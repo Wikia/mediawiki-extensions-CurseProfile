@@ -94,7 +94,7 @@ class ProfilePage extends \Article {
 				case 'Steam':
 					$steamName = htmlspecialchars(self::parseSteamUrl($link));
 					$link = htmlspecialchars($link, ENT_QUOTES);
-					$HTML .= "<a href='$link'>$steamName</a>";
+					$HTML .= "<a href='$link' target='_blank'>$steamName</a>";
 					break;
 				case 'XBL':
 				case 'PSN':
