@@ -49,8 +49,60 @@ $messages['en'] = array(
 						'steamlinkplaceholder'				=> 'a URL to your Steam account',
 						'xbllinkplaceholder'				=> 'What\'s your gamertag?',
 						'psnlinkplaceholder'				=> 'Share your PSN ID',
-						'userprofilelayout'					=> "
-== Default User ==
-=== Wiki Points ===
-{{#Points:}}"
+						'userprofilelayout'					=> '
+<div class="curseprofile">
+	<div class="leftcolumn">
+		<div class="borderless section">
+			{{#avatar: 160 | $3 | you | class="mainavatar"}}
+			<div class="headline">
+				{{#groups: $2}}
+				<h1>$1</h1>
+			</div>
+			<div>
+				{{#profilelinks: $2}}
+				{{#location: $2}}
+			</div>
+			<div class="aboutme">
+				{{#aboutme: $2}}
+			</div>
+		</div>
+		<div class="activity section">
+			<h3>Recent Wiki Activity</h3>
+			{{#recentactivity: $2}}
+		</div>
+		<div class="comments section">
+			<h3>Comments</h3>
+			{{#comments: $2}}
+		</div>
+	</div>
+	<div class="rightcolumn">
+		<div class="rightfloat">
+			<div class="title">Gamepedian</div>
+			<div class="score">{{#Points: User:$1 | all | raw}} GP</div>
+			{{#friendadd: $2}}
+		</div>
+		<div>Favorite Wiki
+		{{#img:150|80}}
+		</div>
+		<div class="section">
+			<h3>Total Statistics</h3>
+			<dl>
+				<dt>Wikis Edited</dt><dd>243</dd>
+				<dt>Total Contributions</dt><dd>16,954
+				<dl>
+					<dt>Other Stats</dt><dd>15,003
+					<dl>
+						<dt>Might</dt><dd>10</dd>
+						<dt>Go</dt><dd>20</dd>
+						<dt>Here</dt><dd>30</dd>
+					</dl></dd>
+				</dl></dd>
+				<dt>Friends</dt><dd>{{#friendcount: $2}}</dd>
+			</dl>
+			{{#friendlist: $2}}
+		</div>
+	</div>
+</div>
+__NOTOC__
+'
 );
