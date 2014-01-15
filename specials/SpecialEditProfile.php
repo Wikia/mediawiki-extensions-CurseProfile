@@ -20,10 +20,8 @@ class SpecialEditProfile extends \UnlistedSpecialPage {
 
 	/**
 	 * Show the special page
-	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute( $toUser ) {
+	public function execute($subPage) {
 		global $wgUser;
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
@@ -40,6 +38,7 @@ class SpecialEditProfile extends \UnlistedSpecialPage {
 				'city' => $wgRequest->getVal('city'),
 				'state' => $wgRequest->getVal('state'),
 				'country' => $wgRequest->getVal('country'),
+				'fav_wiki' => $wgRequest->getVal('fav_wiki'),
 				'steam_link' => $wgRequest->getVal('steam_link'),
 				'xbl_link' => $wgRequest->getVal('xbl_link'),
 				'psn_link' => $wgRequest->getVal('psn_link'),
@@ -49,13 +48,26 @@ class SpecialEditProfile extends \UnlistedSpecialPage {
 			return;
 		}
 
-		// Can't use $this->setHeaders(); here because then it'll set the page
-		// title to <removerelationship> and we don't want that, we'll be
-		// messing with the page title later on in the code
+		// Get list of options for favorite wiki
+		global $wgServer;
+		$mouse = CP::loadMouse(['curl'=>'mouseTransferCurl']);
+		$rawSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
+		$sites = json_decode($rawSites, true);
+		$wikiOptions = ['<option value="">---</option>'];
+		foreach ($sites['data']['wikis'] as $wiki) {
+			if ($wiki['md5_key'] == $profile->getFavoriteWikiHash()) {
+				$sel = 'selected';
+			} else {
+				$sel = '';
+			}
+			$wikiOptions[] = "<option $sel value='{$wiki['md5_key']}'>{$wiki['wiki_name']}</option>";
+		}
+		$wikiOptions = implode("\n", $wikiOptions);
 
 		$wgOut->addHTML('<form id="aboutme" method="post">
 				<label for="aboutme">'.wfMessage('aboutme')->plain().'</label>
 				<textarea id="aboutme" name="aboutme" placeholder="'.wfMessage('aboutmeplaceholder')->plain().'">'.htmlspecialchars($profile->getAboutText()).'</textarea>
+				<label for="favwiki">'.wfMessage('favoritewiki')->plain().'</label> <select name="fav_wiki" id="favwiki">'.$wikiOptions.'</select>
 				<fieldset><legend>Location</legend>
 					<label for="city">'.wfMessage('citylabel')->plain().'</label> <input type="text" name="city" id="city" value="'.$this->escquo($profile->getLocations()['city']).'"><br>
 					<label for="state">'.wfMessage('statelabel')->plain().'</label> <input type="text" name="state" id="state" value="'.$this->escquo($profile->getLocations()['state']).'"><br>

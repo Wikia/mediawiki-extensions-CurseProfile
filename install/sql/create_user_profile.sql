@@ -8,6 +8,7 @@ CREATE TABLE /*_*/user_profile (
   `up_about` text,
   `up_last_seen` datetime default NULL,
   `up_type` int(5) NOT NULL default '1',
+  `up_favorite_wiki` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `up_steam_profile` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `up_xbl_profile` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `up_psn_profile` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL

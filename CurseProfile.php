@@ -70,6 +70,11 @@ $wgAutoloadClasses['CurseProfile\SpecialEditProfile']		= "{$extDir}/specials/Spe
 $wgSpecialPages['EditProfile']								= 'CurseProfile\SpecialEditProfile';
 $wgSpecialPageGroups['EditProfile']							= 'users';
 
+$wgAutoloadClasses['CurseProfile\SpecialToggleProfilePreference'] = "{$extDir}/specials/SpecialToggleProfilePreference.php";
+$wgSpecialPages['ToggleProfilePreference']					= 'CurseProfile\SpecialToggleProfilePreference';
+$wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
+
+// Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
 	'scripts' => ['js/jquery.timeago.js', 'js/curseprofile.js'],
@@ -82,6 +87,8 @@ $wgResourceModules['ext.curseprofile.forms'] = [
 	'remoteExtPath' => 'CurseProfile',
 ];
 
-$wgHooks['ArticleFromTitle'][] = 'CurseProfile\Hooks::onArticleFromTitle';
-$wgHooks['ParserFirstCallInit'][] = 'CurseProfile\Hooks::onParserFirstCall';
-$wgHooks['LoadExtensionSchemaUpdates'][] = 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
+// Hooks
+$wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
+$wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
+$wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
+$wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';

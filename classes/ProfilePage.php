@@ -16,20 +16,32 @@ namespace CurseProfile;
 class ProfilePage extends \Article {
 
 	// protected $user_name;
-	// protected $user_id;
+	protected $user_id;
 	protected $user;
 	protected $profile;
-	protected $viewing_self;
 
 	public function __construct($title) {
 		parent::__construct($title);
-		$this->user = \User::newFromId(\User::idFromName($title->getText()));
-		$this->profile = new ProfileData($this->user->getID());
+		$this->user = \User::newFromName($title->getText());
+		if ($this->user) {
+			$this->user_id = $this->user->getID();
+		} else {
+			$this->user_id = 0;
+		}
+		$this->profile = new ProfileData($this->user_id);
+	}
+
+	/**
+	 * Check whether we are viewing the profile of the logged-in user
+	 *
+	 * @return	boolean
+	 */
+	public function viewingSelf() {
+		global $wgUser;
+		return $wgUser->isLoggedIn() && $wgUser->getID() == $this->user->getID();
 	}
 
 	public function view() {
-		// TODO check user prefs, call parent::view and return nothing if wiki page preferred over profile
-
 		$user_name = $this->user->getName();
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle($this->mTitle->getPrefixedText());
@@ -39,16 +51,55 @@ class ProfilePage extends \Article {
 		// $output->addWikiMsg('userprofilelayout', [$user_name]);
 	}
 
-	public static function isProfilePage($title) {
-		return strpos( $title->getText(), '/' ) === false &&
-		( NS_USER == $title->getNamespace() /*|| NS_USER_PROFILE == $title->getNamespace()*/ );
+	public function isUserPage() {
+		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
-	public static function gravatar(&$parser, $email) {
-		$html = "<img height='160' width='160' class='mainavatar' src='http://www.gravatar.com/avatar/00000000000000000000000000000000?s=160&d=mm&r=pg'>";
+	public function isProfilePage() {
+		return $this->isUserPage() && $this->profile->getTypePref();
+	}
+
+	public function isUserWikiPage() {
+		return $this->isUserPage() && !$this->profile->getTypePref();
+	}
+
+	public function customizeNavBar(&$links) {
+		if ($this->viewingSelf()) {
+			$links['views']['edit_profile'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('editprofile')->plain(),
+				'href'		=> '/Special:EditProfile',
+				'primary'	=> true,
+			];
+			$links['actions']['switch_type'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('toggletypepref')->plain(),
+				'title'		=> wfMessage('toggletypetooltip')->plain(),
+				'href'		=> '/Special:ToggleProfilePreference',
+				'primary'	=> true,
+			];
+		}
+
+		// TODO move add/remove friend links up here
+	}
+
+	/**
+	 * Prints a gravatar image tag for a user
+	 *
+	 * @param	parser
+	 * @param	int		the square size of the avatar to display
+	 * @param	string	user's email address
+	 * @param	string	the user's username
+	 * @param	string	additional html attributes to include in the IMG tag
+	 * @return	string	the HTML fragment containing a IMG tag
+	 */
+	public static function userAvatar(&$parser, $size, $email, $user_name, $attributeString = '') {
+		$size = intval($size);
+		$user_name = htmlspecialchars($user_name, ENT_QUOTES);
 		return [
-			$html,
-			'isHTML' => true
+			"<img src='http://www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString>",
+			'isHTML' => true,
 		];
 	}
 
@@ -121,5 +172,27 @@ class ProfilePage extends \Article {
 	private static function parseSteamUrl($url) {
 		preg_match('|https?://steamcommunity\\.com/id/(\\w+)/?|', $url, $match);
 		return $match[1];
+	}
+
+
+	public static function favoriteWiki(&$parser, $user_id = '') {
+		$user_id = intval($user_id);
+		if ($user_id < 1) {
+			return 'Invalid user ID given';
+		}
+		$mouse = CP::loadMouse();
+		$profile = new ProfileData($user_id);
+		$wiki = $profile->getFavoriteWiki();
+		if (empty($wiki)) {
+			return '';
+		}
+
+		$HTML = wfMessage('favoritewiki')->plain().':<br>';
+		$HTML .= CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
+
+		return [
+			$HTML,
+			'isHTML' => true,
+		];
 	}
 }

@@ -26,20 +26,31 @@ $magicWords['en'] = [
 						'aboutme'							=> array(0, 'aboutme'),
 						'location'							=> array(0, 'location'),
 						'profilelinks'						=> array(0, 'profilelinks'),
+						'favwiki'							=> array(0, 'favwiki'),
 ];
 
 $messages = array();
 $messages['en'] = array(
 						'curseprofile'						=> 'Curse Profile',
 						'curseprofile_description'			=> 'A modular, multi-featured user profile system.',
+						'avataralt'							=> 'Avatar for $1',
 						'addfriend'							=> 'Add Friend',
 						'ignorefriend'						=> 'Ignore Friend',
 						'confirmfriend'						=> 'Confirm Friend',
+						'ignorefriend-response'				=> 'Ignore',
+						'confirmfriend-response'			=> 'Confirm',
+						'alreadyfriends'					=> 'Friends!',
+						'friendrequestsent'					=> 'Request Sent',
+						'nofriends'							=> 'No friends on this wiki',
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
 						'commentplaceholder'				=> 'Leave a comment',
+						'commentaction'						=> 'Post',
 						'editprofile'						=> 'Edit Profile',
+						'toggletypepref'					=> 'Switch Profile Type',
+						'toggletypetooltip'					=> 'Switch between profile and wiki page',
 						'aboutme'							=> 'About Me',
 						'aboutmeplaceholder'				=> 'Write something about yourself!',
+						'favoritewiki'						=> 'Favorite Wiki',
 						'citylabel'							=> 'City',
 						'statelabel'						=> 'State/Province',
 						'countrylabel'						=> 'Country',
@@ -81,9 +92,7 @@ $messages['en'] = array(
 			<div class="score">{{#Points: User:$1 | all | raw}} GP</div>
 			{{#friendadd: $2}}
 		</div>
-		<div>Favorite Wiki
-		{{#img:150|80}}
-		</div>
+		<div>{{#favwiki: $2}}</div>
 		<div class="section">
 			<h3>Total Statistics</h3>
 			<dl>

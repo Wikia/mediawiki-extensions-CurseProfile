@@ -28,10 +28,10 @@ class CommentDisplay {
 		if ($wgUser->isLoggedIn()) {
 			$HTML .= '
 			<div class="commentdisplay">
-				<div class="avatar">'.CP::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
+				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
 				<div class="entryform"><form action="/Special:AddComment/'.$user_id.'" method="post">
 					<textarea name="message" placeholder="'.wfMessage('commentplaceholder')->escaped().'"></textarea>
-					<input type="submit" value="Post">
+					<input type="submit" value="'.wfMessage('commentaction')->escaped().'">
 				</form></div>
 			</div>';
 		}
@@ -44,7 +44,7 @@ class CommentDisplay {
 			$cUser = \User::newFromId($comment['ub_user_id_from']);
 			$HTML .= '
 			<div class="commentdisplay">
-				<div class="avatar">'.CP::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
+				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 				<div>'.CP::timeTag($comment['ub_date']).CP::userLink($comment['ub_user_id_from']).'</div>
 				<div class="commentbody">
 					'.$parser->recursiveTagParse($comment['ub_message']).'

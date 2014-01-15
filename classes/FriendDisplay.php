@@ -27,7 +27,7 @@ class FriendDisplay {
 		if (!$wgUser->getID()) {
 			return '';
 		} elseif ($wgUser->getID() == $user_id) {
-			return ['<div class="button"><a href="/Special:EditProfile">Edit Profile</a></div>', 'isHTML' => true];
+			return ['<div class="button"><a href="/Special:EditProfile">'.wfMessage('editprofile')->escaped().'</a></div>', 'isHTML' => true];
 		}
 
 		//if (not logged in) return '';
@@ -39,16 +39,16 @@ class FriendDisplay {
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
-			return ['<div class="button"><a href="/Special:AddFriend/'.$user_id.'">Add Friend</a></div>', 'isHTML' => true];
+			return ['<div class="button"><a href="/Special:AddFriend/'.$user_id.'">'.wfMessage('addfriend')->escaped().'</a></div>', 'isHTML' => true];
 
 			case Friendship::REQUEST_SENT:
-			return ['<div class="button">Request Sent</div>', 'isHTML' => true];
+			return ['<div class="button">'.wfMessage('friendrequestsent')->escaped().'</div>', 'isHTML' => true];
 
 			case Friendship::REQUEST_RECEIVED:
-			return ['<div class="button">Friendship Requested: <a href="/Special:ConfirmFriend/'.$user_id.'">Confirm</a> / <a href="/Special:IgnoreFriend/'.$user_id.'">Ignore</a></div>', 'isHTML' => true];
+			return ['<div class="button">Friendship Requested: <a href="/Special:ConfirmFriend/'.$user_id.'">'.wfMessage('confirmfriend-response')->escaped().'</a> / <a href="/Special:IgnoreFriend/'.$user_id.'">'.wfMessage('ignorefriend-response')->escaped().'</a></div>', 'isHTML' => true];
 
 			case Friendship::FRIENDS:
-			return ['<div class="button">Friends!</div>', 'isHTML' => true];
+			return ['<div class="button">'.wfMessage('alreadyfriends')->escaped().'</div>', 'isHTML' => true];
 
 			default:
 			return '';
@@ -91,7 +91,7 @@ class FriendDisplay {
 		}
 
 		if (count($friendData) == 0) {
-			return 'No friends on this wiki';
+			return wfMessage('nofriends')->escaped();
 		}
 
 
@@ -100,7 +100,7 @@ class FriendDisplay {
 		foreach ($friendData as $friend) {
 			$fUser = \User::newFromId($friend['user_id']);
 			$HTML .= '<li>';
-			$HTML .= CP::userAvatar($nothing, 32, $fUser->getEmail(), $fUser->getName())[0];
+			$HTML .= ProfilePage::userAvatar($nothing, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$HTML .= ' '.CP::userLink($friend['user_id']);
 			$HTML .= '</li>';
 		}

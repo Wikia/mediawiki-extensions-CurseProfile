@@ -23,7 +23,7 @@ class CP {
 	 *
 	 * @return	mouseHole	mouse instance
 	 */
-	public static function loadMouse() {
+	public static function loadMouse($extraModules=[]) {
 		if (!isset(self::$mouse)) {
 			if (!defined('SITE_DIR')) {
 				define('SITE_DIR', dirname(dirname(dirname(__DIR__))));
@@ -36,6 +36,9 @@ class CP {
 				require_once(SITE_DIR.'/mouse/mouse.php');
 			}
 			self::$mouse = \mouseHole::instance(array('config' => 'mouseConfigMediawiki', 'DB' => 'mouseDatabaseMysqli', 'redis' => 'mouseCacheRedis'), $settings);
+		}
+		if (!empty($extraModules)) {
+			self::$mouse->loadClasses($extraModules);
 		}
 		return self::$mouse;
 	}
@@ -72,28 +75,19 @@ class CP {
 			$height = $width;
 		}
 
-		$html = "<img src='http://placehold.it/{$width}x{$height}' $attributeString/>";
+		if (is_array($attributeString)) {
+			$attributes = [];
+			foreach ($attributeString as $attr => $val) {
+				$attributes[] = $attr.'="'.htmlspecialchars($val, ENT_QUOTES).'"';
+			}
+			$attributes = implode(' ', $attributes);
+		} else {
+			$attributes = $attributeString;
+		}
+
+		$html = "<img src='http://placehold.it/{$width}x{$height}' $attributes/>";
 		return [
 			$html,
-			'isHTML' => true,
-		];
-	}
-
-	/**
-	 * Prints a gravatar image tag for a user
-	 *
-	 * @param	parser
-	 * @param	int		the square size of the avatar to display
-	 * @param	string	user's email address
-	 * @param	string	the user's username
-	 * @param	string	additional html attributes to include in the IMG tag
-	 * @return	string	the HTML fragment containing a IMG tag
-	 */
-	public static function userAvatar(&$parser, $size, $email, $user_name, $attributeString = '') {
-		$size = intval($size);
-		$user_name = htmlspecialchars($user_name, ENT_QUOTES);
-		return [
-			"<img src='http://www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='Avatar for $user_name' $attributeString>",
 			'isHTML' => true,
 		];
 	}

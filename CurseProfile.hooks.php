@@ -15,21 +15,20 @@ namespace CurseProfile;
 
 class Hooks {
 	/**
-	 * If we build a profile page then we will add a bunch of extra
-	 * parser functions for use during the construction.
+	 * Reference to ProfilePage object
 	 *
 	 * @access	private
-	 * @var		boolean
+	 * @var		object
 	 */
-	private static $buildingProfilePage = false;
+	private static $profilePage;
 
 	public static function onParserFirstCall(&$parser) {
-		if (self::$buildingProfilePage) {
-			$parser->setFunctionHook('cpGravatar', 'CurseProfile\ProfilePage::gravatar');
+		if (self::$profilePage) {
 			$parser->setFunctionHook('placeholderImage', 'CurseProfile\CP::placeholderImage');
-			$parser->setFunctionHook('avatar', 'CurseProfile\CP::userAvatar');
+			$parser->setFunctionHook('avatar', 'CurseProfile\ProfilePage::userAvatar');
 			$parser->setFunctionHook('groups', 'CurseProfile\CP::groupList');
 			$parser->setFunctionHook('aboutme', 'CurseProfile\ProfilePage::aboutBlock');
+			$parser->setFunctionHook('favwiki', 'CurseProfile\ProfilePage::favoriteWiki');
 			$parser->setFunctionHook('location', 'CurseProfile\ProfilePage::location');
 			$parser->setFunctionHook('profilelinks', 'CurseProfile\ProfilePage::profileLinks');
 			$parser->setFunctionHook('recentactivity', 'CurseProfile\RecentActivity::parserHook');
@@ -43,25 +42,35 @@ class Hooks {
 
 	public static function onArticleFromTitle(&$title, &$article) {
 		global $wgRequest, $wgOut;
+		self::$profilePage = new ProfilePage($title);
 
-		if (ProfilePage::isProfilePage($title)) {
-			// TODO check user pref and disable return if they don't want the profile page
-
+		if (self::$profilePage->isProfilePage()) {
 			// Disable editing
 			if ( $wgRequest->getVal( 'action' ) == 'edit' ) {
 				$wgOut->redirect( $title->getFullURL() );
 			}
-
+			// Take over page output
 			$wgOut->addModules('ext.curseprofile.profilepage');
-
-			$article = new ProfilePage($title);
-			self::$buildingProfilePage = true;
+			$article = self::$profilePage;
+		} elseif (!self::$profilePage->isUserPage()) {
+			self::$profilePage = null;
 		}
+
 		return true;
 	}
 
 	public static function markUncachable($parser, &$limitReport) {
 		$parser->disableCache();
+		return true;
+	}
+
+	/**
+	 * Adds links to the navigation tabs
+	 */
+	static public function onSkinTemplateNavigation($skin, &$links) {
+		if (self::$profilePage) {
+			self::$profilePage->customizeNavBar($links);
+		}
 		return true;
 	}
 
@@ -81,6 +90,7 @@ class Hooks {
 
 		// Update tables with extra fields for our use
 		$updater->addExtensionField('user_profile', 'up_steam_profile', "{$extDir}/upgrade/sql/add_profile_links.sql", true);
+		$updater->addExtensionField('user_profile', 'up_favorite_wiki', "{$extDir}/upgrade/sql/add_favorite_wiki.sql", true);
 
 		if (defined('CURSEPROFILE_MASTER')) {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/create_user_relationship.sql", true));
