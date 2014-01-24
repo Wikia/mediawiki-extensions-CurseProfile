@@ -99,17 +99,13 @@ dd:after {
 	clear: left;
 }
 
-.comments .avatar {
-	float: left;
-	width: 0;
-	margin-right: 54px;
-}
-
+/* Comment board */
 .commentdisplay {
 	clear: left;
 	margin-bottom: 0.7em;
+	position: relative;
 }
-	.commentdisplay time {
+	.commentdisplay .right {
 		float: right;
 	}
 
@@ -119,12 +115,39 @@ dd:after {
 }
 	.commentdisplay .entryform textarea {
 		display: block;
+		resize: vertical;
+		height: 2em;
 	}
-	.commentdisplay .entryform input[type=submit] {
+	.commentdisplay .entryform button {
 		display: block;
 	}
 
-.friends {
+.comments .avatar {
+	float: left;
+	width: 0;
+	margin-right: 54px;
+}
+
+.reply-count {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+}
+
+.replyset {
+	padding-left: 54px;
+}
+	.replyset .avatar {
+		transform: scale(0.75);
+		transform-origin: top left;
+		margin-right: 40px;
+	}
+	.replyset .entryform {
+		margin-left: 40px;
+	}
+
+/* Sidebar friend list */
+ul.friends {
 	list-style: none;
 	margin-left: 0;
 }

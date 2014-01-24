@@ -20,6 +20,11 @@ class CommentBoard {
 	private $user_id;
 
 	/**
+	 * @var		int		the number of comments to load on a board before a user clicks for more
+	 */
+	protected static $commentsPerPage = 5;
+
+	/**
 	 * Message visibility constants
 	 */
 	const PUBLIC_MESSAGE = 0;
@@ -42,9 +47,10 @@ class CommentBoard {
 	 * Gets the comments on the board
 	 *
 	 * @param	int		optional user ID of user viewing (defaults to wgUser)
+	 * @param	int		the number of times the user has clicked to load more
 	 * @return	array	an array of comment data (text and user info)
 	 */
-	public function getComments($asUser = null) {
+	public function getComments($asUser = null, $pageNo = 0) {
 		$types = [self::PUBLIC_MESSAGE];
 		if (is_null($asUser)) {
 			global $wgUser;
@@ -54,16 +60,70 @@ class CommentBoard {
 			$types[] = self::PRIVATE_MESSAGE;
 		}
 		$mouse = CP::loadMouse();
+
+		// Fetch top level comments
 		$res = $mouse->DB->select([
 			'select' => 'b.*',
 			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_user_id = '.$this->user_id,
+			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id,
 			'order'  => 'b.ub_date DESC',
+			'limit'  => [self::$commentsPerPage * $pageNo, self::$commentsPerPage],
+		]);
+		$comments = [];
+		$commentIds = []; // will contain a mapping of commentId => index within $comments
+		while ($row = $mouse->DB->fetch($res)){
+			$commentIds[$row['ub_id']] = count($comments);
+			$row['replies'] = 0;
+			$comments[] = $row;
+		}
+
+		if (empty($comments)) {
+			return $comments;
+		}
+
+		// Fetch number of replies for each comment in this chunk
+		$repliesRes = $mouse->DB->select([
+			'select' => 'b.ub_in_reply_to as ub_id, COUNT(*) as replies',
+			'from'   => ['user_board' => 'b'],
+			'where'  => 'b.ub_in_reply_to IN ('.implode(',',array_keys($commentIds)).')',
+			'group'  => 'b.ub_in_reply_to',
+		]);
+		while ($row = $mouse->DB->fetch($repliesRes)) {
+			$comments[$commentIds[$row['ub_id']]]['replies'] = intval($row['replies']);
+		}
+
+		return $comments;
+	}
+
+	/**
+	 * Gets all replies to a given comment
+	 *
+	 * @param	int		id of a comment that would be replied to
+	 * @return	array	array of reply data
+	 */
+	public function getReplies($rootComment, $asUser = null) {
+		$types = [self::PUBLIC_MESSAGE];
+		if (is_null($asUser)) {
+			global $wgUser;
+			$asUser = $wgUser->getID();
+		}
+		if ($this->user_id == $asUser) {
+			$types[] = self::PRIVATE_MESSAGE;
+		}
+		$mouse = CP::loadMouse();
+
+		// Fetch comments
+		$res = $mouse->DB->select([
+			'select' => 'b.*',
+			'from'   => ['user_board' => 'b'],
+			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_in_reply_to = '.$rootComment.' AND b.ub_user_id = '.$this->user_id,
+			'order'  => 'b.ub_date ASC',
 		]);
 		$comments = [];
 		while ($row = $mouse->DB->fetch($res)){
 			$comments[] = $row;
 		}
+
 		return $comments;
 	}
 
@@ -72,14 +132,15 @@ class CommentBoard {
 	 *
 	 * @param	int		the ID of a user
 	 * @param	int		optional user ID of user posting (defaults to wgUser)
+	 * @param	int		optional id of a board post that this will be in reply to
 	 */
-	public function addComment($commentText, $fromUser = null) {
+	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
 		$commentText = trim($commentText);
 		if (empty($commentText)) {
 			return false;
 		}
-
 		$dbw = wfGetDB( DB_MASTER );
+
 		$toUser = \User::newFromId($this->user_id);
 		if (is_null($fromUser)) {
 			global $wgUser;
@@ -88,9 +149,16 @@ class CommentBoard {
 			$fromUser = \User::newFromId(intval($fromUser));
 		}
 
+		if (is_null($inReplyTo)) {
+			$inReplyTo = 0;
+		} else {
+			$inReplyTo = intval($inReplyTo);
+		}
+
 		$dbw->insert(
 			'user_board',
 			array(
+				'ub_in_reply_to' => $inReplyTo,
 				'ub_user_id_from' => $fromUser->getId(),
 				'ub_user_name_from' => $fromUser->getName(),
 				'ub_user_id' => $this->user_id,

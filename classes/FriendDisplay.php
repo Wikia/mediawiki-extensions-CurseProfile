@@ -24,10 +24,8 @@ class FriendDisplay {
 		}
 
 		global $wgUser;
-		if (!$wgUser->getID()) {
+		if (!$wgUser->isLoggedIn() || $wgUser->getID() == $user_id) {
 			return '';
-		} elseif ($wgUser->getID() == $user_id) {
-			return ['<div class="button"><a href="/Special:EditProfile">'.wfMessage('editprofile')->escaped().'</a></div>', 'isHTML' => true];
 		}
 
 		//if (not logged in) return '';

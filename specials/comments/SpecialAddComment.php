@@ -31,8 +31,7 @@ class SpecialAddComment extends \UnlistedSpecialPage {
 		if ($wgRequest->wasPosted()) {
 			$user = \User::newFromId($toUser);
 			$board = new CommentBoard($toUser);
-			// $wgOut->addHTML('result: <pre>'.var_export($friendship->sendRequest(CP::curseIDfromUserID($toUser)), true));
-			$board->addComment($wgRequest->getVal('message'));
+			$board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));
 		}
 		$wgOut->redirect('/User:'.urlencode($user->getName()));
 		return;

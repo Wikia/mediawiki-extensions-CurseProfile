@@ -103,6 +103,30 @@ class ProfilePage extends \Article {
 		];
 	}
 
+	/**
+	 * Outputs the groups that a user belongs to in a <UL> tag
+	 */
+	public static function groupList(&$parser, $user_id) {
+		$user_id = intval($user_id);
+		if ($user_id < 1) {
+			return '';
+		}
+
+		$user = \User::newFromId($user_id);
+		$groups = $user->getGroups();
+		if (count($groups) == 0) {
+			return '';
+		}
+
+		$HTML = '<ul class="grouptags">';
+		foreach ($groups as $group) {
+			$HTML .= '<li>'.htmlspecialchars($group).'</li>';
+		}
+		$HTML .= '</ul>';
+
+		return [$HTML, 'isHTML' => true];
+	}
+
 	public static function location(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -187,12 +211,86 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		$HTML = wfMessage('favoritewiki')->plain().':<br>';
-		$HTML .= CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
+		$HTML = CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
+		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}'>".$HTML."</a>";
+		$HTML = wfMessage('favoritewiki')->plain().':<br>' . $HTML;
 
 		return [
 			$HTML,
 			'isHTML' => true,
 		];
+	}
+
+	public static function userStats(&$parser, $user_id = '') {
+		$user_id = intval($user_id);
+		if ($user_id < 1) {
+			return 'Invalid user ID given';
+		}
+		$curse_id = CP::curseIDfromUserID($user_id);
+
+		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
+		global $wgServer;
+		$jsonStats = $mouse->curl->fetch($wgServer.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id);
+		$stats = json_decode($jsonStats, true);
+
+		// keys are message keys fed to wfMessage()
+		// values are numbers or an array of sub-stats with a number at key 0
+		if ($stats) {
+			$totalStats = $stats[$curse_id]['global']['total'];
+			$statsOutput = [
+				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
+				'totalcontribs' => [ $totalStats['actions'],
+					'totaledits'   => $totalStats['edits'],
+					'totaldeletes' => $totalStats['deletes'],
+					'totalpatrols' => $totalStats['patrols'],
+				],
+			];
+		} else {
+			$statsOutput = [
+				'wikisedited' => 0,
+				'totalcontribs' => [ 0,
+					'totaledits' => 0,
+					'totaldeletes' => 0,
+					'totalpatrols' => 0,
+				],
+			];
+		}
+		$statsOutput['friends'] = FriendDisplay::count($parser, $user_id);
+
+		$HTML = self::generateStatsDL($statsOutput);
+
+		return [
+			$HTML,
+			'isHTML' => true,
+		];
+	}
+
+	/**
+	 * Recursive function for parsing out and stringifying the stats array above
+	 *
+	 * @param	mixed	arrays will generate a new list, other values will be directly returned
+	 * @return	string	html DL fragment or $input if it is not an array
+	 */
+	private static function generateStatsDL($input) {
+		if (is_array($input)) {
+			$output = '';
+			if (isset($input[0])) {
+				// handle a value with a sub-list
+				// TODO handle output with commas for better human readability
+				$output .= $input[0];
+			}
+			$output .= "\n<dl>";
+			foreach ($input as $msgKey => $value) {
+				if (!is_string($msgKey)) {
+					continue;
+				}
+				$output .= "\n<dt>".wfMessage($msgKey)->escaped()."</dt><dd>".self::generateStatsDL($value)."</dd>";
+			}
+			$output .= "\n</dl>";
+			return $output;
+		} else {
+			// just a simple value
+			return $input;
+		}
 	}
 }

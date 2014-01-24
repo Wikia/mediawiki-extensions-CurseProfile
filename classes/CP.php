@@ -55,7 +55,7 @@ class CP {
 		$res = self::$mouse->DB->select([
 			'select'	=> 'u.curse_id',
 			'from'		=> ['user' => 'u'],
-			'where'		=> 'user_id = '.$user_id,
+			'where'		=> 'user_id = '.intval($user_id),
 			'limit'		=> '1'
 		]);
 		return self::$mouse->DB->fetch($res)['curse_id'];
@@ -90,30 +90,6 @@ class CP {
 			$html,
 			'isHTML' => true,
 		];
-	}
-
-	/**
-	 * Outputs the groups that a user belongs to in a <UL> tag
-	 */
-	public static function groupList(&$parser, $user_id) {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return '';
-		}
-
-		$user = \User::newFromId($user_id);
-		$groups = $user->getGroups();
-		if (count($groups) == 0) {
-			return '';
-		}
-
-		$HTML = '<ul class="grouptags">';
-		foreach ($groups as $group) {
-			$HTML .= '<li>'.htmlspecialchars($group).'</li>';
-		}
-		$HTML .= '</ul>';
-
-		return [$HTML, 'isHTML' => true];
 	}
 
 	/**

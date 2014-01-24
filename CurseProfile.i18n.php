@@ -27,6 +27,7 @@ $magicWords['en'] = [
 						'location'							=> array(0, 'location'),
 						'profilelinks'						=> array(0, 'profilelinks'),
 						'favwiki'							=> array(0, 'favwiki'),
+						'userstats'							=> array(0, 'userstats'),
 ];
 
 $messages = array();
@@ -43,13 +44,11 @@ $messages['en'] = array(
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
-						'commentplaceholder'				=> 'Leave a comment',
 						'commentaction'						=> 'Post',
 						'editprofile'						=> 'Edit Profile',
 						'toggletypepref'					=> 'Switch Profile Type',
 						'toggletypetooltip'					=> 'Switch between profile and wiki page',
 						'aboutme'							=> 'About Me',
-						'aboutmeplaceholder'				=> 'Write something about yourself!',
 						'favoritewiki'						=> 'Favorite Wiki',
 						'citylabel'							=> 'City',
 						'statelabel'						=> 'State/Province',
@@ -57,11 +56,26 @@ $messages['en'] = array(
 						'steamlink'							=> 'Steam',
 						'xbllink'							=> 'Xbox Live',
 						'psnlink'							=> 'Playstation Network',
+						'viewreplies'						=> 'View $1 {{PLURAL:$1|reply|replies}}',
+						'repliestooltip'					=> 'View replies or add one of your own',
+						'replylink'							=> 'Reply',
+						// form placeholders
+						'commentplaceholder'				=> 'Leave a comment',
+						'commentreplyplaceholder'			=> 'Leave a reply',
+						'aboutmeplaceholder'				=> 'Write something about yourself!',
 						'steamlinkplaceholder'				=> 'a URL to your Steam account',
 						'xbllinkplaceholder'				=> 'What\'s your gamertag?',
 						'psnlinkplaceholder'				=> 'Share your PSN ID',
+						// Stat labels
+						'wikisedited'						=> 'Wikis Edited',
+						'totalcontribs'						=> 'Contributions',
+						'totaledits'						=> 'Edits',
+						'totaldeletes'						=> 'Deletes',
+						'totalpatrols'						=> 'Patrols',
+						'friends'							=> 'Friends',
+						// The big deal
 						'userprofilelayout'					=> '
-<div class="curseprofile">
+<div class="curseprofile" data-userid="$2">
 	<div class="leftcolumn">
 		<div class="borderless section">
 			{{#avatar: 160 | $3 | you | class="mainavatar"}}
@@ -95,19 +109,7 @@ $messages['en'] = array(
 		<div>{{#favwiki: $2}}</div>
 		<div class="section">
 			<h3>Total Statistics</h3>
-			<dl>
-				<dt>Wikis Edited</dt><dd>243</dd>
-				<dt>Total Contributions</dt><dd>16,954
-				<dl>
-					<dt>Other Stats</dt><dd>15,003
-					<dl>
-						<dt>Might</dt><dd>10</dd>
-						<dt>Go</dt><dd>20</dd>
-						<dt>Here</dt><dd>30</dd>
-					</dl></dd>
-				</dl></dd>
-				<dt>Friends</dt><dd>{{#friendcount: $2}}</dd>
-			</dl>
+			{{#userstats: $2}}
 			{{#friendlist: $2}}
 		</div>
 	</div>
