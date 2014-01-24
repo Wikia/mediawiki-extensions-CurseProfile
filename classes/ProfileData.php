@@ -151,9 +151,11 @@ class ProfileData {
 			global $wgServer;
 			$jsonSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
 			$sites = json_decode($jsonSites, true);
-			foreach ($sites['data']['wikis'] as $wiki) {
-				if ($wiki['md5_key'] == $this->data['up_favorite_wiki']) {
-					return $wiki;
+			if ($sites) {
+				foreach ($sites['data']['wikis'] as $wiki) {
+					if ($wiki['md5_key'] == $this->data['up_favorite_wiki']) {
+						return $wiki;
+					}
 				}
 			}
 			return [];
