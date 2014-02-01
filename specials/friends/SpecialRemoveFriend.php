@@ -13,17 +13,17 @@
 **/
 namespace CurseProfile;
 
-class SpecialConfirmFriend extends SpecialConfirmAction {
+class SpecialRemoveFriend extends SpecialConfirmAction {
 	public function __construct() {
-		parent::__construct( 'ConfirmFriend' );
+		parent::__construct( 'RemoveFriend' );
 	}
 
 	protected function getConfirmMessage() {
-		return wfMessage('friendrequestconfirm-prompt', $this->user->getName())->plain();
+		return wfMessage('friendrequestremove-prompt', $this->user->getName())->plain();
 	}
 
 	protected function getButtonMessage() {
-		return wfMessage('ignorefriend-response')->plain();
+		return wfMessage('removefriend')->plain();
 	}
 
 	protected function getRedirect() {
@@ -43,11 +43,11 @@ class SpecialConfirmFriend extends SpecialConfirmAction {
 	public function confirm($formData) {
 		global $wgUser;
 		$friendship = new Friendship(CP::curseIDfromUserID($wgUser->getID()));
-		$res = $friendship->acceptRequest(CP::curseIDfromUserID($this->toUser));
+		$res = $friendship->removeFriend(CP::curseIDfromUserID($this->toUser));
 		if ($res) {
 			return true;
 		} else {
-			return wfMessage('friendrequestconfirm-error')->plain();
+			return wfMessage('friendrequestremove-error')->plain();
 		}
 	}
 }

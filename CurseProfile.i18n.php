@@ -35,18 +35,33 @@ $messages['en'] = array(
 						'curseprofile'						=> 'Curse Profile',
 						'curseprofile_description'			=> 'A modular, multi-featured user profile system.',
 						'avataralt'							=> 'Avatar for $1',
+						// Friendsthip special pages
 						'addfriend'							=> 'Add Friend',
-						'ignorefriend'						=> 'Ignore Friend',
-						'confirmfriend'						=> 'Confirm Friend',
+						'confirmfriend'						=> 'Confirm Friend Request',
+						'ignorefriend'						=> 'Ignore Friend Request',
+						'removefriend'						=> 'Remove Friend',
+						// Friendship messages
+						'friendrequestsend-prompt'			=> 'Confirm your friend request to $1',
+						'friendrequestconfirm-prompt'		=> 'Would you like to confirm the friend request from $1?',
+						'friendrequestignore-prompt'		=> 'Would you like to ingore the friend request from  $1?',
+						'friendrequestremove-prompt'		=> 'Would you like to erase all friendship between yourself and $1?',
+						'friendrequestsend-error'			=> 'There was an error sending your request',
+						'friendrequestconfirm-error'		=> 'There was an error confirming the request',
+						'friendrequestignore-error'			=> 'There was an error ignoring request',
+						'friendrequestremove-error'			=> 'There was an error while trying to remove a friend',
+						'friendrequestsend'					=> 'Add Friend',
+						'friendrequestcancel'				=> 'Cancel Friend Request',
 						'ignorefriend-response'				=> 'Ignore',
 						'confirmfriend-response'			=> 'Confirm',
 						'alreadyfriends'					=> 'Friends!',
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
+						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
 						'commentaction'						=> 'Post',
 						'editprofile'						=> 'Edit Profile',
-						'toggletypepref'					=> 'Switch Profile Type',
+						'profileprefselect'					=> 'Page Type',
+						'toggletypepref'					=> 'Switch User Page Default',
 						'toggletypetooltip'					=> 'Switch between profile and wiki page',
 						'aboutme'							=> 'About Me',
 						'favoritewiki'						=> 'Favorite Wiki',
@@ -102,9 +117,7 @@ $messages['en'] = array(
 	</div>
 	<div class="rightcolumn">
 		<div class="rightfloat">
-			<div class="title">Gamepedian</div>
 			<div class="score">{{#Points: User:$1 | all | raw}} GP</div>
-			{{#friendadd: $2}}
 		</div>
 		<div>{{#favwiki: $2}}</div>
 		<div class="section">

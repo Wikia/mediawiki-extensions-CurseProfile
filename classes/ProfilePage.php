@@ -15,13 +15,14 @@ namespace CurseProfile;
 
 class ProfilePage extends \Article {
 
-	// protected $user_name;
+	protected $user_name;
 	protected $user_id;
 	protected $user;
 	protected $profile;
 
 	public function __construct($title) {
 		parent::__construct($title);
+		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
 		if ($this->user) {
 			$this->user_id = $this->user->getID();
@@ -65,23 +66,59 @@ class ProfilePage extends \Article {
 	}
 
 	public function customizeNavBar(&$links) {
-		if ($this->viewingSelf()) {
-			$links['views']['edit_profile'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('editprofile')->plain(),
-				'href'		=> '/Special:EditProfile',
-				'primary'	=> true,
+		global $wgUser;
+
+		// links specific to the profile page
+		if ($this->isProfilePage()) {
+			$oldLinks = $links;
+			// let's start with a fresh array
+			$links = [
+				'namespaces' => [],
+				'views' => [],
+				'actions' => [],
+				'variants' => [],
 			];
+
+			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
+			$links['namespaces']['user']['text'] = 'User profile'; // rename from "User page"
+			// add link to user wiki
+			$links['namespaces']['user_wiki'] = [
+				'class'		=> false,
+				'text'		=> 'User Wiki',
+				'href'		=> "/UserWiki:{$this->user_name}",
+			];
+
+			// only offer to edit the profile if you are the owner
+			if ($this->viewingSelf()) {
+				$links['views']['edit_profile'] = [
+					'class'		=> false,
+					'text'		=> wfMessage('editprofile')->plain(),
+					'href'		=> '/Special:EditProfile',
+				];
+			} elseif ($wgUser->isLoggedIn()) { // only offer friending when not viewing yourself
+				// add link to add, confirm, or remove friend
+				FriendDisplay::addFriendLink($this->user_id, $links);
+			}
+		}
+
+		// links specific to a user wiki page
+		if ($this->isUserWikiPage()) {
+			$links['namespaces']['user_profile'] = [
+				'class'		=> false,
+				'text'		=> 'User Profile',
+				'href'		=> "/UserProfile:{$this->user_name}",
+			];
+		}
+
+		// Always visible regardless of page type
+		if ($this->viewingSelf()) {
 			$links['actions']['switch_type'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('toggletypepref')->plain(),
 				'title'		=> wfMessage('toggletypetooltip')->plain(),
 				'href'		=> '/Special:ToggleProfilePreference',
-				'primary'	=> true,
 			];
 		}
-
-		// TODO move add/remove friend links up here
 	}
 
 	/**

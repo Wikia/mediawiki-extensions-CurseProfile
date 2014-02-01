@@ -23,7 +23,7 @@ class CP {
 	 *
 	 * @return	mouseHole	mouse instance
 	 */
-	public static function loadMouse($extraModules=[]) {
+	public static function loadMouse($extraModules=[], $extraSettings=[]) {
 		if (!isset(self::$mouse)) {
 			if (!defined('SITE_DIR')) {
 				define('SITE_DIR', dirname(dirname(dirname(__DIR__))));
@@ -32,6 +32,9 @@ class CP {
 				define('SITES_FOLDER', SITE_DIR.'/sites');
 			}
 			$settings = ['file' => SITE_DIR.'/LocalSettings.php'];
+			if (!empty($extraSettings)) {
+				$settings = array_merge($settings, $extraSettings);
+			}
 			if (!class_exists('mouseHole')) {
 				require_once(SITE_DIR.'/mouse/mouse.php');
 			}
@@ -41,6 +44,11 @@ class CP {
 			self::$mouse->loadClasses($extraModules);
 		}
 		return self::$mouse;
+	}
+
+	// Will this work?
+	public static function setMouse($mouse) {
+		self::$mouse = $mouse;
 	}
 
 	/**

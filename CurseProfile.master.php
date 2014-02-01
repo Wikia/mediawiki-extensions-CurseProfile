@@ -16,4 +16,6 @@
 // and can add extra functionality as necessary.
 
 define('CURSEPROFILE_MASTER', true);
-require 'CurseProfile.php';
+require_once 'CurseProfile.php';
+
+$extSyncServices[] = 'CurseProfile\FriendSync';

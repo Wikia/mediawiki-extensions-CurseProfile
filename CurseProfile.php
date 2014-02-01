@@ -38,15 +38,18 @@ $extDir = __DIR__ . '/';
 
 $wgExtensionMessagesFiles['CurseProfile'] = "{$extDir}/CurseProfile.i18n.php";
 
-$wgAutoloadClasses['CurseProfile\Hooks'] = $extDir . 'CurseProfile.hooks.php';
-$wgAutoloadClasses['CurseProfile\CP'] = $extDir . 'classes/CP.php';
-$wgAutoloadClasses['CurseProfile\ProfilePage'] = $extDir . 'classes/ProfilePage.php';
-$wgAutoloadClasses['CurseProfile\ProfileData'] = $extDir . 'classes/ProfileData.php';
+$wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
+$wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
+$wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
+$wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileData.php';
 $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
-$wgAutoloadClasses['CurseProfile\Friendship'] = $extDir . 'classes/Friendship.php';
-$wgAutoloadClasses['CurseProfile\FriendDisplay'] = $extDir . 'classes/FriendDisplay.php';
-$wgAutoloadClasses['CurseProfile\CommentBoard'] = $extDir . 'classes/CommentBoard.php';
+$wgAutoloadClasses['CurseProfile\Friendship']     = $extDir . 'classes/Friendship.php';
+$wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir . 'classes/FriendDisplay.php';
+$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/FriendSync.php';
+$wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
+$wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
+$wgAutoloadClasses['CurseProfile\SpecialConfirmAction'] = $extDir . 'specials/SpecialConfirmAction.php';
 
 // Special Pages
 
@@ -61,6 +64,10 @@ $wgSpecialPageGroups['ConfirmFriend']						= 'users';
 $wgAutoloadClasses['CurseProfile\SpecialIgnoreFriend']		= "{$extDir}/specials/friends/SpecialIgnoreFriend.php";
 $wgSpecialPages['IgnoreFriend']								= 'CurseProfile\SpecialIgnoreFriend';
 $wgSpecialPageGroups['IgnoreFriend']						= 'users';
+
+$wgAutoloadClasses['CurseProfile\SpecialRemoveFriend']		= "{$extDir}/specials/friends/SpecialRemoveFriend.php";
+$wgSpecialPages['RemoveFriend']								= 'CurseProfile\SpecialRemoveFriend';
+$wgSpecialPageGroups['RemoveFriend']						= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comments/SpecialAddComment.php";
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
@@ -80,11 +87,15 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/jquery.timeago.js', 'js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => 'ext.curseprofile.customskin', // allows sites to customize by editing MediaWiki:CurseProfile.css
 ];
 $wgResourceModules['ext.curseprofile.forms'] = [
 	'styles' => ['css/curseprofile_forms.css'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
+];
+$wgResourceModules['ext.curseprofile.customskin'] = [
+	'class' => 'CurseProfile\ResourceLoaderModule',
 ];
 
 // Hooks

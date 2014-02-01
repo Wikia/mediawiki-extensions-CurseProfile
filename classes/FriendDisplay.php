@@ -17,18 +17,23 @@ namespace CurseProfile;
  * A class to manage displaying a list of friends on a user profile
  */
 class FriendDisplay {
-	public static function addFriendLink(&$parser, $user_id = '') {
+	/**
+	 * Generates an array to be inserted into the nav links of the page
+	 *
+	 * @param	int		user id of the profile page being viewed
+	 * @param	array	reference to the links array into which the links will be inserted
+	 * @return	void
+	 */
+	public static function addFriendLink($user_id = '', &$links) {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
-			return 'Invalid user ID given';
+			return;
 		}
 
 		global $wgUser;
 		if (!$wgUser->isLoggedIn() || $wgUser->getID() == $user_id) {
-			return '';
+			return;
 		}
-
-		//if (not logged in) return '';
 
 		$mouse = CP::loadMouse();
 		$curse_id = CP::curseIDfromUserID($wgUser->getID());
@@ -37,19 +42,44 @@ class FriendDisplay {
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
-			return ['<div class="button"><a href="/Special:AddFriend/'.$user_id.'">'.wfMessage('addfriend')->escaped().'</a></div>', 'isHTML' => true];
+			$links['views']['add_friend'] = [
+				'class'   => false,
+				'href'    => "/Special:AddFriend/$user_id",
+				'text'    => wfMessage('friendrequestsend')->plain(),
+			];
+			break;
 
 			case Friendship::REQUEST_SENT:
-			return ['<div class="button">'.wfMessage('friendrequestsent')->escaped().'</div>', 'isHTML' => true];
+			$links['views']['add_friend'] = [
+				'class'   => 'friend-request-sent',
+				'href'    => "/Special:RemoveFriend/$user_id",
+				'text'    => wfMessage('friendrequestcancel')->plain(),
+			];
+			break;
 
 			case Friendship::REQUEST_RECEIVED:
-			return ['<div class="button">Friendship Requested: <a href="/Special:ConfirmFriend/'.$user_id.'">'.wfMessage('confirmfriend-response')->escaped().'</a> / <a href="/Special:IgnoreFriend/'.$user_id.'">'.wfMessage('ignorefriend-response')->escaped().'</a></div>', 'isHTML' => true];
+			$links['actions']['add_friend'] = [
+				'class'   => 'friend-request-confirm',
+				'href'    => "/Special:ConfirmFriend/$user_id",
+				'text'    => wfMessage('confirmfriend-response')->plain(),
+			];
+			$links['actions']['ignore_friend'] = [
+				'class'   => 'friend-request-ignore',
+				'href'    => "/Special:ConfirmFriend/$user_id",
+				'text'    => wfMessage('ignorefriend-response')->plain(),
+			];
+			break;
 
 			case Friendship::FRIENDS:
-			return ['<div class="button">'.wfMessage('alreadyfriends')->escaped().'</div>', 'isHTML' => true];
+			$links['views']['remove_friend'] = [
+				'class'   => 'friend-request-sent',
+				'href'    => "/Special:RemoveFriend/$user_id",
+				'text'    => wfMessage('removefriend')->plain(),
+			];
+			break;
 
 			default:
-			return '';
+			return;
 		}
 	}
 

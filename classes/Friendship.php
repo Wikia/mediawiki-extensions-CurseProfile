@@ -72,7 +72,7 @@ class Friendship {
 	}
 
 	/**
-	 * Returns the array of curse IDs for the current user's friends
+	 * Returns the array of curse IDs for this or another user's friends
 	 *
 	 * @param	int		optional curse ID of a user (default $this->curse_id)
 	 * @return	array	curse IDs of friends
@@ -95,7 +95,7 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
-		return 'requests:'.$user;
+		return 'friendrequests:'.$user;
 	}
 
 	/**
@@ -123,14 +123,18 @@ class Friendship {
 			return false;
 		}
 
+		// Queue sync before error check in case redis is not in sync
+		FriendSync::queue([
+			'task' => 'add',
+			'actor' => $this->curse_id,
+			'target' => $toUser,
+		]);
 		if ($this->getRelationship($toUser) != self::STRANGERS) {
 			return false;
 		}
 
 		$mouse = CP::loadMouse();
 		$mouse->redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
-
-		// TODO add sync
 
 		return true;
 	}
@@ -168,6 +172,11 @@ class Friendship {
 			return -1;
 		}
 
+		FriendSync::queue([
+			'task' => ($response == 'accept' ? 'confirm' : 'ignore'),
+			'actor' => $this->curse_id,
+			'target' => $toUser
+		]);
 		if ($this->getRelationship($toUser) != self::REQUEST_RECEIVED) {
 			return false;
 		}
@@ -183,13 +192,11 @@ class Friendship {
 			$mouse->redis->sadd($this->friendListRedisKey($toUser), $this->curse_id);
 		}
 
-		// TODO add sync
-
 		return true;
 	}
 
 	/**
-	 * Removes a friend relationship
+	 * Removes a friend relationship, or cancels a pending request
 	 *
 	 * @param	int		curse ID of a user
 	 * @return	bool	true on success, false on failure
@@ -200,17 +207,107 @@ class Friendship {
 			return -1;
 		}
 
-		if ($this->getRelationship($toUser) != self::FRIENDS) {
-			return false;
-		}
+		FriendSync::queue([
+			'task' => 'remove',
+			'actor' => $this->curse_id,
+			'target' => $toUser
+		]);
 
 		$mouse = CP::loadMouse();
 
+		$mouse->redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
 		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
 		$mouse->redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
 
 		// TODO add sync
 
 		return true;
+	}
+
+	/**
+	 * Treats the current database info as authoritative and corrects redis to match
+	 * TODO, currently incomplete implementation
+	 *
+	 * @return	null
+	 */
+	public function syncToRedis() {
+		if (!defined('CURSEPROFILE_MASTER')) {
+			return;
+		}
+		$mouse = CP::loadMouse();
+
+		$res = $mouse->DB->select([
+			'select' => 'ur.*',
+			'from'   => ['user_relationship' => 'ur'],
+			'where'  => "ur.r_user_id = {$this->curse_id} AND ur.r_type = 1",
+		]);
+		while ($friend = $mouse->DB->fetch($res)) {
+			$mouse->redis->sadd($this->friendListRedisKey(), $friend['r_user_id_relation']);
+			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $this->curse_id);
+		}
+
+		$res = $mouse->DB->select([
+			'select' => 'ur.*',
+			'from'   => ['user_relationship_request' => 'ur'],
+			'where'  => "ur.ur_user_id = {$this->curse_id} AND ur.ur_type = 1",
+		]);
+		while ($friend = $mouse->DB->fetch($res)) {
+			$mouse->redis->sadd($this->friendListRedisKey(), $friend['r_user_id_relation']);
+			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $this->curse_id);
+		}
+	}
+
+	/**
+	 * This will write a given change to the database
+	 */
+	public function saveToDB($args) {
+		if (!defined('CURSEPROFILE_MASTER')) {
+			return 1; // the appropriate tables don't exist here
+		}
+		$args['target'] = intval($args['target']);
+		if ($args['target'] < 1) {
+			return 1;
+		}
+
+		$mouse = CP::loadMouse();
+		switch ($args['task']) {
+			case 'add':
+				$mouse->DB->insert('user_relationship_request', [
+					'ur_user_id_from' => $this->curse_id,
+					'ur_user_id_to'   => $args['target'],
+					'ur_type'         => 1,
+					'ur_date'         => date( 'Y-m-d H:i:s' ),
+				]);
+				break;
+
+			case 'confirm':
+				$mouse->DB->insert('user_relationship', [
+					'r_user_id'          => $this->curse_id,
+					'r_user_id_relation' => $args['target'],
+					'r_type'             => 1,
+					'r_date'             => date( 'Y-m-d H:i:s' ),
+				]);
+				$mouse->DB->insert('user_relationship', [
+					'r_user_id'          => $args['target'],
+					'r_user_id_relation' => $this->curse_id,
+					'r_type'             => 1,
+					'r_date'             => date( 'Y-m-d H:i:s' ),
+				]);
+				// intentional fall-through
+
+			case 'ignore':
+				$mouse->DB->delete('user_relationship_request', "ur_user_id_from = {$args['target']} AND ur_user_id_to = {$this->curse_id}");
+				break;
+
+			case 'remove':
+				$mouse->DB->delete('user_relationship', "r_user_id = {$args['target']} AND r_user_id_relation = {$this->curse_id}");
+				$mouse->DB->delete('user_relationship', "r_user_id = {$this->curse_id} AND r_user_id_relation = {$args['target']}");
+				$mouse->DB->delete('user_relationship_request', "ur_user_id_from = {$this->curse_id} AND ur_user_id_to = {$args['target']}");
+				break;
+
+			default:
+				return 1;
+		}
+		return 0;
 	}
 }

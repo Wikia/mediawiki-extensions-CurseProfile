@@ -13,48 +13,41 @@
 **/
 namespace CurseProfile;
 
-class SpecialIgnoreFriend extends \UnlistedSpecialPage {
+class SpecialIgnoreFriend extends SpecialConfirmAction {
 	public function __construct() {
 		parent::__construct( 'IgnoreFriend' );
 	}
 
-	/**
-	 * Show the special page
-	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
-	 */
-	public function execute( $toUser ) {
-		global $wgUser;
-		$wgRequest = $this->getRequest();
-		$wgOut = $this->getOutput();
+	protected function getConfirmMessage() {
+		return wfMessage('friendrequestignore-prompt', $this->user->getName())->plain();
+	}
 
-		$user = \User::newFromId($toUser);
-		$friendship = new Friendship(CP::curseIDfromUserID($wgUser->getID()));
-		// $wgOut->addHTML('result: <pre>'.var_export($friendship->sendRequest(CP::curseIDfromUserID($toUser)), true));
-		$friendship->ignoreRequest(CP::curseIDfromUserID($toUser));
-		$wgOut->redirect('/User:'.urlencode($user->getName()));
-		return;
+	protected function getButtonMessage() {
+		return wfMessage('ignorefriend-response')->plain();
+	}
 
-		if ($wgRequest->wasPosted()) {
-			//confirm form, do redirect
-		}
+	protected function getRedirect() {
+		return '/User:'.urlencode($this->user->getName());
+	}
 
-		$this->setHeaders();
-
-		// Can't use $this->setHeaders(); here because then it'll set the page
-		// title to <removerelationship> and we don't want that, we'll be
-		// messing with the page title later on in the code
-		$wgOut->setArticleRelated( false );
-		$wgOut->setRobotPolicy( 'noindex,nofollow' );
-
-		$toUser = intval($toUser);
-		if ($toUser < 1) {
-			$wgOut->addHTML('Error, no user specified');
+	public function execute( $param ) {
+		$this->toUser = intval($param);
+		if ($this->toUser < 1) {
+			$this->getOutput()->addHTML('Error, no user specified');
 			return;
 		}
+		$this->user = \User::newFromId($this->toUser);
+		return parent::execute($param);
+	}
 
-		$user = \User::newFromId($toUser);
-		$wgOut->addHTML('Confirm your friend request to '.$user->getName());
-		$wgOut->addHTML('<form><input type="submit" value="Send It!"></form> <a href="">Cancel</a>');
+	public function confirm($formData) {
+		global $wgUser;
+		$friendship = new Friendship(CP::curseIDfromUserID($wgUser->getID()));
+		$res = $friendship->ignoreRequest(CP::curseIDfromUserID($this->toUser));
+		if ($res) {
+			return true;
+		} else {
+			return wfMessage('friendrequestignore-error')->plain();
+		}
 	}
 }
