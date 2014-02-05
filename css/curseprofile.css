@@ -138,6 +138,8 @@ dd:after {
 	padding-left: 54px;
 }
 	.replyset .avatar {
+		-webkit-transform: scale(0.75);
+		-webkit-transform-origin: top left;
 		transform: scale(0.75);
 		transform-origin: top left;
 		margin-right: 40px;

@@ -85,9 +85,6 @@ class FriendDisplay {
 
 	public static function count(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
 		$friendship = new Friendship(CP::curseIDfromUserID($user_id));
 		$friends = $friendship->getFriends();
 		return count($friends);
@@ -95,9 +92,6 @@ class FriendDisplay {
 
 	public static function friendlist(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
 		$mouse = CP::loadMouse();
 		$friendship = new Friendship(CP::curseIDfromUserID($user_id));
 		$friends = $friendship->getFriends();

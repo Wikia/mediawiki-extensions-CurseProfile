@@ -23,10 +23,99 @@ class ProfileData {
 	protected $user_id;
 
 	/**
-	 * Row as retrieved from the database
-	 * @var		array
+	 * @var		object
 	 */
-	protected $data;
+	protected $user;
+
+	public static function insertProfilePrefs(&$preferences) {
+		$wikiOptions = [
+			'---' => '',
+		];
+		$wikiSites = self::getWikiSites();
+		if ($wikiSites) {
+			foreach ($wikiSites['data']['wikis'] as $wiki) {
+				$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
+			}
+		}
+
+		$preferences['profile-pref'] = [
+			'type' => 'select',
+			'label-message' => 'profileprefselect',
+			'section' => 'personal/info/public',
+			'options' => [
+				wfMessage('profilepref-profile')->plain() => 1,
+				wfMessage('profilepref-wiki')->plain() => 0,
+			],
+		];
+		$preferences['profile-favwiki'] = [
+			'type' => 'select',
+			'label-message' => 'favoritewiki',
+			'section' => 'personal/info/public',
+			'options' => $wikiOptions,
+		];
+		$preferences['profile-aboutme'] = [
+			'type' => 'textarea',
+			'label-message' => 'aboutme',
+			'section' => 'personal/info/public',
+			'rows' => 6,
+			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
+		];
+		$preferences['profile-city'] = [
+			'type' => 'text',
+			'label-message' => 'citylabel',
+			'section' => 'personal/info/location',
+		];
+		$preferences['profile-state'] = [
+			'type' => 'text',
+			'label-message' => 'statelabel',
+			'section' => 'personal/info/location',
+		];
+		$preferences['profile-country'] = [
+			'type' => 'text',
+			'label-message' => 'countrylabel',
+			'section' => 'personal/info/location',
+		];
+		$preferences['profile-link-steam'] = [
+			'type' => 'text',
+			'label-message' => 'steamlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
+		];
+		$preferences['profile-link-xbl'] = [
+			'type' => 'text',
+			'label-message' => 'xbllink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('xbllinkplaceholder')->plain(),
+		];
+		$preferences['profile-link-psn'] = [
+			'type' => 'text',
+			'label-message' => 'psnlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
+		];
+
+
+		$preferences['commentemail'] = [
+			'type' => 'check',
+			'label-message' => 'commentemailpref',
+			'section' => 'personal/email'
+		];
+		$preferences['friendreqemail'] = [
+			'type' => 'check',
+			'label-message' => 'friendreqemailpref',
+			'section' => 'personal/email'
+		];
+	}
+
+	public static function insertProfilePrefsDefaults(&$defaultOptions) {
+		$defaultOptions['commentemail']   = 1;
+		$defaultOptions['friendreqemail'] = 1;
+
+		// Allow overriding by setting the value in the global $wgDefaultUserOptions
+		if (!isset($defaultOptions['profile-pref'])) {
+			$defaultOptions['profile-pref'] = 1;
+		}
+	}
 
 	public function __construct($user_id) {
 		$this->user_id = intval($user_id);
@@ -34,149 +123,59 @@ class ProfileData {
 			// if a user hasn't saved a profile yet, just use the default values
 			$this->user_id = 0;
 		}
-	}
-
-	protected function load() {
-		if (isset($this->data)) {
-			return;
-		}
-		$mouse = CP::loadMouse();
-		$this->data = $mouse->DB->selectAndFetch([
-			'select' => '*',
-			'from'   => 'user_profile',
-			'where'  => 'up_user_id = '.$this->user_id
-		]);
-	}
-
-	/**
-	 * Saves the given data
-	 *
-	 * @param	array	array of data using keys ('aboutme', 'fav_wiki', 'city', 'state', etc)
-	 * @return	boolean	false on failure
-	 */
-	public function save($data) {
-		$dbData = [];
-		$keyMap = [
-			//DB col   =>  friendly name
-			'up_about' => 'aboutme',
-			'up_location_city' => 'city',
-			'up_location_state' => 'state',
-			'up_location_country' => 'country',
-			'up_steam_profile' => 'steam_link',
-			'up_xbl_profile' => 'xbl_link',
-			'up_psn_profile' => 'psn_link',
-			'up_favorite_wiki' => 'fav_wiki',
-			'up_type' => 'typePref',
-		];
-		foreach ($keyMap as $dbKey => $inKey) {
-			if (isset($data[$inKey])) {
-				$dbData[$dbKey] = $data[$inKey];
-			}
-		}
-
-		$mouse = CP::loadMouse();
-		$profile_exists = $mouse->DB->selectAndFetch([
-			'select' => 'count(*) as count',
-			'from'   => 'user_profile',
-			'where'  => 'up_user_id = '.$this->user_id
-		]);
-		if ($profile_exists['count']) {
-			// don't update the default profile
-			if ($this->user_id == 0) {
-				return false;
-			}
-			$mouse->DB->update('user_profile', $dbData, 'up_user_id = '.$this->user_id);
-		} else {
-			// only use default values for the default profile
-			if ($this->user_id == 0) {
-				$dbData = [];
-			}
-			$dbData['up_user_id'] = $this->user_id;
-			$mouse->DB->insert('user_profile', $dbData);
-		}
+		$this->user = \User::newFromId($user_id);
 	}
 
 	public function getAboutText() {
-		$this->load();
-		if (!$this->data) {
-			return '';
-		} else {
-			return $this->data['up_about'];
-		}
+		return $this->user->getOption('profile-aboutme');
 	}
 
 	public function getLocations() {
-		$this->load();
-		if (!$this->data) {
-			return [];
-		} else {
-			$profile = [
-				'city' => $this->data['up_location_city'],
-				'state' => $this->data['up_location_state'],
-				'country' => $this->data['up_location_country'],
-			];
-			return array_filter($profile);
-		}
+		$profile = [
+			'city' => $this->user->getOption('profile-city'),
+			'state' => $this->user->getOption('profile-state'),
+			'country' => $this->user->getOption('profile-country'),
+		];
+		return array_filter($profile);
 	}
 
 	public function getProfileLinks() {
-		$this->load();
-		if (!$this->data) {
-			return [];
-		} else {
-			$profile = [
-				'Steam' => $this->data['up_steam_profile'],
-				'XBL' => $this->data['up_xbl_profile'],
-				'PSN' => $this->data['up_psn_profile'],
-			];
-			return array_filter($profile);
-		}
+		$profile = [
+			'Steam' => $this->user->getOption('profile-link-steam'),
+			'XBL' => $this->user->getOption('profile-link-xbl'),
+			'PSN' => $this->user->getOption('profile-link-psn'),
+		];
+		return array_filter($profile);
 	}
 
 	public function getFavoriteWikiHash() {
-		$this->load();
-		if (!$this->data) {
-			return '';
-		} else {
-			return $this->data['up_favorite_wiki'];
-		}
+		return $this->user->getOption('profile-favwiki');
 	}
 
 	public function getFavoriteWiki() {
-		$this->load();
-		if (!$this->data) {
-			return [];
-		} else {
-			$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-			global $wgServer;
-			$jsonSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
-			$sites = json_decode($jsonSites, true);
-			if ($sites) {
-				foreach ($sites['data']['wikis'] as $wiki) {
-					if ($wiki['md5_key'] == $this->data['up_favorite_wiki']) {
-						return $wiki;
-					}
+		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
+		$sites = self::getWikiSites();
+		if ($sites) {
+			foreach ($sites['data']['wikis'] as $wiki) {
+				if ($wiki['md5_key'] == $this->user->getOption('profile-favwiki')) {
+					return $wiki;
 				}
 			}
-			return [];
 		}
+		return [];
+	}
+
+	public static function getWikiSites() {
+		global $wgServer;
+		$mouse = CP::loadMouse();
+		$jsonSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
+		return json_decode($jsonSites, true);
 	}
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
 	 */
 	public function getTypePref() {
-		$this->load();
-		if (!$this->data) {
-			// No profile exists, use the default value for the database column
-			$mouse = CP::loadMouse();
-			$res = $mouse->DB->selectAndFetch([
-				'select' => 'DEFAULT(up_type) as def',
-				'from'   => 'user_profile',
-			]);
-			return $res['def'];
-		} else {
-			return $this->data['up_type'];
-		}
+		return $this->user->getIntOption('profile-pref');
 	}
 }

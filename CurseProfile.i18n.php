@@ -28,6 +28,7 @@ $magicWords['en'] = [
 						'profilelinks'						=> array(0, 'profilelinks'),
 						'favwiki'							=> array(0, 'favwiki'),
 						'userstats'							=> array(0, 'userstats'),
+						'userlevel'							=> array(0, 'userlevel'),
 ];
 
 $messages = array();
@@ -56,6 +57,31 @@ $messages['en'] = array(
 						'alreadyfriends'					=> 'Friends!',
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
+						// Friendship email
+						'commentemailpref'					=> 'Send me an email when a user comments on my profile',
+						'commentemail-subj'					=> '$1 has left a comment on your profile on {{SITENAME}}!',
+						'commentemail-body'					=> '
+Hi $1,
+$2 has left a comment on your profile at {{SITENAME}}. You can read and reply by viewing your profile:
+
+$3
+
+Thanks,
+The Gamepedia Team
+
+(You can unsubscribe by changing your email preferences at $4)',
+						'friendreqemailpref'				=> 'Send me an email when a user sends me a friend request',
+						'friendreqemail-subj'				=> '$1 has added you as a friend on Gamepedia!',
+						'friendreqemail-body'				=> '
+Hi $1,
+$2 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}}:
+
+$3
+
+Thanks,
+The Gamepedia Team
+
+(You can unsubscribe by changing your email preferences at $4)',
 						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
 						'commentaction'						=> 'Post',
@@ -74,6 +100,11 @@ $messages['en'] = array(
 						'viewreplies'						=> 'View $1 {{PLURAL:$1|reply|replies}}',
 						'repliestooltip'					=> 'View replies or add one of your own',
 						'replylink'							=> 'Reply',
+						'profilepref-profile'				=> 'Use an enhanced profile page',
+						'profilepref-wiki'					=> 'Use a simple wiki page',
+						'prefs-public'						=> 'Public Profile',
+						'prefs-location'					=> 'Location',
+						'prefs-profiles'					=> 'Other Profiles',
 						// form placeholders
 						'commentplaceholder'				=> 'Leave a comment',
 						'commentreplyplaceholder'			=> 'Leave a reply',
@@ -88,45 +119,4 @@ $messages['en'] = array(
 						'totaldeletes'						=> 'Deletes',
 						'totalpatrols'						=> 'Patrols',
 						'friends'							=> 'Friends',
-						// The big deal
-						'userprofilelayout'					=> '
-<div class="curseprofile" data-userid="$2">
-	<div class="leftcolumn">
-		<div class="borderless section">
-			{{#avatar: 160 | $3 | you | class="mainavatar"}}
-			<div class="headline">
-				{{#groups: $2}}
-				<h1>$1</h1>
-			</div>
-			<div>
-				{{#profilelinks: $2}}
-				{{#location: $2}}
-			</div>
-			<div class="aboutme">
-				{{#aboutme: $2}}
-			</div>
-		</div>
-		<div class="activity section">
-			<h3>Recent Wiki Activity</h3>
-			{{#recentactivity: $2}}
-		</div>
-		<div class="comments section">
-			<h3>Comments</h3>
-			{{#comments: $2}}
-		</div>
-	</div>
-	<div class="rightcolumn">
-		<div class="rightfloat">
-			<div class="score">{{#Points: User:$1 | all | raw}} GP</div>
-		</div>
-		<div>{{#favwiki: $2}}</div>
-		<div class="section">
-			<h3>Total Statistics</h3>
-			{{#userstats: $2}}
-			{{#friendlist: $2}}
-		</div>
-	</div>
-</div>
-__NOTOC__
-'
 );

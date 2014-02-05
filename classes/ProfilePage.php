@@ -43,13 +43,14 @@ class ProfilePage extends \Article {
 	}
 
 	public function view() {
-		$user_name = $this->user->getName();
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle($this->mTitle->getPrefixedText());
 
-		$outputString = wfMessage('userprofilelayout')->params($user_name, $this->user->getId(), $this->user->getEmail())->parse();
-		$output->addHtml($outputString); // Removed in favor of using an editable message during development
-		// $output->addWikiMsg('userprofilelayout', [$user_name]);
+		$outputString = \MessageCache::singleton()->parse($this->profileLayout(), $this->mTitle);
+		if ($outputString instanceOf \ParserOutput) {
+			$outputString = $outputString->getText();
+		}
+		$output->addHTML($outputString);
 	}
 
 	public function isUserPage() {
@@ -93,7 +94,7 @@ class ProfilePage extends \Article {
 				$links['views']['edit_profile'] = [
 					'class'		=> false,
 					'text'		=> wfMessage('editprofile')->plain(),
-					'href'		=> '/Special:EditProfile',
+					'href'		=> '/Special:Preferences#mw-prefsection-personal-info-public',
 				];
 			} elseif ($wgUser->isLoggedIn()) { // only offer friending when not viewing yourself
 				// add link to add, confirm, or remove friend
@@ -141,7 +142,11 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Outputs the groups that a user belongs to in a <UL> tag
+	 * Performs the work for the parser tag that displays the groups to which a user belongs
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public static function groupList(&$parser, $user_id) {
 		$user_id = intval($user_id);
@@ -164,6 +169,13 @@ class ProfilePage extends \Article {
 		return [$HTML, 'isHTML' => true];
 	}
 
+	/**
+	 * Performs the work for the parser tag that displays the user's location.
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
 	public static function location(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -175,6 +187,13 @@ class ProfilePage extends \Article {
 		return implode(', ', $locations);
 	}
 
+	/**
+	 * Performs the work for the parser tag that displays the user's "About Me" text
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
 	public static function aboutBlock(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -185,6 +204,13 @@ class ProfilePage extends \Article {
 		return $profile->getAboutText();
 	}
 
+	/**
+	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
 	public static function profileLinks(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -235,7 +261,13 @@ class ProfilePage extends \Article {
 		return $match[1];
 	}
 
-
+	/**
+	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
 	public static function favoriteWiki(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -250,7 +282,7 @@ class ProfilePage extends \Article {
 
 		$HTML = CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
 		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}'>".$HTML."</a>";
-		$HTML = wfMessage('favoritewiki')->plain().':<br>' . $HTML;
+		$HTML = wfMessage('favoritewiki')->plain().'<br>' . $HTML;
 
 		return [
 			$HTML,
@@ -258,6 +290,14 @@ class ProfilePage extends \Article {
 		];
 	}
 
+	/**
+	 * Performs the work for the parser tag that displays user statistics.
+	 * The numbers themselves are pulled from the dataminer api
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
 	public static function userStats(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -329,5 +369,98 @@ class ProfilePage extends \Article {
 			// just a simple value
 			return $input;
 		}
+	}
+
+	/**
+	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
+	 *
+	 * @param	object	parser reference
+	 * @param	int		ID of a user
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
+	public static function userLevel(&$parser, $user_id = '') {
+		$user_id = intval($user_id);
+		if ($user_id < 1) {
+			return 'Invalid user ID given';
+		}
+		$curse_id = CP::curseIDfromUserID($user_id);
+		if ($curse_id < 1) {
+			return '';
+		}
+
+		$mouse = CP::loadMouse();
+		$userPoints = intval($mouse->redis->zscore('wikipoints:usertotals', $curse_id));
+		$levelDefinitions = $mouse->redis->getUnserialized('wikipoints::levels');
+
+		if (!is_array($levelDefinitions)) {
+			return '';
+		}
+
+		foreach ($levelDefinitions as $tier) {
+			if ($userPoints >= $tier['points']) {
+				$HTML = $tier['text'];
+				// TODO display $tier['image_icon'] or $tier['image_large']
+			} else {
+				break; // assuming that the definitions array is sorted by level ASC
+			}
+		}
+
+		return [
+			$HTML,
+			'isHTML' => true,
+		];
+	}
+
+	/**
+	 * Defines the HTML structure of the profile page.
+	 *
+	 * @return	string
+	 */
+	protected function profileLayout() {
+		return sprintf('
+<div class="curseprofile" data-userid="%2$s">
+	<div class="leftcolumn">
+		<div class="borderless section">
+			{{#avatar: 160 | %3$s | you | class="mainavatar"}}
+			<div class="headline">
+				{{#groups: %2$s}}
+				<h1>%1$s</h1>
+			</div>
+			<div>
+				{{#profilelinks: %2$s}}
+				{{#location: %2$s}}
+			</div>
+			<div class="aboutme">
+				{{#aboutme: %2$s}}
+			</div>
+		</div>
+		<div class="activity section">
+			<h3>Recent Wiki Activity</h3>
+			{{#recentactivity: %2$s}}
+		</div>
+		<div class="comments section">
+			<h3>Comments</h3>
+			{{#comments: %2$s}}
+		</div>
+	</div>
+	<div class="rightcolumn">
+		<div class="rightfloat">
+			<div class="title">{{#userlevel: %2$s}}</div>
+			<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+		</div>
+		<div>{{#favwiki: %2$s}}</div>
+		<div class="section">
+			<h3>Total Statistics</h3>
+			{{#userstats: %2$s}}
+			{{#friendlist: %2$s}}
+		</div>
+	</div>
+</div>
+__NOTOC__
+',
+			$this->user_name,
+			$this->user->getID(),
+			$this->user->getEmail()
+		);
 	}
 }

@@ -30,6 +30,10 @@ if (!defined('NS_USER_PROFILE')) {
 if (!defined('NS_USER_WIKI')) {
 	define( 'NS_USER_WIKI', 200 );
 }
+$namespaceNames['en'] = array(
+	NS_USER_WIKI => 'UserWiki',
+	NS_USER_PROFILE => 'User_profile',
+);
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
@@ -73,10 +77,6 @@ $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comm
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
 $wgSpecialPageGroups['AddComment']							= 'users';
 
-$wgAutoloadClasses['CurseProfile\SpecialEditProfile']		= "{$extDir}/specials/SpecialEditProfile.php";
-$wgSpecialPages['EditProfile']								= 'CurseProfile\SpecialEditProfile';
-$wgSpecialPageGroups['EditProfile']							= 'users';
-
 $wgAutoloadClasses['CurseProfile\SpecialToggleProfilePreference'] = "{$extDir}/specials/SpecialToggleProfilePreference.php";
 $wgSpecialPages['ToggleProfilePreference']					= 'CurseProfile\SpecialToggleProfilePreference';
 $wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
@@ -103,6 +103,9 @@ $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';
+$wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces';
+$wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';
+$wgHooks['UserGetDefaultOptions'][]			= 'CurseProfile\Hooks::onUserGetDefaultOptions';
 
 // Ajax Setup
 require_once('CurseProfile.ajax.php');

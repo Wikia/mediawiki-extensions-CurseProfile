@@ -107,7 +107,7 @@ class CP {
 	public static function timeTag($timestamp) {
 		$timestamp = strtotime($timestamp);
 		$iso8601 = date('c', $timestamp);
-		$readableTime = date('Y-m-d H:i:s', $timestamp);
+		$readableTime = date('H:i, d F Y (e)', $timestamp);
 		return '<time class="timeago" datetime="'.$iso8601.'">at '.$readableTime.'</time>';
 	}
 

@@ -32,6 +32,7 @@ class Hooks {
 			$parser->setFunctionHook('location',			'CurseProfile\ProfilePage::location');
 			$parser->setFunctionHook('profilelinks',		'CurseProfile\ProfilePage::profileLinks');
 			$parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats');
+			$parser->setFunctionHook('userlevel',			'CurseProfile\ProfilePage::userLevel');
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');
@@ -99,6 +100,45 @@ class Hooks {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/create_user_relationship_request.sql", true));
 		}
 
+		return true;
+	}
+
+	/**
+	 * Register the canonical names for custom namespaces.
+	 *
+	 * @access	public
+	 * @param	array	namespace numbers mapped to corresponding canonical names
+	 * @return	boolean	true
+	 */
+	static public function onCanonicalNamespaces(&$list) {
+		$list[NS_USER_WIKI]    = 'UserWiki';
+		$list[NS_USER_PROFILE] = 'User_profile';
+		return true;
+	}
+
+	/**
+	 * Add extra preferences
+	 *
+	 * @access	public
+	 * @param	object	user whose preferences are being modified
+	 * @param	array	Preferences description object, to be fed to an HTMLForm
+	 * @return	boolean	true
+	 */
+	static public function onGetPreferences($user, &$preferences) {
+		ProfileData::insertProfilePrefs($preferences);
+		return true;
+	}
+
+	/**
+	 * Add extra preferences
+	 *
+	 * @access	public
+	 * @param	object	user whose preferences are being modified
+	 * @param	array	Preferences description object, to be fed to an HTMLForm
+	 * @return	boolean	true
+	 */
+	static public function onUserGetDefaultOptions(&$defaultOptions) {
+		ProfileData::insertProfilePrefsDefaults($defaultOptions);
 		return true;
 	}
 }

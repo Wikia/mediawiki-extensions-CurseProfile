@@ -36,9 +36,6 @@ class Friendship {
 	 */
 	public function __construct($curse_id) {
 		$this->curse_id = intval($curse_id);
-		if ($this->curse_id < 1) {
-			throw new \Exception('Invalid Curse ID');
-		}
 	}
 
 	/**
@@ -49,7 +46,7 @@ class Friendship {
 	 */
 	public function getRelationship($toUser) {
 		$toUser = intval($toUser);
-		if ($this->curse_id == $toUser || $toUser < 1) {
+		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
 			return -1;
 		}
 
@@ -78,6 +75,10 @@ class Friendship {
 	 * @return	array	curse IDs of friends
 	 */
 	public function getFriends($user = null) {
+		if ($this->curse_id < 1) {
+			return [];
+		}
+
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
@@ -119,7 +120,7 @@ class Friendship {
 	 */
 	public function sendRequest($toUser) {
 		$toUser = intval($toUser);
-		if ($this->curse_id == $toUser || $toUser < 1) {
+		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
 			return false;
 		}
 
@@ -168,7 +169,7 @@ class Friendship {
 	 */
 	private function respondToRequest($toUser, $response) {
 		$toUser = intval($toUser);
-		if ($this->curse_id == $toUser || $toUser < 1) {
+		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
 			return -1;
 		}
 
@@ -203,8 +204,8 @@ class Friendship {
 	 */
 	public function removeFriend($toUser) {
 		$toUser = intval($toUser);
-		if ($this->curse_id == $toUser || $toUser < 1) {
-			return -1;
+		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
+			return false;
 		}
 
 		FriendSync::queue([
