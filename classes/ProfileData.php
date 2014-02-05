@@ -178,4 +178,10 @@ class ProfileData {
 	public function getTypePref() {
 		return $this->user->getIntOption('profile-pref');
 	}
+
+
+	public function toggleTypePref() {
+		$this->user->setOption('profile-pref', !$this->getTypePref());
+		$this->user->saveSettings();
+	}
 }

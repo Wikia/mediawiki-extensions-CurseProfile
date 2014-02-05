@@ -25,14 +25,13 @@ class SpecialToggleProfilePreference extends \UnlistedSpecialPage {
 		global $wgUser;
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
-		$db = $this->DB = wfGetDB(DB_MASTER);
 
-		$profile = new ProfileData($wgUser->getId());
-		$newTypePref = (int) !$profile->getTypePref();
+		if ($wgUser->isLoggedIn()) {
+			$profile = new ProfileData($wgUser->getId());
+			$profile->toggleTypePref();
+		}
 
 		$this->setHeaders();
-
-		$profile->save(['typePref'=>$newTypePref]);
 
 		$wgOut->redirect($wgUser->getUserPage()->getFullURL());
 
