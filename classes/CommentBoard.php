@@ -169,5 +169,22 @@ class CommentBoard {
 			),
 			__METHOD__
 		);
+
+		if ($toUser->getEmail() && $toUser->getIntOption('commentemail')) {
+			if (trim($toUser->getRealName())) {
+				$name = $toUser->getRealName();
+			} else {
+				$name = $toUser->getName();
+			}
+			$updatePrefsLink = \SpecialPage::getTitleFor('Preferences');
+			$subject = wfMessage('commentemail-subj', $fromUser->getName())->parse();
+			$body = wfMessage('commentemail-body')->params(
+					$name,
+					$fromUser->getName(),
+					$toUser->getUserPage()->getFullURL(),
+					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
+				)->parse();
+			$toUser->sendMail($subject, $body);
+		}
 	}
 }

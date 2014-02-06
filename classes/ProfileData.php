@@ -75,6 +75,26 @@ class ProfileData {
 			'label-message' => 'countrylabel',
 			'section' => 'personal/info/location',
 		];
+		$preferences['profile-link-twitter'] = [
+			'type' => 'text',
+			'label-message' => 'twitterlink',
+			'section' => 'personal/info/profiles',
+		];
+		$preferences['profile-link-facebook'] = [
+			'type' => 'text',
+			'label-message' => 'facebooklink',
+			'section' => 'personal/info/profiles',
+		];
+		$preferences['profile-link-google'] = [
+			'type' => 'text',
+			'label-message' => 'googlelink',
+			'section' => 'personal/info/profiles',
+		];
+		$preferences['profile-link-reddit'] = [
+			'type' => 'text',
+			'label-message' => 'redditlink',
+			'section' => 'personal/info/profiles',
+		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
 			'label-message' => 'steamlink',
@@ -94,7 +114,7 @@ class ProfileData {
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
 		];
 
-
+		// Email prefs
 		$preferences['commentemail'] = [
 			'type' => 'check',
 			'label-message' => 'commentemailpref',
@@ -141,6 +161,10 @@ class ProfileData {
 
 	public function getProfileLinks() {
 		$profile = [
+			'Twitter' => $this->user->getOption('profile-link-twitter'),
+			'Facebook' => $this->user->getOption('profile-link-facebook'),
+			'Google' => $this->user->getOption('profile-link-google'),
+			'Reddit' => $this->user->getOption('profile-link-reddit'),
 			'Steam' => $this->user->getOption('profile-link-steam'),
 			'XBL' => $this->user->getOption('profile-link-xbl'),
 			'PSN' => $this->user->getOption('profile-link-psn'),

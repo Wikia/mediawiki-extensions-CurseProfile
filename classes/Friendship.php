@@ -137,6 +137,25 @@ class Friendship {
 		$mouse = CP::loadMouse();
 		$mouse->redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
 
+		$user = \User::newFromId(CP::userIDfromCurseID($toUser));
+		if ($user->getEmail() && $user->getIntOption('friendreqemail')) {
+			if (trim($user->getRealName())) {
+				$name = $user->getRealName();
+			} else {
+				$name = $user->getName();
+			}
+			$updatePrefsLink = \SpecialPage::getTitleFor('Preferences');
+			$thisUser = \User::newFromId(CP::userIDfromCurseID($this->curse_id));
+			$subject = wfMessage('friendreqemail-subj', $thisUser->getName())->parse();
+			$body = wfMessage('friendreqemail-body')->params(
+					$name,
+					$thisUser->getName(),
+					$thisUser->getUserPage()->getFullURL(),
+					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
+				)->parse();
+			$user->sendMail($subject, $body);
+		}
+
 		return true;
 	}
 
@@ -219,8 +238,6 @@ class Friendship {
 		$mouse->redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
 		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
 		$mouse->redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
-
-		// TODO add sync
 
 		return true;
 	}

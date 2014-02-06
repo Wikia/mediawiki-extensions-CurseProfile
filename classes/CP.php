@@ -53,7 +53,6 @@ class CP {
 
 	/**
 	 * Returns a curse id from the local database for a given user id
-	 * (needs some error checking)
 	 *
 	 * @param	int		user id
 	 * @return	int		curse id
@@ -63,10 +62,27 @@ class CP {
 		$res = self::$mouse->DB->select([
 			'select'	=> 'u.curse_id',
 			'from'		=> ['user' => 'u'],
-			'where'		=> 'user_id = '.intval($user_id),
-			'limit'		=> '1'
+			'where'		=> 'u.user_id = '.intval($user_id),
+			'limit'		=> '1',
 		]);
 		return self::$mouse->DB->fetch($res)['curse_id'];
+	}
+
+	/**
+	 * Returns a user id from the local database for a given curse id
+	 *
+	 * @param	int		curse id
+	 * @return	int		user id
+	 */
+	public static function userIDfromCurseID($curse_id) {
+		self::loadMouse();
+		$res = self::$mouse->DB->select([
+			'select'	=> 'u.user_id',
+			'from'		=> ['user' => 'u'],
+			'where'		=> 'u.curse_id = '.intval($curse_id),
+			'limit'		=> '1',
+		]);
+		return self::$mouse->DB->fetch($res)['user_id'];
 	}
 
 	/**

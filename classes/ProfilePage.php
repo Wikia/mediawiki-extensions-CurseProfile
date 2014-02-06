@@ -396,6 +396,7 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
+		$HTML = '';
 		foreach ($levelDefinitions as $tier) {
 			if ($userPoints >= $tier['points']) {
 				$HTML = $tier['text'];
