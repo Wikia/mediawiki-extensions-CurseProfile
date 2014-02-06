@@ -81,12 +81,18 @@ class ProfilePage extends \Article {
 			];
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
-			$links['namespaces']['user']['text'] = 'User profile'; // rename from "User page"
+			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->plain(); // rename from "User page"
 			// add link to user wiki
 			$links['namespaces']['user_wiki'] = [
 				'class'		=> false,
-				'text'		=> 'User Wiki',
+				'text'		=> wfMessage('userwikitab')->plain(),
 				'href'		=> "/UserWiki:{$this->user_name}",
+			];
+
+			$links['views']['contribs'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('contributions')->parse(),
+				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
 			];
 
 			// only offer to edit the profile if you are the owner
@@ -106,7 +112,7 @@ class ProfilePage extends \Article {
 		if ($this->isUserWikiPage()) {
 			$links['namespaces']['user_profile'] = [
 				'class'		=> false,
-				'text'		=> 'User Profile',
+				'text'		=> wfMessage('userprofiletab')->plain(),
 				'href'		=> "/UserProfile:{$this->user_name}",
 			];
 		}
@@ -116,7 +122,6 @@ class ProfilePage extends \Article {
 			$links['actions']['switch_type'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('toggletypepref')->plain(),
-				'title'		=> wfMessage('toggletypetooltip')->plain(),
 				'href'		=> '/Special:ToggleProfilePreference',
 			];
 		}
@@ -184,7 +189,14 @@ class ProfilePage extends \Article {
 		$mouse = CP::loadMouse();
 		$profile = new ProfileData($user_id);
 		$locations = $profile->getLocations();
-		return implode(', ', $locations);
+
+		// TODO add real country flags
+		$flag = CP::placeholderImage($parser, 30, 18)[0];
+
+		return [
+			$flag.' '.implode(', ', $locations),
+			'isHTML' => true,
+		];
 	}
 
 	/**
@@ -422,14 +434,14 @@ class ProfilePage extends \Article {
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
 		<div class="borderless section">
-			{{#avatar: 160 | %3$s | you | class="mainavatar"}}
+			<div class="mainavatar">{{#avatar: 96 | %3$s | you | class="mainavatar"}}</div>
 			<div class="headline">
-				{{#groups: %2$s}}
 				<h1>%1$s</h1>
+				{{#groups: %2$s}}
 			</div>
 			<div>
+				<div class="location">{{#location: %2$s}}</div>
 				{{#profilelinks: %2$s}}
-				{{#location: %2$s}}
 			</div>
 			<div class="aboutme">
 				{{#aboutme: %2$s}}
