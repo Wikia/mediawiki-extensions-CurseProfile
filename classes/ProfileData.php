@@ -40,6 +40,7 @@ class ProfileData {
 				$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
 			}
 		}
+		ksort($wikiOptions);
 
 		$preferences['profile-pref'] = [
 			'type' => 'select',
