@@ -109,7 +109,7 @@ class CP {
 			$attributes = $attributeString;
 		}
 
-		$html = "<img src='http://placehold.it/{$width}x{$height}' $attributes/>";
+		$html = "<img src='http://placehold.it/{$width}x{$height}' $attributes />";
 		return [
 			$html,
 			'isHTML' => true,

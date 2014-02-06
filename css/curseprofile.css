@@ -63,11 +63,13 @@ div.mainavatar {
 	margin-right: 6px;
 }
 
+.countryflag {
+	vertical-align: top;
+}
+
 .grouptags, .profilelinks {
 	list-style: none;
 	margin: 0;
-}
-.profilelinks {
 }
 	.grouptags li, .profilelinks li {
 		display: inline-block;
@@ -157,6 +159,20 @@ div.mainavatar {
 	.replyset .entryform {
 		margin-left: 40px;
 	}
+
+/* Right Sidebar */
+.rightcolumn > :first-child {
+	font-size: 130%;
+}
+
+.level {
+	margin-bottom: 0.4em;
+}
+
+.favorite {
+	text-align: center;
+	display: inline-block;
+}
 
 /* Sidebar friend list */
 ul.friends {

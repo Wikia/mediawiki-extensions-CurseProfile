@@ -20,6 +20,8 @@ class ProfilePage extends \Article {
 	protected $user;
 	protected $profile;
 
+	static protected $output;
+
 	public function __construct($title) {
 		parent::__construct($title);
 		$this->user_name = $title->getText();
@@ -30,6 +32,7 @@ class ProfilePage extends \Article {
 			$this->user_id = 0;
 		}
 		$this->profile = new ProfileData($this->user_id);
+		self::$output = $this->getContext()->getOutput();
 	}
 
 	/**
@@ -43,14 +46,13 @@ class ProfilePage extends \Article {
 	}
 
 	public function view() {
-		$output = $this->getContext()->getOutput();
-		$output->setPageTitle($this->mTitle->getPrefixedText());
+		self::$output->setPageTitle($this->mTitle->getPrefixedText());
 
 		$outputString = \MessageCache::singleton()->parse($this->profileLayout(), $this->mTitle);
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
-		$output->addHTML($outputString);
+		self::$output->addHTML($outputString);
 	}
 
 	public function isUserPage() {
@@ -141,7 +143,7 @@ class ProfilePage extends \Article {
 		$size = intval($size);
 		$user_name = htmlspecialchars($user_name, ENT_QUOTES);
 		return [
-			"<img src='http://www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString>",
+			"<img src='http://www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString />",
 			'isHTML' => true,
 		];
 	}
@@ -191,7 +193,7 @@ class ProfilePage extends \Article {
 		$locations = $profile->getLocations();
 
 		// TODO add real country flags
-		$flag = CP::placeholderImage($parser, 30, 18)[0];
+		$flag = CP::placeholderImage($parser, 30, 18, ['class' => 'countryflag'])[0];
 
 		return [
 			$flag.' '.implode(', ', $locations),
@@ -294,7 +296,7 @@ class ProfilePage extends \Article {
 
 		$HTML = CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
 		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}'>".$HTML."</a>";
-		$HTML = wfMessage('favoritewiki')->plain().'<br>' . $HTML;
+		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
 		return [
 			$HTML,
@@ -328,6 +330,8 @@ class ProfilePage extends \Article {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
+				'localrank' => 'TODO',
+				'globalrank' => 'TODO',
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
 					'totaldeletes' => $totalStats['deletes'],
@@ -368,14 +372,14 @@ class ProfilePage extends \Article {
 				// TODO handle output with commas for better human readability
 				$output .= $input[0];
 			}
-			$output .= "\n<dl>";
+			$output .= "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "\n<dt>".wfMessage($msgKey)->escaped()."</dt><dd>".self::generateStatsDL($value)."</dd>";
+				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey))."</dt><dd>".self::generateStatsDL($value)."</dd>";
 			}
-			$output .= "\n</dl>";
+			$output .= "</dl>";
 			return $output;
 		} else {
 			// just a simple value
@@ -413,6 +417,7 @@ class ProfilePage extends \Article {
 			if ($userPoints >= $tier['points']) {
 				$HTML = $tier['text'];
 				// TODO display $tier['image_icon'] or $tier['image_large']
+				$HTML .= ' '.CP::placeholderImage($parser, 32, '', ['class'=>'level'])[0];
 			} else {
 				break; // assuming that the definitions array is sorted by level ASC
 			}
@@ -434,7 +439,7 @@ class ProfilePage extends \Article {
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
 		<div class="borderless section">
-			<div class="mainavatar">{{#avatar: 96 | %3$s | you | class="mainavatar"}}</div>
+			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
 				<h1>%1$s</h1>
 				{{#groups: %2$s}}
@@ -457,11 +462,13 @@ class ProfilePage extends \Article {
 		</div>
 	</div>
 	<div class="rightcolumn">
-		<div class="rightfloat">
-			<div class="title">{{#userlevel: %2$s}}</div>
-			<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+		<div class="borderless section">
+			<div class="rightfloat">
+				<div class="level">{{#userlevel: %2$s}}</div>
+				<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+			</div>
+			<div class="favorite">{{#favwiki: %2$s}}</div>
 		</div>
-		<div>{{#favwiki: %2$s}}</div>
 		<div class="section">
 			<h3>Total Statistics</h3>
 			{{#userstats: %2$s}}

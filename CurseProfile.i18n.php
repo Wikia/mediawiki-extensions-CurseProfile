@@ -120,6 +120,8 @@ The Gamepedia Team
 						'psnlinkplaceholder'				=> 'Share your PSN ID',
 						// Stat labels
 						'wikisedited'						=> 'Wikis Edited',
+						'localrank'							=> '[[Special:WikiPoints|{{SITENAME}} Rank]]',
+						'globalrank'						=> 'Gamepedia Rank',
 						'totalcontribs'						=> 'Contributions',
 						'totaledits'						=> 'Edits',
 						'totaldeletes'						=> 'Deletes',
