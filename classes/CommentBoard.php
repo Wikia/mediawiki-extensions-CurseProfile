@@ -170,7 +170,7 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		if ($toUser->getEmail() && $toUser->getIntOption('commentemail')) {
+		if ($toUser->getID() != $fromUser->getID() && $toUser->getEmail() && $toUser->getIntOption('commentemail')) {
 			if (trim($toUser->getRealName())) {
 				$name = $toUser->getRealName();
 			} else {

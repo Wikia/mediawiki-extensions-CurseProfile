@@ -191,12 +191,15 @@ class ProfilePage extends \Article {
 		$mouse = CP::loadMouse();
 		$profile = new ProfileData($user_id);
 		$locations = $profile->getLocations();
+		$HTML = implode(', ', $locations);
 
 		// TODO add real country flags
-		$flag = CP::placeholderImage($parser, 30, 18, ['class' => 'countryflag'])[0];
+		if (isset($locations['country']) && !empty($locations['country'])) {
+			$HTML = CP::placeholderImage($parser, 30, 18, ['class' => 'countryflag'])[0].' '.$HTML;
+		}
 
 		return [
-			$flag.' '.implode(', ', $locations),
+			$HTML,
 			'isHTML' => true,
 		];
 	}
@@ -350,6 +353,19 @@ class ProfilePage extends \Article {
 		}
 		$statsOutput['friends'] = FriendDisplay::count($parser, $user_id);
 
+		if ($curse_id > 1 && method_exists('PointsDisplay', 'pointsForCurseId')) {
+			global $wgServer;
+			$statsOutput['localrank'] = \PointsDisplay::pointsForCurseId($curse_id, \WikiPoints::domainToNamespace($wgServer))['rank'];
+			$statsOutput['globalrank'] = \PointsDisplay::pointsForCurseId($curse_id)['rank'];
+
+			if (empty($statsOutput['localrank'])) {
+				unset($statsOutput['localrank']);
+			}
+			if (empty($statsOutput['globalrank'])) {
+				unset($statsOutput['globalrank']);
+			}
+		}
+
 		$HTML = self::generateStatsDL($statsOutput);
 
 		return [
@@ -400,12 +416,12 @@ class ProfilePage extends \Article {
 			return 'Invalid user ID given';
 		}
 		$curse_id = CP::curseIDfromUserID($user_id);
-		if ($curse_id < 1) {
+		if ($curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
 			return '';
 		}
 
 		$mouse = CP::loadMouse();
-		$userPoints = intval($mouse->redis->zscore('wikipoints:usertotals', $curse_id));
+		$userPoints = \PointsDisplay::pointsForCurseId($curse_id)['score'];
 		$levelDefinitions = $mouse->redis->getUnserialized('wikipoints::levels');
 
 		if (!is_array($levelDefinitions)) {

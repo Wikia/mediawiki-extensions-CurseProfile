@@ -1,5 +1,5 @@
 /* Hide the usual page title header */
-.firstHeading {
+.firstHeading, #contentSub {
 	display: none;
 }
 
