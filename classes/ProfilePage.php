@@ -191,12 +191,14 @@ class ProfilePage extends \Article {
 		$mouse = CP::loadMouse();
 		$profile = new ProfileData($user_id);
 		$locations = $profile->getLocations();
-		$HTML = implode(', ', $locations);
 
-		// TODO add real country flags
-		if (isset($locations['country']) && !empty($locations['country'])) {
-			$HTML = CP::placeholderImage($parser, 30, 18, ['class' => 'countryflag'])[0].' '.$HTML;
+		if (isset($locations['country-flag'])) {
+			$src = \FlagFinder::getFlagPath($locations['country-flag']);
+			$HTML = "<img src='$src' class='countryflag' alt='flag for {$locations['country-flag']}'/> ".$HTML;
+			unset($locations['country-flag']);
 		}
+
+		$HTML .= implode(', ', $locations);
 
 		return [
 			$HTML,

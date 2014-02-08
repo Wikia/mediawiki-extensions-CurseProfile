@@ -64,7 +64,7 @@ div.mainavatar {
 }
 
 .countryflag {
-	vertical-align: top;
+	vertical-align: baseline;
 }
 
 .grouptags, .profilelinks {

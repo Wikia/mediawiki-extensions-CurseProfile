@@ -141,6 +141,14 @@ class ProfileData {
 		}
 	}
 
+	public static function processPreferenceSave($user, &$preferences) {
+		if (!empty($preferences['profile-country'])) {
+			$preferences['profile-country-flag'] = \FlagFinder::getCode($preferences['profile-country']);
+		} else {
+			$preferences['profile-country-flag'] = '';
+		}
+	}
+
 	public function __construct($user_id) {
 		$this->user_id = intval($user_id);
 		if ($this->user_id < 1) {
@@ -159,6 +167,7 @@ class ProfileData {
 			'city' => $this->user->getOption('profile-city'),
 			'state' => $this->user->getOption('profile-state'),
 			'country' => $this->user->getOption('profile-country'),
+			'country-flag' => $this->user->getOption('profile-country-flag'),
 		];
 		return array_filter($profile);
 	}

@@ -130,15 +130,27 @@ class Hooks {
 	}
 
 	/**
-	 * Add extra preferences
+	 * Add extra preferences defaults
+	 *
+	 * @access	public
+	 * @param	array	mapping of preference to default value
+	 * @return	boolean	true
+	 */
+	static public function onUserGetDefaultOptions(&$defaultOptions) {
+		ProfileData::insertProfilePrefsDefaults($defaultOptions);
+		return true;
+	}
+
+	/**
+	 * Save preferences
 	 *
 	 * @access	public
 	 * @param	object	user whose preferences are being modified
 	 * @param	array	Preferences description object, to be fed to an HTMLForm
 	 * @return	boolean	true
 	 */
-	static public function onUserGetDefaultOptions(&$defaultOptions) {
-		ProfileData::insertProfilePrefsDefaults($defaultOptions);
+	static public function onUserSaveOptions(\User $user, array &$options) {
+		ProfileData::processPreferenceSave($user, $options);
 		return true;
 	}
 }

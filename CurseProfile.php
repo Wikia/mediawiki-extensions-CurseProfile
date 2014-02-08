@@ -42,6 +42,7 @@ $extDir = __DIR__ . '/';
 
 $wgExtensionMessagesFiles['CurseProfile'] = "{$extDir}/CurseProfile.i18n.php";
 
+$wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
 $wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
 $wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
 $wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
@@ -106,6 +107,7 @@ $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavig
 $wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces';
 $wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';
 $wgHooks['UserGetDefaultOptions'][]			= 'CurseProfile\Hooks::onUserGetDefaultOptions';
+$wgHooks['UserSaveOptions'][]				= 'CurseProfile\Hooks::onUserSaveOptions';
 
 // Ajax Setup
 require_once('CurseProfile.ajax.php');
