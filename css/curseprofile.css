@@ -3,6 +3,33 @@
 	display: none;
 }
 
+.pagination {
+	display: inline-block;
+	margin-left: 0;
+	margin: 1em 0;
+}
+
+	.pagination li {
+		border: 1px solid black;
+		display: inline-block;
+		font-weight: bold;
+		list-style: none inside none;
+		margin: 0 3px;
+		padding: 1px 5px;
+	}
+
+		.pagination li.selected {
+			background-color: #ccc;
+		}
+
+		.pagination li:first-child {
+			margin-left: 0;
+		}
+
+		.pagination li:last-child {
+			margin-right: 0;
+		}
+
 /* clearfix */
 .section:after, .commententry:after, .headline:after, .aboutme:before {
 	content: '';
@@ -75,6 +102,14 @@ div.mainavatar {
 		display: inline-block;
 		margin-right: 0.4em;
 	}
+	.grouptags li {
+		-moz-border-radius: 6px;
+		-webkit-border-radius: 6px;
+		border-radius: 6px;
+		padding: 0.1em 0.6em;
+		background-color: #999; /* fallback for missing rgba support */
+		background-color: rgba(128, 128, 128, 0.5);
+	}
 
 	/* Styles for the individual service icons */
 	.profilelinks li {
@@ -111,6 +146,10 @@ div.mainavatar {
 	clear: left;
 }
 
+.comments.noreplies a.newreply {
+	display: none;
+}
+
 /* Comment board */
 .commentdisplay {
 	clear: left;
@@ -138,12 +177,6 @@ div.mainavatar {
 	float: left;
 	width: 0;
 	margin-right: 54px;
-}
-
-.reply-count {
-	position: absolute;
-	bottom: 0;
-	right: 0;
 }
 
 .replyset {

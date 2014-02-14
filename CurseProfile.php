@@ -23,24 +23,17 @@ $wgExtensionCredits['specialpage'][] = array(
 												'version'			=> '1.0' //Must be a string or Mediawiki will turn it into an integer.
 											);
 
-// Global profile namespace reference
-if (!defined('NS_USER_PROFILE')) {
-	define( 'NS_USER_PROFILE', 202 );
-}
-if (!defined('NS_USER_WIKI')) {
-	define( 'NS_USER_WIKI', 200 );
-}
-$namespaceNames['en'] = array(
-	NS_USER_WIKI => 'UserWiki',
-	NS_USER_PROFILE => 'User_profile',
-);
+
+define('NS_USER_WIKI', 200 );
+define('NS_USER_PROFILE', 202 );
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
 /******************************************/
 $extDir = __DIR__ . '/';
 
-$wgExtensionMessagesFiles['CurseProfile'] = "{$extDir}/CurseProfile.i18n.php";
+$wgExtensionMessagesFiles['CurseProfile']			= "{$extDir}/CurseProfile.i18n.php";
+$wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.namespaces.php";
 
 $wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
 $wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
@@ -78,6 +71,10 @@ $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comm
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
 $wgSpecialPageGroups['AddComment']							= 'users';
 
+$wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/comments/SpecialCommentBoard.php";
+$wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
+$wgSpecialPageGroups['CommentBoard']						= 'users';
+
 $wgAutoloadClasses['CurseProfile\SpecialToggleProfilePreference'] = "{$extDir}/specials/SpecialToggleProfilePreference.php";
 $wgSpecialPages['ToggleProfilePreference']					= 'CurseProfile\SpecialToggleProfilePreference';
 $wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
@@ -90,16 +87,13 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'remoteExtPath' => 'CurseProfile',
 	'dependencies' => 'ext.curseprofile.customskin', // allows sites to customize by editing MediaWiki:CurseProfile.css
 ];
-$wgResourceModules['ext.curseprofile.forms'] = [
-	'styles' => ['css/curseprofile_forms.css'],
-	'localBasePath' => $extDir,
-	'remoteExtPath' => 'CurseProfile',
-];
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',
 ];
 
 // Hooks
+$wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
+$wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';

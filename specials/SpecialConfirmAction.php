@@ -35,7 +35,9 @@ abstract class SpecialConfirmAction extends \UnlistedSpecialPage {
 	 * Returns a string path to which the user will be directed
 	 * '/User:'.urlencode($user->getName())
 	 */
-	abstract protected function getRedirect();
+	protected function getRedirect() {
+		return (new ProfileData($this->toUser))->getProfilePath();
+	}
 
 	/**
 	 * Called when a user has submitted confirmation

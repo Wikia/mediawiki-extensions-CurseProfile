@@ -26,10 +26,6 @@ class SpecialRemoveFriend extends SpecialConfirmAction {
 		return wfMessage('removefriend')->plain();
 	}
 
-	protected function getRedirect() {
-		return '/User:'.urlencode($this->user->getName());
-	}
-
 	public function execute( $param ) {
 		$this->toUser = intval($param);
 		if ($this->toUser < 1) {

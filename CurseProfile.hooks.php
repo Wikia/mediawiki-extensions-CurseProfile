@@ -22,6 +22,10 @@ class Hooks {
 	 */
 	private static $profilePage;
 
+	public static function getProfilePage() {
+		return self::$profilePage;
+	}
+
 	public static function onParserFirstCall(&$parser) {
 		if (self::$profilePage) {
 			$parser->setFunctionHook('placeholderImage',	'CurseProfile\CP::placeholderImage');
@@ -33,6 +37,7 @@ class Hooks {
 			$parser->setFunctionHook('profilelinks',		'CurseProfile\ProfilePage::profileLinks');
 			$parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats');
 			$parser->setFunctionHook('userlevel',			'CurseProfile\ProfilePage::userLevel');
+			$parser->setFunctionHook('editorfriends',		'CurseProfile\ProfilePage::editOrFriends');
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');
@@ -42,9 +47,28 @@ class Hooks {
 		return true;
 	}
 
+	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
+		$context = \RequestContext::getMain();
+		self::$profilePage = new ProfilePage($title);
+
+		if (self::$profilePage->isUserWikiPage()) {
+			$article = self::$profilePage->getUserWikiArticle();
+			$title = $article->getTitle();
+			$context->setTitle($title);
+		}
+
+		return true;
+	}
+
+	public static function onTestCanonicalRedirect( $request, $title, $output ) {
+		if (self::$profilePage->isUserWikiPage()) {
+			return false; // don't redirect if we're forcing the wiki page to render
+		}
+		return true;
+	}
+
 	public static function onArticleFromTitle(&$title, &$article) {
 		global $wgRequest, $wgOut;
-		self::$profilePage = new ProfilePage($title);
 
 		if (self::$profilePage->isProfilePage()) {
 			// Disable editing
@@ -54,7 +78,9 @@ class Hooks {
 			// Take over page output
 			$wgOut->addModules('ext.curseprofile.profilepage');
 			$article = self::$profilePage;
-		} elseif (!self::$profilePage->isUserPage()) {
+		} elseif (self::$profilePage->isUserWikiPage()) {
+			// already taken care of in onBeforeInitialize
+		} else {
 			self::$profilePage = null;
 		}
 
@@ -112,7 +138,7 @@ class Hooks {
 	 */
 	static public function onCanonicalNamespaces(&$list) {
 		$list[NS_USER_WIKI]    = 'UserWiki';
-		$list[NS_USER_PROFILE] = 'User_profile';
+		$list[NS_USER_PROFILE] = 'UserProfile';
 		return true;
 	}
 

@@ -26,10 +26,6 @@ class SpecialIgnoreFriend extends SpecialConfirmAction {
 		return wfMessage('ignorefriend-response')->plain();
 	}
 
-	protected function getRedirect() {
-		return '/User:'.urlencode($this->user->getName());
-	}
-
 	public function execute( $param ) {
 		$this->toUser = intval($param);
 		if ($this->toUser < 1) {

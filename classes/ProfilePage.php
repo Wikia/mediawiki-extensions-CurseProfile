@@ -29,6 +29,7 @@ class ProfilePage extends \Article {
 		if ($this->user) {
 			$this->user_id = $this->user->getID();
 		} else {
+			$this->user = \User::newFromId(0);
 			$this->user_id = 0;
 		}
 		$this->profile = new ProfileData($this->user_id);
@@ -47,6 +48,7 @@ class ProfilePage extends \Article {
 
 	public function view() {
 		self::$output->setPageTitle($this->mTitle->getPrefixedText());
+		self::$output->setArticleFlag(false);
 
 		$outputString = \MessageCache::singleton()->parse($this->profileLayout(), $this->mTitle);
 		if ($outputString instanceOf \ParserOutput) {
@@ -60,12 +62,28 @@ class ProfilePage extends \Article {
 			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
+	public function isDefaultPage() {
+		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
+	}
+
 	public function isProfilePage() {
-		return $this->isUserPage() && $this->profile->getTypePref();
+		return $this->isUserPage() && (
+				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
+				($this->mTitle->getNamespace() == NS_USER_PROFILE)
+			);
 	}
 
 	public function isUserWikiPage() {
-		return $this->isUserPage() && !$this->profile->getTypePref();
+		return $this->isUserPage() && (
+				(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
+				($this->mTitle->getNamespace() == NS_USER_WIKI)
+			);
+	}
+
+	public function getUserWikiArticle() {
+		$article = new \Article($this->user->getUserPage());
+		$article->setContext($this->getContext());
+		return $article;
 	}
 
 	public function customizeNavBar(&$links) {
@@ -84,11 +102,12 @@ class ProfilePage extends \Article {
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
 			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->plain(); // rename from "User page"
+			$links['namespaces']['user']['class'] = 'selected';
 			// add link to user wiki
 			$links['namespaces']['user_wiki'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userwikitab')->plain(),
-				'href'		=> "/UserWiki:{$this->user_name}",
+				'href'		=> $this->profile->getUserWikiPath(),
 			];
 
 			$links['views']['contribs'] = [
@@ -98,16 +117,18 @@ class ProfilePage extends \Article {
 			];
 
 			// only offer to edit the profile if you are the owner
+			/* removed because buttons preferred
 			if ($this->viewingSelf()) {
 				$links['views']['edit_profile'] = [
 					'class'		=> false,
-					'text'		=> wfMessage('editprofile')->plain(),
+					'text'		=> wfMessage('cp-editprofile')->plain(),
 					'href'		=> '/Special:Preferences#mw-prefsection-personal-info-public',
 				];
 			} elseif ($wgUser->isLoggedIn()) { // only offer friending when not viewing yourself
 				// add link to add, confirm, or remove friend
 				FriendDisplay::addFriendLink($this->user_id, $links);
 			}
+			*/
 		}
 
 		// links specific to a user wiki page
@@ -115,8 +136,15 @@ class ProfilePage extends \Article {
 			$links['namespaces']['user_profile'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userprofiletab')->plain(),
-				'href'		=> "/UserProfile:{$this->user_name}",
+				'href'		=> $this->profile->getProfilePath(),
+				'primary'	=> true,
 			];
+
+			if ($this->profile->getTypePref()) {
+				// enabling editing while wiki is not the default is a lot more work
+				// so it is disabled by removing the link
+				unset($links['views']['edit']);
+			}
 		}
 
 		// Always visible regardless of page type
@@ -335,8 +363,8 @@ class ProfilePage extends \Article {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
-				'localrank' => 'TODO',
-				'globalrank' => 'TODO',
+				'localrank' => '',  // inserted early so that they are in the desired order
+				'globalrank' => '', // data is filled in below
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
 					'totaldeletes' => $totalStats['deletes'],
@@ -366,6 +394,10 @@ class ProfilePage extends \Article {
 			if (empty($statsOutput['globalrank'])) {
 				unset($statsOutput['globalrank']);
 			}
+		} else {
+			// No curse id or WikiPoints plugin available
+			unset($statsOutput['localrank']);
+			unset($statsOutput['globalrank']);
 		}
 
 		$HTML = self::generateStatsDL($statsOutput);
@@ -386,9 +418,11 @@ class ProfilePage extends \Article {
 		if (is_array($input)) {
 			$output = '';
 			if (isset($input[0])) {
-				// handle a value with a sub-list
-				// TODO handle output with commas for better human readability
-				$output .= $input[0];
+				if (is_numeric($input[0])) {
+					$output .= number_format($input[0]);
+				} else {
+					$output .= $input[0];
+				}
 			}
 			$output .= "<dl>";
 			foreach ($input as $msgKey => $value) {
@@ -401,7 +435,11 @@ class ProfilePage extends \Article {
 			return $output;
 		} else {
 			// just a simple value
-			return $input;
+			if (is_numeric($input)) {
+				return number_format($input);
+			} else {
+				return $input;
+			}
 		}
 	}
 
@@ -447,6 +485,21 @@ class ProfilePage extends \Article {
 		];
 	}
 
+	public static function editOrFriends(&$parser) {
+		$self = Hooks::getProfilePage();
+		$HTML = FriendDisplay::addFriendButton($self->user_id);
+
+		if ($self->viewingSelf()) {
+			$text = wfMessage('cp-editprofile')->plain();
+			$HTML .= "<button data-href='/Special:Preferences#mw-prefsection-personal-info-public' class='linksub'>$text</button>";
+		}
+
+		return [
+			$HTML,
+			'isHTML' => true,
+		];
+	}
+
 	/**
 	 * Defines the HTML structure of the profile page.
 	 *
@@ -471,11 +524,12 @@ class ProfilePage extends \Article {
 			</div>
 		</div>
 		<div class="activity section">
-			<h3>Recent Wiki Activity</h3>
+			<h3>'.wfMessage('cp-recentactivitysection').'</h3>
 			{{#recentactivity: %2$s}}
 		</div>
 		<div class="comments section">
-			<h3>Comments</h3>
+			<p class="rightfloat">[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
+			<h3>'.wfMessage('cp-recentcommentssection').'</h3>
 			{{#comments: %2$s}}
 		</div>
 	</div>
@@ -484,11 +538,12 @@ class ProfilePage extends \Article {
 			<div class="rightfloat">
 				<div class="level">{{#userlevel: %2$s}}</div>
 				<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+				<div>{{#editorfriends:}}</div>
 			</div>
 			<div class="favorite">{{#favwiki: %2$s}}</div>
 		</div>
 		<div class="section">
-			<h3>Total Statistics</h3>
+			<h3>'.wfMessage('cp-statisticssection').'</h3>
 			{{#userstats: %2$s}}
 			{{#friendlist: %2$s}}
 		</div>
@@ -498,7 +553,8 @@ __NOTOC__
 ',
 			$this->user_name,
 			$this->user->getID(),
-			$this->user->getEmail()
+			$this->user->getEmail(),
+			$this->user->getTitleKey()
 		);
 	}
 }

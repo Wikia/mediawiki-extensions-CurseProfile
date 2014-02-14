@@ -83,6 +83,28 @@ class FriendDisplay {
 		}
 	}
 
+	/**
+	 * @return	string	html button stuff
+	 */
+	public static function addFriendButton($user_id = '') {
+		// reuse logic from the other function
+		$links = [];
+		self::addFriendLink($user_id, $links);
+
+		if (isset($links['views'])) {
+			$links = $links['views'];
+		} elseif (isset($links['actions'])) {
+			$links = $links['actions'];
+		}
+
+		$HTML = '';
+		foreach ($links as $link) {
+			$HTML .= "<button data-href='{$link['href']}' class='linksub'>{$link['text']}</button>";
+		}
+
+		return $HTML;
+	}
+
 	public static function count(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		$friendship = new Friendship(CP::curseIDfromUserID($user_id));

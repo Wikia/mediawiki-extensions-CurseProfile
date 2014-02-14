@@ -3,6 +3,9 @@ function CurseProfile($) {
 	this.init = function() {
 		self.user_id = $('.curseprofile').data('userid');
 		$('time.timeago').timeago(); // enable dynamic relative times on recent activity and comments
+		$('button.linksub').click(function() {
+			window.location = $(this).data('href');
+		});
 		commentBoard.init();
 	};
 
@@ -44,7 +47,7 @@ function CurseProfile($) {
 				.done(function(r){
 					var $r = $(r);
 					$r.find('time.timeago').timeago();
-					$this.closest('.commentdisplay').append($r);
+					$this.closest('.replyset').html($r);
 					$this.attr('disabled', false);
 					$this.detach();
 					if (typeof callback !== 'undefined') {

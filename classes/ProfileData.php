@@ -27,6 +27,22 @@ class ProfileData {
 	 */
 	protected $user;
 
+	public function getProfilePath() {
+		if (!$this->getTypePref()) {
+			return "/UserProfile:".$this->user->getTitleKey();
+		} else {
+			return "/User:".$this->user->getTitleKey();
+		}
+	}
+
+	public function getUserWikiPath() {
+		if ($this->getTypePref()) {
+			return "/UserWiki:".$this->user->getTitleKey();
+		} else {
+			return "/User:".$this->user->getTitleKey();
+		}
+	}
+
 	public static function insertProfilePrefs(&$preferences) {
 		$wikiOptions = [
 			'---' => '',

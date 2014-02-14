@@ -14,7 +14,6 @@
 
 $magicWords = [];
 $magicWords['en'] = [
-						'cpGravatar'						=> array(0, 'cpGravatar'),
 						'placeholderImage'					=> array(0, 'img'),
 						'recentactivity'					=> array(0, 'recentactivity'),
 						'friendadd'							=> array(0, 'friendadd'),
@@ -29,6 +28,7 @@ $magicWords['en'] = [
 						'favwiki'							=> array(0, 'favwiki'),
 						'userstats'							=> array(0, 'userstats'),
 						'userlevel'							=> array(0, 'userlevel'),
+						'editorfriends'						=> array(0, 'editorfriends'),
 ];
 
 $messages = array();
@@ -36,11 +36,13 @@ $messages['en'] = array(
 						'curseprofile'						=> 'Curse Profile',
 						'curseprofile_description'			=> 'A modular, multi-featured user profile system.',
 						'avataralt'							=> 'Avatar for $1',
+
 						// Friendsthip special pages
 						'addfriend'							=> 'Add Friend',
 						'confirmfriend'						=> 'Confirm Friend Request',
 						'ignorefriend'						=> 'Ignore Friend Request',
 						'removefriend'						=> 'Remove Friend',
+
 						// Friendship messages
 						'friendrequestsend-prompt'			=> 'Confirm your friend request to $1',
 						'friendrequestconfirm-prompt'		=> 'Would you like to confirm the friend request from $1?',
@@ -57,7 +59,8 @@ $messages['en'] = array(
 						'alreadyfriends'					=> 'Friends!',
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
-						// Friendship email
+
+						// Emails
 						'commentemailpref'					=> 'Send me an email when a user comments on my profile',
 						'commentemail-subj'					=> '$1 has left a comment on your profile on {{SITENAME}}!',
 						'commentemail-body'					=> '
@@ -82,10 +85,11 @@ Thanks,
 The Gamepedia Team
 
 (You can unsubscribe by changing your email preferences at $4)',
+
 						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
 						'commentaction'						=> 'Post',
-						'editprofile'						=> 'Edit Profile',
+						'cp-editprofile'					=> 'Edit Profile',
 						'profileprefselect'					=> 'Page Type',
 						'toggletypepref'					=> 'Switch User Page Default',
 						'userwikitab'						=> 'User wiki',
@@ -103,7 +107,7 @@ The Gamepedia Team
 						'steamlink'							=> 'Steam',
 						'xbllink'							=> 'Xbox Live',
 						'psnlink'							=> 'Playstation Network',
-						'viewreplies'						=> 'View $1 {{PLURAL:$1|reply|replies}}',
+						'viewearlierreplies'				=> 'Load $1 more {{PLURAL:$1|reply|replies}}',
 						'repliestooltip'					=> 'View replies or add one of your own',
 						'replylink'							=> 'Reply',
 						'profilepref-profile'				=> 'Use an enhanced profile page',
@@ -111,6 +115,7 @@ The Gamepedia Team
 						'prefs-public'						=> 'Public Profile',
 						'prefs-location'					=> 'Location',
 						'prefs-profiles'					=> 'Other Profiles',
+
 						// form placeholders
 						'commentplaceholder'				=> 'Leave a comment',
 						'commentreplyplaceholder'			=> 'Leave a reply',
@@ -118,6 +123,7 @@ The Gamepedia Team
 						'steamlinkplaceholder'				=> 'a URL to your Steam account',
 						'xbllinkplaceholder'				=> 'What\'s your gamertag?',
 						'psnlinkplaceholder'				=> 'Share your PSN ID',
+
 						// Stat labels
 						'wikisedited'						=> 'Wikis Edited',
 						'localrank'							=> '[[Special:WikiPoints|{{SITENAME}} Rank]]',
@@ -127,4 +133,15 @@ The Gamepedia Team
 						'totaldeletes'						=> 'Deletes',
 						'totalpatrols'						=> 'Patrols',
 						'friends'							=> 'Friends',
+
+						// Comment board
+						'commentboard-empty'				=> 'There are no comments on this user\'s board.',
+						'commentboard-invalid'				=> 'This is no such page.',
+						'commentboard-title'				=> 'Comment Board: $1',
+
+						// Basic profile text
+						'cp-recentactivitysection'			=> 'Recent Wiki Activity',
+						'cp-recentcommentssection'			=> 'Recent Comments',
+						'commentarchivelink'				=> 'Comment Archive',
+						'cp-statisticssection'				=> 'Total Statistics',
 );

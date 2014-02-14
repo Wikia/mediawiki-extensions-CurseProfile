@@ -53,7 +53,7 @@ class CommentDisplay {
 		];
 	}
 
-	private static function singleComment($comment) {
+	public static function singleComment($comment) {
 		global $wgOut;
 
 		$HTML = '';
@@ -68,16 +68,26 @@ class CommentDisplay {
 			<div class="commentbody">
 				'.$wgOut->parseInline($comment['ub_message']).'
 			</div>';
-			if ($comment['replies']) {
-				if (!isset($repliesTooltip)) {
-					$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
+			if (isset($comment['replies'])) {
+				$HTML .= '<div class="replyset">';
+
+				// perhaps there are more replies not yet loaded
+				if ($comment['reply_count'] > count($comment['replies'])) {
+					if (!isset($repliesTooltip)) {
+						$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
+					}
+					// force parsing this message because MW won't replace plurals as expected
+					// due to this all happening inside the wfMessage()->parse() call that
+					// generates the entire profile
+					$viewReplies = $wgOut->parseInline(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
+					$HTML .= "
+					<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='$repliesTooltip'>$viewReplies</button>";
 				}
-				// force parsing this message because MW won't replace plurals as expected
-				// due to this all happening inside the wfMessage()->parse() call that
-				// generates the entire profile
-				$viewReplies = $wgOut->parseInline(wfMessage('viewreplies', $comment['replies'])->escaped());
-				$HTML .= "
-				<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='$repliesTooltip'>$viewReplies</button>";
+
+				foreach ($comment['replies'] as $reply) {
+					$HTML .= self::singleComment($reply);
+				}
+				$HTML .= '</div>';
 			}
 		$HTML .= '
 		</div>';
@@ -95,7 +105,7 @@ class CommentDisplay {
 		$HTML = '';
 
 		$board = new CommentBoard($user_id);
-		$comments = $board->getReplies($comment_id);
+		$comments = $board->getReplies($comment_id, null, -1);
 
 		if (empty($comments)) {
 			$HTML = 'No replies were found';
@@ -105,6 +115,6 @@ class CommentDisplay {
 			}
 		}
 
-		return '<div class="replyset">'.$HTML.'</div>';
+		return $HTML;
 	}
 }

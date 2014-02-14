@@ -21,7 +21,9 @@ class CP {
 	/**
 	 * Initializes the mouse singleton for use anywhere
 	 *
-	 * @return	mouseHole	mouse instance
+	 * @param	array	[optional] extra modules that should be loaded
+	 * @param	array	[optional] extra settings to be added (ignored if mouse was previously loaded elsewhere)
+	 * @return	object	mouse instance
 	 */
 	public static function loadMouse($extraModules=[], $extraSettings=[]) {
 		if (!isset(self::$mouse)) {
