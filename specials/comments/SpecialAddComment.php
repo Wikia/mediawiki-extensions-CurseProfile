@@ -33,7 +33,7 @@ class SpecialAddComment extends \UnlistedSpecialPage {
 			$board = new CommentBoard($toUser);
 			$board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));
 		}
-		$wgOut->redirect((new ProfileData($this->toUser))->getProfilePath());
+		$wgOut->redirect((new ProfileData($toUser))->getProfilePath());
 		return;
 	}
 }

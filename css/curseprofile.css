@@ -54,7 +54,7 @@
 
 .headline {
 	text-align: right;
-	overflow: scroll; /* creates a new block formatting context for the content */
+	overflow: hidden; /* creates a new block formatting context for the content */
 }
 	.headline h1 {
 		margin-bottom: 0;

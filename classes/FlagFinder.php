@@ -167,6 +167,7 @@ class FlagFinder {
 		'gambia' => 'gm',
 		'georgia' => 'ge',
 		'germany' => 'de',
+		'deutschland' => 'de', // added
 		'ghana' => 'gh',
 		'gibraltar' => 'gi',
 		'greece' => 'gr',
