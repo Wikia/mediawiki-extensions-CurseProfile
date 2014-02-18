@@ -21,6 +21,7 @@ class ProfilePage extends \Article {
 	protected $profile;
 
 	static protected $output;
+	static private $self;
 
 	public function __construct($title) {
 		parent::__construct($title);
@@ -34,6 +35,7 @@ class ProfilePage extends \Article {
 		}
 		$this->profile = new ProfileData($this->user_id);
 		self::$output = $this->getContext()->getOutput();
+		self::$self = $this;
 	}
 
 	/**
@@ -486,10 +488,9 @@ class ProfilePage extends \Article {
 	}
 
 	public static function editOrFriends(&$parser) {
-		$self = Hooks::getProfilePage();
-		$HTML = FriendDisplay::addFriendButton($self->user_id);
+		$HTML = FriendDisplay::addFriendButton(self::$self->user_id);
 
-		if ($self->viewingSelf()) {
+		if (self::$self->viewingSelf()) {
 			$text = wfMessage('cp-editprofile')->plain();
 			$HTML .= "<button data-href='/Special:Preferences#mw-prefsection-personal-info-public' class='linksub'>$text</button>";
 		}

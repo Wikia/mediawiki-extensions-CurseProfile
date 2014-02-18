@@ -22,10 +22,6 @@ class Hooks {
 	 */
 	private static $profilePage;
 
-	public static function getProfilePage() {
-		return self::$profilePage;
-	}
-
 	public static function onParserFirstCall(&$parser) {
 		if (self::$profilePage) {
 			$parser->setFunctionHook('placeholderImage',	'CurseProfile\CP::placeholderImage');
