@@ -67,6 +67,14 @@ $wgAutoloadClasses['CurseProfile\SpecialRemoveFriend']		= "{$extDir}/specials/fr
 $wgSpecialPages['RemoveFriend']								= 'CurseProfile\SpecialRemoveFriend';
 $wgSpecialPageGroups['RemoveFriend']						= 'users';
 
+$wgAutoloadClasses['CurseProfile\SpecialManageFriends']		= "{$extDir}/specials/friends/SpecialManageFriends.php";
+$wgSpecialPages['ManageFriends']							= 'CurseProfile\SpecialManageFriends';
+$wgSpecialPageGroups['ManageFriends']						= 'users';
+
+$wgAutoloadClasses['CurseProfile\SpecialFriends']			= "{$extDir}/specials/friends/SpecialFriends.php";
+$wgSpecialPages['Friends']									= 'CurseProfile\SpecialFriends';
+$wgSpecialPageGroups['Friends']								= 'users';
+
 $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comments/SpecialAddComment.php";
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
 $wgSpecialPageGroups['AddComment']							= 'users';

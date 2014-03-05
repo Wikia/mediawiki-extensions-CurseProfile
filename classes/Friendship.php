@@ -87,7 +87,36 @@ class Friendship {
 	}
 
 	/**
-	 * Generates a redis key for the hash of pending requests
+	 * Returns the array of pending friend requests that have sent this user
+	 *
+	 * @return	array	keys are curse IDs of potential friends,
+	 *     values are json strings with additional data (currently empty)
+	 */
+	public function getReceivedRequests() {
+		if ($this->curse_id < 1) {
+			return [];
+		}
+
+		$mouse = CP::loadMouse();
+		return $mouse->redis->hgetall($this->requestsRedisKey());
+	}
+
+	/**
+	 * Returns the array of pending friend requests that have been sent by this user
+	 *
+	 * @return	array	values are curse IDs
+	 */
+	public function getSentRequests() {
+		if ($this->curse_id < 1) {
+			return [];
+		}
+
+		$mouse = CP::loadMouse();
+		return $mouse->redis->smembers($this->sentRequestsRedisKey());
+	}
+
+	/**
+	 * Generates a redis key for the hash of pending requests received
 	 *
 	 * @param	int		optional curse ID of a user (default $this->curse_id)
 	 * @return	string	redis key to be used
@@ -97,6 +126,19 @@ class Friendship {
 			$user = $this->curse_id;
 		}
 		return 'friendrequests:'.$user;
+	}
+
+	/**
+	 * Generates a redis key for the set of pending requests sent
+	 *
+	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @return	string	redis key to be used
+	 */
+	private function sentRequestsRedisKey($user = null) {
+		if ($user == null) {
+			$user = $this->curse_id;
+		}
+		return 'friendrequests:'.$user.':sent';
 	}
 
 	/**
@@ -136,6 +178,7 @@ class Friendship {
 
 		$mouse = CP::loadMouse();
 		$mouse->redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
+		$mouse->redis->sadd($this->sentRequestsRedisKey(), $toUser);
 
 		$user = \User::newFromId(CP::userIDfromCurseID($toUser));
 		if ($user->getEmail() && $user->getIntOption('friendreqemail')) {
@@ -205,6 +248,7 @@ class Friendship {
 
 		// delete pending request
 		$mouse->redis->hdel($this->requestsRedisKey(), $toUser);
+		$mouse->redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
 
 		if ($response == 'accept') {
 			// add reciprocal friendship
@@ -236,6 +280,7 @@ class Friendship {
 		$mouse = CP::loadMouse();
 
 		$mouse->redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
+		$mouse->redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
 		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
 		$mouse->redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
 

@@ -121,10 +121,24 @@ class FriendDisplay {
 			return '';
 		}
 
+		return [
+			self::listFromArray($friends),
+			'isHTML' => true,
+		];
+	}
+
+	/**
+	 * Creates a UL html list from an array of curse IDs. The callback function can insert extra html in the LI tags.
+	 *
+	 * @param	array		curse IDs
+	 * @param	callable	signature: callback($curse_id, $userObj) returns string
+	 */
+	public static function listFromArray($curseIDs = [], $callback = null) {
+		$mouse = CP::loadMouse();
 		$friendDataRes = $mouse->DB->select([
 			'select'	=> 'u.*',
 			'from'		=> ['user' => 'u'],
-			'where'		=> 'curse_id IN ('.implode(',',$friends).')',
+			'where'		=> 'curse_id IN ('.implode(',',$curseIDs).')',
 			'order'		=> 'u.user_touched DESC',
 			'limit'		=> '10'
 		]);
@@ -138,7 +152,6 @@ class FriendDisplay {
 			return wfMessage('nofriends')->escaped();
 		}
 
-
 		$HTML = '
 		<ul class="friends">';
 		foreach ($friendData as $friend) {
@@ -146,14 +159,14 @@ class FriendDisplay {
 			$HTML .= '<li>';
 			$HTML .= ProfilePage::userAvatar($nothing, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$HTML .= ' '.CP::userLink($friend['user_id']);
+			if (is_callable($callback)) {
+				$HTML .= ' '.call_user_func($callback, $friend['curse_id'], $fUser);
+			}
 			$HTML .= '</li>';
 		}
 		$HTML .= '
 		</ul>';
 
-		return [
-			$HTML,
-			'isHTML' => true,
-		];
+		return $HTML;
 	}
 }

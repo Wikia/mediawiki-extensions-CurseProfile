@@ -42,6 +42,11 @@ $messages['en'] = array(
 						'confirmfriend'						=> 'Confirm Friend Request',
 						'ignorefriend'						=> 'Ignore Friend Request',
 						'removefriend'						=> 'Remove Friend',
+						'managefriends'						=> 'Manage Friends',
+						'friends'							=> 'Friends',
+						'pendingrequests'					=> 'Pending Requests',
+						'sentrequests'						=> 'Sent Requests',
+						'exception-nologinreturn-text'		=> 'Please [{{fullurl:Special:UserLogin|returnto=$1}} log in] to be able to access this page or action.',
 
 						// Friendship messages
 						'friendrequestsend-prompt'			=> 'Confirm your friend request to $1',
@@ -56,9 +61,11 @@ $messages['en'] = array(
 						'friendrequestcancel'				=> 'Cancel Friend Request',
 						'ignorefriend-response'				=> 'Ignore',
 						'confirmfriend-response'			=> 'Confirm',
+						'removefriend-response'				=> 'Remove',
 						'alreadyfriends'					=> 'Friends!',
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
+						'soronery'							=> 'You have no friends :(',
 
 						// Emails
 						'commentemailpref'					=> 'Send me an email when a user comments on my profile',
@@ -132,12 +139,13 @@ The Gamepedia Team
 						'totaledits'						=> 'Edits',
 						'totaldeletes'						=> 'Deletes',
 						'totalpatrols'						=> 'Patrols',
-						'friends'							=> 'Friends',
+						'totalfriends'						=> '[[Special:Friends/$1|Friends]]',
 
-						// Comment board
+						// Comment board, Friends list
 						'commentboard-empty'				=> 'There are no comments on this user\'s board.',
 						'commentboard-invalid'				=> 'This is no such page.',
 						'commentboard-title'				=> 'Comment Board: $1',
+						'friendsboard-title'				=> 'Friends of $1',
 
 						// Basic profile text
 						'cp-recentactivitysection'			=> 'Recent Wiki Activity',

@@ -36,7 +36,7 @@ abstract class SpecialConfirmAction extends \UnlistedSpecialPage {
 	 * '/User:'.urlencode($user->getName())
 	 */
 	protected function getRedirect() {
-		return (new ProfileData($this->toUser))->getProfilePath();
+		return '/Special:ManageFriends';
 	}
 
 	/**

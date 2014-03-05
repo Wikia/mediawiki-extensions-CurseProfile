@@ -23,7 +23,7 @@ class SpecialConfirmFriend extends SpecialConfirmAction {
 	}
 
 	protected function getButtonMessage() {
-		return wfMessage('ignorefriend-response')->plain();
+		return wfMessage('confirmfriend-response')->plain();
 	}
 
 	public function execute( $param ) {

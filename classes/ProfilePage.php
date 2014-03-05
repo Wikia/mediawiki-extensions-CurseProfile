@@ -365,13 +365,14 @@ class ProfilePage extends \Article {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
-				'localrank' => '',  // inserted early so that they are in the desired order
-				'globalrank' => '', // data is filled in below
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
 					'totaldeletes' => $totalStats['deletes'],
 					'totalpatrols' => $totalStats['patrols'],
 				],
+				'localrank' => '',
+				'globalrank' => '', // data for these fills in below
+				'totalfriends' => '',
 			];
 		} else {
 			$statsOutput = [
@@ -383,7 +384,6 @@ class ProfilePage extends \Article {
 				],
 			];
 		}
-		$statsOutput['friends'] = FriendDisplay::count($parser, $user_id);
 
 		if ($curse_id > 1 && method_exists('PointsDisplay', 'pointsForCurseId')) {
 			global $wgServer;
@@ -401,6 +401,8 @@ class ProfilePage extends \Article {
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
 		}
+
+		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $user_id);
 
 		$HTML = self::generateStatsDL($statsOutput);
 
@@ -431,7 +433,7 @@ class ProfilePage extends \Article {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey))."</dt><dd>".self::generateStatsDL($value)."</dd>";
+				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id))."</dt><dd>".self::generateStatsDL($value)."</dd>";
 			}
 			$output .= "</dl>";
 			return $output;
