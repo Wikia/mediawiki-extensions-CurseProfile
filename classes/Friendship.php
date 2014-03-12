@@ -341,6 +341,7 @@ class Friendship {
 					'ur_type'         => 1,
 					'ur_date'         => date( 'Y-m-d H:i:s' ),
 				]);
+				wfRunHooks('CurseProfileAddFriend', [$this->curse_id, $args['target']]);
 				break;
 
 			case 'confirm':
@@ -366,6 +367,7 @@ class Friendship {
 				$mouse->DB->delete('user_relationship', "r_user_id = {$args['target']} AND r_user_id_relation = {$this->curse_id}");
 				$mouse->DB->delete('user_relationship', "r_user_id = {$this->curse_id} AND r_user_id_relation = {$args['target']}");
 				$mouse->DB->delete('user_relationship_request', "ur_user_id_from = {$this->curse_id} AND ur_user_id_to = {$args['target']}");
+				wfRunHooks('CurseProfileRemoveFriend', [$this->curse_id, $args['target']]);
 				break;
 
 			default:
