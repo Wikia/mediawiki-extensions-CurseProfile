@@ -492,12 +492,12 @@ class ProfilePage extends \Article {
 
 		$HTML = '';
 		foreach ($levelDefinitions as $tier) {
+			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
-				$HTML = $tier['text'];
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML .= ' '.CP::placeholderImage($parser, 84, 64, ['class'=>'level'])[0];
+				$HTML = CP::placeholderImage($parser, 84, 64, ['class'=>'level', 'title'=>$tier['text']])[0];
 			} else {
-				break; // assuming that the definitions array is sorted by level ASC
+				break;
 			}
 		}
 
