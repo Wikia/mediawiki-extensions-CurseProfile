@@ -173,7 +173,7 @@ class ProfilePage extends \Article {
 		$size = intval($size);
 		$user_name = htmlspecialchars($user_name, ENT_QUOTES);
 		return [
-			"<img src='http://www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString />",
+			"<img src='//www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString />",
 			'isHTML' => true,
 		];
 	}
@@ -276,19 +276,25 @@ class ProfilePage extends \Article {
 		$HTML = '
 		<ul class="profilelinks">';
 		foreach ($profileLinks as $key => $link) {
-			$HTML .= "<li class='$key'>";
+			$item = "<li class='$key' title='$key'>";
 			switch ($key) {
-				case 'Steam':
-					$steamName = htmlspecialchars(self::parseSteamUrl($link));
-					$link = htmlspecialchars($link, ENT_QUOTES);
-					$HTML .= "<a href='$link' target='_blank'>$steamName</a>";
-					break;
 				case 'XBL':
 				case 'PSN':
+					$item .= htmlspecialchars($link);
+					break;
 				default:
-					$HTML .= htmlspecialchars($link);
+					if (self::validateUrl($key, $link)) {
+						wfDebug('validated '.$link.' for service '.$key);
+						$link = htmlspecialchars($link, ENT_QUOTES);
+						$item .= "<a href='$link' target='_blank'></a>";
+					} else {
+						wfDebug('validation failed on '.$link.' for service '.$key);
+						$item = '';
+						// TODO move this validation to preferences save and avoid validating on display
+					}
 			}
-			$HTML .= '</li>';
+			$item .= '</li>';
+			$HTML .= $item;
 		}
 		$HTML .= '
 		</ul>';
@@ -302,12 +308,24 @@ class ProfilePage extends \Article {
 	/**
 	 * Extracts the username from a steamcommunity.com profile link
 	 *
+	 * @param	string	name of service to validate
 	 * @param	string	url to profile
 	 * @return	string	username or id
 	 */
-	private static function parseSteamUrl($url) {
-		preg_match('|https?://steamcommunity\\.com/id/(\\w+)/?|', $url, $match);
-		return $match[1];
+	private static function validateUrl($service, $url) {
+		$patterns = [
+			'Steam'		=> '|https?://steamcommunity\\.com/id/(\\w+)/?|',
+			'Twitter'	=> '|https://twitter\\.com/(\\w+)|',
+			'Reddit'	=> '|http://www\\.reddit\\.com/user/(\\w+)|',
+			'Facebook'	=> '|https://www\\.facebook\\.com/(\\w+)|',
+			'Google'	=> '|https://plus\\.google\\.com/\\+(\\w+)/posts|',
+		];
+		if (isset($patterns[$service])) {
+			$pattern = $patterns[$service];
+		} else {
+			return false;
+		}
+		return preg_match($pattern, $url);
 	}
 
 	/**
@@ -477,7 +495,7 @@ class ProfilePage extends \Article {
 			if ($userPoints >= $tier['points']) {
 				$HTML = $tier['text'];
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML .= ' '.CP::placeholderImage($parser, 32, '', ['class'=>'level'])[0];
+				$HTML .= ' '.CP::placeholderImage($parser, 84, 64, ['class'=>'level'])[0];
 			} else {
 				break; // assuming that the definitions array is sorted by level ASC
 			}

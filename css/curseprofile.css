@@ -117,6 +117,16 @@ div.mainavatar {
 		background-position: top left;
 		background-size: 1.9em auto;
 		line-height: 1.9em;
+		height: 1.9em;
+		min-width: 1.9em;
+		vertical-align: middle;
+	}
+		.profilelinks li a {
+			display: block;
+			height: 100%;
+			width: 100%;
+		}
+	.profilelinks .XBL, .profilelinks .PSN {
 		padding-left: 2.1em;
 	}
 	.profilelinks .Twitter {
@@ -201,6 +211,10 @@ div.mainavatar {
 .level {
 	margin-bottom: 0.4em;
 }
+	.level img {
+		vertical-align: bottom;
+		margin: 0;
+	}
 
 .favorite {
 	text-align: center;

@@ -217,8 +217,6 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		wfRunHooks('CurseProfileAddComment', [$fromUser, $inReplyTo]);
-
 		if ($toUser->getID() != $fromUser->getID() && $toUser->getEmail() && $toUser->getIntOption('commentemail')) {
 			if (trim($toUser->getRealName())) {
 				$name = $toUser->getRealName();

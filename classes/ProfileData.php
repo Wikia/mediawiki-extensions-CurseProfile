@@ -79,6 +79,7 @@ class ProfileData {
 			'section' => 'personal/info/public',
 			'rows' => 6,
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
+			'help-message' => 'aboutmehelp',
 		];
 		$preferences['profile-city'] = [
 			'type' => 'text',
@@ -99,21 +100,25 @@ class ProfileData {
 			'type' => 'text',
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('fblinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-reddit'] = [
 			'type' => 'text',
 			'label-message' => 'redditlink',
 			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
