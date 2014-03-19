@@ -438,20 +438,17 @@ class ProfilePage extends \Article {
 	 */
 	private static function generateStatsDL($input) {
 		if (is_array($input)) {
-			$output = '';
-			if (isset($input[0])) {
-				if (is_numeric($input[0])) {
-					$output .= number_format($input[0]);
-				} else {
-					$output .= $input[0];
-				}
-			}
-			$output .= "<dl>";
+			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id))."</dt><dd>".self::generateStatsDL($value)."</dd>";
+				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id))."</dt>";
+				$output .= "<dd>".self::generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+				// add the sub-list if there is one
+				if (is_array($value)) {
+					$output .= self::generateStatsDL($value);
+				}
 			}
 			$output .= "</dl>";
 			return $output;
@@ -495,7 +492,7 @@ class ProfilePage extends \Article {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = CP::placeholderImage($parser, 84, 64, ['class'=>'level', 'title'=>$tier['text']])[0];
+				$HTML = CP::placeholderImage($parser, 110, 64, ['class'=>'level', 'title'=>$tier['text']])[0];
 			} else {
 				break;
 			}
@@ -557,13 +554,13 @@ class ProfilePage extends \Article {
 	<div class="rightcolumn">
 		<div class="borderless section">
 			<div class="rightfloat">
-				<div class="level">{{#userlevel: %2$s}}</div>
 				<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+				<div class="level">{{#userlevel: %2$s}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>
 			<div class="favorite">{{#favwiki: %2$s}}</div>
 		</div>
-		<div class="section">
+		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
 			{{#userstats: %2$s}}
 			{{#friendlist: %2$s}}

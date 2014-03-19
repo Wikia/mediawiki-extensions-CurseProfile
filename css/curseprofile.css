@@ -31,7 +31,7 @@
 		}
 
 /* clearfix */
-.section:after, .commententry:after, .headline:after, .aboutme:before {
+.section:after, .commententry:after, .headline:after, .aboutme:before, .stats > dl:after {
 	content: '';
 	clear: both;
 	display: block;
@@ -63,15 +63,21 @@
 	}
 
 /* Sidebar stats display */
-dl dl {
+.stats > dl {
+	width: 40%;
+	min-width: 10.5em;
+}
+.stats dl dl {
 	margin-left: 1em;
+	clear: right;
 }
-dt, dd {
-	display: inline;
+.stats dt {
+	float: left;
+	clear: left;
 }
-dd:after {
-	content: '';
-	display: block;
+.stats dd {
+	float: right;
+	clear: right;
 }
 
 .section {
@@ -225,4 +231,30 @@ div.mainavatar {
 ul.friends {
 	list-style: none;
 	margin-left: 0;
+}
+
+@media screen and (min-width: 1260px) {
+	ul.friends {
+		-moz-columns: 2;
+		-webkit-columns: 2;
+		columns: 2;
+	}
+}
+
+@media screen and (min-width: 1800px) {
+	ul.friends {
+		-moz-columns: 3;
+		-webkit-columns: 3;
+		columns: 3;
+	}
+	.activity ul {
+		-moz-columns: 2;
+		-webkit-columns: 2;
+		columns: 2;
+	}
+}
+
+.friends li {
+	white-space: nowrap;
+	word-wrap: break-word;
 }
