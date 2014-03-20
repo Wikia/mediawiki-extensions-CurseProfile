@@ -24,11 +24,11 @@ class SpecialAddComment extends \UnlistedSpecialPage {
 	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $toUser ) {
-		global $wgUser;
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
+		$wgUser = $wgOut->getUser();
 
-		if ($wgRequest->wasPosted()) {
+		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
 			$user = \User::newFromId($toUser);
 			$board = new CommentBoard($toUser);
 			$board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));

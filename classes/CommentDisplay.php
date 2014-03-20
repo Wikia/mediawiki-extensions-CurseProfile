@@ -35,6 +35,7 @@ class CommentDisplay {
 					<form action="/Special:AddComment/'.$user_id.'" method="post">
 						<textarea name="message" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
 						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
+						'.\Html::hidden('token', $wgUser->getEditToken()).'
 					</form>
 				</div>
 			</div>';
