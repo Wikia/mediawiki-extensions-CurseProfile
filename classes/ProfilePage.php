@@ -475,7 +475,14 @@ class ProfilePage extends \Article {
 			return 'Invalid user ID given';
 		}
 		$curse_id = CP::curseIDfromUserID($user_id);
+		// Check for existance of wikipoints functions
 		if ($curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
+			return '';
+		}
+
+		// don't display if the viewer does not have the 'userlevel-view' right
+		global $wgUser;
+		if (!$wgUser->isAllowed('userlevel-view')) {
 			return '';
 		}
 

@@ -27,6 +27,8 @@ $wgExtensionCredits['specialpage'][] = array(
 define('NS_USER_WIKI', 200 );
 define('NS_USER_PROFILE', 202 );
 
+$wgAvailableRights[] = 'userlevel-view';
+
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
 /******************************************/
