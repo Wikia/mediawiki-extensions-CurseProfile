@@ -69,11 +69,11 @@
 }
 .stats dl dl {
 	margin-left: 1em;
-	clear: right;
+	clear: both;
 }
 .stats dt {
 	float: left;
-	clear: left;
+	clear: both;
 }
 .stats dd {
 	float: right;

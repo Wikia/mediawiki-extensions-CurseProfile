@@ -16,3 +16,5 @@
 
 // Comment boards
 $wgAjaxExportList[] = 'CurseProfile\CommentDisplay::repliesTo';
+
+$wgAPIModules['friend'] = 'CurseProfile\FriendApi';

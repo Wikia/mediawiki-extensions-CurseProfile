@@ -66,6 +66,7 @@ $messages['en'] = array(
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
 						'soronery'							=> 'You have no friends :(',
+						'friendship-invalidaction'			=> 'An invalid action was attempted',
 
 						// Emails
 						'commentemailpref'					=> 'Send me an email when a user comments on my profile',
@@ -77,19 +78,17 @@ $2 has left a comment on your profile at {{SITENAME}}. You can read and reply by
 $3
 
 Thanks,
-The Gamepedia Team
+Your friendly {{SITENAME}} notification system
 
 (You can unsubscribe by changing your email preferences at $4)',
 						'friendreqemailpref'				=> 'Send me an email when a user sends me a friend request',
 						'friendreqemail-subj'				=> '$1 has added you as a friend on Gamepedia!',
 						'friendreqemail-body'				=> '
 Hi $1,
-$2 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}}:
-
-$3
+$2 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} $3 or by visiting
 
 Thanks,
-The Gamepedia Team
+Your friendly {{SITENAME}} notification system
 
 (You can unsubscribe by changing your email preferences at $4)',
 

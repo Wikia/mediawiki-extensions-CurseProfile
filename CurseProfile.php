@@ -44,9 +44,12 @@ $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentAct
 $wgAutoloadClasses['CurseProfile\Friendship']     = $extDir . 'classes/Friendship.php';
 $wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir . 'classes/FriendDisplay.php';
 $wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/FriendSync.php';
+$wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi.php';
 $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
+
+// TODO remove if ajax friending can be relied upon
 $wgAutoloadClasses['CurseProfile\SpecialConfirmAction'] = $extDir . 'specials/SpecialConfirmAction.php';
 
 // Special Pages
@@ -93,11 +96,11 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/jquery.timeago.js', 'js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => 'ext.curseprofile.customskin', // allows sites to customize by editing MediaWiki:CurseProfile.css
+	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api'],
 ];
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',
-];
+]; // allows sites to customize by editing MediaWiki:CurseProfile.css
 
 // Hooks
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';

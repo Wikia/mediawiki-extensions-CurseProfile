@@ -196,7 +196,7 @@ class Friendship {
 					$thisUser->getUserPage()->getFullURL(),
 					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
 				)->parse();
-			$user->sendMail($subject, $body);
+			// $user->sendMail($subject, $body);
 		}
 
 		return true;

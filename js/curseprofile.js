@@ -7,6 +7,7 @@ function CurseProfile($) {
 			window.location = $(this).data('href');
 		});
 		commentBoard.init();
+		friendship.init();
 	};
 
 	this.ajax = function(method, params) {
@@ -110,6 +111,32 @@ function CurseProfile($) {
 			if ($replySet.length !== 0) {
 				placeReplyBox();
 			}
+		}
+	},
+
+	/**
+	 * All friending-related ajax functions
+	 */
+	friendship = {
+		init: function() {
+			$('.friendship-action').on('click', friendship.sendAction);
+		},
+
+		sendAction: function(e) {
+			var $this = $(this);
+			$this.attr('disabled', true);
+			(new mw.Api()).post({
+				action: 'friend',
+				'friendship_action': $this.data('action'),
+				curse_id: $this.data('id'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				$this.attr('disabled', false);
+				$this.closest('.friendship-container').html(resp.html);
+			}).fail(function(resp) {
+				$this.attr('disabled', false);
+				console.dir(resp);
+			});
 		}
 	};
 }
