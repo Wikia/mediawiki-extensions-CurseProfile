@@ -45,9 +45,12 @@ class FriendDisplay {
 		$friendship = new Friendship($curse_id);
 		if ($isCurseId) {
 			$links['curse_id'] = $user_id;
+			$user = \CurseUser::newFromCurseId($user_id);
 		} else {
 			$links['curse_id'] = CP::curseIDfromUserID($user_id);
+			$user = \User::newFromId($user_id);
 		}
+		$user->load();
 		$relationship = $friendship->getRelationship($links['curse_id']);
 
 		switch ($relationship) {
@@ -90,6 +93,7 @@ class FriendDisplay {
 				'class'   => 'friend-request-sent',
 				'href'    => "/Special:RemoveFriend/$user_id",
 				'text'    => wfMessage('removefriend')->plain(),
+				'confirm' => wfMessage('friendrequestremove-prompt', $user->getName())->plain(),
 			];
 			break;
 
@@ -103,7 +107,7 @@ class FriendDisplay {
 	 * @param	boolean	determines the function of the previous arg
 	 * @return	string	html button stuff
 	 */
-	public static function addFriendButton($user_id = '', $isCurseId = false) {
+	public static function friendButtons($user_id = '', $isCurseId = false) {
 		// reuse logic from the other function
 		$links = [];
 		self::addFriendLink($user_id, $links, $isCurseId);
@@ -114,11 +118,25 @@ class FriendDisplay {
 
 		$HTML = '';
 
-		if (count($links['views'])) foreach ($links['views'] as $link) {
-			$HTML .= "<button class='friendship-action' data-action='{$link['action']}' data-id='{$links['curse_id']}'>{$link['text']}</button>";
+		if (count($links['views'])) {
+			foreach ($links['views'] as $link) {
+				$attribs = [
+					'class' => 'friendship-action',
+					'data-action' => $link['action'],
+					'data-id' => $links['curse_id'],
+				];
+				if (isset($link['confirm'])) {
+					$attribs['data-confirm'] = $link['confirm'];
+				}
+				$HTML .= \Html::rawElement('button', $attribs, $link['text']);
+			}
 		}
 
-		return '<div class="friendship-container">'.$HTML.'</div>';
+		return $HTML;
+	}
+
+	public static function addFriendButton($user_id = '', $isCurseId = false) {
+		return '<div class="friendship-container">'.self::friendButtons($user_id, $isCurseId).'</div>';
 	}
 
 	public static function count(&$parser, $user_id = '') {

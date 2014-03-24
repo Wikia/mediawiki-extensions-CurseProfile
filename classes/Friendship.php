@@ -196,7 +196,7 @@ class Friendship {
 					$thisUser->getUserPage()->getFullURL(),
 					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
 				)->parse();
-			// $user->sendMail($subject, $body);
+			$user->sendMail($subject, $body);
 		}
 
 		return true;
@@ -279,10 +279,17 @@ class Friendship {
 
 		$mouse = CP::loadMouse();
 
+		// remove pending incoming requests
 		$mouse->redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
+		$mouse->redis->hdel($this->requestsRedisKey(), $toUser);
+
+		// remove sent request references
 		$mouse->redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
-		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
+		$mouse->redis->srem($this->sentRequestsRedisKey(), $toUser);
+
+		// remove existing friendship
 		$mouse->redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
+		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
 
 		return true;
 	}

@@ -119,22 +119,44 @@ function CurseProfile($) {
 	 */
 	friendship = {
 		init: function() {
-			$('.friendship-action').on('click', friendship.sendAction);
+			$(document).on('click', '.friendship-action', friendship.sendAction);
 		},
 
 		sendAction: function(e) {
-			var $this = $(this);
-			$this.attr('disabled', true);
+			var $this = $(this),
+				$container = $this.closest('.friendship-container'),
+				$buttons = $container.find('.friendship-action');
+			e.preventDefault();
+			$buttons.attr('disabled', true);
+			// confirmation for friend removal
+			if ($this.data('confirm') && !window.confirm($this.data('confirm'))) {
+				$buttons.attr('disabled', false);
+				return;
+			}
 			(new mw.Api()).post({
 				action: 'friend',
-				'friendship_action': $this.data('action'),
+				friendship_action: $this.data('action'),
 				curse_id: $this.data('id'),
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
-				$this.attr('disabled', false);
-				$this.closest('.friendship-container').html(resp.html);
+				$buttons.attr('disabled', false);
+				if (resp.remove) {
+					var $list = $this.closest('ul.friends');
+					if ($list.length === 0) {
+						$this.detach();
+					} else {
+						if ($list.find('li').length > 1) {
+							$this.closest('li').hide();
+						} else {
+							// remove the entire list and the preceeding H2
+							$list.hide().prev().hide();
+						}
+					}
+				} else {
+					$container.html(resp.html);
+				}
 			}).fail(function(resp) {
-				$this.attr('disabled', false);
+				$buttons.attr('disabled', false);
 				console.dir(resp);
 			});
 		}

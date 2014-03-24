@@ -31,22 +31,28 @@ class FriendApi extends \ApiBase {
 		switch ($action) {
 			case 'send':
 			$result = $f->sendRequest($curse_id);
+			$html = FriendDisplay::friendButtons($curse_id, true);
 			break;
 
 			case 'confirm':
 			$result = $f->acceptRequest($curse_id);
+			$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
 			break;
 
 			case 'ignore':
+			$rel = $f->getRelationship($curse_id);
 			$result = $f->ignoreRequest($curse_id);
+			if ($rel == Friendship::REQUEST_RECEIVED) {
+				$this->getResult()->addValue(null, 'remove', true);
+			}
+			$html = '';
 			break;
 
 			case 'remove':
 			$result = $f->removeFriend($curse_id);
+			$html = FriendDisplay::friendButtons($curse_id, true);
 			break;
 		}
-
-		$html = wfMessage('friendrequestsent')->plain();
 
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
