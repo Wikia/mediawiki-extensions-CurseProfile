@@ -74,6 +74,7 @@
 .stats dt {
 	float: left;
 	clear: both;
+	white-space: pre-line;
 }
 .stats dd {
 	float: right;

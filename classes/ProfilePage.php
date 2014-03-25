@@ -437,13 +437,14 @@ class ProfilePage extends \Article {
 	 * @return	string	html DL fragment or $input if it is not an array
 	 */
 	private static function generateStatsDL($input) {
+		global $wgUser;
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id))."</dt>";
+				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id, $wgUser->getId()))."</dt>";
 				$output .= "<dd>".self::generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
