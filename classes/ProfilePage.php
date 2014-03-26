@@ -28,6 +28,7 @@ class ProfilePage extends \Article {
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
 		if ($this->user) {
+			$this->user->load();
 			$this->user_id = $this->user->getID();
 		} else {
 			$this->user = \User::newFromId(0);
@@ -52,7 +53,10 @@ class ProfilePage extends \Article {
 		self::$output->setPageTitle($this->mTitle->getPrefixedText());
 		self::$output->setArticleFlag(false);
 
-		$outputString = \MessageCache::singleton()->parse($this->profileLayout(), $this->mTitle);
+		$layout = $this->profileLayout();
+		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
+
+		$outputString = \MessageCache::singleton()->parse($layout, $this->mTitle);
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
@@ -365,12 +369,8 @@ class ProfilePage extends \Article {
 	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function userStats(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
-		$curse_id = CP::curseIDfromUserID($user_id);
+	public function userStats() {
+		$curse_id = $this->user->curse_id;
 
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		global $wgServer;
@@ -404,7 +404,6 @@ class ProfilePage extends \Article {
 		}
 
 		if ($curse_id > 1 && method_exists('PointsDisplay', 'pointsForCurseId')) {
-			global $wgServer;
 			$statsOutput['localrank'] = \PointsDisplay::pointsForCurseId($curse_id, \WikiPoints::domainToNamespace($wgServer))['rank'];
 			$statsOutput['globalrank'] = \PointsDisplay::pointsForCurseId($curse_id)['rank'];
 
@@ -424,10 +423,7 @@ class ProfilePage extends \Article {
 
 		$HTML = self::generateStatsDL($statsOutput);
 
-		return [
-			$HTML,
-			'isHTML' => true,
-		];
+		return $HTML;
 	}
 
 	/**
@@ -436,7 +432,7 @@ class ProfilePage extends \Article {
 	 * @param	mixed	arrays will generate a new list, other values will be directly returned
 	 * @return	string	html DL fragment or $input if it is not an array
 	 */
-	private static function generateStatsDL($input) {
+	private function generateStatsDL($input) {
 		global $wgUser;
 		if (is_array($input)) {
 			$output = "<dl>";
@@ -444,7 +440,7 @@ class ProfilePage extends \Article {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".self::$output->parseInline(wfMessage($msgKey, self::$self->user_id, $wgUser->getId()))."</dt>";
+				$output .= "<dt>".wfMessage($msgKey, self::$self->user_id, $wgUser->getId())->plain()."</dt>";
 				$output .= "<dd>".self::generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
@@ -570,7 +566,7 @@ class ProfilePage extends \Article {
 		</div>
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
-			{{#userstats: %2$s}}
+			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
 	</div>

@@ -31,7 +31,7 @@ class Hooks {
 			$parser->setFunctionHook('favwiki',				'CurseProfile\ProfilePage::favoriteWiki');
 			$parser->setFunctionHook('location',			'CurseProfile\ProfilePage::location');
 			$parser->setFunctionHook('profilelinks',		'CurseProfile\ProfilePage::profileLinks');
-			$parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats');
+			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline)
 			$parser->setFunctionHook('userlevel',			'CurseProfile\ProfilePage::userLevel');
 			$parser->setFunctionHook('editorfriends',		'CurseProfile\ProfilePage::editOrFriends');
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');

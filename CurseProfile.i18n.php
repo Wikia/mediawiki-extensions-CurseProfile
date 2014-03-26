@@ -137,15 +137,13 @@ Your friendly {{SITENAME}} notification system
 
 						// Stat labels
 						'wikisedited'						=> 'Wikis Edited',
-						'localrank'							=> '{{SITENAME}} Rank
-([[Special:WikiPoints|Leaderboard]])',
-						'globalrank'						=> 'Gamepedia Rank',
+						'localrank'							=> '{{SITENAME}} Rank',
+						'globalrank'						=> 'Gamepedia Rank<br>([[Special:WikiPoints|Leaderboard]])',
 						'totalcontribs'						=> 'Contributions',
 						'totaledits'						=> 'Edits',
 						'totaldeletes'						=> 'Deletes',
 						'totalpatrols'						=> 'Patrols',
-						'totalfriends'						=> 'Friends
-([[Special:Friends/$1|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])',
+						'totalfriends'						=> 'Friends<br>([[Special:Friends/$1|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])',
 
 						// Comment board, Friends list
 						'commentboard-empty'				=> 'There are no comments on this user\'s board.',
