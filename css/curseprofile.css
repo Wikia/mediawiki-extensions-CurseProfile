@@ -233,9 +233,13 @@ ul.friends {
 	list-style: none;
 	margin-left: 0;
 }
+	.friends li {
+		white-space: nowrap;
+		word-wrap: break-word;
+	}
 
 @media screen and (min-width: 1260px) {
-	ul.friends {
+	.stats ul.friends {
 		-moz-columns: 2;
 		-webkit-columns: 2;
 		columns: 2;
@@ -243,19 +247,14 @@ ul.friends {
 }
 
 @media screen and (min-width: 1800px) {
-	ul.friends {
+	.stats ul.friends {
 		-moz-columns: 3;
 		-webkit-columns: 3;
 		columns: 3;
 	}
-	.activity ul {
+	/*.activity ul {
 		-moz-columns: 2;
 		-webkit-columns: 2;
 		columns: 2;
-	}
-}
-
-.friends li {
-	white-space: nowrap;
-	word-wrap: break-word;
+	}*/
 }
