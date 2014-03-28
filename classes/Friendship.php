@@ -187,15 +187,15 @@ class Friendship {
 			} else {
 				$name = $user->getName();
 			}
-			$updatePrefsLink = \SpecialPage::getTitleFor('Preferences');
 			$thisUser = \User::newFromId(CP::userIDfromCurseID($this->curse_id));
-			$subject = wfMessage('friendreqemail-subj', $thisUser->getName())->parse();
+			$subject = wfMessage('friendreqemail-subj', $thisUser->getName())->text();
 			$body = wfMessage('friendreqemail-body')->params(
 					$name,
 					$thisUser->getName(),
 					$thisUser->getUserPage()->getFullURL(),
-					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
-				)->parse();
+					\SpecialPage::getTitleFor('Preferences')->getFullURL().'#mw-prefsection-personal-email',
+					\SpecialPage::getTitleFor('ManageFriends')->getFullURL()
+				)->text();
 			$user->sendMail($subject, $body);
 		}
 

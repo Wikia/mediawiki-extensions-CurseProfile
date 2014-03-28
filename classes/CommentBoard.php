@@ -224,13 +224,13 @@ class CommentBoard {
 				$name = $toUser->getName();
 			}
 			$updatePrefsLink = \SpecialPage::getTitleFor('Preferences');
-			$subject = wfMessage('commentemail-subj', $fromUser->getName())->parse();
+			$subject = wfMessage('commentemail-subj', $fromUser->getName())->text();
 			$body = wfMessage('commentemail-body')->params(
 					$name,
 					$fromUser->getName(),
 					$toUser->getUserPage()->getFullURL(),
 					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
-				)->parse();
+				)->text();
 			$toUser->sendMail($subject, $body);
 		}
 	}

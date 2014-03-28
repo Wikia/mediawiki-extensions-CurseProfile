@@ -80,17 +80,23 @@ $3
 Thanks,
 Your friendly {{SITENAME}} notification system
 
-(You can unsubscribe by changing your email preferences at $4)',
+You can unsubscribe by changing your email preferences at:
+$4
+',
 						'friendreqemailpref'				=> 'Send me an email when a user sends me a friend request',
 						'friendreqemail-subj'				=> '$1 has added you as a friend on Gamepedia!',
 						'friendreqemail-body'				=> '
 Hi $1,
-$2 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} $3 or by visiting
+$2 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} $3 or by visiting the friend management page:
+
+$5
 
 Thanks,
 Your friendly {{SITENAME}} notification system
 
-(You can unsubscribe by changing your email preferences at $4)',
+You can unsubscribe by changing your email preferences at:
+$4
+',
 
 						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
