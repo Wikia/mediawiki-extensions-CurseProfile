@@ -142,7 +142,7 @@ class CP {
 			$user_id = $user;
 			$user = \User::newFromId($user);
 		}
-		// return \Linker::linkKnown($user->getUserPage(), $user->getName()); //htmlspecialchars($user->getName())
-		return \Linker::userLink($user_id, $user->getName());
+		return \Linker::linkKnown($user->getUserPage(), $user->getName()); //htmlspecialchars($user->getName())
+		// return \Linker::userLink($user_id, $user->getName());
 	}
 }
