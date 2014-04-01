@@ -175,4 +175,64 @@ class Hooks {
 		ProfileData::processPreferenceSave($user, $options);
 		return true;
 	}
+
+	/**
+	 * Setup echo notifications
+	 */
+	public static function onBeforeCreateEchoEvent( &$notifications, &$notificationCategories /* , &$icons */ ) {
+		$notificationCategories['friendship'] = [
+			// 'tooltip' => 'echo-pref-tooltip-friendship',
+			'priority' => 3,
+		];
+		$notifications['friendship-request'] = [
+			'category' => 'friendship',
+			'group' => 'interactive',
+			'icon' => 'gratitude',
+			'title-message' => 'notification-friendship-request',
+			'title-params' => ['agent'],
+			'email-subject-message' => 'notification-friendship-request-email-subj',
+			'email-subject-params' => ['agent'],
+			'email-body-message' => 'notification-friendship-request-email-body',
+			'email-body-params' => ['agent'],
+			'email-body-batch-message' => 'notification-friendship-request-email-batch',
+			'email-body-batch-params' => ['agent'],
+		];
+
+		$notificationCategories['profile-comment'] = [
+			// 'tooltip' => 'echo-pref-tooltip-profile-comment',
+			'priority' => 4,
+		];
+		$notifications['profile-comment'] = [
+			'category' => 'profile-comment',
+			'group' => 'interactive',
+			'icon' => 'chat',
+			'formatter-class' => 'CurseProfile\CommentFormatter',
+			'title-message' => 'notification-profile-comment',
+			'title-params' => ['agent', 'user'],
+			'payload' => ['comment-text'],
+			'email-subject-message' => 'notification-profile-comment-email-subj',
+			'email-subject-params' => ['agent', 'user'],
+			'email-body-message' => 'notification-profile-comment-email-body',
+			'email-body-params' => ['agent', 'user'],
+			'email-body-batch-message' => 'notification-profile-comment-email-batch',
+			'email-body-batch-params' => ['agent', 'user'],
+		];
+		return true;
+	}
+
+	public static function onEchoGetDefaultNotifiedUsers($event, &$users) {
+		switch ($event->getType()) {
+			case 'friendship-request':
+			case 'profile-comment':
+				$extra = $event->getExtra();
+				if (!$extra || !isset($extra['target_user_id'])) {
+					break;
+				}
+				$targetId = $extra['target_user_id'];
+				$user = \User::newFromId($targetId);
+				$users[$targetId] = $user;
+				break;
+		}
+		return true;
+	}
 }

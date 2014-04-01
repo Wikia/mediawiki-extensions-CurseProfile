@@ -162,4 +162,20 @@ $4
 						'cp-recentcommentssection'			=> 'Recent Comments',
 						'commentarchivelink'				=> 'Comment Archive',
 						'cp-statisticssection'				=> 'Total Statistics',
+
+						// Echo Notification messages
+						'echo-pref-subscription-profile-comment' => 'Leaves a comment on my profile',
+						'echo-dismiss-title-profile-comment'=> 'profile comment',
+						'notification-profile-comment'		=> '$1 has left a comment on [[User:$2|your profile]].',
+						'notification-profile-comment-email-subj' => '$1 {{PLURAL:$2|has|have}} left {{PLURAL:$2|comment|comments}} on your Gamepedia profile!',
+						'notification-profile-comment-email-body' => '',
+						'notification-profile-comment-email-batch' => '',
+
+						'echo-pref-subscription-friendship' => 'Sends me a friend request',
+						'echo-dismiss-title-friendship'		=> 'friendship request',
+						'notification-friendship-request'	=> '$1 has added you as a friend.',
+						'notification-friendship-request-email-subj' => '$1 {{PLURAL:$2|has|have}} added you as a friend on Gamepedia!',
+						'notification-friendship-request-email-body' => '',
+						'notification-friendship-request-email-batch' => '',
+
 );

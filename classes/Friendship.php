@@ -188,15 +188,13 @@ class Friendship {
 				$name = $user->getName();
 			}
 			$thisUser = \User::newFromId(CP::userIDfromCurseID($this->curse_id));
-			$subject = wfMessage('friendreqemail-subj', $thisUser->getName())->text();
-			$body = wfMessage('friendreqemail-body')->params(
-					$name,
-					$thisUser->getName(),
-					$thisUser->getUserPage()->getFullURL(),
-					\SpecialPage::getTitleFor('Preferences')->getFullURL().'#mw-prefsection-personal-email',
-					\SpecialPage::getTitleFor('ManageFriends')->getFullURL()
-				)->text();
-			$user->sendMail($subject, $body);
+			\EchoEvent::create([
+				'type' => 'friendship-request',
+				'agent' => $thisUser,
+				'extra' => [
+					'target_user_id' => $user
+				]
+			]);
 		}
 
 		return true;
