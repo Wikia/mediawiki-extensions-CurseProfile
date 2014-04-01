@@ -13,7 +13,7 @@
 **/
 namespace CurseProfile;
 
-class SpecialManageFriends extends \UnlistedSpecialPage {
+class SpecialManageFriends extends \SpecialPage {
 	public function __construct() {
 		parent::__construct( 'ManageFriends' );
 	}

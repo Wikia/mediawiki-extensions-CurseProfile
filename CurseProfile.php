@@ -52,26 +52,7 @@ $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDi
 $wgAutoloadClasses['CurseProfile\CommentFormatter'] = $extDir . 'classes/CommentFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 
-// TODO remove if ajax friending can be relied upon
-$wgAutoloadClasses['CurseProfile\SpecialConfirmAction'] = $extDir . 'specials/SpecialConfirmAction.php';
-
 // Special Pages
-
-$wgAutoloadClasses['CurseProfile\SpecialAddFriend']			= "{$extDir}/specials/friends/SpecialAddFriend.php";
-$wgSpecialPages['AddFriend']								= 'CurseProfile\SpecialAddFriend';
-$wgSpecialPageGroups['AddFriend']							= 'users';
-
-$wgAutoloadClasses['CurseProfile\SpecialConfirmFriend']		= "{$extDir}/specials/friends/SpecialConfirmFriend.php";
-$wgSpecialPages['ConfirmFriend']							= 'CurseProfile\SpecialConfirmFriend';
-$wgSpecialPageGroups['ConfirmFriend']						= 'users';
-
-$wgAutoloadClasses['CurseProfile\SpecialIgnoreFriend']		= "{$extDir}/specials/friends/SpecialIgnoreFriend.php";
-$wgSpecialPages['IgnoreFriend']								= 'CurseProfile\SpecialIgnoreFriend';
-$wgSpecialPageGroups['IgnoreFriend']						= 'users';
-
-$wgAutoloadClasses['CurseProfile\SpecialRemoveFriend']		= "{$extDir}/specials/friends/SpecialRemoveFriend.php";
-$wgSpecialPages['RemoveFriend']								= 'CurseProfile\SpecialRemoveFriend';
-$wgSpecialPageGroups['RemoveFriend']						= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialManageFriends']		= "{$extDir}/specials/friends/SpecialManageFriends.php";
 $wgSpecialPages['ManageFriends']							= 'CurseProfile\SpecialManageFriends';
