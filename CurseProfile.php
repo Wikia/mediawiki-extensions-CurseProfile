@@ -49,6 +49,7 @@ $wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/FriendSyn
 $wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi.php';
 $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
+$wgAutoloadClasses['CurseProfile\CommentFormatter'] = $extDir . 'classes/CommentFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 
 // TODO remove if ajax friending can be relied upon
@@ -115,6 +116,8 @@ $wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces
 $wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';
 $wgHooks['UserGetDefaultOptions'][]			= 'CurseProfile\Hooks::onUserGetDefaultOptions';
 $wgHooks['UserSaveOptions'][]				= 'CurseProfile\Hooks::onUserSaveOptions';
+$wgHooks['BeforeCreateEchoEvent'][]			= 'CurseProfile\Hooks::onBeforeCreateEchoEvent';
+$wgHooks['EchoGetDefaultNotifiedUsers'][]	= 'CurseProfile\Hooks::onEchoGetDefaultNotifiedUsers';
 
 // Ajax Setup
 require_once('CurseProfile.ajax.php');

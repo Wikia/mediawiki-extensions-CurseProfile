@@ -217,21 +217,15 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		if ($toUser->getID() != $fromUser->getID() && $toUser->getEmail() && $toUser->getIntOption('commentemail')) {
-			if (trim($toUser->getRealName())) {
-				$name = $toUser->getRealName();
-			} else {
-				$name = $toUser->getName();
-			}
-			$updatePrefsLink = \SpecialPage::getTitleFor('Preferences');
-			$subject = wfMessage('commentemail-subj', $fromUser->getName())->text();
-			$body = wfMessage('commentemail-body')->params(
-					$name,
-					$fromUser->getName(),
-					$toUser->getUserPage()->getFullURL(),
-					$updatePrefsLink->getFullURL().'#mw-prefsection-personal-email'
-				)->text();
-			$toUser->sendMail($subject, $body);
+		if ($toUser->getId() != $fromUser->getId()) {
+			\EchoEvent::create([
+				'type' => 'profile-comment',
+				'agent' => $fromUser,
+				'extra' => [
+					'target_user_id' => $toUser->getId(),
+					'comment_text' => substr($commentText, 0, CommentFormatter::MAX_PREVIEW_LEN),
+				]
+			]);
 		}
 	}
 }

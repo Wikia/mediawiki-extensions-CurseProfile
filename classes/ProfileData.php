@@ -138,23 +138,13 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
 		];
-
-		// Email prefs
-		$preferences['commentemail'] = [
-			'type' => 'check',
-			'label-message' => 'commentemailpref',
-			'section' => 'personal/email'
-		];
-		$preferences['friendreqemail'] = [
-			'type' => 'check',
-			'label-message' => 'friendreqemailpref',
-			'section' => 'personal/email'
-		];
 	}
 
 	public static function insertProfilePrefsDefaults(&$defaultOptions) {
-		$defaultOptions['commentemail']   = 1;
-		$defaultOptions['friendreqemail'] = 1;
+		$defaultOptions['echo-subscriptions-web-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-email-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-comment'] = 0;
 
 		// Allow overriding by setting the value in the global $wgDefaultUserOptions
 		if (!isset($defaultOptions['profile-pref'])) {
