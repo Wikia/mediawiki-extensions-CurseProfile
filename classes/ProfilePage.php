@@ -419,7 +419,7 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $user_id);
+		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $this->user->getId());
 
 		$HTML = self::generateStatsDL($statsOutput);
 
