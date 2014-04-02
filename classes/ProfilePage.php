@@ -118,7 +118,7 @@ class ProfilePage extends \Article {
 
 			$links['views']['contribs'] = [
 				'class'		=> false,
-				'text'		=> wfMessage('contributions')->parse(),
+				'text'		=> wfMessage('contributions')->text(),
 				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
 			];
 
@@ -546,6 +546,7 @@ class ProfilePage extends \Article {
 			</div>
 		</div>
 		<div class="activity section">
+			<p class="rightfloat">[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
 			<h3>'.wfMessage('cp-recentactivitysection').'</h3>
 			{{#recentactivity: %2$s}}
 		</div>
