@@ -283,18 +283,18 @@ class ProfilePage extends \Article {
 			$item = "<li class='$key' title='$key'>";
 			switch ($key) {
 				case 'XBL':
+					$link = urlencode($link);
+					$item .= \Html::element('a', ['href'=>"https://live.xbox.com/en-US/Profile?gamertag=$link", 'target'=>'_blank']);
+					break;
 				case 'PSN':
-					$item .= htmlspecialchars($link);
+					$link = urlencode($link);
+					$item .= \Html::element('a', ['href'=>"http://psnprofiles.com/$link", 'target'=>'_blank']);
 					break;
 				default:
 					if (self::validateUrl($key, $link)) {
-						wfDebug('validated '.$link.' for service '.$key);
-						$link = htmlspecialchars($link, ENT_QUOTES);
-						$item .= "<a href='$link' target='_blank'></a>";
+						$item .= \Html::element('a', ['href'=>$link, 'target'=>'_blank']);
 					} else {
-						wfDebug('validation failed on '.$link.' for service '.$key);
 						$item = '';
-						// TODO move this validation to preferences save and avoid validating on display
 					}
 			}
 			$item .= '</li>';
