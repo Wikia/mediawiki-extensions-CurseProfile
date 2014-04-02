@@ -98,33 +98,39 @@ class ProfileData {
 		];
 		$preferences['profile-link-twitter'] = [
 			'type' => 'text',
+			'pattern' => 'https?://twitter\\.com/(\\w+)',
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
+			'pattern' => 'https?://www\\.facebook\\.com/(\\w+)',
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('fblinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
+			'pattern' => 'https?://plus\\.google\\.com/\\+(\\w+)/posts',
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-reddit'] = [
 			'type' => 'text',
+			'pattern' => 'https?://www\\.reddit\\.com/user/(\\w+)',
 			'label-message' => 'redditlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
+			'pattern' => 'https?://steamcommunity\\.com/id/(\\w+)/?',
 			'label-message' => 'steamlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
+			'help-message' => 'profilelink-help',
 		];
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',

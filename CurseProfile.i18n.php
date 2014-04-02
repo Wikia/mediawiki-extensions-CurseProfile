@@ -104,10 +104,11 @@ $messages['en'] = array(
 						'commentreplyplaceholder'			=> 'Leave a reply',
 						'aboutmeplaceholder'				=> 'Write something about yourself!',
 						'steamlinkplaceholder'				=> 'http://steamcommunity.com/id/example',
-						'twitterlinkplaceholder'			=> 'https://twitter.com/exampmle',
+						'twitterlinkplaceholder'			=> 'https://twitter.com/example',
 						'redditlinkplaceholder'				=> 'http://www.reddit.com/user/example',
 						'fblinkplaceholder'					=> 'https://www.facebook.com/example',
 						'googlelinkplaceholder'				=> 'https://plus.google.com/+example/posts',
+						'profilelink-help'					=> 'A profile link must exactly match the example format to be displayed.',
 						'xbllinkplaceholder'				=> 'Share your gamertag',
 						'psnlinkplaceholder'				=> 'Share your PSN ID',
 
@@ -136,7 +137,7 @@ $messages['en'] = array(
 						// Echo Notification messages
 						'echo-pref-subscription-profile-comment' => 'Leaves a comment on my profile',
 						'echo-dismiss-title-profile-comment'=> 'profile comment',
-						'notification-profile-comment'		=> '$1 has left a comment on [[User:$2|your profile]].',
+						'notification-profile-comment'		=> '[[User:$1]] has left a comment on [[User:$2|your profile]].',
 						'notification-profile-comment-email-subj' => '$1 has left a comment on your Gamepedia profile!',
 						'notification-profile-comment-email-body' => 'Hi $2,
 $1 has left a comment on your profile at {{SITENAME}}. You can read and reply by viewing your profile:
@@ -152,7 +153,7 @@ $4',
 
 						'echo-pref-subscription-friendship' => 'Sends me a friend request',
 						'echo-dismiss-title-friendship'		=> 'friendship request',
-						'notification-friendship-request'	=> '$1 has added you as a friend.',
+						'notification-friendship-request'	=> '[[User:$1]] has added you as a friend.',
 						'notification-friendship-request-email-subj' => '$1 has added you as a friend on Gamepedia!',
 						'notification-friendship-request-email-body' => 'Hi $2,
 $1 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} $3 or by visiting the friend management page:

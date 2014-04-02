@@ -319,10 +319,10 @@ class ProfilePage extends \Article {
 	private static function validateUrl($service, $url) {
 		$patterns = [
 			'Steam'		=> '|https?://steamcommunity\\.com/id/(\\w+)/?|',
-			'Twitter'	=> '|https://twitter\\.com/(\\w+)|',
-			'Reddit'	=> '|http://www\\.reddit\\.com/user/(\\w+)|',
-			'Facebook'	=> '|https://www\\.facebook\\.com/(\\w+)|',
-			'Google'	=> '|https://plus\\.google\\.com/\\+(\\w+)/posts|',
+			'Twitter'	=> '|https?://twitter\\.com/(\\w+)|',
+			'Reddit'	=> '|https?://www\\.reddit\\.com/user/(\\w+)|',
+			'Facebook'	=> '|https?://www\\.facebook\\.com/(\\w+)|',
+			'Google'	=> '|https?://plus\\.google\\.com/\\+(\\w+)/posts|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
