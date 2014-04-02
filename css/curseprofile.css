@@ -177,14 +177,12 @@ div.mainavatar {
 .commentdisplay .entryform {
 	margin-left: 54px;
 	padding-right: 5px;
+	text-align: right;
 }
 	.commentdisplay .entryform textarea {
 		display: block;
 		resize: vertical;
 		height: 2em;
-	}
-	.commentdisplay .entryform button {
-		display: block;
 	}
 
 .comments .avatar {
