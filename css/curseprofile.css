@@ -122,7 +122,7 @@ div.mainavatar {
 	.profilelinks li {
 		background-repeat: no-repeat;
 		background-position: top left;
-		background-size: 1.9em auto;
+		background-size: 100% auto;
 		line-height: 1.9em;
 		height: 1.9em;
 		min-width: 1.9em;
