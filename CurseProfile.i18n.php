@@ -133,6 +133,8 @@ $messages['en'] = array(
 						'cp-recentcommentssection'			=> 'Recent Comments',
 						'commentarchivelink'				=> 'Comment Archive',
 						'cp-statisticssection'				=> 'Total Statistics',
+						'profileactivity-created'			=> 'Created',
+						'profileactivity-edited'			=> 'Edited',
 
 						// Echo Notification messages
 						'echo-pref-subscription-profile-comment' => 'Leaves a comment on my profile',

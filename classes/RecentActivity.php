@@ -33,8 +33,8 @@ class RecentActivity {
 		foreach ($activity as $rev) {
 			$title = \Title::newFromID($rev['rev_page']);
 			if ($title) {
-				$verb = $rev['rev_parent_id'] ? 'Edited' : 'Created';
-				$HTML .= '<li>'.$verb.' '.\Linker::link($title).' '.CP::timeTag($rev['rev_timestamp']).'</li>';
+				$verb = $rev['rev_parent_id'] ? wfMessage('profileactivity-edited') : wfMessage('profileactivity-created');
+				$HTML .= '<li>'.$verb.' '.\Linker::link($title).' '.self::diffHistLinks($title, $rev).' '.CP::timeTag($rev['rev_timestamp']).'</li>';
 			}
 		}
 		$HTML .= '
@@ -44,6 +44,19 @@ class RecentActivity {
 			$HTML,
 			'isHTML' => true,
 		];
+	}
+
+	/**
+	 * Generates html for a link group like: (diff | hist)
+	 *
+	 * @param object	mw Title object of the page
+	 * @param arary		row from the revision table that should be diffed
+	 */
+	public static function diffHistLinks($title, $rev) {
+		$HTML = \Linker::link($title, 'diff', [], ['diff'=>$rev['rev_id']]);
+		$HTML .= ' | ';
+		$HTML .= \Linker::link($title, 'hist', [], ['action'=>'history']);
+		return '('.$HTML.')';
 	}
 
 	/**
