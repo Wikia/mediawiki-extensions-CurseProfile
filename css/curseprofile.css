@@ -64,7 +64,7 @@
 
 /* Sidebar stats display */
 .stats > dl {
-	width: 40%;
+	width: 50%;
 	min-width: 10.5em;
 }
 .stats dl dl {

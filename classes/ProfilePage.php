@@ -254,7 +254,11 @@ class ProfilePage extends \Article {
 		}
 		$mouse = CP::loadMouse();
 		$profile = new ProfileData($user_id);
-		return $profile->getAboutText();
+		global $wgOut;
+		return [
+			$wgOut->parse($profile->getAboutText()),
+			'isHTML' => true
+		];
 	}
 
 	/**
