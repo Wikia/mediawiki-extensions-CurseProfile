@@ -18,3 +18,4 @@
 $wgAjaxExportList[] = 'CurseProfile\CommentDisplay::repliesTo';
 
 $wgAPIModules['friend'] = 'CurseProfile\FriendApi';
+$wgAPIModules['comment'] = 'CurseProfile\CommentApi';

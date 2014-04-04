@@ -38,7 +38,9 @@ function CurseProfile($) {
 
 		init: function() {
 			$('.reply-count').on('click', commentBoard.loadReplies);
-			$('.comments').on('click', 'a.newreply', commentBoard.newReply);
+			$('.comments')
+				.on('click', 'a.newreply', commentBoard.newReply)
+				.on('click', 'a.remove', commentBoard.removeComment);
 		},
 
 		loadReplies: function(e, callback) {
@@ -111,6 +113,25 @@ function CurseProfile($) {
 			if ($replySet.length !== 0) {
 				placeReplyBox();
 			}
+		},
+
+		removeComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+			$this.hide();
+			(new mw.Api()).post({
+				action: 'comment',
+				comment_action: 'remove',
+				comment_id: $comment.data('id'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				if (resp.html) {
+					$comment.slideUp();
+				}
+			}).fail(function(resp) {
+				$this.show();
+				console.dir(resp);
+			});
 		}
 	},
 

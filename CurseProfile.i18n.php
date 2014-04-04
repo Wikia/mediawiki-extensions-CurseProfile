@@ -66,7 +66,9 @@ $messages['en'] = array(
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
 						'soronery'							=> 'You have no friends :(',
-						'friendship-invalidaction'			=> 'An invalid action was attempted',
+						'friendship-invalidaction'			=> 'An invalid action was attempted.',
+						'comment-invalidaction'				=> 'An invalid action was attempted.',
+						'comment-adminremoved'				=> 'This comment has been removed.',
 
 						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
@@ -93,6 +95,8 @@ $messages['en'] = array(
 						'viewearlierreplies'				=> 'Load $1 more {{PLURAL:$1|reply|replies}}',
 						'repliestooltip'					=> 'View replies or add one of your own',
 						'replylink'							=> 'Reply',
+						'removelink'						=> '✕',
+						'removelink-tooltip'				=> 'Remove this comment',
 						'profilepref-profile'				=> 'Use an enhanced Curse Profile user page',
 						'profilepref-wiki'					=> 'Use a standard wiki user page',
 						'prefs-public'						=> 'Public Profile',

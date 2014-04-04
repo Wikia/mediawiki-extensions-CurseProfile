@@ -78,6 +78,7 @@ class ProfileData {
 			'label-message' => 'aboutme',
 			'section' => 'personal/info/public',
 			'rows' => 6,
+			'maxlength' => 5000,
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];

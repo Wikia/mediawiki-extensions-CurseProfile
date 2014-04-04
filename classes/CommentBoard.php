@@ -19,6 +19,8 @@ namespace CurseProfile;
 class CommentBoard {
 	private $user_id;
 
+	const MAX_LENGTH = 5000;
+
 	/**
 	 * @var		int		the number of comments to load on a board before a user clicks for more
 	 */
@@ -27,6 +29,7 @@ class CommentBoard {
 	/**
 	 * Message visibility constants
 	 */
+	const DELETED_MESSAGE = -1;
 	const PUBLIC_MESSAGE = 0;
 	const PRIVATE_MESSAGE = 1;
 
@@ -182,7 +185,7 @@ class CommentBoard {
 	 * @param	int		optional id of a board post that this will be in reply to
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
-		$commentText = trim($commentText);
+		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
 		}
@@ -227,5 +230,44 @@ class CommentBoard {
 				]
 			]);
 		}
+	}
+
+	/**
+	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
+	 *
+	 * @param	int		id of a comment to remove
+	 * @return	stuff	whatever mouse DB returns
+	 */
+	public static function removeComment($comment_id) {
+		$mouse = CP::loadMouse();
+		return $mouse->DB->update('user_board', ['ub_type' => self::DELETED_MESSAGE], 'ub_id ='.intval($comment_id));
+	}
+
+	/**
+	 * Checks if a user has permissions to remove a comment
+	 *
+	 * @param	mixed	int id of comment to check, or array row from user_board table
+	 * @param	obj		[optional] mw User object, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canRemove($comment_id, $user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		}
+
+		if (is_array($comment_id)) {
+			$comment = $comment_id;
+		} else {
+			$mouse = CP::loadMouse();
+			$comment = $mouse->DB->selectAndFetch([
+				'select' => 'b.*',
+				'from'   => ['user_board' => 'b'],
+				'where'  => 'b.ub_id = '.intval($comment_id),
+			]);
+		}
+
+		// comment must either be on user's own profile, or have the permission
+		return $comment['ub_user_id'] == $user->getId() || $user->isAllowed('profile-modcomments');
 	}
 }

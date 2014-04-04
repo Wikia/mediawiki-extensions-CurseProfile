@@ -33,7 +33,7 @@ class CommentDisplay {
 				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
 				<div class="entryform">
 					<form action="/Special:AddComment/'.$user_id.'" method="post">
-						<textarea name="message" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
+						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
 						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
 						'.\Html::hidden('token', $wgUser->getEditToken()).'
 					</form>
@@ -63,7 +63,11 @@ class CommentDisplay {
 		<div class="commentdisplay" data-id="'.$comment['ub_id'].'">
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
-				<div class="right">'.CP::timeTag($comment['ub_date']).' <a href="#" class="newreply">'.wfMessage('replylink')->escaped().'</a></div>
+				<div class="right">
+					'.CP::timeTag($comment['ub_date']).' '
+					.\Html::element('a', ['href'=>'#', 'class'=>'newreply'], wfMessage('replylink')).' '
+					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
+				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])
 				.'</div>
 			<div class="commentbody">
