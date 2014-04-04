@@ -377,8 +377,7 @@ class ProfilePage extends \Article {
 		$curse_id = $this->user->curse_id;
 
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		global $wgServer;
-		$jsonStats = $mouse->curl->fetch($wgServer.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id);
+		$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
 		$stats = json_decode($jsonStats, true);
 
 		// keys are message keys fed to wfMessage()
