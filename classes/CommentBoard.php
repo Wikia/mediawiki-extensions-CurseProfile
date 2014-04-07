@@ -220,6 +220,8 @@ class CommentBoard {
 			__METHOD__
 		);
 
+		wfRunHooks('CurseProfileAddComment', [$fromUser, $inReplyTo]);
+
 		if ($toUser->getId() != $fromUser->getId()) {
 			\EchoEvent::create([
 				'type' => 'profile-comment',
