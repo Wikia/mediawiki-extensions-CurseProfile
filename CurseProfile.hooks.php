@@ -83,6 +83,7 @@ class Hooks {
 		return true;
 	}
 
+	// TODO: Currently unused? Either remove or find out how to properly use.
 	public static function markUncachable($parser, &$limitReport) {
 		$parser->disableCache();
 		return true;

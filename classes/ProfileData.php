@@ -165,6 +165,26 @@ class ProfileData {
 		} else {
 			$preferences['profile-country-flag'] = '';
 		}
+
+		$editProfileFields = [
+			'profile-aboutme',
+			'profile-city',
+			'profile-state',
+			'profile-country',
+			'profile-link-twitter',
+			'profile-link-facebook',
+			'profile-link-google',
+			'profile-link-reddit',
+			'profile-link-steam',
+			'profile-link-xbl',
+			'profile-link-psn',
+		];
+		foreach($editProfileFields as $field) {
+			if (!empty($preferences[$field])) {
+				wfRunHooks('CurseProfileEdited', [$user, $preferences]);
+				break;
+			}
+		}
 	}
 
 	public function __construct($user_id) {
