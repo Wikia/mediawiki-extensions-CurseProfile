@@ -294,6 +294,20 @@ class ProfilePage extends \Article {
 					$link = urlencode($link);
 					$item .= \Html::element('a', ['href'=>"http://psnprofiles.com/$link", 'target'=>'_blank']);
 					break;
+				case 'Twitter':
+					if (!self::validateUrl($key, $link)) {
+						$item = '';
+					} else {
+						$item .= \Html::element('a', ['href'=>"https://twitter.com/$link", 'target'=>'_blank']);
+					}
+					break;
+				case 'Reddit':
+					if (!self::validateUrl($key, $link)) {
+						$item = '';
+					} else {
+						$item .= \Html::element('a', ['href'=>"http://www.reddit.com/user/$link", 'target'=>'_blank']);
+					}
+					break;
 				default:
 					if (self::validateUrl($key, $link)) {
 						$item .= \Html::element('a', ['href'=>$link, 'target'=>'_blank']);
@@ -320,20 +334,24 @@ class ProfilePage extends \Article {
 	 * @param	string	url to profile
 	 * @return	string	username or id
 	 */
-	private static function validateUrl($service, $url) {
+	private static function validateUrl($service, &$url) {
 		$patterns = [
-			'Steam'		=> '|https?://steamcommunity\\.com/id/(\\w+)/?|',
-			'Twitter'	=> '|https?://twitter\\.com/(\\w+)|',
-			'Reddit'	=> '|https?://www\\.reddit\\.com/user/(\\w+)|',
-			'Facebook'	=> '|https?://www\\.facebook\\.com/(\\w+)|',
-			'Google'	=> '|https?://plus\\.google\\.com/\\+(\\w+)/posts|',
+			'Steam'		=> '|^https?://steamcommunity\\.com/id/\\w+/?$|',
+			'Twitter'	=> '|^@?(\\w{1,15})$|',
+			'Reddit'	=> '|^\\w{3,20}$|',
+			'Facebook'	=> '|^https?://www\\.facebook\\.com/\\w+$|',
+			'Google'	=> '|^https?://plus\\.google\\.com/\\+\\w+/posts$|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
 		} else {
 			return false;
 		}
-		return preg_match($pattern, $url);
+		$result = preg_match($pattern, $url, $matches);
+		if (count($matches) > 1) {
+			$url = $matches[1];
+		}
+		return $result;
 	}
 
 	/**

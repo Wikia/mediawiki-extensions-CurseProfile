@@ -97,13 +97,6 @@ class ProfileData {
 			'label-message' => 'countrylabel',
 			'section' => 'personal/info/location',
 		];
-		$preferences['profile-link-twitter'] = [
-			'type' => 'text',
-			'pattern' => 'https?://twitter\\.com/(\\w+)',
-			'label-message' => 'twitterlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
-		];
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
 			'pattern' => 'https?://www\\.facebook\\.com/(\\w+)',
@@ -118,13 +111,6 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
-		$preferences['profile-link-reddit'] = [
-			'type' => 'text',
-			'pattern' => 'https?://www\\.reddit\\.com/user/(\\w+)',
-			'label-message' => 'redditlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
-		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
 			'pattern' => 'https?://steamcommunity\\.com/id/(\\w+)/?',
@@ -132,6 +118,22 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
 			'help-message' => 'profilelink-help',
+		];
+		$preferences['profile-link-twitter'] = [
+			'type' => 'text',
+			'pattern' => '@?(\\w{1,15})',
+			'maxlength' => 15,
+			'label-message' => 'twitterlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
+		];
+		$preferences['profile-link-reddit'] = [
+			'type' => 'text',
+			'pattern' => '\\w{3,20}',
+			'maxlength' => 20,
+			'label-message' => 'redditlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
