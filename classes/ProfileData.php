@@ -99,7 +99,7 @@ class ProfileData {
 		];
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
-			'pattern' => 'https?://www\\.facebook\\.com/(\\w+)',
+			'pattern' => 'https?://www\\.facebook\\.com/([\\w\\.]+)',
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('fblinkplaceholder')->plain(),

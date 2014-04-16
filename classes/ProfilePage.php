@@ -339,7 +339,7 @@ class ProfilePage extends \Article {
 			'Steam'		=> '|^https?://steamcommunity\\.com/id/\\w+/?$|',
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
-			'Facebook'	=> '|^https?://www\\.facebook\\.com/\\w+$|',
+			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
 			'Google'	=> '|^https?://plus\\.google\\.com/\\+\\w+/posts$|',
 		];
 		if (isset($patterns[$service])) {
