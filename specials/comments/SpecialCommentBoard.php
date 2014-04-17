@@ -64,7 +64,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 
 		$wgOut->addHTML($mouse->output->commentboard->header($user, $wgOut->getPageTitle()));
 
-		$board = new CommentBoard($user_id);
+		$board = new CommentBoard($user_id, CommentBoard::BOARDTYPE_ARCHIVES);
 
 		$total = $board->countComments();
 		if ($total == 0) {

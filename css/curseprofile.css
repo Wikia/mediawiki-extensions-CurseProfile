@@ -174,6 +174,20 @@ div.mainavatar {
 		float: right;
 	}
 
+.commentdisplay.deleted {
+	background-color: rgba(255, 200, 200, 0.4);
+	border: 2px dashed rgba(125, 0, 0, 0.6);
+	padding: 2px 2px 6px;
+	border-radius: 5px;
+}
+	.commentdisplay.deleted .remove {
+		display: none;
+	}
+
+.commentdisplay.private {
+	background-color: rgba(200, 200, 255, 0.4);
+}
+
 .commentdisplay .entryform {
 	margin-left: 54px;
 	padding-right: 5px;

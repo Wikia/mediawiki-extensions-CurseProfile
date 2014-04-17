@@ -59,8 +59,24 @@ class CommentDisplay {
 
 		$HTML = '';
 		$cUser = \User::newFromId($comment['ub_user_id_from']);
+
+		$type = '';
+		switch ($comment['ub_type']) {
+			case CommentBoard::PRIVATE_MESSAGE:
+			$type = 'private';
+			break;
+
+			case CommentBoard::DELETED_MESSAGE:
+			$type = 'deleted';
+			break;
+
+			case CommentBoard::PUBLIC_MESSAGE:
+			$type = 'public';
+			break;
+		}
+
 		$HTML .= '
-		<div class="commentdisplay" data-id="'.$comment['ub_id'].'">
+		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">

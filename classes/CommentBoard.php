@@ -27,6 +27,17 @@ class CommentBoard {
 	protected static $commentsPerPage = 5;
 
 	/**
+	 * @var		int		one of the below constants
+	 */
+	public $type;
+
+	/**
+	 * Board type constants
+	 */
+	const BOARDTYPE_RECENT   = 1; // recent comments shown on a person's profile
+	const BOARDTYPE_ARCHIVES = 2; // archive page that shows all comments
+
+	/**
 	 * Message visibility constants
 	 */
 	const DELETED_MESSAGE = -1;
@@ -39,8 +50,9 @@ class CommentBoard {
 	 *
 	 * @param	int		the ID of a user
 	 */
-	public function __construct($user_id) {
+	public function __construct($user_id, $type = self::BOARDTYPE_RECENT) {
 		$this->user_id = intval($user_id);
+		$this->type = intval($type);
 		if ($this->user_id < 1) {
 			throw new \Exception('Invalid user ID');
 		}
@@ -52,15 +64,26 @@ class CommentBoard {
 	 * @param	int		ID of a user
 	 * @return	array	INTs from the list of visibility CONST
 	 */
-	private function getViewableTypes($user_id) {
+	private function getViewableTypes($asUser) {
 		$types = [self::PUBLIC_MESSAGE];
+
 		if (is_null($asUser)) {
 			global $wgUser;
 			$asUser = $wgUser->getID();
 		}
-		if ($this->user_id == $asUser) {
+		if (!($asUser instanceof \User)) {
+			$asUser = \User::newFromId($asUser);
+			$asUser->load();
+		}
+
+		if ($this->user_id == $asUser->getId()) {
 			$types[] = self::PRIVATE_MESSAGE;
 		}
+
+		if ($this->type == self::BOARDTYPE_ARCHIVES && $asUser->isAllowed('profile-modcomments')) {
+			$types[] = self::DELETED_MESSAGE;
+		}
+
 		return $types;
 	}
 
