@@ -517,7 +517,7 @@ class ProfilePage extends \Article {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = CP::placeholderImage($parser, 110, 64, ['class'=>'level', 'title'=>$tier['text']])[0];
+				$HTML = \Html::element('img', ['class'=>'level', 'title'=>$tier['text'], 'src'=>'/extensions/CurseProfile/img/levels/100.png']);
 			} else {
 				break;
 			}
