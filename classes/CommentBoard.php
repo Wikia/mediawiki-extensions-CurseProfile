@@ -293,6 +293,7 @@ class CommentBoard {
 		}
 
 		// comment must either be on user's own profile, or have the permission
-		return $comment['ub_user_id'] == $user->getId() || $user->isAllowed('profile-modcomments');
+		return $comment['ub_type'] != self::DELETED_MESSAGE && 
+			($comment['ub_user_id'] == $user->getId() || $user->isAllowed('profile-modcomments'));
 	}
 }

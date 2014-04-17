@@ -180,9 +180,6 @@ div.mainavatar {
 	padding: 2px 2px 6px;
 	border-radius: 5px;
 }
-	.commentdisplay.deleted .remove {
-		display: none;
-	}
 
 .commentdisplay.private {
 	background-color: rgba(200, 200, 255, 0.4);
