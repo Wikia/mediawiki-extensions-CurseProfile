@@ -23,7 +23,7 @@ class skin_managefriends {
 	public function display($friends) {
 		$this->HTML = '<h2>'.wfMessage('friends').'</h2>';
 		if (count($friends)) {
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, [$this, 'removeFriend']);
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends);
 		} else {
 			$this->HTML .= wfMessage('nofriends')->plain();
 		}
@@ -44,41 +44,25 @@ class skin_managefriends {
 
 		if (count($received)) {
 			$this->HTML .= '<h2>'.wfMessage('pendingrequests').'</h2>';
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray(array_keys($received), [$this, 'respondToRequest']);
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray(array_keys($received), true);
 		}
 
 		$this->HTML .= '<h2>'.wfMessage('friends').'</h2>';
 		if (count($friends)) {
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, [$this, 'removeFriend']);
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, true);
 		} else {
 			$this->HTML .= wfMessage('soronery')->plain();
 		}
 
 		if (count($sent)) {
 			$this->HTML .= '<h2>'.wfMessage('sentrequests').'</h2>';
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($sent, [$this, 'cancelRequest']);
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($sent, true);
 		}
 
-		return $this->HTML;
-	}
+		$this->HTML .= '<h3>'.wfMessage('senddirectrequest').'</h3>';
+		$this->HTML .= Html::element('input', ['type'=>'text', 'id'=>'directfriendreq', 'placeholder'=>wfMessage('directfriendreqplaceholder')->text()]);
+		$this->HTML .= Html::element('button', ['id'=>'senddirectreq'], wfMessage('sendrequest')->text());
 
-	public function respondToRequest($curse_id, $user) {
-		return
-			$this->friendLink($user->getId(), 'Special:ConfirmFriend', 'confirmfriend-response')
-			. ' ' .
-			$this->friendLink($user->getId(), 'Special:IgnoreFriend', 'ignorefriend-response')
-		;
-	}
-
-	public function removeFriend($curse_id, $user) {
-		return $this->friendLink($user->getId(), 'Special:RemoveFriend', 'removefriend-response');
-	}
-
-	public function cancelRequest($curse_id, $user) {
-		return $this->friendLink($user->getId(), 'Special:RemoveFriend', 'friendrequestcancel');
-	}
-
-	public function friendLink($id, $page, $msg) {
-		return "<a href='/$page/$id'>".wfMessage($msg).'</a>';
+		return '<div id="managefriends">'.$this->HTML.'</div>';
 	}
 }

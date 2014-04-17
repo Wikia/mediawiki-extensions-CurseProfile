@@ -46,6 +46,8 @@ $messages['en'] = array(
 						'friends'							=> 'Friends',
 						'pendingrequests'					=> 'Pending Requests',
 						'sentrequests'						=> 'Sent Requests',
+						'senddirectrequest'					=> 'Send New Friend Request',
+						'sendrequest'						=> 'Send Request',
 						'exception-nologinreturn-text'		=> 'Please [{{fullurl:Special:UserLogin|returnto=$1}} log in] to be able to access this page or action.',
 
 						// Friendship messages
@@ -57,6 +59,9 @@ $messages['en'] = array(
 						'friendrequestconfirm-error'		=> 'There was an error confirming the request',
 						'friendrequestignore-error'			=> 'There was an error ignoring request',
 						'friendrequestremove-error'			=> 'There was an error while trying to remove a friend',
+						'friendrequest-direct-success'		=> 'Your friend has been sent',
+						'friendrequest-direct-notfound'		=> 'A user by that name could not be found',
+						'friendrequest-direct-unmerged'		=> 'This user cannot be added as a friend because they have not merged their Curse account',
 						'friendrequestsend'					=> 'Add Friend',
 						'friendrequestcancel'				=> 'Cancel Friend Request',
 						'ignorefriend-response'				=> 'Ignore',
@@ -106,6 +111,7 @@ $messages['en'] = array(
 						// form placeholders
 						'commentplaceholder'				=> 'Leave a comment',
 						'commentreplyplaceholder'			=> 'Leave a reply',
+						'directfriendreqplaceholder'		=> 'Enter a username',
 						'aboutmeplaceholder'				=> 'Write something about yourself!',
 						'steamlinkplaceholder'				=> 'http://steamcommunity.com/id/example',
 						'fblinkplaceholder'					=> 'https://www.facebook.com/example',

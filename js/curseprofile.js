@@ -141,6 +141,7 @@ function CurseProfile($) {
 	friendship = {
 		init: function() {
 			$(document).on('click', '.friendship-action', friendship.sendAction);
+			$('#senddirectreq').on('click', friendship.sendDirectReq);
 		},
 
 		sendAction: function(e) {
@@ -156,7 +157,7 @@ function CurseProfile($) {
 			}
 			(new mw.Api()).post({
 				action: 'friend',
-				friendship_action: $this.data('action'),
+				do: $this.data('action'),
 				curse_id: $this.data('id'),
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
@@ -178,7 +179,24 @@ function CurseProfile($) {
 				}
 			}).fail(function(resp) {
 				$buttons.attr('disabled', false);
-				console.dir(resp);
+			});
+		},
+
+		sendDirectReq: function(e) {
+			var $this = $(this);
+			$('.directreqresult').slideUp().detach(); // remove existing messages
+			$this.attr('disabled', true);
+			(new mw.Api()).post({
+				action: 'friend',
+				do: 'directreq',
+				name: $('#directfriendreq').val(),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				$('<div/>').addClass('successbox').addClass('directreqresult').text(resp.html).hide().insertAfter('#senddirectreq').slideDown();
+				$this.attr('disabled', false);
+			}).fail(function(message, resp) {
+				$('<div/>').addClass('errorbox').addClass('directreqresult').text(resp.error.info).hide().insertAfter('#senddirectreq').slideDown();
+				$this.attr('disabled', false);
 			});
 		}
 	};

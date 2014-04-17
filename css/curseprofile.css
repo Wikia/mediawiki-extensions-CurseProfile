@@ -244,6 +244,19 @@ ul.friends {
 		word-wrap: break-word;
 	}
 
+/* manage friends special page */
+#managefriends .friendship-container {
+	display: inline;
+}
+
+#managefriends .errorbox:last-child,
+#managefriends .warningbox:last-child,
+#managefriends .successbox:last-child {
+	float: none;
+	margin-top: 0.5em;
+}
+
+
 @media screen and (min-width: 1260px) {
 	.stats ul.friends {
 		-moz-columns: 2;

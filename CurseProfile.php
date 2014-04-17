@@ -79,10 +79,15 @@ $wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
-	'scripts' => ['js/jquery.timeago.js', 'js/curseprofile.js'],
+	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api'],
+	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago'],
+];
+$wgResourceModules['jquery.timeago'] = [
+	'scripts' => ['js/jquery.timeago.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
 ];
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',

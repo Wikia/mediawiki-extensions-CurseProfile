@@ -13,6 +13,11 @@
 **/
 namespace CurseProfile;
 
+/**
+ * Special page that allows one to manage their friends.
+ * In addition to listing current friends, shows pending requests, both incoming and outgoing.
+ * Also allows for friend requests to be sent directly by name.
+ */
 class SpecialManageFriends extends \SpecialPage {
 	public function __construct() {
 		parent::__construct( 'ManageFriends' );

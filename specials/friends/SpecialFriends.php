@@ -13,6 +13,10 @@
 **/
 namespace CurseProfile;
 
+/**
+ * Special page that lists the friends a user has.
+ * Redirects to ManageFriends when viewing one's own friends page.
+ */
 class SpecialFriends extends \UnlistedSpecialPage {
 	public function __construct() {
 		parent::__construct( 'Friends' );
