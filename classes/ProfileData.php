@@ -230,7 +230,6 @@ class ProfileData {
 	}
 
 	public function getFavoriteWiki() {
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		$sites = self::getWikiSites();
 		if ($sites) {
 			foreach ($sites['data']['wikis'] as $wiki) {
@@ -244,7 +243,7 @@ class ProfileData {
 
 	public static function getWikiSites() {
 		global $wgServer;
-		$mouse = CP::loadMouse();
+		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		$jsonSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
 		return json_decode($jsonSites, true);
 	}
