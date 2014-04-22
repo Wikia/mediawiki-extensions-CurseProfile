@@ -24,7 +24,6 @@ class Hooks {
 
 	public static function onParserFirstCall(&$parser) {
 		if (self::$profilePage) {
-			$parser->setFunctionHook('placeholderImage',	'CurseProfile\CP::placeholderImage');
 			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
 			$parser->setFunctionHook('groups',				'CurseProfile\ProfilePage::groupList');
 			$parser->setFunctionHook('aboutme',				'CurseProfile\ProfilePage::aboutBlock');

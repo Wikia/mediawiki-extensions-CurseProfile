@@ -373,8 +373,7 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		// $HTML = CP::placeholderImage($nothing, 157, 118, ['title'=>$wiki['wiki_name'], 'alt'=>$wiki['wiki_name']])[0];
-		$HTML = \Html::element('img', ['src'=>'/extensions/CurseProfile/img/wikis/distance.jpg', 'height'=>118, 'width'=>157, 'alt'=>$wiki['wiki_name']]);
+		$HTML = \Html::element('img', ['src'=>CP::getWikiImageByHash($wiki['md5_key']), 'height'=>118, 'width'=>157, 'alt'=>$wiki['wiki_name']]);
 		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}/'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 

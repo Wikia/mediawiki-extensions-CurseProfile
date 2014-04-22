@@ -88,37 +88,6 @@ class CP {
 	}
 
 	/**
-	 * Creates a placeholder image tag of given dimensions.
-	 * {{#img: 25}} produces a 25px square image
-	 * Other examples:
-	 * {{#img: 25 | class="icon" style="border: 1px solid black;"}}
-	 * {{#img: 25 | 50}}
-	 * {{#img: 25 | 50 | class="icon" style="border: 1px solid black;"}}
-	 */
-	public static function placeholderImage(&$parser, $width, $height = '', $attributeString = '') {
-		if (intval($height) < 1) {
-			$attributeString = $height;
-			$height = $width;
-		}
-
-		if (is_array($attributeString)) {
-			$attributes = [];
-			foreach ($attributeString as $attr => $val) {
-				$attributes[] = $attr.'="'.htmlspecialchars($val, ENT_QUOTES).'"';
-			}
-			$attributes = implode(' ', $attributes);
-		} else {
-			$attributes = $attributeString;
-		}
-
-		$html = "<img src='http://placehold.it/{$width}x{$height}' $attributes />";
-		return [
-			$html,
-			'isHTML' => true,
-		];
-	}
-
-	/**
 	 * Craetes a time tag that can be converted to a dynamic relative time
 	 * after adding timeago.yarp.com to the page
 	 */
@@ -144,5 +113,32 @@ class CP {
 		}
 		return \Linker::linkKnown($user->getUserPage(), $user->getName()); //htmlspecialchars($user->getName())
 		// return \Linker::userLink($user_id, $user->getName());
+	}
+
+	/**
+	 * Returns a string URL to a png image for a gamepedia wiki
+	 *
+	 * @param	string	md5 site key
+	 * @return	string	url path to image
+	 */
+	public static function getWikiImageByHash($md5) {
+		$mouse = self::loadMouse(['curl' => 'mouseTransferCurl']);
+
+		// Try to use a cached value from redis
+		if ($mouse->redis->exists('wikiavatar:'.$md5)) {
+			return $mouse->redis->get('wikiavatar:'.$md5);
+		}
+
+		// fallback to direct lookup
+		$result = $mouse->curl->post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5), [], [], true);
+		$json = json_decode($result, true);
+		if ($json && isset($json['AvatarUrl'])) {
+			// cache to redis
+			$mouse->redis->set('wikiavatar:'.$md5, $json['AvatarUrl']);
+			$mouse->redis->expire('wikiavatar:'.$md5, 86400); // discard after 24 hrs
+			return $json['AvatarUrl'];
+		} else {
+			return '';
+		}
 	}
 }

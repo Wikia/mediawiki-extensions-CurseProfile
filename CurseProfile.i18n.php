@@ -14,7 +14,6 @@
 
 $magicWords = [];
 $magicWords['en'] = [
-						'placeholderImage'					=> array(0, 'img'),
 						'recentactivity'					=> array(0, 'recentactivity'),
 						'friendadd'							=> array(0, 'friendadd'),
 						'friendcount'						=> array(0, 'friendcount'),
