@@ -110,11 +110,8 @@ class Hooks {
 
 		// Add tables that may exist for previous users of SocialProfile
 		$updater->addExtensionUpdate(array('addTable', 'user_board', "{$extDir}/install/sql/create_user_board.sql", true));
-		// $updater->addExtensionUpdate(array('addTable', 'user_profile', "{$extDir}/install/sql/create_user_profile.sql", true));
 
 		// Update tables with extra fields for our use
-		// $updater->addExtensionField('user_profile', 'up_steam_profile', "{$extDir}/upgrade/sql/add_profile_links.sql", true);
-		// $updater->addExtensionField('user_profile', 'up_favorite_wiki', "{$extDir}/upgrade/sql/add_favorite_wiki.sql", true);
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
 
 		if (defined('CURSEPROFILE_MASTER')) {
