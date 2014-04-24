@@ -84,7 +84,7 @@ $messages['en'] = array(
 						'userprofiletab'					=> 'User profile',
 						'tooltip-ca-switch_type'			=> 'Switch between profile and wiki page',
 						'aboutme'							=> 'About Me',
-						'aboutmehelp'						=> 'You may use wikitext for formatting.',
+						'aboutmehelp'						=> 'Wikitext is available for formatting.',
 						'favoritewiki'						=> 'Favorite Wiki',
 						'citylabel'							=> 'City',
 						'statelabel'						=> 'State/Province',
@@ -106,6 +106,8 @@ $messages['en'] = array(
 						'prefs-public'						=> 'Public Profile',
 						'prefs-location'					=> 'Location',
 						'prefs-profiles'					=> 'Other Profiles',
+						'avatar'							=> 'Avatar',
+						'avatar-help'						=> 'Gamepedia uses Gravatar to display an avatar based on your email address. Visit [http://www.gravatar.com/ gravatar.com] to change your avatar.',
 
 						// form placeholders
 						'commentplaceholder'				=> 'Leave a comment',

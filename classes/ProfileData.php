@@ -82,6 +82,13 @@ class ProfileData {
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];
+		$preferences['profile-avatar'] = [
+			'type' => 'info',
+			'label-message' =>'avatar',
+			'section' => 'personal/info/public',
+			'default' => wfMessage('avatar-help')->parse(),
+			'raw' => true,
+		];
 		$preferences['profile-city'] = [
 			'type' => 'text',
 			'label-message' => 'citylabel',
