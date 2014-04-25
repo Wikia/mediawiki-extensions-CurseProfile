@@ -180,22 +180,14 @@ class Friendship {
 		$mouse->redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
 		$mouse->redis->sadd($this->sentRequestsRedisKey(), $toUser);
 
-		$user = \User::newFromId(CP::userIDfromCurseID($toUser));
-		if ($user->getEmail() && $user->getIntOption('friendreqemail')) {
-			if (trim($user->getRealName())) {
-				$name = $user->getRealName();
-			} else {
-				$name = $user->getName();
-			}
-			$thisUser = \User::newFromId(CP::userIDfromCurseID($this->curse_id));
-			\EchoEvent::create([
-				'type' => 'friendship-request',
-				'agent' => $thisUser,
-				'extra' => [
-					'target_user_id' => $user
-				]
-			]);
-		}
+		global $wgUser;
+		\EchoEvent::create([
+			'type' => 'friendship-request',
+			'agent' => $wgUser,
+			'extra' => [
+				'target_user_id' => CP::userIDfromCurseID($toUser)
+			]
+		]);
 
 		wfRunHooks('CurseProfileAddFriend', [$this->curse_id, $toUser]);
 
