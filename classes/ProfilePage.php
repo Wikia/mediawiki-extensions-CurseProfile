@@ -580,7 +580,7 @@ class ProfilePage extends \Article {
 	<div class="rightcolumn">
 		<div class="borderless section">
 			<div class="rightfloat">
-				<div class="score">{{#Points: User:%1$s | all | raw}} GP</div>
+				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
 				<div class="level">{{#userlevel: %2$s}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>

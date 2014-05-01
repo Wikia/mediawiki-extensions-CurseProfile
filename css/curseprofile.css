@@ -194,6 +194,10 @@ div.mainavatar {
 	font-size: 130%;
 }
 
+img.GP-brand {
+	vertical-align: sub;
+}
+
 .level {
 	margin-bottom: 0.4em;
 }
