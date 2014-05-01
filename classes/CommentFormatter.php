@@ -21,7 +21,7 @@ class CommentFormatter extends \EchoBasicFormatter {
 
 	protected function formatPayload($payload, $event, $user) {
 		switch ($payload) {
-			case '':
+			case 'comment-text':
 				$extra = $event->getExtra();
 				if (!isset($extra['comment_text'])) {
 					return '';
