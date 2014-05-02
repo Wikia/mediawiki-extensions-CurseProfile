@@ -185,14 +185,13 @@ class Hooks {
 			'category' => 'friendship',
 			'group' => 'interactive',
 			'icon' => 'gratitude',
+			'formatter-class' => 'CurseProfile\NotificationFormatter',
 			'title-message' => 'notification-friendship-request',
 			'title-params' => ['agent'],
 			'email-subject-message' => 'notification-friendship-request-email-subj',
 			'email-subject-params' => ['agent'],
 			'email-body-message' => 'notification-friendship-request-email-body',
-			'email-body-params' => ['agent'],
-			'email-body-batch-message' => 'notification-friendship-request-email-batch',
-			'email-body-batch-params' => ['agent'],
+			'email-body-params' => ['agent', 'user', 'gamepedia-footer'],
 		];
 
 		$notificationCategories['profile-comment'] = [
@@ -203,16 +202,14 @@ class Hooks {
 			'category' => 'profile-comment',
 			'group' => 'interactive',
 			'icon' => 'chat',
-			'formatter-class' => 'CurseProfile\CommentFormatter',
+			'formatter-class' => 'CurseProfile\NotificationFormatter',
 			'title-message' => 'notification-profile-comment',
 			'title-params' => ['agent', 'user'],
 			'payload' => ['comment-text'],
 			'email-subject-message' => 'notification-profile-comment-email-subj',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-message' => 'notification-profile-comment-email-body',
-			'email-body-params' => ['agent', 'user'],
-			'email-body-batch-message' => 'notification-profile-comment-email-batch',
-			'email-body-batch-params' => ['agent', 'user'],
+			'email-body-params' => ['agent', 'user', 'gamepedia-footer'],
 		];
 		return true;
 	}

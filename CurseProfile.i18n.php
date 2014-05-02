@@ -150,34 +150,28 @@ $messages['en'] = array(
 						// Echo Notification messages
 						'echo-pref-subscription-profile-comment' => 'Leaves a comment on my profile',
 						'echo-dismiss-title-profile-comment'=> 'profile comment',
-						'notification-profile-comment'		=> '[[User:$1]] has left a comment on [[User:$2|your profile]].',
+						'notification-profile-comment'		=> '[[{{ns:User}}:$1]] has left a comment on [[{{ns:User}}:$2|your profile]].',
 						'notification-profile-comment-email-subj' => '$1 has left a comment on your Gamepedia profile!',
 						'notification-profile-comment-email-body' => 'Hi $2,
-$1 has left a comment on your profile at {{SITENAME}}. You can read and reply by viewing your profile:
+$1 has left a comment on your profile on {{SITENAME}}. You can read and reply by viewing your profile:
 
-$3
+{{canonicalurl:{{ns:User}}:$2}}
 
-Thanks,
-Your friendly {{SITENAME}} notification system
-
-You can unsubscribe by changing your email preferences at:
-$4',
-						'notification-profile-comment-email-batch' => '',
+$3',
 
 						'echo-pref-subscription-friendship' => 'Sends me a friend request',
 						'echo-dismiss-title-friendship'		=> 'friendship request',
 						'notification-friendship-request'	=> '[[User:$1]] has added you as a friend.',
 						'notification-friendship-request-email-subj' => '$1 has added you as a friend on Gamepedia!',
 						'notification-friendship-request-email-body' => 'Hi $2,
-$1 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} $3 or by visiting the friend management page:
+$1 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} {{canonicalurl:{{ns:User}}:$1}} or by visiting the friend management page:
 
-$5
+{{canonicalurl:{{#special:ManageFriends}}}}
 
-Thanks,
-Your friendly {{SITENAME}} notification system
+$3',
+						'emailfooter-gamepedia' => 'Thanks,
+Your friendly Gamepedia notification system
 
 You can unsubscribe by changing your email preferences at:
-$4',
-						'notification-friendship-request-email-batch' => '',
-
+{{canonicalurl:{{#special:Preferences}}#mw-prefsection-echo}}',
 );

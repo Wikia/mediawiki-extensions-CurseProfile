@@ -57,9 +57,9 @@ function CurseProfile($) {
 						callback();
 					}
 				})
-				.fail(function(r) {
+				.fail(function(code, resp) {
 					$this.attr('disabled', false);
-					console.debug(r);
+					console.debug(resp);
 				});
 			// if the button is left disabled when detached, the browser will remember and keep it disabled on page reloads
 			// thus it needs to be re-enabled before we get rid of it
@@ -128,7 +128,7 @@ function CurseProfile($) {
 				if (resp.html) {
 					$comment.slideUp();
 				}
-			}).fail(function(resp) {
+			}).fail(function(code, resp) {
 				$this.show();
 				console.dir(resp);
 			});
@@ -165,7 +165,7 @@ function CurseProfile($) {
 				if (resp.remove) {
 					var $list = $this.closest('ul.friends');
 					if ($list.length === 0) {
-						$this.detach();
+						$container.detach();
 					} else {
 						if ($list.find('li').length > 1) {
 							$this.closest('li').hide();
@@ -177,7 +177,7 @@ function CurseProfile($) {
 				} else {
 					$container.html(resp.html);
 				}
-			}).fail(function(resp) {
+			}).fail(function(code, resp) {
 				$buttons.attr('disabled', false);
 			});
 		},

@@ -51,7 +51,7 @@ $wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi
 $wgAutoloadClasses['CurseProfile\CommentApi']     = $extDir . 'classes/CommentApi.php';
 $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
-$wgAutoloadClasses['CurseProfile\CommentFormatter'] = $extDir . 'classes/CommentFormatter.php';
+$wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 
 // Special Pages
