@@ -194,7 +194,8 @@ div.mainavatar {
 }
 
 img.GP-brand {
-	vertical-align: sub;
+	vertical-align: middle;
+	margin-bottom: 5px;
 }
 
 .level {
