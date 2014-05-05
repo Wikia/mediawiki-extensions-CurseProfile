@@ -373,7 +373,12 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		$HTML = \Html::element('img', ['src'=>CP::getWikiImageByHash($wiki['md5_key']), 'height'=>118, 'width'=>157, 'alt'=>$wiki['wiki_name']]);
+		$imgPath = CP::getWikiImageByHash($wiki['md5_key']);
+		if (!empty($imgPath)) {
+			$HTML = \Html::element('img', ['src'=>$imgPath, 'height'=>118, 'width'=>157, 'alt'=>$wiki['wiki_name']]);
+		} else {
+			$HTML = htmlspecialchars($wiki['wiki_name']);
+		}
 		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}/'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
