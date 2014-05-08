@@ -335,7 +335,6 @@ class ProfilePage extends \Article {
 	 * @return	string	username or id
 	 */
 	private static function validateUrl($service, &$url) {
-		echo 'validating '.$service;
 		$patterns = [
 			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
