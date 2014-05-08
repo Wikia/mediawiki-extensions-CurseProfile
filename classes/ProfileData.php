@@ -113,14 +113,14 @@ class ProfileData {
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
-			'pattern' => 'https?://plus\\.google\\.com/\\+(\\w+)/posts',
+			'pattern' => 'https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)',
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
-			'pattern' => 'https?://steamcommunity\\.com/id/(\\w+)/?',
+			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
 			'label-message' => 'steamlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
