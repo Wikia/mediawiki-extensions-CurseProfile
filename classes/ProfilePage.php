@@ -336,7 +336,7 @@ class ProfilePage extends \Article {
 	 */
 	private static function validateUrl($service, &$url) {
 		$patterns = [
-			'Steam'		=> '|^https?://steamcommunity\\.com/id/\\w+/?$|',
+			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',

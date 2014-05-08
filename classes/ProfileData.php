@@ -120,7 +120,7 @@ class ProfileData {
 		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
-			'pattern' => 'https?://steamcommunity\\.com/id/(\\w+)/?',
+			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
 			'label-message' => 'steamlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
