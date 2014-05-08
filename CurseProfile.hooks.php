@@ -65,7 +65,7 @@ class Hooks {
 	public static function onArticleFromTitle(&$title, &$article) {
 		global $wgRequest, $wgOut;
 
-		if (self::$profilePage->isProfilePage()) {
+		if (self::$profilePage && self::$profilePage->isProfilePage()) {
 			// Disable editing
 			if ( $wgRequest->getVal( 'action' ) == 'edit' ) {
 				$wgOut->redirect( $title->getFullURL() );
@@ -73,7 +73,7 @@ class Hooks {
 			// Take over page output
 			$wgOut->addModules('ext.curseprofile.profilepage');
 			$article = self::$profilePage;
-		} elseif (self::$profilePage->isUserWikiPage()) {
+		} elseif (self::$profilePage && self::$profilePage->isUserWikiPage()) {
 			// already taken care of in onBeforeInitialize
 		} else {
 			self::$profilePage = null;
