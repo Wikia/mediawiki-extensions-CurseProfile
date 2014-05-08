@@ -522,7 +522,7 @@ class ProfilePage extends \Article {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = \Html::element('img', ['class'=>'level', 'title'=>$tier['text'], 'src'=>'/extensions/CurseProfile/img/levels/100.png']);
+				$HTML = \Html::element('img', ['class'=>'level', 'title'=>$tier['text'], 'src' => $tier['image_large']]);
 			} else {
 				break;
 			}
