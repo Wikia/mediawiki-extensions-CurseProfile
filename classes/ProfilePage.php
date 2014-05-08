@@ -335,12 +335,13 @@ class ProfilePage extends \Article {
 	 * @return	string	username or id
 	 */
 	private static function validateUrl($service, &$url) {
+		echo 'validating '.$service;
 		$patterns = [
 			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'Google'	=> '|^https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)$|',
+			'Google'	=> '~^https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)$~',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
