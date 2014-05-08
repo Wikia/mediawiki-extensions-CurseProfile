@@ -503,12 +503,6 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		// don't display if the viewer does not have the 'userlevel-view' right
-		global $wgUser;
-		if (!$wgUser->isAllowed('userlevel-view')) {
-			return '';
-		}
-
 		$mouse = CP::loadMouse();
 		$userPoints = \PointsDisplay::pointsForCurseId($curse_id)['score'];
 		$levelDefinitions = $mouse->redis->getUnserialized('wikipoints::levels');
