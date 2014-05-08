@@ -340,7 +340,7 @@ class ProfilePage extends \Article {
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'Google'	=> '|^https?://plus\\.google\\.com/\\+\\w+/posts$|',
+			'Google'	=> '|^https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)$|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
