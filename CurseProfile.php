@@ -72,10 +72,6 @@ $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/co
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
 $wgSpecialPageGroups['CommentBoard']						= 'users';
 
-$wgAutoloadClasses['CurseProfile\SpecialToggleProfilePreference'] = "{$extDir}/specials/SpecialToggleProfilePreference.php";
-$wgSpecialPages['ToggleProfilePreference']					= 'CurseProfile\SpecialToggleProfilePreference';
-$wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
-
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],

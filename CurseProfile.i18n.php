@@ -79,7 +79,6 @@ $messages['en'] = array(
 						'commentaction'						=> 'Post',
 						'cp-editprofile'					=> 'Edit Profile',
 						'profileprefselect'					=> 'Page Type',
-						'toggletypepref'					=> 'Switch User Page Default',
 						'userwikitab'						=> 'User wiki',
 						'userprofiletab'					=> 'User profile',
 						'tooltip-ca-switch_type'			=> 'Switch between profile and wiki page',

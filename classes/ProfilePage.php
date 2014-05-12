@@ -152,15 +152,6 @@ class ProfilePage extends \Article {
 				unset($links['views']['edit']);
 			}
 		}
-
-		// Always visible regardless of page type
-		if ($this->viewingSelf()) {
-			$links['actions']['switch_type'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('toggletypepref')->plain(),
-				'href'		=> '/Special:ToggleProfilePreference',
-			];
-		}
 	}
 
 	/**
