@@ -244,6 +244,7 @@ ul.friends {
 
 .helper_mark:before {
 	background-color: #ACE0FC;
+	color: black;
 	border: 1px solid #000000;
 	border-radius: 10px;
 	content: "?";
@@ -258,6 +259,7 @@ ul.friends {
 
 	.helper_mark > span {
 		background-color: #EEEEEE;
+		color: black;
 		border-radius: 10px;
 		bottom: 135%;
 		-webkit-box-shadow: 0 0 5px 3px rgba(50, 50, 50, 0.75);
