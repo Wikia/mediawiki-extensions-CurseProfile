@@ -611,7 +611,7 @@ class ProfilePage extends \Article {
 			<div class="favorite">{{#favwiki: %2$s}}</div>
 		</div>
 		<div class="section stats">
-			<h3>'.wfMessage('cp-statisticssection').'<br/><sub>since May 13, 2014</sub></h3>
+			<h3>'.wfMessage('cp-statisticssection').'<br/><sub>since May 13, 2014</sub><div class="helper_mark"><span>The Gamepedia team is currently working to compile historic statistics.  We apologize for the inconvenience while we work to develop this feature.</span></div></h3>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
