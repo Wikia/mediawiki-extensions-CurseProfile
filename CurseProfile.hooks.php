@@ -18,9 +18,16 @@ class Hooks {
 	 * Reference to ProfilePage object
 	 *
 	 * @access	private
-	 * @var		object
+	 * @var		object	CurseProfile\ProfilePage
 	 */
 	private static $profilePage;
+
+	/**
+	 * Reference to the title originally parsed from this request
+	 * @access	private
+	 * @var		object	Title
+	 */
+	private static $title;
 
 	public static function onParserFirstCall(&$parser) {
 		if (self::$profilePage) {
@@ -43,13 +50,15 @@ class Hooks {
 	}
 
 	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
-		$context = \RequestContext::getMain();
+		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
-		if (self::$profilePage->isUserWikiPage()) {
-			$article = self::$profilePage->getUserWikiArticle();
-			$title = $article->getTitle();
-			$context->setTitle($title);
+		if (self::$profilePage->isSpoofedWikiPage()) {
+			// overwrite the assignable argument
+			$title = self::$profilePage->getUserWikiArticle()->getTitle();
+			\RequestContext::getMain()->setTitle($title);
+		} elseif ($request->getVal('redirectToUserwiki')) {
+			$output->redirect(self::$profilePage->getCustomUserWikiTitle()->getFullURL());
 		}
 
 		return true;
@@ -65,20 +74,31 @@ class Hooks {
 	public static function onArticleFromTitle(&$title, &$article) {
 		global $wgRequest, $wgOut;
 
-		if (self::$profilePage && self::$profilePage->isProfilePage()) {
-			// Disable editing
-			if ( $wgRequest->getVal( 'action' ) == 'edit' ) {
-				$wgOut->redirect( $title->getFullURL() );
-			}
-			// Take over page output
-			$wgOut->addModules('ext.curseprofile.profilepage');
-			$article = self::$profilePage;
-		} elseif (self::$profilePage && self::$profilePage->isUserWikiPage()) {
-			// already taken care of in onBeforeInitialize
-		} else {
-			self::$profilePage = null;
+		// TODO shouldn't need to special case against static vars here.
+		// We should be able to statelessly create a new ProfilePage from
+		// the given title and perform logic from that object.
+		// However, some of the crappy static stuff in ProfilePage makes that
+		// more appropriate approach problematic until the ProfilePage class
+		// gets cleaned up first.
+		if (!self::$title->equals($title) || !self::$profilePage) {
+			return true;
 		}
 
+		// handle rendering duties for any of our namespaces
+		if (self::$profilePage->isProfilePage()) {
+			// Add our CSS and JS
+			$article = self::$profilePage;
+			$wgOut->addModules('ext.curseprofile.profilepage');
+			return true;
+		}
+
+		return true;
+	}
+
+	public static function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
+		if (self::$profilePage && self::$profilePage->profilePreferred()) {
+			$extraQuery = 'redirectToUserwiki=1';
+		}
 		return true;
 	}
 
@@ -92,7 +112,7 @@ class Hooks {
 	 * Adds links to the navigation tabs
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage) {
+		if (self::$profilePage && self::$profilePage->isUserPage()) {
 			self::$profilePage->customizeNavBar($links);
 		}
 		return true;

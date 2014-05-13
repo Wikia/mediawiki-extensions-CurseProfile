@@ -93,6 +93,7 @@ $wgResourceModules['ext.curseprofile.customskin'] = [
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
+$wgHooks['ArticleUpdateBeforeRedirect'][]	= 'CurseProfile\Hooks::onArticleUpdateBeforeRedirect';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';

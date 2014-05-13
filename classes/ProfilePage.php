@@ -19,12 +19,15 @@ class ProfilePage extends \Article {
 	protected $user_id;
 	protected $user;
 	protected $profile;
+	private $actionIsView;
 
+	// TODO refactor out static methods and these variables
 	static protected $output;
 	static private $self;
 
 	public function __construct($title) {
 		parent::__construct($title);
+		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
 		if ($this->user) {
@@ -63,15 +66,29 @@ class ProfilePage extends \Article {
 		self::$output->addHTML($outputString);
 	}
 
+	public function profilePreferred() {
+		return $this->profile->getTypePref();
+	}
+
+	/**
+	 * True if we are not on a subpage, and if we are in the basic User namespace,
+	 * or either of the custom UserProfile/UserWiki namespaces.
+	 */
 	public function isUserPage() {
-		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false && $this->actionIsView
 			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
+	/**
+	 * True if we are viewing the user's default option (in the default User namespace)
+	 */
 	public function isDefaultPage() {
 		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
 	}
 
+	/**
+	 * True if we need to render the user's profile page on either namespace
+	 */
 	public function isProfilePage() {
 		return $this->isUserPage() && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
@@ -79,6 +96,9 @@ class ProfilePage extends \Article {
 			);
 	}
 
+	/**
+	 * True when we need to render the user's wiki page on either namespace
+	 */
 	public function isUserWikiPage() {
 		return $this->isUserPage() && (
 				(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
@@ -86,10 +106,28 @@ class ProfilePage extends \Article {
 			);
 	}
 
+	/**
+	 * True if we are on the custom UserWiki namespace
+	 */
+	public function isSpoofedWikiPage() {
+
+		return $this->mTitle->getNamespace() == NS_USER_WIKI && $this->actionIsView;
+	}
+
+	/**
+	 * Returns the article object for the User's page in the standard User namespace
+	 */
 	public function getUserWikiArticle() {
 		$article = new \Article($this->user->getUserPage());
 		$article->setContext($this->getContext());
 		return $article;
+	}
+
+	/**
+	 * Returns the title object for the user's page in the UserWiki namespace
+	 */
+	public function getCustomUserWikiTitle() {
+		return \Title::makeTitle(NS_USER_WIKI, $this->user->getName());
 	}
 
 	public function customizeNavBar(&$links) {
@@ -145,12 +183,6 @@ class ProfilePage extends \Article {
 				'href'		=> $this->profile->getProfilePath(),
 				'primary'	=> true,
 			];
-
-			if ($this->profile->getTypePref()) {
-				// enabling editing while wiki is not the default is a lot more work
-				// so it is disabled by removing the link
-				unset($links['views']['edit']);
-			}
 		}
 	}
 
