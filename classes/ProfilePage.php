@@ -354,8 +354,8 @@ class ProfilePage extends \Article {
 	 * Extracts the username from a steamcommunity.com profile link
 	 *
 	 * @param	string	name of service to validate
-	 * @param	string	url to profile
-	 * @return	string	username or id
+	 * @param	string	url to profile or username, may be modified to strip leading @ from twitter
+	 * @return	mixed	false or validated string value
 	 */
 	private static function validateUrl($service, &$url) {
 		$patterns = [
@@ -363,7 +363,7 @@ class ProfilePage extends \Article {
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'Google'	=> '~^https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)$~',
+			'Google'	=> '~^https?://plus\\.google\\.com/(?:u/\\d/)?\\+?\\w+/(?:posts|about)$~',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
