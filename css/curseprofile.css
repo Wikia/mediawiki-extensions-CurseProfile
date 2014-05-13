@@ -233,6 +233,7 @@ ul.friends {
 	margin-top: 0.5em;
 }
 
+/* This is temporary and to be removed later. */
 .helper_mark {
 	display: inline-block;
 	position: relative;
@@ -274,6 +275,10 @@ ul.friends {
 
 	.helper_mark:hover span {
 		display: inline-block;
+	}
+
+	.section.stats > h3 {
+	    overflow: visible;
 	}
 
 @media screen and (min-width: 1260px) {
