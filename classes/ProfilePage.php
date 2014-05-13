@@ -612,6 +612,7 @@ class ProfilePage extends \Article {
 		</div>
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
+			<h4>Since May 13, 2014</h4>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
