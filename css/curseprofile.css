@@ -242,13 +242,27 @@ ul.friends {
 	line-height: 15px;
 }
 
+.helper_mark:before {
+	background-color: #ACE0FC;
+	border: 1px solid #000000;
+	border-radius: 10px;
+	content: "?";
+	display: inline-block;
+	font-weight: bold;
+	height: 1.2em;
+	margin: 0 0 0 5px;
+	text-align: center;
+	width: 1.2em;
+	font-size: 11pt;
+}
+
 	.helper_mark > span {
 		background-color: #EEEEEE;
 		border-radius: 10px;
 		bottom: 135%;
-		-webkit-box-shadow: 0px 0px 5px 3px rgba(50, 50, 50, 0.75);
-		-moz-box-shadow: 0px 0px 5px 3px rgba(50, 50, 50, 0.75);
-		box-shadow: 0px 0px 5px 3px rgba(50, 50, 50, 0.75);
+		-webkit-box-shadow: 0 0 5px 3px rgba(50, 50, 50, 0.75);
+		-moz-box-shadow: 0 0 5px 3px rgba(50, 50, 50, 0.75);
+		box-shadow: 0 0 5px 3px rgba(50, 50, 50, 0.75);
 		display: none;
 		left: -2px;
 		margin: 0;
@@ -275,7 +289,6 @@ ul.friends {
 		-webkit-transform: rotate(45deg);
 		-moz-transform: rotate(45deg);
 		-ms-transform: rotate(45deg);
-		-o-transform: rotate(45deg);
 		transform: rotate(45deg);
 		width: 10px;
 		z-index: 10;
@@ -284,9 +297,8 @@ ul.friends {
 	.helper_mark:hover span {
 		display: inline-block;
 	}
-
-	.section.stats > h3 {
-	    overflow: visible;
+	#stats-date-note {
+		overflow: visible;
 	}
 
 @media screen and (min-width: 1260px) {
