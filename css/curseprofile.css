@@ -238,6 +238,8 @@ ul.friends {
 	display: inline-block;
 	position: relative;
 	vertical-align: middle;
+	font-size: 12px;
+	line-height: 15px;
 }
 
 	.helper_mark > span {
