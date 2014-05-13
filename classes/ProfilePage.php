@@ -611,8 +611,7 @@ class ProfilePage extends \Article {
 			<div class="favorite">{{#favwiki: %2$s}}</div>
 		</div>
 		<div class="section stats">
-			<h3>'.wfMessage('cp-statisticssection').'</h3>
-			<h4>Since May 13, 2014</h4>
+			<h3>'.wfMessage('cp-statisticssection').'<br/><sub>since May 13, 2014</sub></h3>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
