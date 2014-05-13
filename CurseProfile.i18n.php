@@ -124,8 +124,8 @@ $messages['en'] = array(
 
 						// Stat labels
 						'wikisedited'						=> 'Wikis Edited',
-						'localrank'							=> '{{SITENAME}} Rank',
-						'globalrank'						=> 'Gamepedia Rank<br>([[Special:WikiPoints|Leaderboard]])',
+						'localrank'							=> '{{SITENAME}} Rank<br>([[Special:WikiPoints|Leaderboard]])',
+						'globalrank'						=> 'Gamepedia Rank',
 						'totalcontribs'						=> 'Contributions',
 						'totaledits'						=> 'Edits',
 						'totaldeletes'						=> 'Deletes',
