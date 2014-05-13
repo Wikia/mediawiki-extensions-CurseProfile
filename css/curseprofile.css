@@ -255,6 +255,8 @@ ul.friends {
 		text-align: center;
 		width: 180px;
 		z-index: 20;
+		font-size: 12px;
+		line-height: 15px;
 	}
 
 	.helper_mark > span:after {
@@ -268,6 +270,10 @@ ul.friends {
 		height: 10px;
 		left: 10px;
 		position: absolute;
+		-webkit-transform: rotate(45deg);
+		-moz-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+		-o-transform: rotate(45deg);
 		transform: rotate(45deg);
 		width: 10px;
 		z-index: 10;
