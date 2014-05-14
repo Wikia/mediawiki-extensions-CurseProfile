@@ -30,7 +30,7 @@ class Hooks {
 	private static $title;
 
 	public static function onParserFirstCall(&$parser) {
-		if (self::$profilePage) {
+		if (self::$profilePage->isProfilePage()) {
 			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
 			$parser->setFunctionHook('groups',				'CurseProfile\ProfilePage::groupList');
 			$parser->setFunctionHook('aboutme',				'CurseProfile\ProfilePage::aboutBlock');
@@ -80,7 +80,7 @@ class Hooks {
 		// However, some of the crappy static stuff in ProfilePage makes that
 		// more appropriate approach problematic until the ProfilePage class
 		// gets cleaned up first.
-		if (!self::$title->equals($title) || !self::$profilePage) {
+		if (!self::$title->equals($title)) {
 			return true;
 		}
 
@@ -96,7 +96,7 @@ class Hooks {
 	}
 
 	public static function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
-		if (self::$profilePage && self::$profilePage->profilePreferred()) {
+		if (self::$profilePage->isUserPage() && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'redirectToUserwiki=1';
 		}
 		return true;
@@ -112,7 +112,7 @@ class Hooks {
 	 * Adds links to the navigation tabs
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage && self::$profilePage->isUserPage()) {
+		if (self::$profilePage->isUserPage()) {
 			self::$profilePage->customizeNavBar($links);
 		}
 		return true;
