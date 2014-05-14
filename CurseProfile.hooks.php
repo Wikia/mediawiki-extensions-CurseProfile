@@ -71,6 +71,22 @@ class Hooks {
 		return true;
 	}
 
+	/**
+	 * Make links to user pages known (not red) when that user opts for a profile page
+	 */
+	public static function onLinkBegin( $dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret ) {
+		// only process user namespace links
+		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI])) {
+			return true;
+		}
+		$profile = new ProfilePage($target);
+		if ($profile->isProfilePage()) {
+			$ret = \Html::rawElement('a', ['href'=>$target->getFullURL($query)] + $customAttribs, $html);
+			return false;
+		}
+		return true;
+	}
+
 	public static function onArticleFromTitle(&$title, &$article) {
 		global $wgRequest, $wgOut;
 
