@@ -30,7 +30,10 @@ class Hooks {
 	private static $title;
 
 	public static function onParserFirstCall(&$parser) {
-		if (self::$profilePage->isProfilePage()) {
+		// must check to see if profile page exists because sometimes the parser is used to parse messages
+		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
+		// onBeforeInitialize and not setting self::$profilePage
+		if (self::$profilePage && self::$profilePage->isProfilePage()) {
 			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
 			$parser->setFunctionHook('groups',				'CurseProfile\ProfilePage::groupList');
 			$parser->setFunctionHook('aboutme',				'CurseProfile\ProfilePage::aboutBlock');
