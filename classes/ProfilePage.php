@@ -73,9 +73,12 @@ class ProfilePage extends \Article {
 	/**
 	 * True if we are not on a subpage, and if we are in the basic User namespace,
 	 * or either of the custom UserProfile/UserWiki namespaces.
+	 *
+	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
 	 */
-	public function isUserPage() {
-		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false && $this->actionIsView
+	public function isUserPage($onlyView = true) {
+		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+			&& (!$onlyView || $this->actionIsView)
 			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 

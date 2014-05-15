@@ -112,7 +112,7 @@ class Hooks {
 	}
 
 	public static function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
-		if (self::$profilePage->isUserPage() && self::$profilePage->profilePreferred()) {
+		if (self::$profilePage->isUserPage(false) && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'redirectToUserwiki=1';
 		}
 		return true;
