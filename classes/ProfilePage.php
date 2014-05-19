@@ -92,8 +92,8 @@ class ProfilePage extends \Article {
 	/**
 	 * True if we need to render the user's profile page on either namespace
 	 */
-	public function isProfilePage() {
-		return $this->isUserPage() && (
+	public function isProfilePage($onlyView = true) {
+		return $this->isUserPage($onlyView) && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
 				($this->mTitle->getNamespace() == NS_USER_PROFILE)
 			);
@@ -102,11 +102,17 @@ class ProfilePage extends \Article {
 	/**
 	 * True when we need to render the user's wiki page on either namespace
 	 */
-	public function isUserWikiPage() {
-		return $this->isUserPage() && (
-				(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-				($this->mTitle->getNamespace() == NS_USER_WIKI)
+	public function isUserWikiPage($onlyView = true) {
+		if ($onlyView) {
+			return $this->isUserPage($onlyView) && (
+					(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
+					($this->mTitle->getNamespace() == NS_USER_WIKI)
+				);
+		} else {
+			return $this->isUserWikiPage(true) || (
+				$this->isUserPage(false) && ($this->mTitle->getNamespace() == NS_USER && !$this->actionIsView)
 			);
+		}
 	}
 
 	/**
@@ -179,13 +185,17 @@ class ProfilePage extends \Article {
 		}
 
 		// links specific to a user wiki page
-		if ($this->isUserWikiPage()) {
+		if ($this->isUserWikiPage(false)) {
 			$links['namespaces']['user_profile'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userprofiletab')->plain(),
 				'href'		=> $this->profile->getProfilePath(),
 				'primary'	=> true,
 			];
+
+			// correct User profile to "User wiki" and use appropriate link
+			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->plain();
+			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
 		}
 	}
 
