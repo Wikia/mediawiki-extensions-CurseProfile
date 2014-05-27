@@ -19,12 +19,15 @@ class ProfilePage extends \Article {
 	protected $user_id;
 	protected $user;
 	protected $profile;
+	private $actionIsView;
 
+	// TODO refactor out static methods and these variables
 	static protected $output;
 	static private $self;
 
 	public function __construct($title) {
 		parent::__construct($title);
+		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
 		if ($this->user) {
@@ -63,33 +66,77 @@ class ProfilePage extends \Article {
 		self::$output->addHTML($outputString);
 	}
 
-	public function isUserPage() {
+	public function profilePreferred() {
+		return $this->profile->getTypePref();
+	}
+
+	/**
+	 * True if we are not on a subpage, and if we are in the basic User namespace,
+	 * or either of the custom UserProfile/UserWiki namespaces.
+	 *
+	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
+	 */
+	public function isUserPage($onlyView = true) {
 		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+			&& (!$onlyView || $this->actionIsView)
 			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
+	/**
+	 * True if we are viewing the user's default option (in the default User namespace)
+	 */
 	public function isDefaultPage() {
 		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
 	}
 
-	public function isProfilePage() {
-		return $this->isUserPage() && (
+	/**
+	 * True if we need to render the user's profile page on either namespace
+	 */
+	public function isProfilePage($onlyView = true) {
+		return $this->isUserPage($onlyView) && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
 				($this->mTitle->getNamespace() == NS_USER_PROFILE)
 			);
 	}
 
-	public function isUserWikiPage() {
-		return $this->isUserPage() && (
-				(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-				($this->mTitle->getNamespace() == NS_USER_WIKI)
+	/**
+	 * True when we need to render the user's wiki page on either namespace
+	 */
+	public function isUserWikiPage($onlyView = true) {
+		if ($onlyView) {
+			return $this->isUserPage($onlyView) && (
+					(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
+					($this->mTitle->getNamespace() == NS_USER_WIKI)
+				);
+		} else {
+			return $this->isUserWikiPage(true) || (
+				$this->isUserPage(false) && ($this->mTitle->getNamespace() == NS_USER && !$this->actionIsView)
 			);
+		}
 	}
 
+	/**
+	 * True if we are on the custom UserWiki namespace
+	 */
+	public function isSpoofedWikiPage() {
+
+		return $this->mTitle->getNamespace() == NS_USER_WIKI && $this->actionIsView;
+	}
+
+	/**
+	 * Returns the article object for the User's page in the standard User namespace
+	 */
 	public function getUserWikiArticle() {
 		$article = new \Article($this->user->getUserPage());
 		$article->setContext($this->getContext());
 		return $article;
+	}
+
+	/**
+	 * Returns the title object for the user's page in the UserWiki namespace
+	 */
+	public function getCustomUserWikiTitle() {
+		return \Title::makeTitle(NS_USER_WIKI, $this->user->getName());
 	}
 
 	public function customizeNavBar(&$links) {
@@ -138,7 +185,7 @@ class ProfilePage extends \Article {
 		}
 
 		// links specific to a user wiki page
-		if ($this->isUserWikiPage()) {
+		if ($this->isUserWikiPage(false)) {
 			$links['namespaces']['user_profile'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userprofiletab')->plain(),
@@ -146,20 +193,9 @@ class ProfilePage extends \Article {
 				'primary'	=> true,
 			];
 
-			if ($this->profile->getTypePref()) {
-				// enabling editing while wiki is not the default is a lot more work
-				// so it is disabled by removing the link
-				unset($links['views']['edit']);
-			}
-		}
-
-		// Always visible regardless of page type
-		if ($this->viewingSelf()) {
-			$links['actions']['switch_type'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('toggletypepref')->plain(),
-				'href'		=> '/Special:ToggleProfilePreference',
-			];
+			// correct User profile to "User wiki" and use appropriate link
+			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->plain();
+			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
 		}
 	}
 
@@ -331,8 +367,8 @@ class ProfilePage extends \Article {
 	 * Extracts the username from a steamcommunity.com profile link
 	 *
 	 * @param	string	name of service to validate
-	 * @param	string	url to profile
-	 * @return	string	username or id
+	 * @param	string	url to profile or username, may be modified to strip leading @ from twitter
+	 * @return	mixed	false or validated string value
 	 */
 	private static function validateUrl($service, &$url) {
 		$patterns = [
@@ -340,7 +376,7 @@ class ProfilePage extends \Article {
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
 			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'Google'	=> '~^https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)$~',
+			'Google'	=> '~^https?://plus\\.google\\.com/(?:u/\\d/)?\\+?\\w+/(?:posts|about)$~',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];

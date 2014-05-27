@@ -59,6 +59,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
 		$wgOut->addModules('ext.curseprofile.profilepage');
+		$wgOut->addModules('ext.curse.pagination');
 		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
 		$mouse->output->loadTemplate('commentboard');
 

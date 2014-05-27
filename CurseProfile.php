@@ -72,17 +72,13 @@ $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/co
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
 $wgSpecialPageGroups['CommentBoard']						= 'users';
 
-$wgAutoloadClasses['CurseProfile\SpecialToggleProfilePreference'] = "{$extDir}/specials/SpecialToggleProfilePreference.php";
-$wgSpecialPages['ToggleProfilePreference']					= 'CurseProfile\SpecialToggleProfilePreference';
-$wgSpecialPageGroups['ToggleProfilePreference']				= 'users';
-
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
 	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'ext.curse.pagination', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago'],
+	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago'],
 ];
 $wgResourceModules['jquery.timeago'] = [
 	'scripts' => ['js/jquery.timeago.js'],
@@ -96,7 +92,9 @@ $wgResourceModules['ext.curseprofile.customskin'] = [
 // Hooks
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
+$wgHooks['LinkBegin'][]						= 'CurseProfile\Hooks::onLinkBegin';
 $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
+$wgHooks['ArticleUpdateBeforeRedirect'][]	= 'CurseProfile\Hooks::onArticleUpdateBeforeRedirect';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';
