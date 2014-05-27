@@ -112,7 +112,7 @@ class Hooks {
 		}
 
 		// handle rendering duties for any of our namespaces
-		if (self::$profilePage instanceOf CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
+		if (self::$profilePage instanceOf \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
 			// Add our CSS and JS
 			$article = self::$profilePage;
 			$wgOut->addModules('ext.curseprofile.profilepage');
