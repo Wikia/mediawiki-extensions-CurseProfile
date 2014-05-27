@@ -99,7 +99,7 @@ class Hooks {
 	 * @param	object	Context object
 	 * @return	void
 	 */
-	public static function onArticleFromTitle(Title &$title, &$article, $context) {
+	public static function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
 		// TODO shouldn't need to special case against static vars here.
