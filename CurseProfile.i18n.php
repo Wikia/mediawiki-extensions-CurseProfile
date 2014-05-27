@@ -79,7 +79,6 @@ $messages['en'] = array(
 						'commentaction'						=> 'Post',
 						'cp-editprofile'					=> 'Edit Profile',
 						'profileprefselect'					=> 'Page Type',
-						'toggletypepref'					=> 'Switch User Page Default',
 						'userwikitab'						=> 'User wiki',
 						'userprofiletab'					=> 'User profile',
 						'tooltip-ca-switch_type'			=> 'Switch between profile and wiki page',
@@ -125,8 +124,8 @@ $messages['en'] = array(
 
 						// Stat labels
 						'wikisedited'						=> 'Wikis Edited',
-						'localrank'							=> '{{SITENAME}} Rank',
-						'globalrank'						=> 'Gamepedia Rank<br>([[Special:WikiPoints|Leaderboard]])',
+						'localrank'							=> '{{SITENAME}} Rank<br>([[Special:WikiPoints|Leaderboard]])',
+						'globalrank'						=> 'Gamepedia Rank',
 						'totalcontribs'						=> 'Contributions',
 						'totaledits'						=> 'Edits',
 						'totaldeletes'						=> 'Deletes',
