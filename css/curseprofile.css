@@ -244,10 +244,7 @@ ul.friends {
 
 .helper_mark:before {
 	background-color: #ACE0FC;
-<<<<<<< local
-=======
 	color: black;
->>>>>>> other
 	border: 1px solid #000000;
 	border-radius: 10px;
 	content: "?";
@@ -262,10 +259,7 @@ ul.friends {
 
 	.helper_mark > span {
 		background-color: #EEEEEE;
-<<<<<<< local
-=======
 		color: black;
->>>>>>> other
 		border-radius: 10px;
 		bottom: 135%;
 		-webkit-box-shadow: 0 0 5px 3px rgba(50, 50, 50, 0.75);
@@ -305,12 +299,9 @@ ul.friends {
 	.helper_mark:hover span {
 		display: inline-block;
 	}
-<<<<<<< local
-=======
 	.section.stats h3 {
 		margin-bottom: -0.3em;
 	}
->>>>>>> other
 	#stats-date-note {
 		overflow: visible;
 	}
