@@ -90,7 +90,16 @@ class Hooks {
 		return true;
 	}
 
-	public static function onArticleFromTitle(&$title, &$article) {
+	/**
+	 * Function Documentation
+	 *
+	 * @access	public
+	 * @param	object	Title object
+	 * @param	mixed	Article object or null
+	 * @param	object	Context object
+	 * @return	void
+	 */
+	public static function onArticleFromTitle(Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
 		// TODO shouldn't need to special case against static vars here.
@@ -99,7 +108,7 @@ class Hooks {
 		// However, some of the crappy static stuff in ProfilePage makes that
 		// more appropriate approach problematic until the ProfilePage class
 		// gets cleaned up first.
-		if (!self::$title->equals($title)) {
+		if (self::$title instanceOf Title && !self::$title->equals($title)) {
 			return true;
 		}
 
