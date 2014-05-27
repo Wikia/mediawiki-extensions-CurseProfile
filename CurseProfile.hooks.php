@@ -91,15 +91,14 @@ class Hooks {
 	}
 
 	/**
-	 * Function Documentation
+	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
 	 *
 	 * @access	public
 	 * @param	object	Title object
 	 * @param	mixed	Article object or null
-	 * @param	object	Context object
 	 * @return	void
 	 */
-	public static function onArticleFromTitle(\Title &$title, &$article, $context) {
+	public static function onArticleFromTitle(\Title &$title, &$article) {
 		global $wgRequest, $wgOut;
 
 		// TODO shouldn't need to special case against static vars here.
