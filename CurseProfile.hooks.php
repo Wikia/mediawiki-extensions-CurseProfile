@@ -35,14 +35,17 @@ class Hooks {
 		// onBeforeInitialize and not setting self::$profilePage
 		if (self::$profilePage && self::$profilePage->isProfilePage()) {
 			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
-			$parser->setFunctionHook('groups',				'CurseProfile\ProfilePage::groupList');
-			$parser->setFunctionHook('aboutme',				'CurseProfile\ProfilePage::aboutBlock');
-			$parser->setFunctionHook('favwiki',				'CurseProfile\ProfilePage::favoriteWiki');
-			$parser->setFunctionHook('location',			'CurseProfile\ProfilePage::location');
-			$parser->setFunctionHook('profilelinks',		'CurseProfile\ProfilePage::profileLinks');
-			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline)
-			$parser->setFunctionHook('userlevel',			'CurseProfile\ProfilePage::userLevel');
+
+			// methods on the profile object
+			$parser->setFunctionHook('groups',				[self::$profilePage, 'groupList']);
+			$parser->setFunctionHook('aboutme',				[self::$profilePage, 'aboutBlock']);
+			$parser->setFunctionHook('favwiki',				[self::$profilePage, 'favoriteWiki']);
+			$parser->setFunctionHook('location',			[self::$profilePage, 'location']);
+			$parser->setFunctionHook('profilelinks',		[self::$profilePage, 'profileLinks']);
+			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline due to parser issues)
+			$parser->setFunctionHook('userlevel',			[self::$profilePage, 'userLevel']);
 			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
+
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');

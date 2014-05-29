@@ -217,17 +217,10 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the groups to which a user belongs
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function groupList(&$parser, $user_id) {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return '';
-		}
-
-		$user = \User::newFromId($user_id);
-		$groups = $user->getGroups();
+	public function groupList(&$parser) {
+		$groups = $this->user->getGroups();
 		if (count($groups) == 0) {
 			return '';
 		}
@@ -245,17 +238,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's location.
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function location(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function location(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$locations = $profile->getLocations();
+		$locations = $this->profile->getLocations();
 
 		if (isset($locations['country-flag'])) {
 			$src = \FlagFinder::getFlagPath($locations['country-flag']);
@@ -275,19 +262,13 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function aboutBlock(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function aboutBlock(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
 		global $wgOut;
 		return [
-			$wgOut->parse($profile->getAboutText()),
+			$wgOut->parse($this->profile->getAboutText()),
 			'isHTML' => true
 		];
 	}
@@ -296,17 +277,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function profileLinks(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function profileLinks(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$profileLinks = $profile->getProfileLinks();
+		$profileLinks = $this->profile->getProfileLinks();
 
 		if (count($profileLinks) == 0) {
 			return '';
@@ -389,17 +364,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function favoriteWiki(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function favoriteWiki(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$wiki = $profile->getFavoriteWiki();
+		$wiki = $this->profile->getFavoriteWiki();
 		if (empty($wiki)) {
 			return '';
 		}
@@ -522,17 +491,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function userLevel(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
-		$curse_id = CP::curseIDfromUserID($user_id);
+	public function userLevel(&$parser) {
 		// Check for existance of wikipoints functions
-		if ($curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
+		if ($this->user->curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
 			return '';
 		}
 
@@ -588,14 +551,14 @@ class ProfilePage extends \Article {
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
 				<h1>%1$s</h1>
-				{{#groups: %2$s}}
+				{{#groups:}}
 			</div>
 			<div>
-				<div class="location">{{#location: %2$s}}</div>
-				{{#profilelinks: %2$s}}
+				<div class="location">{{#location:}}</div>
+				{{#profilelinks:}}
 			</div>
 			<div class="aboutme">
-				{{#aboutme: %2$s}}
+				{{#aboutme:}}
 			</div>
 		</div>
 		<div class="activity section">
@@ -613,10 +576,10 @@ class ProfilePage extends \Article {
 		<div class="borderless section">
 			<div class="rightfloat">
 				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
-				<div class="level">{{#userlevel: %2$s}}</div>
+				<div class="level">{{#userlevel:}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>
-			<div class="favorite">{{#favwiki: %2$s}}</div>
+			<div class="favorite">{{#favwiki:}}</div>
 		</div>
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
