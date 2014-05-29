@@ -84,7 +84,7 @@ class Hooks {
 		}
 		$profile = new ProfilePage($target);
 		if ($profile->isProfilePage()) {
-			$ret = \Html::rawElement('a', ['href'=>$target->getFullURL($query)] + $customAttribs, $html);
+			$ret = \Html::rawElement('a', ['href'=>$target->getPrefixedURL($query)] + $customAttribs, $html);
 			return false;
 		}
 		return true;
