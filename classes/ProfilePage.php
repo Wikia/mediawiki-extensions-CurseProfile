@@ -21,10 +21,6 @@ class ProfilePage extends \Article {
 	protected $profile;
 	private $actionIsView;
 
-	// TODO refactor out static methods and these variables
-	static protected $output;
-	static private $self;
-
 	public function __construct($title) {
 		parent::__construct($title);
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
@@ -38,8 +34,6 @@ class ProfilePage extends \Article {
 			$this->user_id = 0;
 		}
 		$this->profile = new ProfileData($this->user_id);
-		self::$output = $this->getContext()->getOutput();
-		self::$self = $this;
 	}
 
 	/**
@@ -53,8 +47,9 @@ class ProfilePage extends \Article {
 	}
 
 	public function view() {
-		self::$output->setPageTitle($this->mTitle->getPrefixedText());
-		self::$output->setArticleFlag(false);
+		$output = $this->getContext()->getOutput();
+		$output->setPageTitle($this->mTitle->getPrefixedText());
+		$output->setArticleFlag(false);
 
 		$layout = $this->profileLayout();
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
@@ -63,7 +58,7 @@ class ProfilePage extends \Article {
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
-		self::$output->addHTML($outputString);
+		$output->addHTML($outputString);
 	}
 
 	public function profilePreferred() {
@@ -485,7 +480,7 @@ class ProfilePage extends \Article {
 
 		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $this->user->getId());
 
-		$HTML = self::generateStatsDL($statsOutput);
+		$HTML = $this->generateStatsDL($statsOutput);
 
 		return $HTML;
 	}
@@ -504,11 +499,11 @@ class ProfilePage extends \Article {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".wfMessage($msgKey, self::$self->user_id, $wgUser->getId())->plain()."</dt>";
-				$output .= "<dd>".self::generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+				$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
+				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
-					$output .= self::generateStatsDL($value);
+					$output .= $this->generateStatsDL($value);
 				}
 			}
 			$output .= "</dl>";
@@ -566,10 +561,10 @@ class ProfilePage extends \Article {
 		];
 	}
 
-	public static function editOrFriends(&$parser) {
-		$HTML = FriendDisplay::addFriendButton(self::$self->user_id);
+	public function editOrFriends(&$parser) {
+		$HTML = FriendDisplay::addFriendButton($this->user_id);
 
-		if (self::$self->viewingSelf()) {
+		if ($this->viewingSelf()) {
 			$text = wfMessage('cp-editprofile')->plain();
 			$HTML .= "<button data-href='/Special:Preferences#mw-prefsection-personal-info-public' class='linksub'>$text</button>";
 		}

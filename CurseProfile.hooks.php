@@ -42,7 +42,7 @@ class Hooks {
 			$parser->setFunctionHook('profilelinks',		'CurseProfile\ProfilePage::profileLinks');
 			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline)
 			$parser->setFunctionHook('userlevel',			'CurseProfile\ProfilePage::userLevel');
-			$parser->setFunctionHook('editorfriends',		'CurseProfile\ProfilePage::editOrFriends');
+			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');
