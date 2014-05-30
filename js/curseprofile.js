@@ -121,7 +121,7 @@ function CurseProfile($) {
 			$this.hide();
 			(new mw.Api()).post({
 				action: 'comment',
-				comment_action: 'remove',
+				do: 'remove',
 				comment_id: $comment.data('id'),
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
