@@ -21,10 +21,6 @@ class ProfilePage extends \Article {
 	protected $profile;
 	private $actionIsView;
 
-	// TODO refactor out static methods and these variables
-	static protected $output;
-	static private $self;
-
 	public function __construct($title) {
 		parent::__construct($title);
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
@@ -38,8 +34,6 @@ class ProfilePage extends \Article {
 			$this->user_id = 0;
 		}
 		$this->profile = new ProfileData($this->user_id);
-		self::$output = $this->getContext()->getOutput();
-		self::$self = $this;
 	}
 
 	/**
@@ -53,8 +47,9 @@ class ProfilePage extends \Article {
 	}
 
 	public function view() {
-		self::$output->setPageTitle($this->mTitle->getPrefixedText());
-		self::$output->setArticleFlag(false);
+		$output = $this->getContext()->getOutput();
+		$output->setPageTitle($this->mTitle->getPrefixedText());
+		$output->setArticleFlag(false);
 
 		$layout = $this->profileLayout();
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
@@ -63,7 +58,7 @@ class ProfilePage extends \Article {
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
-		self::$output->addHTML($outputString);
+		$output->addHTML($outputString);
 	}
 
 	public function profilePreferred() {
@@ -222,17 +217,10 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the groups to which a user belongs
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function groupList(&$parser, $user_id) {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return '';
-		}
-
-		$user = \User::newFromId($user_id);
-		$groups = $user->getGroups();
+	public function groupList(&$parser) {
+		$groups = $this->user->getGroups();
 		if (count($groups) == 0) {
 			return '';
 		}
@@ -250,17 +238,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's location.
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function location(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function location(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$locations = $profile->getLocations();
+		$locations = $this->profile->getLocations();
 
 		if (isset($locations['country-flag'])) {
 			$src = \FlagFinder::getFlagPath($locations['country-flag']);
@@ -280,19 +262,13 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function aboutBlock(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function aboutBlock(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
 		global $wgOut;
 		return [
-			$wgOut->parse($profile->getAboutText()),
+			$wgOut->parse($this->profile->getAboutText()),
 			'isHTML' => true
 		];
 	}
@@ -301,17 +277,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function profileLinks(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function profileLinks(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$profileLinks = $profile->getProfileLinks();
+		$profileLinks = $this->profile->getProfileLinks();
 
 		if (count($profileLinks) == 0) {
 			return '';
@@ -394,17 +364,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function favoriteWiki(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
+	public function favoriteWiki(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
-		$wiki = $profile->getFavoriteWiki();
+		$wiki = $this->profile->getFavoriteWiki();
 		if (empty($wiki)) {
 			return '';
 		}
@@ -485,7 +449,7 @@ class ProfilePage extends \Article {
 
 		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $this->user->getId());
 
-		$HTML = self::generateStatsDL($statsOutput);
+		$HTML = $this->generateStatsDL($statsOutput);
 
 		return $HTML;
 	}
@@ -504,11 +468,11 @@ class ProfilePage extends \Article {
 				if (!is_string($msgKey)) {
 					continue;
 				}
-				$output .= "<dt>".wfMessage($msgKey, self::$self->user_id, $wgUser->getId())->plain()."</dt>";
-				$output .= "<dd>".self::generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+				$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
+				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
-					$output .= self::generateStatsDL($value);
+					$output .= $this->generateStatsDL($value);
 				}
 			}
 			$output .= "</dl>";
@@ -527,17 +491,11 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
 	 *
 	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public static function userLevel(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
-			return 'Invalid user ID given';
-		}
-		$curse_id = CP::curseIDfromUserID($user_id);
+	public function userLevel(&$parser) {
 		// Check for existance of wikipoints functions
-		if ($curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
+		if ($this->user->curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
 			return '';
 		}
 
@@ -566,10 +524,10 @@ class ProfilePage extends \Article {
 		];
 	}
 
-	public static function editOrFriends(&$parser) {
-		$HTML = FriendDisplay::addFriendButton(self::$self->user_id);
+	public function editOrFriends(&$parser) {
+		$HTML = FriendDisplay::addFriendButton($this->user_id);
 
-		if (self::$self->viewingSelf()) {
+		if ($this->viewingSelf()) {
 			$text = wfMessage('cp-editprofile')->plain();
 			$HTML .= "<button data-href='/Special:Preferences#mw-prefsection-personal-info-public' class='linksub'>$text</button>";
 		}
@@ -593,14 +551,14 @@ class ProfilePage extends \Article {
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
 				<h1>%1$s</h1>
-				{{#groups: %2$s}}
+				{{#groups:}}
 			</div>
 			<div>
-				<div class="location">{{#location: %2$s}}</div>
-				{{#profilelinks: %2$s}}
+				<div class="location">{{#location:}}</div>
+				{{#profilelinks:}}
 			</div>
 			<div class="aboutme">
-				{{#aboutme: %2$s}}
+				{{#aboutme:}}
 			</div>
 		</div>
 		<div class="activity section">
@@ -618,10 +576,10 @@ class ProfilePage extends \Article {
 		<div class="borderless section">
 			<div class="rightfloat">
 				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
-				<div class="level">{{#userlevel: %2$s}}</div>
+				<div class="level">{{#userlevel:}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>
-			<div class="favorite">{{#favwiki: %2$s}}</div>
+			<div class="favorite">{{#favwiki:}}</div>
 		</div>
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
