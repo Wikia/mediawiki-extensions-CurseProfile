@@ -500,7 +500,7 @@ class ProfilePage extends \Article {
 		}
 
 		$mouse = CP::loadMouse();
-		$userPoints = \PointsDisplay::pointsForCurseId($curse_id)['score'];
+		$userPoints = \PointsDisplay::pointsForCurseId($this->user->curse_id)['score'];
 		$levelDefinitions = $mouse->redis->getUnserialized('wikipoints::levels');
 
 		if (!is_array($levelDefinitions)) {
