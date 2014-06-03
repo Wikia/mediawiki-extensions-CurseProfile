@@ -221,7 +221,6 @@ class ProfilePage extends \Article {
 	 */
 	public function groupList(&$parser) {
 		$groups = $this->user->getGroups();
-
 		if (count($groups) == 0) {
 			return '';
 		}
@@ -267,7 +266,6 @@ class ProfilePage extends \Article {
 	 */
 	public function aboutBlock(&$parser) {
 		$mouse = CP::loadMouse();
-		$profile = new ProfileData($user_id);
 		global $wgOut;
 		return [
 			$wgOut->parse($this->profile->getAboutText()),
@@ -585,7 +583,7 @@ class ProfilePage extends \Article {
 		</div>
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
-			<div id="stats-date-note">since May 14, 2014<div class="helper_mark"><span>The Gamepedia team is currently working to compile historic statistics.  We apologize for the inconvenience while we work to develop this feature.</span></div></div>
+			<div id="stats-date-note">since May 13, 2014<div class="helper_mark"><span>The Gamepedia team is currently working to compile historic statistics.  We apologize for the inconvenience while we work to develop this feature.</span></div></div>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
