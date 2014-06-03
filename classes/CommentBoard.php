@@ -17,8 +17,12 @@ namespace CurseProfile;
  * Class that manages a 'wall' of comments on a user profile page
  */
 class CommentBoard {
+	/**
+	 *	@var	int		the id of the user to whom this comment board belongs to
+	 */
 	private $user_id;
 
+	// maximum character length of a single comment
 	const MAX_LENGTH = 5000;
 
 	/**
