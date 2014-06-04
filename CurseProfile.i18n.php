@@ -70,9 +70,12 @@ $messages['en'] = array(
 						'friendrequestsent'					=> 'Request Sent',
 						'nofriends'							=> 'No friends on this wiki',
 						'soronery'							=> 'You have no friends :(',
+
+						// API messages
 						'friendship-invalidaction'			=> 'An invalid action was attempted.',
 						'comment-invalidaction'				=> 'An invalid action was attempted.',
 						'comment-adminremoved'				=> 'This comment has been removed.',
+						'comment-invaliduser'				=> 'Could not find a user for the given id.',
 
 						// Profile management
 						'emptyactivity'						=> 'This user hasn\'t made any edits on this wiki yet',
