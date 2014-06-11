@@ -149,6 +149,7 @@ class ProfilePage extends \Article {
 			];
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
+			$links['namespaces']['user']['href'] = $this->mTitle->getLinkURL();
 			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->plain(); // rename from "User page"
 			$links['namespaces']['user']['class'] = 'selected';
 			// add link to user wiki
