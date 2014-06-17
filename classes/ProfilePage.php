@@ -22,10 +22,8 @@ class ProfilePage extends \Article {
 	private $actionIsView;
 
 	public function __construct($title) {
-		global $wgRequest;
-
 		parent::__construct($title);
-		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view' || ($wgRequest->getInt('diff') == 0 && $wgRequest->getInt('oldid') == 0);
+		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
 		if ($this->user) {
@@ -93,7 +91,7 @@ class ProfilePage extends \Article {
 		return $this->isUserPage($onlyView) && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
 				($this->mTitle->getNamespace() == NS_USER_PROFILE)
-			);
+			) && ($this->getContext()->getRequest()->getInt('diff') == 0 && $this->getContext()->getRequest()->getInt('oldid') == 0);
 	}
 
 	/**
