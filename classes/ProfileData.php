@@ -113,7 +113,7 @@ class ProfileData {
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
-			'pattern' => 'https?://plus\\.google\\.com/(u/\\d/)?\\+?\\w+/(posts|about)',
+			'pattern' => 'https?://(plus|www)\\.google\\.com/(u/\\d/)?\\+?\\w+(/(posts|about)?)?',
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
