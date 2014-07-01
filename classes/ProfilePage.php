@@ -91,7 +91,7 @@ class ProfilePage extends \Article {
 		return $this->isUserPage($onlyView) && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
 				($this->mTitle->getNamespace() == NS_USER_PROFILE)
-			);
+			) && ($this->getContext()->getRequest()->getInt('diff') == 0 && $this->getContext()->getRequest()->getInt('oldid') == 0);
 	}
 
 	/**
@@ -393,8 +393,6 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays user statistics.
 	 * The numbers themselves are pulled from the dataminer api
 	 *
-	 * @param	object	parser reference
-	 * @param	int		ID of a user
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userStats() {
@@ -448,7 +446,7 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		$statsOutput['totalfriends'] = FriendDisplay::count($parser, $this->user->getId());
+		$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 
 		$HTML = $this->generateStatsDL($statsOutput);
 
