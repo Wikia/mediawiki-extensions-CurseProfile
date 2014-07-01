@@ -166,6 +166,7 @@ div.mainavatar {
 		display: block;
 		resize: vertical;
 		height: 2em;
+        margin-bottom:5px;
 	}
 
 .comments .avatar {
@@ -239,7 +240,7 @@ ul.friends {
 	position: relative;
 	vertical-align: middle;
 	font-size: 12px;
-	line-height: 15px;
+	line-height: 16px;
 }
 
 .helper_mark:before {
@@ -325,4 +326,8 @@ ul.friends {
 		-webkit-columns: 2;
 		columns: 2;
 	}*/
+}
+
+.curseprofile h3 {
+    margin:3px 0 8px 0 !important;
 }
