@@ -64,6 +64,9 @@
 	border-width: 0;
 	padding: 0;
 }
+	.section h3 {
+		margin:3px 0 8px 0;
+	}
 
 div.mainavatar {
 	float: left;
@@ -326,8 +329,4 @@ ul.friends {
 		-webkit-columns: 2;
 		columns: 2;
 	}*/
-}
-
-.curseprofile h3 {
-    margin:3px 0 8px 0;
 }
