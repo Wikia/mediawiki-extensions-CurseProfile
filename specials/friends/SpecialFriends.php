@@ -55,7 +55,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		}
 
 		// Fix missing or incorrect username segment in the path
-		if ($user->getName() != $user_name) {
+		if ($user->getTitleKey() != $user_name) {
 			$fixedPath = '/Special:Friends/'.$user_id.'/'.$user->getTitleKey();
 			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
 				$fixedPath .= '?'.$_SERVER['QUERY_STRING'];
