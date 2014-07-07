@@ -35,7 +35,9 @@ $wgAvailableRights[] = 'profile-modcomments';
 /******************************************/
 $extDir = __DIR__ . '/';
 
+$wgMessagesDirs['CurseProfile'] = $extDir . 'i18n';
 $wgExtensionMessagesFiles['CurseProfile']			= "{$extDir}/CurseProfile.i18n.php";
+$wgExtensionMessagesFiles['CurseProfileMagic']		= "{$extDir}/CurseProfile.i18n.magic.php";
 $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.namespaces.php";
 
 $wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
