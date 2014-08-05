@@ -112,5 +112,7 @@
 	"notification-friendship-request": "[[User:$1]] has added you as a friend.",
 	"notification-friendship-request-email-subj": "$1 has added you as a friend on Gamepedia!",
 	"notification-friendship-request-email-body": "Hi $2,\n$1 has added you as a friend on Gamepedia. You can confirm their request by visiting their profile on {{SITENAME}} {{canonicalurl:{{ns:User}}:$1}} or by visiting the friend management page:\n\n{{canonicalurl:{{#special:ManageFriends}}}}\n\n$3",
-	"emailfooter-gamepedia": "Thanks,\nYour friendly Gamepedia notification system\n\nYou can unsubscribe by changing your email preferences at:\n{{canonicalurl:{{#special:Preferences}}#mw-prefsection-echo}}"
+	"emailfooter-gamepedia": "Thanks,\nYour friendly Gamepedia notification system\n\nYou can unsubscribe by changing your email preferences at:\n{{canonicalurl:{{#special:Preferences}}#mw-prefsection-echo}}",
+	"profilestats" : "CurseProfile Stats",
+	"action-profilestats" : "view CurseProfile stats"
 }

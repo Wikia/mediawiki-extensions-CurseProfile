@@ -12,10 +12,22 @@
  *
 **/
 
-// This file is included only by the master wiki and adds extra functionality,
-// and can add extra functionality as necessary.
+// This file is included only by the master wiki and adds extra functionality
 
 define('CURSEPROFILE_MASTER', true);
 require_once 'CurseProfile.php';
 
 $extSyncServices[] = 'CurseProfile\FriendSync';
+
+$wgAutoloadClasses['CurseProfile\SpecialProfileStats']		= __DIR__."/specials/SpecialProfileStats.php";
+$wgSpecialPages['ProfileStats']								= 'CurseProfile\SpecialProfileStats';
+$wgSpecialPageGroups['ProfileStats']						= 'wiki';
+
+// Resource modules
+$wgResourceModules['ext.curseprofile.profilestats'] = [
+	'styles' => ['css/profilestats.css'],
+	'scripts' => ['js/profilestats.js'],
+	'localBasePath' => __DIR__.'/',
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['jquery.timeago', 'highcharts'],
+];
