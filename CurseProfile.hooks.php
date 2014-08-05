@@ -141,7 +141,7 @@ class Hooks {
 	 * Adds links to the navigation tabs
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage->isUserPage(false)) {
+		if (self::$profilePage && self::$profilePage->isUserPage(false)) {
 			self::$profilePage->customizeNavBar($links);
 		}
 		return true;
