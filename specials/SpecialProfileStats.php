@@ -79,7 +79,10 @@ class SpecialProfileStats extends \SpecialPage {
 			</div>";
 
 		$HTML .= "<h2>Actual Usage Stats</h2>"
-		."<div id='friends-system'><h3>Friends System</h3>".$this->buildTable($this->friends, ['key'=>'Number of Friends', 'value'=>'Users'])."</div>"
+		."<div id='friends-system'><h3>Friends System</h3>"
+			.$this->buildTable($this->friends, ['key'=>'Number of Friends', 'value'=>'Users'])
+			."<p>Average number of friends from non-zero users: {$this->avgFriends}</p>"
+		."</div>"
 		."<div id='profile-creation'><h3>Profile Creation</h3>".$this->buildTable($this->profileContent, ['key'=>'Content in Profile','value'=>'Users'])."</div>"
 		."<div id='favorite-wikis'><h3>Favorite Wikis</h3>".$this->buildTable($this->favoriteWikis, ['key'=>'Wiki','value'=>'Favorites'], [$this, 'wikiNameFromHash'], true)."</div>";
 
@@ -94,8 +97,12 @@ class SpecialProfileStats extends \SpecialPage {
 		$HTML = '';
 		$customLabel = is_callable($labelCallback);
 		$rows = 0;
-
 		$total = array_sum($data);
+		if ($withRank) {
+			asort($data);
+			$data = array_reverse($data);
+		}
+
 		foreach ($data as $key => $value) {
 			$percentage = number_format(100 * $value / $total, 1);
 			$value = number_format($value);
@@ -106,13 +113,13 @@ class SpecialProfileStats extends \SpecialPage {
 				$rows += 1;
 				$key = $rows."<td>".$key;
 			}
-			$HTML .= "<tr><td>{$key}<td>{$value}<td>{$percentage}%</tr>";
+			$HTML .= "<tr><td>{$key}<td class='numeric'>{$value}<td class='numeric'>{$percentage}%</tr>";
 		}
 
 		if ($withRank) {
 			$units['key'] = 'Rank<th>'.$units['key'];
 		}
-		$HTML = "<table><thead><th>{$units['key']}<th>{$units['value']}<th>Percentage</thead><tbody>$HTML</tbody></table>";
+		$HTML = "<table class='wikitable'><thead><th>{$units['key']}<th>{$units['value']}<th>Percentage</thead><tbody>$HTML</tbody></table>";
 		return $HTML;
 	}
 }
