@@ -87,6 +87,24 @@ class Friendship {
 	}
 
 	/**
+	 * Returns the number of friends a user has
+	 *
+	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @return	int		a number of friends
+	 */
+	public function getFriendCount($user = null) {
+		if ($this->curse_id < 1) {
+			return [];
+		}
+
+		if ($user == null) {
+			$user = $this->curse_id;
+		}
+		$mouse = CP::loadMouse();
+		return $mouse->redis->scard($this->friendListRedisKey($user));
+	}
+
+	/**
 	 * Returns the array of pending friend requests that have sent this user
 	 *
 	 * @return	array	keys are curse IDs of potential friends,

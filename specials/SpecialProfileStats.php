@@ -2,7 +2,7 @@
 /**
  * Curse Inc.
  * Curse Profile
- * Display stats on 
+ * Display stats on the adoption rate of CurseProfile across hydra
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
@@ -34,25 +34,10 @@ class SpecialProfileStats extends \SpecialPage {
 		$this->mouse->output->addTemplateFolder($IP.'/extensions/Hydralytics/templates');
 		$this->mouse->output->loadTemplate('hydralytics');
 
-		// get primary adoption stats
-		$this->users['profile'] = 5000;
-		$this->users['wiki'] = 1000;
-
-		// get friending stats
-		$this->friends['none'] = 3500;
-		$this->friends['more'] = 1500;
-		$this->avgFriends = 2;
-
-		// get customization stats
-		$this->profileContent['empty'] = 3000;
-		$this->profileContent['filled'] = 2000;
-
-		// get favorite wiki stats
-		$this->favoriteWikis['help.gamepedia.com'] = 1500;
-		$this->favoriteWikis['minecraft.gamepedia.com'] = 2500;
-		$this->favoriteWikis['lol.gamepedia.com'] = 500;
-		$this->favoriteWikis['wowpedia.org'] = 300;
-		$this->favoriteWikis['dota2.gamepedia.com'] = 200;
+		$data = $this->mouse->redis->hgetall('profilestats');
+		foreach ($data as $k => $v) {
+			$this->$k = unserialize($v);
+		}
 
 		$this->output->addModules('ext.curseprofile.profilestats');
 		$this->output->addHTML($this->buildOutput());
@@ -90,11 +75,16 @@ class SpecialProfileStats extends \SpecialPage {
 	}
 
 	private function wikiNameFromHash($md5_key) {
-		return $md5_key;
+		$wiki = \DynamicSettings\Wiki::loadFromHash($md5_key);
+		return $wiki->getName().' ('.$wiki->getLanguage().')';
 	}
 
 	private function buildTable($data, $units, $labelCallback = false, $withRank = false) {
 		$HTML = '';
+		if (empty($data)) {
+			return '';
+		}
+
 		$customLabel = is_callable($labelCallback);
 		$rows = 0;
 		$total = array_sum($data);

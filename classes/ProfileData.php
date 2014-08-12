@@ -27,6 +27,21 @@ class ProfileData {
 	 */
 	protected $user;
 
+	public static $editProfileFields = [
+		'profile-aboutme',
+		'profile-city',
+		'profile-state',
+		'profile-country',
+		'profile-link-twitter',
+		'profile-link-facebook',
+		'profile-link-google',
+		'profile-link-reddit',
+		'profile-link-steam',
+		'profile-link-xbl',
+		'profile-link-psn',
+		'profile-favwiki'
+	];
+
 	public function getProfilePath() {
 		if (!$this->getTypePref()) {
 			return "/UserProfile:".$this->user->getTitleKey();
@@ -175,20 +190,7 @@ class ProfileData {
 			$preferences['profile-country-flag'] = '';
 		}
 
-		$editProfileFields = [
-			'profile-aboutme',
-			'profile-city',
-			'profile-state',
-			'profile-country',
-			'profile-link-twitter',
-			'profile-link-facebook',
-			'profile-link-google',
-			'profile-link-reddit',
-			'profile-link-steam',
-			'profile-link-xbl',
-			'profile-link-psn',
-		];
-		foreach($editProfileFields as $field) {
+		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $preferences]);
 				break;
