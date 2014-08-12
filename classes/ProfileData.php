@@ -251,7 +251,7 @@ class ProfileData {
 	public static function getWikiSites() {
 		global $wgServer;
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonSites = $mouse->curl->fetch($wgServer.'/extensions/AllSites/api.php?action=siteInformation&task=getSiteStats');
+		$jsonSites = $mouse->curl->fetch($wgServer.'/api.php?action=allsites&do=getSiteStats&format=json');
 		return json_decode($jsonSites, true);
 	}
 
