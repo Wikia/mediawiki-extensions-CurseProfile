@@ -190,6 +190,13 @@ class ProfileData {
 			$preferences['profile-country-flag'] = '';
 		}
 
+		if (isset($preferences['profile-pref'])) {
+			$mouse = \mouseNest::getMouse();
+			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
+			// is to report each individual user as using the last pref they saved on any wiki
+			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+		}
+
 		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $preferences]);
@@ -238,6 +245,7 @@ class ProfileData {
 		return $this->user->getOption('profile-favwiki');
 	}
 
+	// TODO make this able to look up wiki info directly from the has rather than loading all site info
 	public function getFavoriteWiki() {
 		$sites = self::getWikiSites();
 		if ($sites) {
