@@ -71,6 +71,7 @@ class StatsRecache extends \SyncService {
 
 	public function execute($args = []) {
 		$db = wfGetDB(DB_SLAVE);
+		$this->outputLine('Querying users from database', time());
 		$res = $db->select('user',
 			['curse_id'],
 			['curse_id > 0'],
@@ -108,6 +109,7 @@ class StatsRecache extends \SyncService {
 			if ($favWiki) {
 				$this->favoriteWikis[$favWiki] += 1;
 			}
+			$this->outputLine('Compiled stats for curse_id '.$row['curse_id'], time());
 		}
 
 		// compute the average
@@ -117,9 +119,11 @@ class StatsRecache extends \SyncService {
 			$this->avgFriends = 'NaN';
 		}
 
+		$this->outputLine('Saving results into redis', time());
 		// save results into redis for display on the stats page
 		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
 			$this->mouse->redis->hset('profilestats', $prop, serialize($this->$prop));
 		}
+		$this->outputLine('Done.', time());
 	}
 }
