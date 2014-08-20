@@ -227,7 +227,7 @@ class Hooks {
 	 */
 	public static function onBeforeCreateEchoEvent( &$notifications, &$notificationCategories /* , &$icons */ ) {
 		$notificationCategories['friendship'] = [
-			// 'tooltip' => 'echo-pref-tooltip-friendship',
+			'tooltip' => 'echo-pref-tooltip-friendship',
 			'priority' => 3,
 		];
 		$notifications['friendship-request'] = [
@@ -244,7 +244,7 @@ class Hooks {
 		];
 
 		$notificationCategories['profile-comment'] = [
-			// 'tooltip' => 'echo-pref-tooltip-profile-comment',
+			'tooltip' => 'echo-pref-tooltip-profile-comment',
 			'priority' => 4,
 		];
 		$notifications['profile-comment'] = [
