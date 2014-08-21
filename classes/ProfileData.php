@@ -27,6 +27,21 @@ class ProfileData {
 	 */
 	protected $user;
 
+	public static $editProfileFields = [
+		'profile-aboutme',
+		'profile-city',
+		'profile-state',
+		'profile-country',
+		'profile-link-twitter',
+		'profile-link-facebook',
+		'profile-link-google',
+		'profile-link-reddit',
+		'profile-link-steam',
+		'profile-link-xbl',
+		'profile-link-psn',
+		'profile-favwiki'
+	];
+
 	public function getProfilePath() {
 		if (!$this->getTypePref()) {
 			return "/UserProfile:".$this->user->getTitleKey();
@@ -175,20 +190,14 @@ class ProfileData {
 			$preferences['profile-country-flag'] = '';
 		}
 
-		$editProfileFields = [
-			'profile-aboutme',
-			'profile-city',
-			'profile-state',
-			'profile-country',
-			'profile-link-twitter',
-			'profile-link-facebook',
-			'profile-link-google',
-			'profile-link-reddit',
-			'profile-link-steam',
-			'profile-link-xbl',
-			'profile-link-psn',
-		];
-		foreach($editProfileFields as $field) {
+		if (isset($preferences['profile-pref'])) {
+			$mouse = \mouseNest::getMouse();
+			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
+			// is to report each individual user as using the last pref they saved on any wiki
+			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+		}
+
+		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $preferences]);
 				break;
@@ -236,6 +245,7 @@ class ProfileData {
 		return $this->user->getOption('profile-favwiki');
 	}
 
+	// TODO make this able to look up wiki info directly from the has rather than loading all site info
 	public function getFavoriteWiki() {
 		$sites = self::getWikiSites();
 		if ($sites) {

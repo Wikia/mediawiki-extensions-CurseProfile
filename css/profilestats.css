@@ -1,0 +1,10 @@
+.chart {
+	width: 800px;
+	display: inline-block;
+}
+
+#adoption-chart, #friends-system, #profile-creation, #favorite-wikis {
+	display: inline-block;
+	width: 33%;
+	vertical-align: top;
+}
