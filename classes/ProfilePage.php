@@ -46,6 +46,12 @@ class ProfilePage extends \Article {
 	private $actionIsView;
 
 	/**
+	 * An array of groups to be excluded from display on profiles
+	 * @var array
+	 */
+	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
+
+	/**
 	 * @param \Title $title
 	 */
 	public function __construct($title) {
@@ -271,14 +277,18 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function groupList(&$parser) {
-		$groups = $this->user->getGroups();
+		$groups = $this->user->getEffectiveGroups();
 		if (count($groups) == 0) {
 			return '';
 		}
 
 		$HTML = '<ul class="grouptags">';
 		foreach ($groups as $group) {
-			$HTML .= '<li>'.htmlspecialchars($group).'</li>';
+			if (in_array($group, $this->restrictedGroups)) {
+				continue;
+			}
+			$HTML .= '<li>'.ucfirst(htmlspecialchars($group)).'</li>';
+
 		}
 		$HTML .= '</ul>';
 
