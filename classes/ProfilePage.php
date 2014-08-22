@@ -20,7 +20,7 @@ class ProfilePage extends \Article {
 	protected $user;
 	protected $profile;
 	private $actionIsView;
-	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor'];
+	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
 
 	public function __construct($title) {
 		parent::__construct($title);
