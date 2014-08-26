@@ -63,6 +63,7 @@ class SpecialProfileStats extends \SpecialPage {
 				<div id='adoption-chart'>".$this->buildTable($this->users,['key'=>'Profile Type','value'=>'Users'])."</div>
 			</div>";
 
+		$this->avgFriends = number_format($this->avgFriends, 2);
 		$HTML .= "<h2>Actual Usage Stats</h2>"
 		."<div id='friends-system'><h3>Friends System</h3>"
 			.$this->buildTable($this->friends, ['key'=>'Number of Friends', 'value'=>'Users'])
