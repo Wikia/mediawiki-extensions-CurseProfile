@@ -14,6 +14,8 @@
 namespace CurseProfile;
 
 class StatsRecache extends \SyncService {
+	public static $forceSingleInstance = true;
+
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
