@@ -13,7 +13,7 @@
 **/
 namespace CurseProfile;
 
-class StatsRecache extends \SyncService\SyncService {
+class StatsRecache extends \SyncService\Job {
 	public static $forceSingleInstance = true;
 
 	/**

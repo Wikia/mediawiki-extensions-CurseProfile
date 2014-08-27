@@ -16,7 +16,7 @@ namespace CurseProfile;
 /**
  * Syncs global data from child wikis back to the master
  */
-class FriendSync extends \SyncService\SyncService {
+class FriendSync extends \SyncService\Job {
 	public function execute($args = []) {
 		CP::setMouse((object)['DB'=>$this->DB,'redis'=>$this->redis]);
 		$friendship = new Friendship($args['actor']);
