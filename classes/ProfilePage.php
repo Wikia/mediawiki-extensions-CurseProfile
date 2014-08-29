@@ -458,9 +458,11 @@ class ProfilePage extends \Article {
 	public function userStats() {
 		$curse_id = $this->user->curse_id;
 
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
-		$stats = json_decode($jsonStats, true);
+		if ($curse_id > 0) {
+			$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
+			$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
+			$stats = json_decode($jsonStats, true);
+		}
 
 		// keys are message keys fed to wfMessage()
 		// values are numbers or an array of sub-stats with a number at key 0
@@ -500,13 +502,13 @@ class ProfilePage extends \Article {
 			if (empty($statsOutput['globalrank'])) {
 				unset($statsOutput['globalrank']);
 			}
+
+			$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 		} else {
 			// No curse id or WikiPoints plugin available
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
 		}
-
-		$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 
 		$HTML = $this->generateStatsDL($statsOutput);
 
