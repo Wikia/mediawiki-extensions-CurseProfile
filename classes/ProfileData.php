@@ -195,7 +195,7 @@ class ProfileData {
 		$defaultOptions['echo-subscriptions-web-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-email-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
-		$defaultOptions['echo-subscriptions-email-profile-comment'] = 0;
+		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
 
 		// Allow overriding by setting the value in the global $wgDefaultUserOptions
 		if (!isset($defaultOptions['profile-pref'])) {
