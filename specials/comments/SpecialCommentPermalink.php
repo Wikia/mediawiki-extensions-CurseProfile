@@ -39,9 +39,6 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 		$user = \User::newFromId($comment[0]['ub_user_id']);
 		$user->load();
 
-		// display while highlighting the selected ID
-
-		$start = $wgRequest->getInt('st');
 		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
 		$wgOut->addModules('ext.curseprofile.profilepage');
@@ -50,6 +47,7 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 
 		$wgOut->addHTML($mouse->output->commentboard->permalinkHeader($user, $wgOut->getPageTitle()));
 
+		// display single comment while highlighting the selected ID
 		$wgOut->addHTML('<div class="comments noreplies">'.CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
 
 		return;
