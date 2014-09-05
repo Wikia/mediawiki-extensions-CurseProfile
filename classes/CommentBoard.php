@@ -117,35 +117,80 @@ class CommentBoard {
 	}
 
 	/**
-	 * Gets the comments on the board
-	 * TODO: fetch some replies and them in to the array along with counts of how many more there were left to load
+	 * Look up a single comment given a comment id (for display from a permalink)
 	 *
+	 * @param	int		id of a user board comment
+	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
+	 * @return	array	an array of comment data in the same format as getComments.
+	 *   array will be empty if comment is unknown, or not visible.
+	 */
+	public static function getCommentById($comment_id, $asUser = null) {
+		$comment_id = intval($comment_id);
+		if ($comment_id < 1) {
+			return [];
+		}
+
+		$db = wfGetDB(DB_SLAVE);
+
+		// Look up the target comment
+		$res = $db->select(
+			['user_board'],
+			['ub_in_reply_to', 'ub_user_id', 'ub_type'],
+			["ub_id = $comment_id"],
+			__METHOD__
+		);
+		$comment = $res->fetchRow();
+		$res->free();
+
+		if (!$comment) {
+			return [];
+		}
+
+		// switch our primary ID a parent comment, if it exists
+		if ($comment['ub_in_reply_to']) {
+			$rootId = $comment['ub_in_reply_to'];
+		} else {
+			$rootId = $comment_id;
+		}
+
+		$board = new self($comment['ub_user_id'], self::BOARDTYPE_ARCHIVES);
+		$types = $board->getViewableTypes($asUser);
+
+		if (!in_array($comment['ub_type'], $types)) {
+			return [];
+		}
+
+		$comment = $board->getCommentsWithConditions("AND ub_id = $rootId", $asUser, 0, 1);
+		// force loading all replies instead of just 5
+		$comment[0]['replies'] = $board->getReplies($rootId, $asUser, 0);
+		return $comment;
+	}
+
+	/**
+	 * Generic comment retrieval utility function. Automatically limits to viewable types.
+	 *
+	 * @param	string	sql conditions applied to the user_board table query
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
 	 * @param	int		[optional] number of comments to skip when loading more
 	 * @param	int		[optional] number of top-level items to return
-	 * @param	int		[optional] maximum age of comments (by number of days)
-	 * @return	array	an array of comment data (text and user info)
+	 * @return	array	comments!
 	 */
-	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
-		$types = $this->getViewableTypes($asUser);
+	private function getCommentsWithConditions($conditions, $asUser = null, $startAt = 0, $limit = 100) {
 		$mouse = CP::loadMouse();
 
-		if ($maxAge < 0) {
-			$ageLimit = '';
-		} else {
-			$ageLimit = ' AND b.ub_date >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
-		}
+		$types = $this->getViewableTypes($asUser);
 
 		// Fetch top level comments
 		$res = $mouse->DB->select([
 			'select' => 'b.*',
 			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id . $ageLimit,
+			'where'  => 'b.ub_type IN ('.implode(',',$types).') '.$conditions,
 			'order'  => 'b.ub_date DESC',
 			'limit'  => [$startAt, $limit],
 		]);
 		$comments = [];
-		$commentIds = []; // will contain a mapping of commentId => index within $comments
+		$commentIds = []; // will contain a mapping of commentId => array index within $comments
+		// (for fast lookup of a comment by id when inserting replies)
 		while ($row = $mouse->DB->fetch($res)){
 			$commentIds[$row['ub_id']] = count($comments);
 			$row['reply_count'] = 0;
@@ -156,7 +201,7 @@ class CommentBoard {
 			return $comments;
 		}
 
-		// Fetch number of replies for each comment in this chunk
+		// Count many replies each comment in this chunk has
 		$repliesRes = $mouse->DB->select([
 			'select' => 'b.ub_in_reply_to as ub_id, COUNT(*) as replies',
 			'from'   => ['user_board' => 'b'],
@@ -165,6 +210,7 @@ class CommentBoard {
 		]);
 		while ($row = $mouse->DB->fetch($repliesRes)) {
 			$comments[$commentIds[$row['ub_id']]]['reply_count'] = intval($row['replies']);
+			// retrieve replies if there are any
 			if ($row['replies'] > 0) {
 				$comments[$commentIds[$row['ub_id']]]['replies'] = $this->getReplies($row['ub_id'], $asUser);
 			}
@@ -174,11 +220,29 @@ class CommentBoard {
 	}
 
 	/**
+	 * Gets all comments on the board
+	 * TODO: fetch some replies and them in to the array along with counts of how many more there were left to load
+	 *
+	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
+	 * @param	int		[optional] number of comments to skip when loading more
+	 * @param	int		[optional] number of top-level items to return
+	 * @param	int		[optional] maximum age of comments (by number of days)
+	 * @return	array	an array of comment data (text and user info)
+	 */
+	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
+		$searchConditions = ' AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id;
+		if ($maxAge >= 0) {
+			$searchConditions .= ' AND b.ub_date >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
+		}
+		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
+	}
+
+	/**
 	 * Gets all replies to a given comment
 	 *
 	 * @param	int		id of a comment that would be replied to
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
-	 * @param	int		[optional] max number items to return (less recent replies will be ommitted)
+	 * @param	int		[optional] max number items to return (older replies will be ommitted)
 	 * @return	array	array of reply data
 	 */
 	public function getReplies($rootComment, $asUser = null, $limit = 5) {
