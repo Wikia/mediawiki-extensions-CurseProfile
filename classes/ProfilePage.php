@@ -13,15 +13,48 @@
 **/
 namespace CurseProfile;
 
+/**
+ * Class ProfilePage
+ * Holds the primary logic over how and when a profile page is displayed
+ */
 class ProfilePage extends \Article {
 
+	/**
+	 * @var String
+	 */
 	protected $user_name;
+
+	/**
+	 * @var int
+	 */
 	protected $user_id;
+
+	/**
+	 * @var \User instance
+	 */
 	protected $user;
+
+	/**
+	 * @var ProfileData instance
+	 */
 	protected $profile;
+
+	/**
+	 * Whether or not the current page being rendered is with action=view
+	 * @var bool
+	 */
 	private $actionIsView;
 	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
 
+	/**
+	 * An array of groups to be excluded from display on profiles
+	 * @var array
+	 */
+	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
+
+	/**
+	 * @param \Title $title
+	 */
 	public function __construct($title) {
 		parent::__construct($title);
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
@@ -47,6 +80,9 @@ class ProfilePage extends \Article {
 		return $wgUser->isLoggedIn() && $wgUser->getID() == $this->user->getID();
 	}
 
+	/**
+	 * Primary rendering function for mediawiki's Article
+	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle($this->mTitle->getPrefixedText());
@@ -62,6 +98,10 @@ class ProfilePage extends \Article {
 		$output->addHTML($outputString);
 	}
 
+	/**
+	 * Shortcut method to retrieving the user's profile page preference
+	 * @return	bool	true if profile page is preferred, false if wiki is preferred
+	 */
 	public function profilePreferred() {
 		return $this->profile->getTypePref();
 	}
@@ -71,6 +111,7 @@ class ProfilePage extends \Article {
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
 	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	bool
 	 */
 	public function isUserPage($onlyView = true) {
 		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
@@ -80,6 +121,8 @@ class ProfilePage extends \Article {
 
 	/**
 	 * True if we are viewing the user's default option (in the default User namespace)
+	 *
+	 * @return	bool
 	 */
 	public function isDefaultPage() {
 		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
@@ -87,6 +130,9 @@ class ProfilePage extends \Article {
 
 	/**
 	 * True if we need to render the user's profile page on either namespace
+	 *
+	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	bool
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
@@ -97,6 +143,9 @@ class ProfilePage extends \Article {
 
 	/**
 	 * True when we need to render the user's wiki page on either namespace
+	 *
+	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	bool
 	 */
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {
@@ -113,6 +162,7 @@ class ProfilePage extends \Article {
 
 	/**
 	 * True if we are on the custom UserWiki namespace
+	 * @return	bool
 	 */
 	public function isSpoofedWikiPage() {
 
@@ -121,6 +171,7 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Returns the article object for the User's page in the standard User namespace
+	 * @return	Article instance
 	 */
 	public function getUserWikiArticle() {
 		$article = new \Article($this->user->getUserPage());
@@ -130,11 +181,16 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Returns the title object for the user's page in the UserWiki namespace
+	 * @return	\Title instance
 	 */
 	public function getCustomUserWikiTitle() {
 		return \Title::makeTitle(NS_USER_WIKI, $this->user->getName());
 	}
 
+	/**
+	 * Adjusts the links in the primary action bar on profile pages and user wiki pages
+	 * @param	array	structured info on what links will appear on the rendered page
+	 */
 	public function customizeNavBar(&$links) {
 		global $wgUser;
 
@@ -402,9 +458,11 @@ class ProfilePage extends \Article {
 	public function userStats() {
 		$curse_id = $this->user->curse_id;
 
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
-		$stats = json_decode($jsonStats, true);
+		if ($curse_id > 0) {
+			$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
+			$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
+			$stats = json_decode($jsonStats, true);
+		}
 
 		// keys are message keys fed to wfMessage()
 		// values are numbers or an array of sub-stats with a number at key 0
@@ -444,13 +502,13 @@ class ProfilePage extends \Article {
 			if (empty($statsOutput['globalrank'])) {
 				unset($statsOutput['globalrank']);
 			}
+
+			$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 		} else {
 			// No curse id or WikiPoints plugin available
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
 		}
-
-		$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 
 		$HTML = $this->generateStatsDL($statsOutput);
 
@@ -527,12 +585,16 @@ class ProfilePage extends \Article {
 		];
 	}
 
+	/**
+	 * Parser hook function that inserts either an "edit profile" button or a "add/remove friend" button
+	 * @param	$parser
+	 * @return	array	with html as the first element
+	 */
 	public function editOrFriends(&$parser) {
 		$HTML = FriendDisplay::addFriendButton($this->user_id);
 
 		if ($this->viewingSelf()) {
-			$text = wfMessage('cp-editprofile')->plain();
-			$HTML .= "<button data-href='/Special:Preferences#mw-prefsection-personal-info-public' class='linksub'>$text</button>";
+			$HTML .= \Html::element('button', ['data-href'=>'/Special:Preferences#mw-prefsection-personal-info-public', 'class'=>'linksub'], wfMessage('cp-editprofile')->plain());
 		}
 
 		return [

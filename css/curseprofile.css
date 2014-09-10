@@ -160,6 +160,10 @@ div.mainavatar {
 	background-color: rgba(200, 200, 255, 0.4);
 }
 
+.commentdisplay.highlighted > :not(.replyset) {
+	background-color: lightyellow;
+}
+
 .commentdisplay .entryform {
 	margin-left: 54px;
 	padding-right: 5px;
