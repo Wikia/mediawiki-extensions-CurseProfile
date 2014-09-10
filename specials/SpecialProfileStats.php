@@ -34,6 +34,7 @@ class SpecialProfileStats extends \SpecialPage {
 		$this->mouse->output->addTemplateFolder($IP.'/extensions/Hydralytics/templates');
 		$this->mouse->output->loadTemplate('hydralytics');
 
+		// Data built by StatsRecache job, refer to its contents for data format
 		$data = $this->mouse->redis->hgetall('profilestats');
 		foreach ($data as $k => $v) {
 			$this->$k = unserialize($v);
@@ -51,6 +52,10 @@ class SpecialProfileStats extends \SpecialPage {
 		return true;
 	}
 
+	/**
+	 * Builds the html output of the special page
+	 * @return	string	html content
+	 */
 	private function buildOutput() {
 		$HTML = '';
 
@@ -66,7 +71,7 @@ class SpecialProfileStats extends \SpecialPage {
 		$HTML .= "<h2>Actual Usage Stats</h2>"
 		."<div id='friends-system'><h3>Friends System</h3>"
 			.$this->buildTable($this->friends, ['key'=>'Number of Friends', 'value'=>'Users'])
-			."<p>Average number of friends from non-zero users: {$this->avgFriends}</p>"
+			."<p>".wfMessage('profilestats-avgFriends', $this->avgFriends)->escaped()."</p>"
 		."</div>"
 		."<div id='profile-creation'><h3>Profile Creation</h3>".$this->buildTable($this->profileContent, ['key'=>'Content in Profile','value'=>'Users'])."</div>"
 		."<div id='favorite-wikis'><h3>Favorite Wikis</h3>".$this->buildTable($this->favoriteWikis, ['key'=>'Wiki','value'=>'Favorites'], [$this, 'wikiNameFromHash'], true)."</div>";
@@ -74,11 +79,25 @@ class SpecialProfileStats extends \SpecialPage {
 		return $HTML;
 	}
 
+	/**
+	 * Returns a printable wiki name for a wiki key
+	 * @param	string	md5 key for a wiki
+	 * @param	string	human-readable name and language of the wiki
+	 */
 	private function wikiNameFromHash($md5_key) {
 		$wiki = \DynamicSettings\Wiki::loadFromHash($md5_key);
 		return $wiki->getName().' ('.$wiki->getLanguage().')';
 	}
 
+	/**
+	 * Builds a HTML table for display
+	 *
+	 * @param	array		data in { key: value } format
+	 * @param	array		text to use for column headers e.g. [ 'key'=>'Key Header', 'label'=>'Label Header']
+	 * @param	callable	[optional] callback to use for converting the data keys to strings for display. default uses wfMessage('profilestats-'.$key)
+	 * @param	boolean		[optional] when true adds a left-most rank column counting up from 1
+	 * @return	string		HTML table
+	 */
 	private function buildTable($data, $units, $labelCallback = false, $withRank = false) {
 		$HTML = '';
 		if (empty($data)) {
@@ -98,6 +117,8 @@ class SpecialProfileStats extends \SpecialPage {
 			$value = number_format($value);
 			if ($customLabel) {
 				$key = call_user_func($labelCallback, $key);
+			} else {
+				$key = wfMessage('profilestats-'.$key)->escaped();
 			}
 			if ($withRank) {
 				$rows += 1;

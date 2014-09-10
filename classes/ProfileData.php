@@ -27,6 +27,10 @@ class ProfileData {
 	 */
 	protected $user;
 
+	/**
+	 * Fields in user preferences that a user can edit to earn a "customize your profile" achievement
+	 * @var		array
+	 */
 	public static $editProfileFields = [
 		'profile-aboutme',
 		'profile-city',
@@ -42,6 +46,10 @@ class ProfileData {
 		'profile-favwiki'
 	];
 
+	/**
+	 * Returns the canonical URL path to a user's profile based on their profile preference
+	 * @return string
+	 */
 	public function getProfilePath() {
 		if (!$this->getTypePref()) {
 			return "/UserProfile:".$this->user->getTitleKey();
@@ -50,6 +58,10 @@ class ProfileData {
 		}
 	}
 
+	/**
+	 * Returns the canonical URL path to a user's wiki page based on their profile preference
+	 * @return string
+	 */
 	public function getUserWikiPath() {
 		if ($this->getTypePref()) {
 			return "/UserWiki:".$this->user->getTitleKey();
@@ -58,6 +70,10 @@ class ProfileData {
 		}
 	}
 
+	/**
+	 * Inserts curse profile fields into the user preferences form
+	 * @param array of data for HTMLForm to generate the Special:Preferences form
+	 */
 	public static function insertProfilePrefs(&$preferences) {
 		$wikiOptions = [
 			'---' => '',
@@ -171,11 +187,15 @@ class ProfileData {
 		];
 	}
 
+	/**
+	 * Adds default values for preferences added by curse profile
+	 * @param array of default values
+	 */
 	public static function insertProfilePrefsDefaults(&$defaultOptions) {
 		$defaultOptions['echo-subscriptions-web-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-email-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
-		$defaultOptions['echo-subscriptions-email-profile-comment'] = 0;
+		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
 
 		// Allow overriding by setting the value in the global $wgDefaultUserOptions
 		if (!isset($defaultOptions['profile-pref'])) {
@@ -183,13 +203,20 @@ class ProfileData {
 		}
 	}
 
+	/**
+	 * Runs when the user saves their preferences.
+	 * @param $user
+	 * @param $preferences
+	 */
 	public static function processPreferenceSave($user, &$preferences) {
+		// Try to determine what flag to display based on what they have entered as their country
 		if (!empty($preferences['profile-country'])) {
 			$preferences['profile-country-flag'] = \FlagFinder::getCode($preferences['profile-country']);
 		} else {
 			$preferences['profile-country-flag'] = '';
 		}
 
+		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
 		if (isset($preferences['profile-pref'])) {
 			$mouse = \mouseNest::getMouse();
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
@@ -197,6 +224,7 @@ class ProfileData {
 			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
 		}
 
+		// run hooks on profile preferences (mostly for achievements)
 		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $preferences]);
@@ -205,6 +233,10 @@ class ProfileData {
 		}
 	}
 
+	/**
+	 * Create a new ProfileData instance
+	 * @param $user_id
+	 */
 	public function __construct($user_id) {
 		$this->user_id = intval($user_id);
 		if ($this->user_id < 1) {
@@ -214,10 +246,18 @@ class ProfileData {
 		$this->user = \User::newFromId($user_id);
 	}
 
+	/**
+	 * Get the user's "About Me" text
+	 * @return string
+	 */
 	public function getAboutText() {
 		return $this->user->getOption('profile-aboutme');
 	}
 
+	/**
+	 * Returns all the user's location profile data
+	 * @return array possibly including keys: city, state, country, country-flag
+	 */
 	public function getLocations() {
 		$profile = [
 			'city' => $this->user->getOption('profile-city'),
@@ -228,6 +268,10 @@ class ProfileData {
 		return array_filter($profile);
 	}
 
+	/**
+	 * Returns all the user's social profile links
+	 * @return array possibly including keys: Twitter, Facebook, Google, Reddit, Steam, XBL, PSN
+	 */
 	public function getProfileLinks() {
 		$profile = [
 			'Twitter' => $this->user->getOption('profile-link-twitter'),
@@ -241,11 +285,20 @@ class ProfileData {
 		return array_filter($profile);
 	}
 
+	/**
+	 * Returns the md5_key for the wiki the user has selected as a favorite
+	 * @return string
+	 */
 	public function getFavoriteWikiHash() {
 		return $this->user->getOption('profile-favwiki');
 	}
 
-	// TODO make this able to look up wiki info directly from the has rather than loading all site info
+	/**
+	 * Returns more complete info on the wiki chosen as the user's favorite
+	 * TODO make this able to look up wiki info directly from the hash rather than sifting through all site info
+	 *
+	 * @return array
+	 */
 	public function getFavoriteWiki() {
 		$sites = self::getWikiSites();
 		if ($sites) {
@@ -258,6 +311,12 @@ class ProfileData {
 		return [];
 	}
 
+	/**
+	 * Returns the decoded wiki data available by the allsites API
+	 * TODO rewrite this to use a DerivativeRequest object and avoid using curl
+	 *
+	 * @return array
+	 */
 	public static function getWikiSites() {
 		global $wgServer;
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
@@ -267,11 +326,16 @@ class ProfileData {
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
+	 * @return bool
 	 */
 	public function getTypePref() {
 		return $this->user->getIntOption('profile-pref');
 	}
 
+	/**
+	 * Changes the user's profile preference to the opposite of what it was before, and saves their user preferences.
+	 * @return	void
+	 */
 	public function toggleTypePref() {
 		$this->user->setOption('profile-pref', !$this->getTypePref());
 		$this->user->saveSettings();

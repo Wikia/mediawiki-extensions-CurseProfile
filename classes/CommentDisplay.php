@@ -17,6 +17,13 @@ namespace CurseProfile;
  * A class to manage displaying a list of friends on a user profile
  */
 class CommentDisplay {
+	/**
+	 * Responds to the comments parser hook that displays recent comments on a profile
+	 *
+	 * @param	object	parser instance
+	 * @param	int		id of the user whose recent comments should be displayed
+	 * @return	array	with html at index 0
+	 */
 	public static function comments(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -54,7 +61,14 @@ class CommentDisplay {
 		];
 	}
 
-	public static function singleComment($comment) {
+	/**
+	 * Returns html display for a single profile comment
+	 *
+	 * @param	array	structured comment data as returned by CommentBoard
+	 * @param	int		[optional] id of a comment to highlight from among those displayed
+	 * @return	string	html for display
+	 */
+	public static function singleComment($comment, $highlight = false) {
 		global $wgOut;
 
 		$HTML = '';
@@ -75,12 +89,16 @@ class CommentDisplay {
 			break;
 		}
 
+		if ($highlight == $comment['ub_id']) {
+			$type .= ' highlighted';
+		}
+
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">
-					'.CP::timeTag($comment['ub_date']).' '
+					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], CP::timeTag($comment['ub_date'])).' '
 					.\Html::element('a', ['href'=>'#', 'class'=>'newreply'], wfMessage('replylink')).' '
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
 				.'</div>
@@ -106,7 +124,7 @@ class CommentDisplay {
 				}
 
 				foreach ($comment['replies'] as $reply) {
-					$HTML .= self::singleComment($reply);
+					$HTML .= self::singleComment($reply, $highlight);
 				}
 				$HTML .= '</div>';
 			}
@@ -116,7 +134,11 @@ class CommentDisplay {
 	}
 
 	/**
-	 * Unlike the previous comments function
+	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
+	 *
+	 * @param	int		the id of the user the parent comment belongs to
+	 * @param	int		the id of the comment for which replies need to be loaded
+	 * @return	string	html for display
 	 */
 	public static function repliesTo($user_id, $comment_id) {
 		$user_id = intval($user_id);

@@ -18,7 +18,7 @@ class StatsRecache extends \SyncService {
 
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
-	 * Crawls all wikis and throws as many users profile preferences into redis as possible
+	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
 	public static function populateLastPref() {
 		$mouse = \mouseNest::getMouse();
@@ -71,6 +71,29 @@ class StatsRecache extends \SyncService {
 		}
 	}
 
+	/**
+	 * Refreshes profile stats data. Should be run regularly (via the StatsRecacheCron.php wrapper script)
+	 * Puts a serialized PHP object into redis in the following format:
+	 * {
+	 *   users: {
+	 *     profile: int,
+	 *     wiki: int
+	 *   },
+	 *   friends: {
+	 *     none: int,
+	 *     more: int
+	 *   },
+	 *   avgFriends: decimal,
+	 *   profileContent: {
+	 *     filled: int,
+	 *     empty: int
+	 *   },
+	 *   favoriteWikis: {
+	 *     md5_key: int,
+	 *     md5_key: int
+	 *   }
+	 * }
+	 */
 	public function execute($args = []) {
 		$db = wfGetDB(DB_SLAVE);
 		$this->outputLine('Querying users from database', time());
@@ -116,7 +139,7 @@ class StatsRecache extends \SyncService {
 
 		// compute the average
 		if (count($this->avgFriends)) {
-			$this->avgFriends = array_sum($this->avgFriends) / count($this->avgFriends);
+			$this->avgFriends = number_format(array_sum($this->avgFriends) / count($this->avgFriends), 2);
 		} else {
 			$this->avgFriends = 'NaN';
 		}

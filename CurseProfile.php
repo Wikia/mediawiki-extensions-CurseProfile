@@ -72,7 +72,9 @@ $wgSpecialPageGroups['AddComment']							= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/comments/SpecialCommentBoard.php";
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
-$wgSpecialPageGroups['CommentBoard']						= 'users';
+
+$wgAutoloadClasses['CurseProfile\SpecialCommentPermalink']	= "{$extDir}/specials/comments/SpecialCommentPermalink.php";
+$wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalink';
 
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
