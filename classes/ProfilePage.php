@@ -288,6 +288,7 @@ class ProfilePage extends \Article {
 				continue;
 			}
 			$HTML .= '<li>'.ucfirst(htmlspecialchars($group)).'</li>';
+
 		}
 		$HTML .= '</ul>';
 
