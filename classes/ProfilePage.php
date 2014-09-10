@@ -44,7 +44,6 @@ class ProfilePage extends \Article {
 	 * @var bool
 	 */
 	private $actionIsView;
-	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
 
 	/**
 	 * An array of groups to be excluded from display on profiles
