@@ -83,6 +83,7 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago'],
+	'position' => 'top',
 ];
 $wgResourceModules['jquery.timeago'] = [
 	'scripts' => ['js/jquery.timeago.js'],
