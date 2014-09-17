@@ -41,6 +41,7 @@ function CurseProfile($) {
 			$('.comments')
 				.on('click', 'a.newreply', commentBoard.newReply)
 				.on('click', 'a.remove', commentBoard.removeComment);
+			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
 		},
 
 		loadReplies: function(e, callback) {
