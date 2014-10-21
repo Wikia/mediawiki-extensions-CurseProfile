@@ -122,6 +122,11 @@ class CP {
 	 * @return	string	url path to image
 	 */
 	public static function getWikiImageByHash($md5) {
+		// TODO: write a separate file (loaded directly by the browser) to replace this function
+		// That separate file should accept an MD5 url parameter and issue a 302 redirect to the correct location
+		// This function would simply change to return a string URL to that new file, ultimately
+		// deferring lengthy curl lookups during main rendering when it's only needed for an image.
+
 		$mouse = self::loadMouse(['curl' => 'mouseTransferCurl']);
 
 		// Try to use a cached value from redis
