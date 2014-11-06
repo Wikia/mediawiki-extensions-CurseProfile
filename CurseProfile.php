@@ -76,6 +76,9 @@ $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
 $wgAutoloadClasses['CurseProfile\SpecialCommentPermalink']	= "{$extDir}/specials/comments/SpecialCommentPermalink.php";
 $wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalink';
 
+$wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
+$wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
+
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
