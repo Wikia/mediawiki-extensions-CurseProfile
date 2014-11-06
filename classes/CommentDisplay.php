@@ -32,7 +32,7 @@ class CommentDisplay {
 		$HTML = '';
 
 		global $wgUser;
-		if ($wgUser->isLoggedIn()) {
+		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked()) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			$HTML .= '
