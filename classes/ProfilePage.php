@@ -206,14 +206,23 @@ class ProfilePage extends \Article {
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
 			$links['namespaces']['user']['href'] = $this->mTitle->getLinkURL();
-			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->plain(); // rename from "User page"
+			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->text(); // rename from "User page"
 			$links['namespaces']['user']['class'] = 'selected';
 			// add link to user wiki
 			$links['namespaces']['user_wiki'] = [
 				'class'		=> false,
-				'text'		=> wfMessage('userwikitab')->plain(),
+				'text'		=> wfMessage('userwikitab')->text(),
 				'href'		=> $this->profile->getUserWikiPath(),
 			];
+
+			// show link to usertalk page if on non-default profile
+			if (!$this->profile->getTypePref()) {
+				$links['namespaces']['user_talk'] = [
+					'class'		=> false,
+					'text'		=> wfMessage('talk')->text(),
+					'href'		=> $this->user->getTalkPage()->getLinkURL(),
+				];
+			}
 
 			$links['views']['contribs'] = [
 				'class'		=> false,
@@ -240,13 +249,13 @@ class ProfilePage extends \Article {
 		if ($this->isUserWikiPage(false)) {
 			$links['namespaces']['user_profile'] = [
 				'class'		=> false,
-				'text'		=> wfMessage('userprofiletab')->plain(),
+				'text'		=> wfMessage('userprofiletab')->text(),
 				'href'		=> $this->profile->getProfilePath(),
 				'primary'	=> true,
 			];
 
 			// correct User profile to "User wiki" and use appropriate link
-			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->plain();
+			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->text();
 			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
 		}
 	}
@@ -458,9 +467,11 @@ class ProfilePage extends \Article {
 	public function userStats() {
 		$curse_id = $this->user->curse_id;
 
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
-		$stats = json_decode($jsonStats, true);
+		if ($curse_id > 0) {
+			$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
+			$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
+			$stats = json_decode($jsonStats, true);
+		}
 
 		// keys are message keys fed to wfMessage()
 		// values are numbers or an array of sub-stats with a number at key 0
@@ -500,13 +511,13 @@ class ProfilePage extends \Article {
 			if (empty($statsOutput['globalrank'])) {
 				unset($statsOutput['globalrank']);
 			}
+
+			$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 		} else {
 			// No curse id or WikiPoints plugin available
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
 		}
-
-		$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 
 		$HTML = $this->generateStatsDL($statsOutput);
 

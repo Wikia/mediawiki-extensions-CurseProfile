@@ -122,23 +122,10 @@ class CP {
 	 * @return	string	url path to image
 	 */
 	public static function getWikiImageByHash($md5) {
-		$mouse = self::loadMouse(['curl' => 'mouseTransferCurl']);
-
-		// Try to use a cached value from redis
-		if ($mouse->redis->exists('wikiavatar:'.$md5)) {
-			return $mouse->redis->get('wikiavatar:'.$md5);
-		}
-
-		// fallback to direct lookup
-		$result = $mouse->curl->post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5), [], [], true);
-		$json = json_decode($result, true);
-		if ($json && isset($json['AvatarUrl'])) {
-			// cache to redis
-			$mouse->redis->set('wikiavatar:'.$md5, $json['AvatarUrl']);
-			$mouse->redis->expire('wikiavatar:'.$md5, 86400); // discard after 24 hrs
-			return $json['AvatarUrl'];
-		} else {
-			return '';
-		}
+		// TODO: write a separate file (loaded directly by the browser) to replace this function
+		// That separate file should accept an MD5 url parameter and issue a 302 redirect to the correct location
+		// This function would simply change to return a string URL to that new file, ultimately
+		// deferring lengthy curl lookups during main rendering when it's only needed for an image.
+		return '/Special:WikiImageRedirect?md5='.urlencode($md5);
 	}
 }

@@ -122,7 +122,7 @@ class CommentApi extends \CurseApiBase {
 
 		if ($user->getIntOption('profile-pref')) {
 			$board = new CommentBoard($user_id);
-			$board->addComment($text, null, $inreply);
+			$commentSuccess = $board->addComment($text, null, $inreply);
 		} else {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
 			// however there didn't seem to be an easy way to add a section rather than editing the entire content
@@ -157,11 +157,11 @@ class CommentApi extends \CurseApiBase {
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
 		$board = new CommentBoard($toUser);
-		$board->addComment($text, null, $inreply);
+		$commentSuccess = $board->addComment($text, null, $inreply);
 
 		// TODO: should probably change CommentBoard::addComment to indicate failure or succes
 		// so that this api call isn't hard-coded to always return success assuming params validate
-		$this->getResult()->addValue(null, 'result', 'success');
+		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 	}
 
 	public function doRemove() {

@@ -25,10 +25,23 @@ class skin_commentboard {
 	 *
 	 * @access	public
 	 * @param	object	user reference
+	 * @param	string	text title of the pageq
 	 * @return	string	Built HTML
 	 */
 	public function header($user, $title) {
-		return "<h1>$title</h1>".'<p><a href="'.(new CurseProfile\ProfileData($user->getId()))->getProfilePath().'">back to profile</a></p>';
+		return "<h1>$title</h1>".
+		'<p>'.
+			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
+		'</p>';
+	}
+
+	public function permalinkHeader($user, $title) {
+		return "<h1>$title</h1>".
+		'<p>'.
+			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
+			' | '.
+			Html::element('a', ['href'=>SpecialPage::getTitleFor('CommentBoard', $user->getId())->getFullURL()], wfMessage('commentboard-link-backtoboard')).
+		'</p>';
 	}
 
 	/**
@@ -39,7 +52,7 @@ class skin_commentboard {
 	 * @param	string	[optional] built HTML fragment for pagination
 	 * @return	string	Built HTML
 	 */
-	public function comments($comments, $user_id, $pagination = null) {
+	public function comments($comments, $user_id, $pagination = '') {
 		$this->HTML = '';
 		$this->HTML .= '<div>'.$pagination.'</div>';
 

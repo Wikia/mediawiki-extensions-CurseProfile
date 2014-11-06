@@ -72,7 +72,12 @@ $wgSpecialPageGroups['AddComment']							= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/comments/SpecialCommentBoard.php";
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
-$wgSpecialPageGroups['CommentBoard']						= 'users';
+
+$wgAutoloadClasses['CurseProfile\SpecialCommentPermalink']	= "{$extDir}/specials/comments/SpecialCommentPermalink.php";
+$wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalink';
+
+$wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
+$wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
 
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
@@ -80,10 +85,16 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago'],
+	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago', 'jquery.autosize'],
+	'position' => 'top',
 ];
 $wgResourceModules['jquery.timeago'] = [
 	'scripts' => ['js/jquery.timeago.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+];
+$wgResourceModules['jquery.autosize'] = [
+	'scripts' => ['js/jquery.autosize.min.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
