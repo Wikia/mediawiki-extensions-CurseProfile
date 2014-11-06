@@ -271,9 +271,11 @@ class CommentBoard {
 	/**
 	 * Add a public comment to the board
 	 *
-	 * @param	int		the ID of a user
-	 * @param	int		optional user ID of user posting (defaults to wgUser)
-	 * @param	int		optional id of a board post that this will be in reply to
+	 * @access	public
+	 * @param	integer	the ID of a user
+	 * @param	integer	optional user ID of user posting (defaults to wgUser)
+	 * @param	integer	optional id of a board post that this will be in reply to
+	 * @return	boolean	Success
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
@@ -288,6 +290,9 @@ class CommentBoard {
 			$fromUser = $wgUser;
 		} else {
 			$fromUser = \User::newFromId(intval($fromUser));
+		}
+		if ($fromUser->isBlocked()) {
+			return false;
 		}
 
 		if (is_null($inReplyTo)) {
@@ -324,6 +329,7 @@ class CommentBoard {
 				]
 			]);
 		}
+		return true;
 	}
 
 	/**
