@@ -62,6 +62,7 @@ class Hooks {
 		if (self::$profilePage->isSpoofedWikiPage()) {
 			// overwrite the assignable argument
 			$title = self::$profilePage->getUserWikiArticle()->getTitle();
+			// TODO investigate using a derivitave context here instead of overwriting the original one?
 			\RequestContext::getMain()->setTitle($title);
 		} elseif ($request->getVal('redirectToUserwiki')) {
 			$output->redirect(self::$profilePage->getCustomUserWikiTitle()->getFullURL());
