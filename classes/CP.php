@@ -126,6 +126,8 @@ class CP {
 		// That separate file should accept an MD5 url parameter and issue a 302 redirect to the correct location
 		// This function would simply change to return a string URL to that new file, ultimately
 		// deferring lengthy curl lookups during main rendering when it's only needed for an image.
-		return '/Special:WikiImageRedirect?md5='.urlencode($md5);
+		$wikiImageRedirect = \Title::newFromText('Special:WikiImageRedirect');
+		$wikiImageRedirectURL = $wikiImageRedirect->getFullURL();
+		return $wikiImageRedirectURL.'?md5='.urlencode($md5);
 	}
 }
