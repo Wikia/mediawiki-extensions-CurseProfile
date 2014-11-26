@@ -182,10 +182,10 @@ class CommentBoard {
 
 		// Fetch top level comments
 		$res = $mouse->DB->select([
-			'select' => 'b.*',
+			'select' => ['b.*', 'IFNULL(b.ub_last_reply, b.ub_date) AS last_updated'],
 			'from'   => ['user_board' => 'b'],
 			'where'  => 'b.ub_type IN ('.implode(',',$types).') '.$conditions,
-			'order'  => 'b.ub_date DESC',
+			'order'  => 'last_updated DESC',
 			'limit'  => [$startAt, $limit],
 		]);
 		$comments = [];
@@ -208,6 +208,7 @@ class CommentBoard {
 			'where'  => 'b.ub_in_reply_to IN ('.implode(',',array_keys($commentIds)).')',
 			'group'  => 'b.ub_in_reply_to',
 		]);
+		// TODO: fetch replies for all comments in a single DB query?
 		while ($row = $mouse->DB->fetch($repliesRes)) {
 			$comments[$commentIds[$row['ub_id']]]['reply_count'] = intval($row['replies']);
 			// retrieve replies if there are any
@@ -221,7 +222,6 @@ class CommentBoard {
 
 	/**
 	 * Gets all comments on the board
-	 * TODO: fetch some replies and them in to the array along with counts of how many more there were left to load
 	 *
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
 	 * @param	int		[optional] number of comments to skip when loading more
@@ -232,7 +232,7 @@ class CommentBoard {
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
 		$searchConditions = ' AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id;
 		if ($maxAge >= 0) {
-			$searchConditions .= ' AND b.ub_date >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
+			$searchConditions .= ' AND last_updated >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}
@@ -316,6 +316,15 @@ class CommentBoard {
 			__METHOD__
 		);
 
+		$dbw->update(
+			'user_board',
+			[
+				'ub_last_reply' = date( 'Y-m-d H:i:s' )
+			],
+			'ub_id = '.$inReplyTo,
+			__METHOD__
+		);
+
 		wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
 
 		if ($toUser->getId() != $fromUser->getId()) {
@@ -334,6 +343,7 @@ class CommentBoard {
 
 	/**
 	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
+	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	int		id of a comment to remove
 	 * @return	stuff	whatever mouse DB returns
