@@ -98,7 +98,7 @@ class CommentDisplay {
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">
-					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], CP::timeTag($comment['ub_date'])).' '
+					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
 					.\Html::element('a', ['href'=>'#', 'class'=>'newreply'], wfMessage('replylink')).' '
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
 				.'</div>
@@ -134,6 +134,20 @@ class CommentDisplay {
 	}
 
 	/**
+	 * Returns a <time> tag with a comment's post date or last edited date
+	 *
+	 * @param	array	comment data
+	 * @return	stirng	html fragment
+	 */
+	private static function timestamp($comment){
+		if (is_null($comment['ub_edited'])) {
+			return CP::timeTag($comment['ub_date']);
+		} else {
+			return wfMessage('cp-commentedited').' '.CP::timeTag($comment['ub_edited']);
+		}
+	}
+
+	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
 	 * @param	int		the id of the user the parent comment belongs to
@@ -151,7 +165,7 @@ class CommentDisplay {
 		$comments = $board->getReplies($comment_id, null, -1);
 
 		if (empty($comments)) {
-			$HTML = 'No replies were found';
+			$HTML = wfMessage('cp-nocommentreplies');
 		} else {
 			foreach ($comments as $comment) {
 				$HTML .= self::singleComment($comment);
