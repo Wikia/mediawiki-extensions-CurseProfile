@@ -182,7 +182,7 @@ class CommentBoard {
 
 		// Fetch top level comments
 		$res = $mouse->DB->select([
-			'select' => ['b.*', 'IFNULL(b.ub_last_reply, b.ub_date) AS last_updated'],
+			'select' => 'b.*, IFNULL(b.ub_last_reply, b.ub_date) AS last_updated',
 			'from'   => ['user_board' => 'b'],
 			'where'  => 'b.ub_type IN ('.implode(',',$types).') '.$conditions,
 			'order'  => 'last_updated DESC',
@@ -319,7 +319,7 @@ class CommentBoard {
 		$dbw->update(
 			'user_board',
 			[
-				'ub_last_reply' = date( 'Y-m-d H:i:s' )
+				'ub_last_reply' => date( 'Y-m-d H:i:s' )
 			],
 			'ub_id = '.$inReplyTo,
 			__METHOD__
