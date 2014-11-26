@@ -23,7 +23,7 @@ class CommentApi extends \CurseApiBase {
 
 	public function getParamDescription() {
 		return array_merge(parent::getParamDescription(), [
-			// remove
+			// getRaw, edit, and remove
 			'comment_id' => 'The the ID of a comment which is being acted upon. Required for remove actions.',
 
 			// add
@@ -72,6 +72,32 @@ class CommentApi extends \CurseApiBase {
 						\ApiBase::PARAM_DFLT => 0,
 					],
 				]
+			],
+
+			'getRaw' => [
+				'tokenRequired' => false,
+				'postRequired' => false,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+
+			'edit' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+					'text' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
 			],
 
 			'addToDefault' => [
@@ -162,6 +188,22 @@ class CommentApi extends \CurseApiBase {
 		// TODO: should probably change CommentBoard::addComment to indicate failure or succes
 		// so that this api call isn't hard-coded to always return success assuming params validate
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
+	}
+
+	public function doGetRaw() {
+		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'));
+		$this->getResult()->addValue(null, 'text', $comment);
+	}
+
+	public function doEdit() {
+		$comment_id = $this->getMain()->getVal('comment_id');
+		$text = $this->getMain()->getVal('text');
+		if ($comment_id && CommentBoard::canEdit($comment_id)) {
+			$res = CommentBoard::editComment($comment_id, $text);
+			$this->getResult()->addValue(null, 'result', 'success');
+		} else {
+			$this->dieUsageMsg(['comment-invalidaction']);
+		}
 	}
 
 	public function doRemove() {
