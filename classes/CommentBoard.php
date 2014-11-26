@@ -232,7 +232,7 @@ class CommentBoard {
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
 		$searchConditions = ' AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id;
 		if ($maxAge >= 0) {
-			$searchConditions .= ' AND last_updated >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
+			$searchConditions .= ' AND IFNULL(b.ub_last_reply, b.ub_date) >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}
