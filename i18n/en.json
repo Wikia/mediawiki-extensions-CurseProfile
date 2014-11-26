@@ -62,6 +62,8 @@
 	"psnlink": "Playstation Network",
 	"viewearlierreplies": "Load $1 more {{PLURAL:$1|reply|replies}}",
 	"repliestooltip": "View replies or add one of your own",
+	"cp-commentedited": "edited",
+	"cp-nocommentreplies": "No replies were found",
 	"replylink": "Reply",
 	"removelink": "✕",
 	"removelink-tooltip": "Remove this comment",
