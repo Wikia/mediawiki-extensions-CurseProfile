@@ -69,7 +69,7 @@ class CommentDisplay {
 	 * @return	string	html for display
 	 */
 	public static function singleComment($comment, $highlight = false) {
-		global $wgOut;
+		global $wgOut, $wgUser;
 
 		$HTML = '';
 		$cUser = \User::newFromId($comment['ub_user_id_from']);
@@ -99,7 +99,8 @@ class CommentDisplay {
 			<div>
 				<div class="right">
 					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
-					.\Html::element('a', ['href'=>'#', 'class'=>'newreply'], wfMessage('replylink')).' '
+					.(!$wgUser->isAnon() ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
+					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
 				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])
