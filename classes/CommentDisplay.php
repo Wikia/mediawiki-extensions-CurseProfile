@@ -31,22 +31,7 @@ class CommentDisplay {
 		}
 		$HTML = '';
 
-		global $wgUser;
-		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked()) {
-			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
-			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			$HTML .= '
-			<div class="commentdisplay add-comment">
-				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
-				<div class="entryform">
-					<form action="/Special:AddComment/'.$user_id.'" method="post">
-						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
-						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
-						'.\Html::hidden('token', $wgUser->getEditToken()).'
-					</form>
-				</div>
-			</div>';
-		}
+		$HTML .= self::newCommentForm($user_id);
 
 		$board = new CommentBoard($user_id);
 		$comments = $board->getComments();
@@ -59,6 +44,34 @@ class CommentDisplay {
 			$HTML,
 			'isHTML' => true,
 		];
+	}
+
+	/**
+	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
+	 *
+	 * @param	int		id of the user whose comment board will recieve a new comment via this form
+	 * @param	bool	if true, the form will have an added class to be hidden by css
+	 * @return	string	html fragment or empty string
+	 */
+	public static function newCommentForm($user_id, $hidden = false) {
+		global $wgUser;
+		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked()) {
+			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
+			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
+			return '
+			<div class="commentdisplay add-comment'.($hidden ? ' hidden' : '').'">
+				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
+				<div class="entryform">
+					<form action="/Special:AddComment/'.$user_id.'" method="post">
+						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
+						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
+						'.\Html::hidden('token', $wgUser->getEditToken()).'
+					</form>
+				</div>
+			</div>';
+		} else {
+			return '';
+		}
 	}
 
 	/**

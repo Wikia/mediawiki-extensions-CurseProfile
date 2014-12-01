@@ -40,6 +40,9 @@ function CurseProfile($) {
 			$('.reply-count').on('click', commentBoard.loadReplies);
 			$('.comments')
 				.on('click', 'a.newreply', commentBoard.newReply)
+				.on('click', 'a.edit', commentBoard.editComment)
+				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
+				.on('click', 'form.edit .cancel', commentBoard.cancelCommentEdit)
 				.on('click', 'a.remove', commentBoard.removeComment);
 			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
 		},
@@ -111,10 +114,48 @@ function CurseProfile($) {
 				}
 			}
 
+			// if the replies now exist after attempts to load them, we can put the reply box below them
 			if ($replySet.length !== 0) {
 				placeReplyBox();
 			}
 		},
+
+		editComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+
+			// obscure comment with translucent throbber
+
+			// use API to download raw comment text
+
+			// clone and alter new comment form to function as an edit form
+
+			// insert raw comment text in to edit form
+
+			// insert edit form into DOM to replace throbber
+		},
+
+		cancelCommentEdit: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay'),
+				$origComment = $comment.prev();
+			e.preventDefault();
+
+			// remove edit form and show old comment content
+		}
+
+		submitCommentEdit: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay'),
+				$origComment = $comment.prev();
+			e.preventDefault();
+
+			// overlay throbber
+
+			// use API to post new comment text
+
+			// use API to get new comment display
+
+			// insert new comment into DOM to replace throbber, old comment content & edit form
+		}
 
 		removeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
