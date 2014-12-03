@@ -191,8 +191,8 @@ class CommentApi extends \CurseApiBase {
 	}
 
 	public function doGetRaw() {
-		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'));
-		$this->getResult()->addValue(null, 'text', $comment);
+		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'), false);
+		$this->getResult()->addValue(null, 'text', ( isset($comment[0]['ub_message']) ? $comment[0]['ub_message'] : ''));
 	}
 
 	public function doEdit() {

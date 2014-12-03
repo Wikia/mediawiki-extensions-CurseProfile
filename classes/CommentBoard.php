@@ -120,11 +120,12 @@ class CommentBoard {
 	 * Look up a single comment given a comment id (for display from a permalink)
 	 *
 	 * @param	int		id of a user board comment
+	 * @param	bool	[optional] true by default, if given ID is a reply, will fetch parent comment as well
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
 	 * @return	array	an array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
-	public static function getCommentById($comment_id, $asUser = null) {
+	public static function getCommentById($comment_id, $withParent = true, $asUser = null) {
 		$comment_id = intval($comment_id);
 		if ($comment_id < 1) {
 			return [];
@@ -147,7 +148,7 @@ class CommentBoard {
 		}
 
 		// switch our primary ID a parent comment, if it exists
-		if ($comment['ub_in_reply_to']) {
+		if ($withParent && $comment['ub_in_reply_to']) {
 			$rootId = $comment['ub_in_reply_to'];
 		} else {
 			$rootId = $comment_id;
