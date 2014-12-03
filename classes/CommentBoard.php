@@ -342,6 +342,34 @@ class CommentBoard {
 	}
 
 	/**
+	 * Checks if a user has permissions to reply to a comment
+	 *
+	 * @param	mixed	int id of comment to check, or array row from user_board table
+	 * @param	obj		[optional] mw User object, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canReply($comment_id, $user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		}
+
+		if (is_array($comment_id)) {
+			$comment = $comment_id;
+		} else {
+			$mouse = CP::loadMouse();
+			$comment = $mouse->DB->selectAndFetch([
+				'select' => 'b.*',
+				'from'   => ['user_board' => 'b'],
+				'where'  => 'b.ub_id = '.intval($comment_id),
+			]);
+		}
+
+		// comment must not be deleted and user must be logged in
+		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon();
+	}
+
+	/**
 	 * Replaces the text content of a comment. Permissions are not checked. Use canEdit() to check.
 	 *
 	 * @param	int		id of a user board comment
