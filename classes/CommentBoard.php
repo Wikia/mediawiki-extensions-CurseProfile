@@ -412,8 +412,8 @@ class CommentBoard {
 			]);
 		}
 
-		// comment must be written by this user
-		return $comment['ub_user_id'] == $user->getId();
+		// comment must not be deleted and must be written by this user
+		return $comment['ub_type'] > self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId();
 	}
 
 	/**
