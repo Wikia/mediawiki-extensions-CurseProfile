@@ -201,6 +201,9 @@ class CommentApi extends \CurseApiBase {
 		if ($comment_id && CommentBoard::canEdit($comment_id)) {
 			$res = CommentBoard::editComment($comment_id, $text);
 			$this->getResult()->addValue(null, 'result', 'success');
+			// add parsed text to result
+			global $wgOut;
+			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parseInline($text));
 		} else {
 			$this->dieUsageMsg(['comment-invalidaction']);
 		}
