@@ -317,14 +317,16 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		$dbw->update(
-			'user_board',
-			[
-				'ub_last_reply' => date( 'Y-m-d H:i:s' )
-			],
-			'ub_id = '.$inReplyTo,
-			__METHOD__
-		);
+		if ($inReplyTo) {
+			$dbw->update(
+				'user_board',
+				[
+					'ub_last_reply' => date('Y-m-d H:i:s')
+				],
+				['ub_id = ' . $inReplyTo],
+				__METHOD__
+			);
+		}
 
 		wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
 
