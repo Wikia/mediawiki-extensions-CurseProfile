@@ -175,6 +175,18 @@ div.mainavatar {
 		margin-bottom:5px;
 	}
 
+.commentdisplay .overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(25, 25, 25, 0.7);
+	background-image: url('/extensions/WikiEditor/modules/images/dialogs/loading-small.gif');
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
 .comments .avatar {
 	float: left;
 	width: 0;
