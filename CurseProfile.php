@@ -89,6 +89,7 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'position' => 'top',
 	'messages' => [
 		'cancel',
+		'remove-prompt',
 	],
 ];
 $wgResourceModules['jquery.timeago'] = [

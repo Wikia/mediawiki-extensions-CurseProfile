@@ -70,6 +70,7 @@
 	"commenteditlink-tooltip": "Edit this comment",
 	"removelink": "✗",
 	"removelink-tooltip": "Remove this comment",
+	"remove-prompt": "You are about to delete the comment by $1",
 	"profilepref-profile": "Use an enhanced Curse Profile user page",
 	"profilepref-wiki": "Use a standard wiki user page",
 	"prefs-public": "Public Profile",

@@ -212,6 +212,9 @@ function CurseProfile($) {
 		removeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
+			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a[title^="User:"]').text()).text() ) ) {
+				return;
+			}
 			$this.hide();
 			(new mw.Api()).post({
 				action: 'comment',
