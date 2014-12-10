@@ -76,7 +76,7 @@ function CurseProfile($) {
 			var $replySet, $replyHolder, $textarea, $this = $(this).closest('.commentdisplay'),
 				placeReplyBox = function() {
 					if (commentBoard.replyForm === null) {
-						commentBoard.replyForm = $('.add-comment').clone();
+						commentBoard.replyForm = $('.add-comment').clone().removeClass('hidden');
 						// Update placeholder to use the reply-specific one
 						$textarea = commentBoard.replyForm.find('textarea');
 						$textarea.prop('placeholder', $textarea.data('replyplaceholder'));
