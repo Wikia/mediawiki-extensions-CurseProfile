@@ -113,7 +113,7 @@
 	"echo-category-title-profile-comment": "Profile Comment",
 	"echo-pref-tooltip-profile-comment": "Notify me when someone leaves a comment on my profile.",
 	"echo-dismiss-title-profile-comment": "profile comment",
-	"notification-profile-comment": "<span class=\"plainlinks\">[{{fullurl:{{ns:User}}:$1|action=view}} $1] has left a comment on [{{fullurl:{{ns:UserProfile}}:$2|action=view}} your profile]</span>:",
+	"notification-profile-comment": "[[{{ns:User}}:$1]] has left a comment on [[{{ns:User}}:$2|your profile]].",
 	"notification-profile-comment-email-subj": "$1 has left a comment on your Gamepedia profile!",
 	"notification-profile-comment-email-body": "Hi $2,\n$1 has left a comment on your profile on {{SITENAME}}. You can read and reply by viewing your profile:\n\n{{canonicalurl:{{ns:User}}:$2}}\n\n$3",
 	"echo-category-title-friendship": "Friend Request",
