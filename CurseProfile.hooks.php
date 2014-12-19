@@ -241,8 +241,10 @@ class Hooks {
 			'title-params' => ['agent'],
 			'email-subject-message' => 'notification-friendship-request-email-subj',
 			'email-subject-params' => ['agent'],
-			'email-body-message' => 'notification-friendship-request-email-body',
-			'email-body-params' => ['agent', 'user', 'gamepedia-footer'],
+			'email-body-batch-message' => 'notification-friendship-request-email-body',
+			'email-body-batch-params' => ['agent'],
+			'email-body-batch-bundle-message' => 'notification-friendship-request-email-batch-body',
+			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
 		];
 
 		$notificationCategories['profile-comment'] = [
@@ -259,8 +261,10 @@ class Hooks {
 			'payload' => ['comment-text'],
 			'email-subject-message' => 'notification-profile-comment-email-subj',
 			'email-subject-params' => ['agent', 'user'],
-			'email-body-message' => 'notification-profile-comment-email-body',
-			'email-body-params' => ['agent', 'user', 'gamepedia-footer'],
+			'email-body-batch-message' => 'notification-profile-comment-email-body',
+			'email-body-batch-params' => ['agent', 'user'],
+			'email-body-batch-bundle-message' => 'notification-profile-comment-email-bundle-body',
+			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 		];
 		return true;
 	}
