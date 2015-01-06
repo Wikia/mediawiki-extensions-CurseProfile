@@ -31,7 +31,22 @@ class CommentDisplay {
 		}
 		$HTML = '';
 
-		$HTML .= self::newCommentForm($user_id);
+		global $wgUser;
+		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked()) {
+			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
+			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
+			$HTML .= '
+			<div class="commentdisplay add-comment">
+				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
+				<div class="entryform">
+					<form action="/Special:AddComment/'.$user_id.'" method="post">
+						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
+						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
+						'.\Html::hidden('token', $wgUser->getEditToken()).'
+					</form>
+				</div>
+			</div>';
+		}
 
 		$board = new CommentBoard($user_id);
 		$comments = $board->getComments();
@@ -47,34 +62,6 @@ class CommentDisplay {
 	}
 
 	/**
-	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
-	 *
-	 * @param	int		id of the user whose comment board will recieve a new comment via this form
-	 * @param	bool	if true, the form will have an added class to be hidden by css
-	 * @return	string	html fragment or empty string
-	 */
-	public static function newCommentForm($user_id, $hidden = false) {
-		global $wgUser;
-		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked()) {
-			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
-			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			return '
-			<div class="commentdisplay add-comment'.($hidden ? ' hidden' : '').'">
-				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
-				<div class="entryform">
-					<form action="/Special:AddComment/'.$user_id.'" method="post">
-						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
-						<button name="inreplyto" value="0">'.wfMessage('commentaction')->escaped().'</button>
-						'.\Html::hidden('token', $wgUser->getEditToken()).'
-					</form>
-				</div>
-			</div>';
-		} else {
-			return '';
-		}
-	}
-
-	/**
 	 * Returns html display for a single profile comment
 	 *
 	 * @param	array	structured comment data as returned by CommentBoard
@@ -82,7 +69,7 @@ class CommentDisplay {
 	 * @return	string	html for display
 	 */
 	public static function singleComment($comment, $highlight = false) {
-		global $wgOut, $wgUser;
+		global $wgOut;
 
 		$HTML = '';
 		$cUser = \User::newFromId($comment['ub_user_id_from']);
@@ -111,9 +98,8 @@ class CommentDisplay {
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">
-					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
-					.(CommentBoard::canReply($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
-					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
+					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], CP::timeTag($comment['ub_date'])).' '
+					.\Html::element('a', ['href'=>'#', 'class'=>'newreply'], wfMessage('replylink')).' '
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
 				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])
@@ -148,20 +134,6 @@ class CommentDisplay {
 	}
 
 	/**
-	 * Returns a <time> tag with a comment's post date or last edited date
-	 *
-	 * @param	array	comment data
-	 * @return	stirng	html fragment
-	 */
-	private static function timestamp($comment){
-		if (is_null($comment['ub_edited'])) {
-			return CP::timeTag($comment['ub_date']);
-		} else {
-			return wfMessage('cp-commentedited').' '.CP::timeTag($comment['ub_edited']);
-		}
-	}
-
-	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
 	 * @param	int		the id of the user the parent comment belongs to
@@ -179,7 +151,7 @@ class CommentDisplay {
 		$comments = $board->getReplies($comment_id, null, -1);
 
 		if (empty($comments)) {
-			$HTML = wfMessage('cp-nocommentreplies');
+			$HTML = 'No replies were found';
 		} else {
 			foreach ($comments as $comment) {
 				$HTML .= self::singleComment($comment);

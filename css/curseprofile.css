@@ -130,8 +130,13 @@ div.mainavatar {
 		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAQAAADZc7J/AAAC90lEQVR4AY3UX2jVZRzH8dfzO7/pma00FOMc04SMLEmy0BQdiasuEppJYGJQJpJRFBUURBDeSCyoLoK6EOyiP9MLc4J2oWQ4lZmYERQsL8pqP6l0ydLtrJ1zni4Szs52Zns918+bz9U3NYFsWtOdaTEWpdUsZJd7/aWhcM5YTdOmPh7aPRia1ZR16xr6xAVjhMxox3Jtm8P2UNRQHNBRetfghIH8vLDPEtcUf6086jQA4U8AuZVhr9kA53W7zy3Gi0Nxs90ASeK/F5Y5XPvO357Raq0OPYaMFpqTThsAwkUQ5ySnQkGNs1oNAxZYb4vZdSsqrU5DWgW5zlDQUOpe3+iwx3vuV1uR+7y00CDJiBFhfVhlAnN9YSt+9pTv1YS5+Zfy8pK83jTZYUKpoAgueVudV0uzSpKSxWvC7cYJaiqA4y6qCTc0b2qWNAvtJmlAvzrtJJh0IEjUaR24MTUjzNFAMN50M9VJWxYmlQL/F6gClpuhXiwkihroNywAopvNNMVibxorKSa5sjqDDnvWQzIpCKLHHPGxt1z2o351yulI1gSIvrXfAWeREwA5P/nQKX0ugOnusNpG80DI0moGHPSBHmWwyEZFFTDFKTvBIm1u1eMzPXb5yHKUsyR3Jfbyvk2OKbvJkw7q9rREBCTme8FRx7yixTnwu68Qh0Z+SEbYR7MceNgTBjxnjX45UNLmpO0ued5SW5xAwRtehkP5wTQvdoXXtlhot5M+tQsUpYDEP96xTy+4zkrrtZkFYhfhIsKJsAKG9TnniuvNEy1Twd222YZgiUestQBAzEq3GQwZ8qtCtzGGHdDlqIIX7bDWOvdIjVbdaufVBYTOsEEDvzljmbzpxjlzaKkKYQ9Y3ZKeCHeZvD/iUr9A6AcMz8+fNNukxJIHHKcWuJqYun8yK+L56jpfA4QLaqot6c6wwTXF7upGfTQMQLJKR1ihodhbfd1euEYAwoqwTvvoSxn7dMWu775UNkY4YiKLWhSaipVUljvvkgn8C0It8lWlrxf0AAAAAElFTkSuQmCC');
 	}
 
+
 .activity {
 	clear: left;
+}
+
+.comments.noreplies a.newreply {
+	display: none;
 }
 
 /* Comment board */
@@ -143,10 +148,6 @@ div.mainavatar {
 	.commentdisplay .right {
 		float: right;
 	}
-
-.add-comment.hidden {
-	display: none;
-}
 
 .commentdisplay.deleted {
 	background-color: rgba(255, 200, 200, 0.4);

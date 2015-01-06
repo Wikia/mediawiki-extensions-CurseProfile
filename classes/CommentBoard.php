@@ -183,10 +183,10 @@ class CommentBoard {
 
 		// Fetch top level comments
 		$res = $mouse->DB->select([
-			'select' => 'b.*, IFNULL(b.ub_last_reply, b.ub_date) AS last_updated',
+			'select' => 'b.*',
 			'from'   => ['user_board' => 'b'],
 			'where'  => 'b.ub_type IN ('.implode(',',$types).') '.$conditions,
-			'order'  => 'last_updated DESC',
+			'order'  => 'b.ub_date DESC',
 			'limit'  => [$startAt, $limit],
 		]);
 		$comments = [];
@@ -209,7 +209,6 @@ class CommentBoard {
 			'where'  => 'b.ub_in_reply_to IN ('.implode(',',array_keys($commentIds)).')',
 			'group'  => 'b.ub_in_reply_to',
 		]);
-		// TODO: fetch replies for all comments in a single DB query?
 		while ($row = $mouse->DB->fetch($repliesRes)) {
 			$comments[$commentIds[$row['ub_id']]]['reply_count'] = intval($row['replies']);
 			// retrieve replies if there are any
@@ -223,6 +222,7 @@ class CommentBoard {
 
 	/**
 	 * Gets all comments on the board
+	 * TODO: fetch some replies and them in to the array along with counts of how many more there were left to load
 	 *
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
 	 * @param	int		[optional] number of comments to skip when loading more
@@ -233,7 +233,7 @@ class CommentBoard {
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
 		$searchConditions = ' AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id;
 		if ($maxAge >= 0) {
-			$searchConditions .= ' AND IFNULL(b.ub_last_reply, b.ub_date) >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
+			$searchConditions .= ' AND b.ub_date >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}
@@ -317,17 +317,6 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		if ($inReplyTo) {
-			$dbw->update(
-				'user_board',
-				[
-					'ub_last_reply' => date('Y-m-d H:i:s')
-				],
-				['ub_id = ' . $inReplyTo],
-				__METHOD__
-			);
-		}
-
 		wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
 
 		if ($toUser->getId() != $fromUser->getId()) {
@@ -345,83 +334,7 @@ class CommentBoard {
 	}
 
 	/**
-	 * Checks if a user has permissions to reply to a comment
-	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[optional] mw User object, defaults to $wgUser
-	 * @return	bool
-	 */
-	public static function canReply($comment_id, $user = null) {
-		if (is_null($user)) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
-		if (is_array($comment_id)) {
-			$comment = $comment_id;
-		} else {
-			$mouse = CP::loadMouse();
-			$comment = $mouse->DB->selectAndFetch([
-				'select' => 'b.*',
-				'from'   => ['user_board' => 'b'],
-				'where'  => 'b.ub_id = '.intval($comment_id),
-			]);
-		}
-
-		// comment must not be deleted and user must be logged in
-		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon();
-	}
-
-	/**
-	 * Replaces the text content of a comment. Permissions are not checked. Use canEdit() to check.
-	 *
-	 * @param	int		id of a user board comment
-	 * @param	string	new text to use for the comment
-	 * @return	bool	true if successful
-	 */
-	public static function editComment($comment_id, $message) {
-		$mouse = CP::loadMouse();
-		return $mouse->DB->update(
-			'user_board',
-			[
-				'ub_message' => $message,
-				'ub_edited' => date( 'Y-m-d H:i:s' ),
-			],
-			'ub_id ='.intval($comment_id)
-		);
-	}
-
-	/**
-	 * Checks if a user has permissions to edit a comment
-	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[optional] mw User object, defaults to $wgUser
-	 * @return	bool
-	 */
-	public static function canEdit($comment_id, $user = null) {
-		if (is_null($user)) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
-		if (is_array($comment_id)) {
-			$comment = $comment_id;
-		} else {
-			$mouse = CP::loadMouse();
-			$comment = $mouse->DB->selectAndFetch([
-				'select' => 'b.*',
-				'from'   => ['user_board' => 'b'],
-				'where'  => 'b.ub_id = '.intval($comment_id),
-			]);
-		}
-
-		// comment must not be deleted and must be written by this user
-		return $comment['ub_type'] > self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId();
-	}
-
-	/**
 	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
-	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	int		id of a comment to remove
 	 * @return	stuff	whatever mouse DB returns

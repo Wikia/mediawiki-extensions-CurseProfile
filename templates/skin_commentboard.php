@@ -21,7 +21,7 @@ class skin_commentboard {
 	private $HTML;
 
 	/**
-	 * Header for comments archive board
+	 * Comments display
 	 *
 	 * @access	public
 	 * @param	object	user reference
@@ -35,11 +35,6 @@ class skin_commentboard {
 		'</p>';
 	}
 
-	/**
-	 * Header for single comment permalink page
-	 *
-	 * @access	public
-	 */
 	public function permalinkHeader($user, $title) {
 		return "<h1>$title</h1>".
 		'<p>'.
@@ -54,7 +49,6 @@ class skin_commentboard {
 	 *
 	 * @access	public
 	 * @param	array	array of comments
-	 * @param	int		id of user to whom this comment list belongs
 	 * @param	string	[optional] built HTML fragment for pagination
 	 * @return	string	Built HTML
 	 */
@@ -62,15 +56,10 @@ class skin_commentboard {
 		$this->HTML = '';
 		$this->HTML .= '<div>'.$pagination.'</div>';
 
-		$this->HTML .= '<div class="comments curseprofile" data-userid="'.$user_id.'">';
-
-		// add hidden compose form, to support replies
-		$this->HTML .= CurseProfile\CommentDisplay::newCommentForm($user_id, true);
-
+		$this->HTML .= '<div class="comments curseprofile noreplies" data-userid="'.$user_id.'">';
 		foreach ($comments as $comment) {
 			$this->HTML .= CurseProfile\CommentDisplay::singleComment($comment);
 		}
-
 		$this->HTML .= '</div>';
 
 		$this->HTML .= '<div>'.$pagination.'</div>';
