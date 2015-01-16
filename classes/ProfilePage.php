@@ -137,7 +137,13 @@ class ProfilePage extends \Article {
 		return $this->isUserPage($onlyView) && (
 				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
 				($this->mTitle->getNamespace() == NS_USER_PROFILE)
-			) && ($this->getContext()->getRequest()->getInt('diff') == 0 && $this->getContext()->getRequest()->getInt('oldid') == 0);
+			) && (
+				$this->getContext()->getRequest()->getInt('diff') == 0 &&
+				$this->getContext()->getRequest()->getInt('oldid') == 0 &&
+				// The rcid parameter is deprecated and nonfunctional in any recent version of MW.
+				// However, CurseProfile creates unexpected behavior if left unsupported here
+				$this->getContext()->getRequest()->getInt('rcid') == 0
+			);
 	}
 
 	/**
