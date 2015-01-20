@@ -485,7 +485,7 @@ class ProfilePage extends \Article {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
 				'achievementsearned' => 123,
-				"<dd class='achievements'>{{#achievements:global|5}}</dd>",
+				"<dd class='achievements'>{{#achievements:local|5}}</dd>",
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
@@ -574,15 +574,21 @@ class ProfilePage extends \Article {
 	 * @return	array
 	 */
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
-		return ['<div class="icon">
-					<img src="">
-				</div><div class="icon">
-					<img src="">
-				</div><div class="icon">
-					<img src="">
-				</div><div class="icon">
-					<img src="">
-				</div>', 'isHTML' => true];
+		if ($type === 'local') {
+			$earned = \achievementsHooks::getAchievementProgressForDisplay($this->user->curse_id, $limit);
+			$output = '';
+			foreach ($earned as $ach) {
+				$icon = \Html::rawElement('div', ['class'=>'icon'],
+					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
+				);
+				$output .= $icon;
+			}
+			return [$output, 'isHTML' => true];
+		}
+
+		if ($type === 'global') {
+			return 'TODO: Mega Achievements';
+		}
 	}
 
 	/**
