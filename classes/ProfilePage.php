@@ -694,13 +694,13 @@ class ProfilePage extends \Article {
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
-		<div class="section achievements">
+		{{#if: %5$s | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection').'</h3>
 			<h4>'.wfMessage('achievements-local')->plain().'</h4>
 			{{#achievements:local|20}}
 			<h4>'.wfMessage('achievements-global').'</h4>
 			{{#achievements:global|20}}
-		</div>
+		</div> }}
 	</div>
 </div>
 __NOTOC__
@@ -708,7 +708,8 @@ __NOTOC__
 			$this->user_name,
 			$this->user->getID(),
 			$this->user->getEmail(),
-			$this->user->getTitleKey()
+			$this->user->getTitleKey(),
+			( $this->user->curse_id > 0 ? 'true' : '' )
 		);
 	}
 }
