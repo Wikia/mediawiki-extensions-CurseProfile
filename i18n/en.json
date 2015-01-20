@@ -103,6 +103,7 @@
 	"cp-recentcommentssection": "Recent Comments",
 	"commentarchivelink": "Comment Archive",
 	"cp-statisticssection": "Total Statistics",
+	"cp-achievementssection": "Achievements",
 	"profileactivity-created": "Created",
 	"profileactivity-edited": "Edited",
 	"echo-category-title-profile-comment": "Profile Comment",
@@ -126,5 +127,8 @@
 	"profilestats-more": "One or more",
 	"profilestats-empty": "Empty",
 	"profilestats-filled": ">1 field",
-	"profilestats-avgFriends": "Users with at least 1 friend avg $1 friends."
+	"profilestats-avgFriends": "Users with at least 1 friend avg $1 friends.",
+	"achievementsearned": "Achievements",
+	"achievements-local": "{{SITENAME}}",
+	"achievements-global": "All Achievements"
 }

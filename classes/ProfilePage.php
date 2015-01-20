@@ -468,7 +468,7 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays user statistics.
 	 * The numbers themselves are pulled from the dataminer api
 	 *
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
 		$curse_id = $this->user->curse_id;
@@ -484,6 +484,8 @@ class ProfilePage extends \Article {
 		if ($stats) {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
+				'achievementsearned' => 123,
+				"<dd class='achievements'>{{#achievements:global|5}}</dd>",
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
@@ -496,6 +498,7 @@ class ProfilePage extends \Article {
 			];
 		} else {
 			$statsOutput = [
+				'achievementsearned' => 0,
 				'wikisedited' => 0,
 				'totalcontribs' => [ 0,
 					'totaledits' => 0,
@@ -541,10 +544,9 @@ class ProfilePage extends \Article {
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
-				if (!is_string($msgKey)) {
-					continue;
+				if (is_string($msgKey)) {
+					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				}
-				$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
@@ -561,6 +563,26 @@ class ProfilePage extends \Article {
 				return $input;
 			}
 		}
+	}
+
+	/**
+	 * Display the icons of the recent achievements the user has earned, for the sidebar
+	 *
+	 * @param	object	parser reference
+	 * @param	string	type of query. one of: local, global (default)
+	 * @param	int		maximum number to display
+	 * @return	array
+	 */
+	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
+		return ['<div class="icon">
+					<img src="">
+				</div><div class="icon">
+					<img src="">
+				</div><div class="icon">
+					<img src="">
+				</div><div class="icon">
+					<img src="">
+				</div>', 'isHTML' => true];
 	}
 
 	/**
@@ -665,6 +687,13 @@ class ProfilePage extends \Article {
 			<h3>'.wfMessage('cp-statisticssection').'</h3>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
+		</div>
+		<div class="section achievements">
+			<h3>'.wfMessage('cp-achievementssection').'</h3>
+			<h4>'.wfMessage('achievements-local')->plain().'</h4>
+			{{#achievements:local|20}}
+			<h4>'.wfMessage('achievements-global').'</h4>
+			{{#achievements:global|20}}
 		</div>
 	</div>
 </div>

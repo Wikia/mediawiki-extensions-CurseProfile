@@ -53,6 +53,20 @@
 	float: right;
 	clear: right;
 }
+.stats .achievements {
+	float: none;
+	clear: both;
+	margin-left: 0;
+}
+.achievements .icon {
+	display: inline-block;
+}
+.achievements .icon {
+	max-height: 32px;
+	max-width: 32px;
+	min-height: 32px;
+	min-width: 32px;
+}
 
 .section {
 	clear: both;
