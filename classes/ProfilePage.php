@@ -702,6 +702,7 @@ class ProfilePage extends \Article {
 			{{#achievements:global|20}}
 		</div> }}
 	</div>
+	{{#if: %6$s | <div class="blocked"></div> }}
 </div>
 __NOTOC__
 ',
@@ -709,7 +710,8 @@ __NOTOC__
 			$this->user->getID(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			( $this->user->curse_id > 0 ? 'true' : '' )
+			( $this->user->curse_id > 0 ? 'true' : '' ),
+			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
 }

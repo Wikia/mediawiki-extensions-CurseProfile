@@ -4,10 +4,32 @@
 }
 
 /* clearfix */
-.section:after, .commententry:after, .headline:after, .aboutme:before, .stats > dl:after {
+.curseprofile:after,
+.section:after,
+.commententry:after,
+.headline:after,
+.aboutme:before,
+.stats > dl:after {
 	content: '';
 	clear: both;
 	display: block;
+}
+
+.curseprofile {
+	position: relative;
+}
+
+.curseprofile .blocked {
+	display: block;
+	background-image: url('../img/blocked.png');
+	background-repeat: no-repeat;
+	background-size: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 68%;
+	pointer-events: none;
 }
 
 .leftcolumn {
