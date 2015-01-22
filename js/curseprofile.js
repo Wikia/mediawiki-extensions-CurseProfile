@@ -8,6 +8,7 @@ function CurseProfile($) {
 		});
 		commentBoard.init();
 		friendship.init();
+		window.commentBoard = commentBoard;
 	};
 
 	this.ajax = function(method, params) {
@@ -35,11 +36,16 @@ function CurseProfile($) {
 	commentBoard = {
 		page: 1,
 		replyForm: null,
+		editForm: null,
+		editedComment: null,
 
 		init: function() {
 			$('.reply-count').on('click', commentBoard.loadReplies);
 			$('.comments')
 				.on('click', 'a.newreply', commentBoard.newReply)
+				.on('click', 'a.edit', commentBoard.editComment)
+				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
+				.on('click', 'form.edit .cancel', commentBoard.cancelCommentEdit)
 				.on('click', 'a.remove', commentBoard.removeComment);
 			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
 		},
@@ -70,7 +76,7 @@ function CurseProfile($) {
 			var $replySet, $replyHolder, $textarea, $this = $(this).closest('.commentdisplay'),
 				placeReplyBox = function() {
 					if (commentBoard.replyForm === null) {
-						commentBoard.replyForm = $('.add-comment').clone();
+						commentBoard.replyForm = $('.add-comment').clone().removeClass('hidden');
 						// Update placeholder to use the reply-specific one
 						$textarea = commentBoard.replyForm.find('textarea');
 						$textarea.prop('placeholder', $textarea.data('replyplaceholder'));
@@ -111,14 +117,104 @@ function CurseProfile($) {
 				}
 			}
 
+			// if the replies now exist after attempts to load them, we can put the reply box below them
 			if ($replySet.length !== 0) {
 				placeReplyBox();
 			}
 		},
 
+		editComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+
+			// obscure comment with translucent throbber
+			$comment.append('<div class="overlay"></div>');
+
+			// clone and alter new comment form to function as an edit form
+			if (commentBoard.editForm === null) {
+				commentBoard.editForm = $('.add-comment').clone().removeClass('hidden');
+				// Update the form to behave as an edit instead of a reply
+				commentBoard.editForm.find('form').addClass('edit');
+				commentBoard.editForm.find('button').addClass('submit')
+					.after('<input type="hidden" name="comment_id" value="" />')
+					.before('<button class="cancel"></button>').prev().text(mw.message('cancel').text());
+			} else {
+				// cancel any pending edits
+				if (commentBoard.editedComment) {
+					commentBoard.cancelCommentEdit();
+				}
+				commentBoard.editForm.detach();
+			}
+			commentBoard.editForm.find('input[name=comment_id]').attr('value', $comment.data('id'));
+
+			// use API to download raw comment text
+			(new mw.Api()).post({
+				action: 'comment',
+				do: 'getRaw',
+				comment_id: $comment.data('id')
+			}).done(function(resp) {
+				if (resp.text) {
+					// insert raw comment text in to edit form
+					commentBoard.editForm.find('textarea').val(resp.text);
+
+					// insert edit form into DOM to replace throbber
+					commentBoard.editForm.append($comment.find('.replyset'));
+					$comment.hide().after(commentBoard.editForm);
+				}
+			});
+
+			commentBoard.editedComment = $comment;
+		},
+
+		cancelCommentEdit: function(e) {
+			var $comment = commentBoard.editedComment;
+			if (e && e.preventDefault) {
+				e.preventDefault();
+			}
+
+			if (!$comment) {
+				return;
+			}
+
+			// remove edit form and show old comment content
+			$comment.append(commentBoard.editForm.find('.replyset')).find('div.overlay').detach();
+			$comment.show();
+			commentBoard.editForm.detach().find('div.overlay').detach();
+
+			// mark that we don't have a pending edit anymore
+			commentBoard.editedComment = null;
+		},
+
+		submitCommentEdit: function(e) {
+			var $this = $(this), $comment = commentBoard.editedComment, api = new mw.Api();
+			e.preventDefault();
+
+			// overlay throbber
+			commentBoard.editForm.append('<div class="overlay"></div>');
+
+			// use API to post new comment text
+			api.post({
+				action: 'comment',
+				do: 'edit',
+				comment_id: $comment.data('id'),
+				text: commentBoard.editForm.find('textarea').val(),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				if (resp.result === 'success') {
+					// replace the text of the old comment object
+					$comment.find('.commentbody').html(resp.parsedContent);
+					// end the editing context
+					commentBoard.cancelCommentEdit();
+				}
+			});
+		},
+
 		removeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
+			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a[title^="User:"]').text()).text() ) ) {
+				return;
+			}
 			$this.hide();
 			(new mw.Api()).post({
 				action: 'comment',
