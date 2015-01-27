@@ -29,7 +29,7 @@ class skin_commentboard {
 	 * @return	string	Built HTML
 	 */
 	public function header($user, $title) {
-		return "<h1>$title</h1>".
+		return
 		'<p>'.
 			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
 		'</p>';
@@ -41,7 +41,7 @@ class skin_commentboard {
 	 * @access	public
 	 */
 	public function permalinkHeader($user, $title) {
-		return "<h1>$title</h1>".
+		return
 		'<p>'.
 			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
 			' | '.

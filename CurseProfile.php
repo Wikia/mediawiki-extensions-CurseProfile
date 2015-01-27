@@ -85,7 +85,16 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago', 'jquery.autosize'],
+	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'mediawiki.user', 'mediawiki.api'],
+	'position' => 'top',
+];
+
+$wgResourceModules['ext.curseprofile.comments'] = [
+	'styles' => ['css/comments.css'],
+	'scripts' => ['js/comments.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
 	'position' => 'top',
 	'messages' => [
 		'cancel',
@@ -97,11 +106,13 @@ $wgResourceModules['jquery.timeago'] = [
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
+
 $wgResourceModules['jquery.autosize'] = [
 	'scripts' => ['js/jquery.autosize.min.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
+
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',
 ]; // allows sites to customize by editing MediaWiki:CurseProfile.css
