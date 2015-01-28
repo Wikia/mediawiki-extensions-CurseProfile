@@ -92,7 +92,10 @@ class CP {
 	 * after adding timeago.yarp.com to the page
 	 */
 	public static function timeTag($timestamp) {
-		$timestamp = strtotime($timestamp);
+		// quick sanity check to see if the argument might already be a unix timestamp
+		if (!is_numeric($timestamp) || $timestamp < 100000 || $timestamp > 3000000000) {
+			$timestamp = strtotime($timestamp);
+		}
 		$iso8601 = date('c', $timestamp);
 		$readableTime = date('H:i, d F Y (e)', $timestamp);
 		return '<time class="timeago" datetime="'.$iso8601.'">at '.$readableTime.'</time>';

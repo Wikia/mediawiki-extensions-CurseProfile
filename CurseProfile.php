@@ -15,13 +15,13 @@
 /******************************************/
 /* Credits                                */
 /******************************************/
-$wgExtensionCredits['specialpage'][] = array(
-												'path'				=> __FILE__,
-												'name'				=> 'Curse Profile',
-												'author'			=> 'Noah Manneschmidt, Curse Inc&copy;',
-												'descriptionmsg'	=> 'curseprofile_description',
-												'version'			=> '1.0' //Must be a string or Mediawiki will turn it into an integer.
-											);
+$wgExtensionCredits['specialpage'][] = [
+	'path'				=> __FILE__,
+	'name'				=> 'Curse Profile',
+	'author'			=> 'Noah Manneschmidt, Curse Inc&copy;',
+	'descriptionmsg'	=> 'curseprofile_description',
+	'version'			=> '1.5' //Must be a string or Mediawiki will turn it into an integer.
+];
 
 
 define('NS_USER_WIKI', 200 );
@@ -68,13 +68,16 @@ $wgSpecialPageGroups['Friends']								= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comments/SpecialAddComment.php";
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
-$wgSpecialPageGroups['AddComment']							= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/comments/SpecialCommentBoard.php";
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentPermalink']	= "{$extDir}/specials/comments/SpecialCommentPermalink.php";
 $wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalink';
+
+$wgAutoloadClasses['CurseProfile\SpecialCommentModeration']	= "{$extDir}/specials/comments/SpecialCommentModeration.php";
+$wgSpecialPages['CommentModeration']						= 'CurseProfile\SpecialCommentModeration';
+$wgSpecialPageGroups['CommentModeration']					= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
@@ -101,6 +104,16 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 		'remove-prompt',
 	],
 ];
+
+$wgResourceModules['ext.curseprofile.commentmoderation'] = [
+	'styles' => ['css/commentmoderation.less'],
+	'scripts' => ['js/commentmoderation.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['ext.curseprofile.comments'],
+	'position' => 'top',
+];
+
 $wgResourceModules['jquery.timeago'] = [
 	'scripts' => ['js/jquery.timeago.js'],
 	'localBasePath' => $extDir,

@@ -117,7 +117,7 @@ class CommentDisplay {
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
 				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])
-				.'</div>
+			.'</div>
 			<div class="commentbody">
 				'.$wgOut->parseInline($comment['ub_message']).'
 			</div>';

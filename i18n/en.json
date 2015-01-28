@@ -99,7 +99,7 @@
 	"totalpatrols": "Patrols",
 	"totalfriends": "Friends<br>([[Special:Friends/$1|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])",
 	"commentboard-empty": "There are no comments on this user's board.",
-	"commentboard-invalid": "This is no such page.",
+	"commentboard-invalid": "There is no such page.",
 	"commentboard-title": "Comment Board: $1",
 	"commentboard-link-backtoprofile": "back to profile",
 	"commentboard-link-backtoboard": "back to comment archive",
@@ -136,5 +136,10 @@
 	"profilestats-avgFriends": "Users with at least 1 friend avg $1 friends.",
 	"achievementsearned": "Achievements",
 	"achievements-local": "{{SITENAME}}",
-	"achievements-global": "All Achievements"
+	"achievements-global": "All Achievements",
+	"commentmoderation": "Comment Moderation",
+	"commentmoderation-empty": "There are no comments in the moderation queue.",
+	"commentmoderation-title": "Curse Profile Comment Moderation",
+	"commentmoderation-item": "First reported %1$s by %2$s:",
+	"commentmoderation-item-andothers": "First reported %1$s by %2$s and %3$d others:"
 }
