@@ -49,6 +49,7 @@ class skin_commentmoderation {
 		$HTML = '<div id="commentmoderation" class="comments">';
 
 		foreach ($reports as $rep) {
+			$rep = $rep->data;
 			$author = CurseUser::newFromCurseId($rep['comment']['author']);
 			$HTML .= '<div class="report-item">';
 

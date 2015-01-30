@@ -459,4 +459,18 @@ class CommentBoard {
 		return $comment['ub_type'] != self::DELETED_MESSAGE && 
 			($comment['ub_user_id'] == $user->getId() || $user->isAllowed('profile-modcomments'));
 	}
+
+	/**
+	 * Send a comment to the moderation queue. Does not check permissions.
+	 *
+	 * @param	int		id of the comment to report
+	 * @return	bool	success
+	 */
+	public static function reportComment($comment_id) {
+		if ($comment_id) {
+			$mouse = CP::loadMouse();
+
+			
+		}
+	}
 }

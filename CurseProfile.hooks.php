@@ -161,6 +161,7 @@ class Hooks {
 
 		// Add tables that may exist for previous users of SocialProfile
 		$updater->addExtensionUpdate(array('addTable', 'user_board', "{$extDir}/install/sql/create_user_board.sql", true));
+		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/create_comment_moderation.sql", true));
 
 		// Update tables with extra fields for our use
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);

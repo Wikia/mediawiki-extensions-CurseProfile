@@ -26,6 +26,9 @@ class CommentApi extends \CurseApiBase {
 			// getRaw, edit, and remove
 			'comment_id' => 'The the ID of a comment which is being acted upon. Required for remove actions.',
 
+			// dismissReport, deleteFromReport
+			'report_id' => 'The unique report key identifying an instance of a comment. "{sitemd5key}:{comment_id}:{edit_timestamp}"',
+
 			// add
 			'curse_id' => 'The id for a user on whose board a comment will be added',
 			'user_id' => 'The optional id for a user on whose board a comment will be added. curse_id is ignored when this is present.',
@@ -125,7 +128,40 @@ class CommentApi extends \CurseApiBase {
 						\ApiBase::PARAM_DFLT => 0,
 					],
 				]
-			]
+			],
+
+			'report' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					]
+				]
+			],
+
+			'dismissReport' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'report_id' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					]
+				]
+			],
+
+			'deleteFromReport' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'report_id' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					]
+				]
+			],
 		];
 	}
 
@@ -149,6 +185,7 @@ class CommentApi extends \CurseApiBase {
 		if ($user->getIntOption('profile-pref')) {
 			$board = new CommentBoard($user_id);
 			$commentSuccess = $board->addComment($text, null, $inreply);
+			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 		} else {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
 			// however there didn't seem to be an easy way to add a section rather than editing the entire content
@@ -164,11 +201,9 @@ class CommentApi extends \CurseApiBase {
 			);
 			$api = new \ApiMain($params, true);
 			$api->execute();
+			// TODO: check the result object from the internal API call to determine success/failure status
+			$this->getResult()->addValue(null, 'result', 'success');
 		}
-
-		// TODO: should probably change CommentBoard::addComment to indicate failure or succes
-		// so that this api call isn't hard-coded to always return success assuming params validate
-		$this->getResult()->addValue(null, 'result', 'success');
 	}
 
 	/**
@@ -185,8 +220,6 @@ class CommentApi extends \CurseApiBase {
 		$board = new CommentBoard($toUser);
 		$commentSuccess = $board->addComment($text, null, $inreply);
 
-		// TODO: should probably change CommentBoard::addComment to indicate failure or succes
-		// so that this api call isn't hard-coded to always return success assuming params validate
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 	}
 
@@ -218,5 +251,26 @@ class CommentApi extends \CurseApiBase {
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
 		}
+	}
+
+	public function doReport() {
+		$comment_id = $this->getMain()->getVal('comment_id');
+		if ($comment_id) {
+			CommentBoard::reportComment($comment_id);
+			$this->getResult()->addValue(null, 'result', 'success');
+			$this->getResult()->addValue(null, 'html', wfMessage('comment-reported'));
+		} else {
+			return $this->dieUsageMsg(['comment-invalidaction']);
+		}
+	}
+
+	public function doDismissReport() {
+		$report_id = $this->getMain()->getVal('report_id');
+		list($md5key, $comment_id) = explode(':', $report_id);
+		
+	}
+
+	public function doDeleteFromReport() {
+
 	}
 }

@@ -50,7 +50,7 @@ class SpecialCommentModeration extends \SpecialPage {
 			$wgOut->addWikiMsg('commentmoderation-empty');
 			return;
 		} else {
-			$content = $mouse->output->commentmoderation->renderComments($this->getModQueue());
+			$content = $mouse->output->commentmoderation->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
 		$pagination = $mouse->output->generatePagination($total, $itemsPerPage, $start);
@@ -63,7 +63,8 @@ class SpecialCommentModeration extends \SpecialPage {
 	}
 
 	private function countModQueue() {
-		return 42;
+		// TODO: pass extra param for byWiki or byUser
+		return CommentReport::getCount($this->sortStyle);
 	}
 
 	private function getModQueue() {

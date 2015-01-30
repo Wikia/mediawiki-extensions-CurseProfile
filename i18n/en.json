@@ -39,6 +39,7 @@
 	"friendship-invalidaction": "An invalid action was attempted.",
 	"comment-invalidaction": "An invalid action was attempted.",
 	"comment-adminremoved": "This comment has been removed.",
+	"comment-reported": "Thanks for the report. The comment will be reviewed by moderator soon.",
 	"comment-invaliduser": "Could not find a user for the given id.",
 	"emptyactivity": "This user hasn't made any edits on this wiki yet",
 	"commentaction": "Post",
