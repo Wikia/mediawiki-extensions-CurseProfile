@@ -176,6 +176,18 @@ class Hooks {
 	}
 
 	/**
+	 * Add unit tests to the mediawiki test framework
+	 *
+	 * @access	public
+	 * @param	array	$files
+	 * @return	boolean	true
+	 */
+	public static function onUnitTestsList( &$files ) {
+		$files = array_merge( $files, glob(__DIR__.'/tests/phpunit/*Test.php'));
+		return true;
+	}
+
+	/**
 	 * Register the canonical names for custom namespaces.
 	 *
 	 * @access	public

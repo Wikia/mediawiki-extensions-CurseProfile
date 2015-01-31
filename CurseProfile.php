@@ -138,6 +138,7 @@ $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
 $wgHooks['ArticleUpdateBeforeRedirect'][]	= 'CurseProfile\Hooks::onArticleUpdateBeforeRedirect';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
+$wgHooks['UnitTestsList'][]					= 'CurseProfile\Hooks::onUnitTestsList';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';
 $wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces';
 $wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';
