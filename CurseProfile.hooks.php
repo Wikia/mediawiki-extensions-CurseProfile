@@ -183,6 +183,7 @@ class Hooks {
 	 * @return	boolean	true
 	 */
 	public static function onUnitTestsList( &$files ) {
+		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
 		$files = array_merge( $files, glob(__DIR__.'/tests/phpunit/*Test.php'));
 		return true;
 	}

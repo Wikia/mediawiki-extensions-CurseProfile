@@ -12,6 +12,13 @@ class CommentReportTest extends MediaWikiTestCase {
 		parent::tearDown();
 	}
 
+	public function testGetReports() {
+
+	}
+
+	/**
+	 * @depends testGetReports
+	 */
 	public function testReportComment() {
 		$this->assertTrue(false, "Comments should be reportable by logged-in users.");
 	}
