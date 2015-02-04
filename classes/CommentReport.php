@@ -59,7 +59,7 @@ class CommentReport {
 	 * @return	int
 	 */
 	public static function getCount($sortStyle, $qualifier = null) {
-		$mouse = CP::getMouse();
+		$mouse = CP::loadMouse();
 		// TODO: alternately query the DB directly if this is not running on the master wiki
 		switch ($sortStyle) {
 			case 'byWiki':
@@ -78,21 +78,25 @@ class CommentReport {
 	/**
 	 * Main retrieval function to get data out of redis or the local db
 	 *
-	 * @param	string	$sortStyle
-	 * @param	int		$limit
-	 * @param	int		$offset [optional]
+	 * @param	string	$sortStyle [optional] default byVolume
+	 * @param	int		$limit [optional] default 10
+	 * @param	int		$offset [optional] default 0
 	 * @return	array
 	 */
-	public static function getReports($sortStyle, $limit, $offset = 0) {
-		$mouse = CP::getMouse();
+	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
+		$mouse = CP::loadMouse();
 		switch ($sortStyle) {
 			case 'byVolume':
 			default:
 				$keys = $mouse->redis->zrevrange(self::REDIS_KEY_VOLUME_INDEX, $offest, $limit+$offset);
-				// prepend key value to prep mass retrieval from redis
-				$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
-				$reports = call_user_func_array([$mouse->redis, 'hmget'], $keys);
-				$reports = array_map(function($rep) { return new self($rep); }, $reports);
+				if (count($keys)) {
+					// prepend key value to prep mass retrieval from redis
+					$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
+					$reports = call_user_func_array([$mouse->redis, 'hmget'], $keys);
+					$reports = array_map(function($rep) { return new self($rep); }, $reports);
+				} else {
+					$reports = [];
+				}
 		}
 		return $reports;
 	}
