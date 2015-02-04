@@ -24,7 +24,7 @@
 }
 
 .commentdisplay.highlighted > :not(.replyset) {
-	background-color: lightyellow;
+	background-color: hsla(60, 80%, 50%, 0.4);
 }
 
 .commentdisplay .entryform {
