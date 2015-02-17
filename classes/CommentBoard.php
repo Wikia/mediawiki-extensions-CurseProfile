@@ -292,7 +292,7 @@ class CommentBoard {
 		} else {
 			$fromUser = \User::newFromId(intval($fromUser));
 		}
-		if ($fromUser->isBlocked()) {
+		if ($fromUser->isBlocked() || $toUser->isBlocked()) {
 			return false;
 		}
 
@@ -368,8 +368,10 @@ class CommentBoard {
 			]);
 		}
 
+		$boardOwner = \User::newFromId($comment['ub_user_id']);
+
 		// comment must not be deleted and user must be logged in
-		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon();
+		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && !$boardOwner->isBlocked();
 	}
 
 	/**
