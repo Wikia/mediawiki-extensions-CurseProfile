@@ -16,5 +16,5 @@ $magicWords['en'] = [
 	'userstats'      => array(0, 'userstats'),
 	'userlevel'      => array(0, 'userlevel'),
 	'editorfriends'  => array(0, 'editorfriends'),
-	'achievements'   => array(0, 'achievements'),
+	//'achievements'   => array(0, 'achievements'),
 ];
