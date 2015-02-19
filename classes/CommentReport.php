@@ -223,7 +223,7 @@ class CommentReport {
 		];
 		$report = new self($data);
 		$report->initialLocalInsert();
-		if ($this->id == 0) {
+		if ($report->id == 0) {
 			return false;
 		}
 		$report->initialRedisInsert();
