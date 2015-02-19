@@ -16,7 +16,8 @@
 				.on('click', 'a.edit', commentBoard.editComment)
 				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
 				.on('click', 'form.edit .cancel', commentBoard.cancelCommentEdit)
-				.on('click', 'a.remove', commentBoard.removeComment);
+				.on('click', 'a.remove', commentBoard.removeComment)
+				.on('click', 'a.report', commentBoard.reportComment);
 			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
 			$('time.timeago').timeago(); // enable dynamic relative times on comments
 		},
@@ -197,7 +198,7 @@
 		removeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
-			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a[title^="User:"]').text()).text() ) ) {
+			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a[title^="User:"]').first().text()).text() ) ) {
 				return;
 			}
 			$this.hide();
@@ -210,6 +211,27 @@
 				if (resp.html) {
 					$comment.slideUp();
 				}
+			}).fail(function(code, resp) {
+				$this.show();
+				console.dir(resp);
+			});
+		},
+
+		reportComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+			if ( !window.confirm( mw.message('report-prompt', $comment.find('a[title^="User:"]').first().text()).text() ) ) {
+				return;
+			}
+			$this.hide();
+			(new mw.Api()).post({
+				action: 'comment',
+				do: 'report',
+				comment_id: $comment.data('id'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				// TODO what happens after a comment is reported?
+				window.alert( mw.message('report-thanks').text() );
 			}).fail(function(code, resp) {
 				$this.show();
 				console.dir(resp);

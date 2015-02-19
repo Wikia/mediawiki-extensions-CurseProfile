@@ -44,7 +44,7 @@ class CommentReport {
 	/**
 	 * Constructor used by static methods to create instances of this class
 	 *
-	 * @param	array	$data a mostly filled out data set
+	 * @param	array	$data a mostly filled out data set (see newFromRow)
 	 * @return	void
 	 */
 	private function __construct($data) {
@@ -84,6 +84,14 @@ class CommentReport {
 	 * @return	array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
+		if (defined('CURSEPROFILE_MASTER')) {
+			return self::getReportsRedis($sortStyle, $limit, $offset);
+		} else {
+			return self::getReportsDb($sortStyle, $limit, $offset);
+		}
+	}
+
+	private static function getReportsRedis($sortStyle, $limit, $offest) {
 		$mouse = CP::loadMouse();
 		switch ($sortStyle) {
 			case 'byVolume':
@@ -93,7 +101,7 @@ class CommentReport {
 					// prepend key value to prep mass retrieval from redis
 					$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
 					$reports = call_user_func_array([$mouse->redis, 'hmget'], $keys);
-					$reports = array_map(function($rep) { return new self($rep); }, $reports);
+					$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
 				} else {
 					$reports = [];
 				}
@@ -101,12 +109,16 @@ class CommentReport {
 		return $reports;
 	}
 
+	private static function getReportsDb($sortStyle, $limit, $offset) {
+		$db = wfGetDB(DB_SLAVE);
+	}
+
 	/**
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
 	 * @param	int		id of a local comment
-	 * @return	obj		CommentReport instance that is already saved
+	 * @return	mixed	CommentReport instance that is already saved or null on failure
 	 */
 	public static function newUserReport($comment_id) {
 		$db = wfGetDB(DB_SLAVE);
@@ -127,7 +139,7 @@ class CommentReport {
 
 		if (!$comment) {
 			// comment did not exist, is already deleted, or a private message (legacy feature of leaguepedia's old profile system)
-			return false;
+			return null;
 		}
 
 		// check for existing reports// Look up the target comment
@@ -135,18 +147,18 @@ class CommentReport {
 		$res = $db->select(
 			['user_board_report_archives'],
 			['ra_id', 'ra_comment_id', 'ra_last_edited', 'ra_action_taken'],
-			["ra_comment_id = $comment_id", "ra_last_edited = ".$comment['last_touched']],
+			["ra_comment_id = $comment_id", "ra_last_edited = '{$comment['last_touched']}'"],
 			__METHOD__
 		);
 		$reportRow = $res->fetchRow();
 		$res->free();
 
-		// create new report item if never reported before
 		if (!$reportRow) {
+			// create new report item if never reported before
 			$report = self::createWithArchive($comment);
 		} elseif ($reportRow['ra_action_taken']) {
-			// do nothing if comment has already been moderated
-			return true;
+			// comment has already been moderated
+			return self::newFromRow($reportRow);
 		} else {
 			// add report to existing archive
 			$report = self::addReportTo($reportRow['ra_id']);
@@ -157,6 +169,9 @@ class CommentReport {
 
 	/**
 	 * Archive the contents of a comment into a new report
+	 *
+	 * @param	array	comment row from the user_board DB table
+	 * @return	obj		CommentReport instance
 	 */
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
@@ -172,7 +187,9 @@ class CommentReport {
 				'author' => $authorCurseId,
 			],
 			'reports' => [],
-			'action_taken' => 'none',
+			'action_taken' => 0,
+			'action_taken_by' => null,
+			'first_reported' => time(),
 		];
 		$report = new self($data);
 		$report->initialLocalInsert();
@@ -181,6 +198,31 @@ class CommentReport {
 		$report->addReportFrom($wgUser);
 
 		return $report;
+	}
+
+	/**
+	 * Creates a new comment report object from a DB row
+	 *
+	 * @param	array	row from the the user_board_report_archives table
+	 * @return	obj		CommentReport instance
+	 */
+	private static function newFromRow($report) {
+		global $dsSiteKey;
+		$data = [
+			'comment' => [
+				'text' => $report['ra_comment_text'],
+				'cid' => $report['ra_comment_id'],
+				'origin_wiki' => $dsSiteKey,
+				'last_touched' => $report['ra_last_edited'],
+				'author' => $report['ra_curse_id_from'],
+			],
+			'reports' => null, // TODO could be loaded now or on demand with a to-be-written getReports() method
+			'action_taken' => $report['ra_action_taken'],
+			'action_taken_by' => $report['ra_action_taken_by'],
+			'first_reported' => $report['ra_first_reported'],
+		];
+		$cr = new self($data);
+		return $cr;
 	}
 
 	/**
@@ -195,10 +237,10 @@ class CommentReport {
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
 			'ra_last_edited' => $this->data['comment']['last_touched'],
-			// 'ra_user_id_from' => $this->data['comment']['ub_user_id_from'],
+			'ra_user_id_from' => $this->data['comment']['ub_user_id_from'],
 			'ra_curse_id_from' => $this->data['comment']['author'],
 			'ra_comment_text' => $this->data['comment']['text'],
-			'ra_first_reported' => date('Y-m-d H:i:s'),
+			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
 		], __METHOD__);
 		$this->id = $db->insertId();
 	}
@@ -212,9 +254,10 @@ class CommentReport {
 	private function initialRedisInsert() {
 		$mouse = CP::loadMouse();
 		$commentKey = $this->redisReportKey();
-		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $commentKey, serialize($redisData));
+		$date = $this->data['first_reported'];
+		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
 		$mouse->redis->zadd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
-		$mouse->redis->zadd(self::REDIS_KEY_WIKI_INDEX.$dsSiteKey, $date, $commentKey);
+		$mouse->redis->zadd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
 		$mouse->redis->zadd(self::REDIS_KEY_USER_INDEX.$authorCurseId, $date, $commentKey);
 		$mouse->redis->zadd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
 	}

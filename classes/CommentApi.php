@@ -37,7 +37,7 @@ class CommentApi extends \CurseApiBase {
 
 			// addToDefault
 			// all the params for add plus:
-			'title' => 'The headline to use when posting a new section to the user\' talk page',
+			'title' => 'The headline to use when posting a new section to the user\'s talk page',
 		]);
 	}
 
@@ -256,9 +256,8 @@ class CommentApi extends \CurseApiBase {
 	public function doReport() {
 		$comment_id = $this->getMain()->getVal('comment_id');
 		if ($comment_id) {
-			CommentBoard::reportComment($comment_id);
-			$this->getResult()->addValue(null, 'result', 'success');
-			$this->getResult()->addValue(null, 'html', wfMessage('comment-reported'));
+			$res = CommentBoard::reportComment($comment_id);
+			$this->getResult()->addValue(null, 'result', $res ? 'success' : 'error');
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
 		}

@@ -103,6 +103,8 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 	'messages' => [
 		'cancel',
 		'remove-prompt',
+		'report-prompt',
+		'report-thanks',
 	],
 ];
 

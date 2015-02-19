@@ -466,13 +466,42 @@ class CommentBoard {
 	 * Send a comment to the moderation queue. Does not check permissions.
 	 *
 	 * @param	int		id of the comment to report
-	 * @return	bool	success
+	 * @return	mixed	CommentReport instance or null for failure
 	 */
 	public static function reportComment($comment_id) {
 		if ($comment_id) {
 			$mouse = CP::loadMouse();
 
-			
+			$rep = CommentReport::newUserReport($comment_id);
+			return $rep;
 		}
+	}
+
+	/**
+	 * Checks if a user has permissions to report a comment
+	 *
+	 * @param	mixed	int id of comment to check, or array row from user_board table
+	 * @param	obj		[optional] mw User object, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canReport($comment_id, $user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		}
+
+		if (is_array($comment_id)) {
+			$comment = $comment_id;
+		} else {
+			$mouse = CP::loadMouse();
+			$comment = $mouse->DB->selectAndFetch([
+				'select' => 'b.*',
+				'from'   => ['user_board' => 'b'],
+				'where'  => 'b.ub_id = '.intval($comment_id),
+			]);
+		}
+
+		// user must be logged-in to report, comment must be public (not deleted), and no point in reporting if user can remove it themselves
+		return !$user->isAnon() && !$user->isAllowed('profile-modcomments') && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
 	}
 }

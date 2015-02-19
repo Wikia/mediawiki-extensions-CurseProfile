@@ -75,9 +75,9 @@ class skin_commentmoderation {
 
 	private function itemLine($rep) {
 		if (count($rep['reports']) <= self::MAX_REPORTER_AVATARS) {
-			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep['reports'][0]['timestamp']), $this->reporterIcons($rep['reports']));
+			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']));
 		} else {
-			return sprintf(wfMessage('commentmoderation-item-andothers')->text(), CP::timeTag($rep['reports'][0]['timestamp']), $this->reporterIcons($rep['reports']), count($rep['reports'])-self::MAX_REPORTER_AVATARS);
+			return sprintf(wfMessage('commentmoderation-item-andothers')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']), count($rep['reports'])-self::MAX_REPORTER_AVATARS);
 		}
 	}
 
@@ -97,9 +97,15 @@ class skin_commentmoderation {
 
 	private function permalink($rep) {
 		if (defined('CURSEPROFILE_MASTER')) {
-			$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
-			$domain = $wiki->getDomains()->getDomain();
-			return 'content as posted '.Html::rawElement('a', ['href'=>'http://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']], CP::timeTag($rep['comment']['last_touched']).' on '.$wiki->getNameForDisplay());
+			if ($rep['comment']['origin_wiki'] == 'master') {
+				$domain = $GLOBALS['wgServer'];
+				$wikiName = $GLOBALS['wgSitename'];
+			} else {
+				$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
+				$domain = $wiki->getDomains()->getDomain();
+				$wikiName = $wiki->getNameForDisplay();
+			}
+			return 'content as posted '.Html::rawElement('a', ['href'=>'http://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']], CP::timeTag($rep['comment']['last_touched']).' on '.$wikiName);
 		} else {
 			return CP::timeTag($rep['comment']['last_touched']);
 		}
