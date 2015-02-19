@@ -270,7 +270,7 @@ class CommentReport {
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
 			'ra_last_edited' => $this->data['comment']['last_touched'],
-			'ra_user_id_from' => $this->data['comment']['ub_user_id_from'],
+			// 'ra_user_id_from' => $this->data['comment']['ub_user_id_from'], // potentially deprecating the use of local user IDs here
 			'ra_curse_id_from' => $this->data['comment']['author'],
 			'ra_comment_text' => $this->data['comment']['text'],
 			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
