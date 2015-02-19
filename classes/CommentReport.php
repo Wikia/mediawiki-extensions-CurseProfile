@@ -111,6 +111,36 @@ class CommentReport {
 
 	private static function getReportsDb($sortStyle, $limit, $offset) {
 		$db = wfGetDB(DB_SLAVE);
+		$reports = [];
+		switch ($sortStyle) {
+			case 'byVolume':
+			default:
+				// TODO alter scheme to have an incrementing count in the archive table to avoid using a slow count(*) query
+				$subTable = '(select ubr_report_archive_id, count(*) as report_count from user_board_reports group by ubr_report_archive_id) AS ubr';
+				$res = $db->select(
+					[
+						'user_board_report_archives AS ra',
+						$subTable,
+					],
+					['ra.*', 'report_count'],
+					[],
+					__METHOD__,
+					[
+						'ORDER BY' => 'report_count DESC',
+						'LIMIT' => $limit,
+						'OFFSET' => $offset,
+					],
+					[
+						$subTable => [
+							'LEFT JOIN',['ra_id=ubr_report_archive_id']
+						]
+					]
+				);
+				foreach ($res as $row) {
+						$reports[] = self::newFromRow((array)$row);
+				}
+		}
+		return $reports;
 	}
 
 	/**
@@ -216,7 +246,7 @@ class CommentReport {
 				'last_touched' => $report['ra_last_edited'],
 				'author' => $report['ra_curse_id_from'],
 			],
-			'reports' => null, // TODO could be loaded now or on demand with a to-be-written getReports() method
+			'reports' => [], // TODO could be loaded now or on demand with a to-be-written getReports() method
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by'],
 			'first_reported' => $report['ra_first_reported'],
