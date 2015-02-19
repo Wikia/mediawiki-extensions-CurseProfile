@@ -16,6 +16,7 @@
 	border: 2px solid goldenrod;
 	background-color: lightyellow;
 	border-radius: 5px;
+	color: #222;
 	padding: 5px;
 }
 
@@ -24,6 +25,9 @@
 }
 
 .moderation-actions {
+	position: relative;
+	perspective: 200px;
+
 	.del, .dis {
 		display: inline-block;
 		border: 1px solid;
@@ -41,5 +45,27 @@
 		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAv0lEQVR4AYXRIS9HcRyF8Y97XwHB2C5DMDPvQFQU4aZbZCOZwK4gCAiSJqqYzUb57041r0GQbHe7Jiim/cTvRvg9b+Cc5xwA5hy596736NgyBGN2DM7VKlM2nBocKAC482xRwKyRTglse1H6z4MW5n1YEkBhAtN6K7Qu/G305AYcOuNWI4AtyTpY0/FmAUHlyxVg3GeozFgFl77tARARjWTfpqSGiIiSJ5If10CUDE12vZoEQjMzVG7q/FnZu38BgFc7M2il/W8AAAAASUVORK5CYIIf95a9a2ebaa300ef544e67cf0c354946');
 		background-position: 3px 7px;
 		.button-hue(120);
+	}
+
+	.actions, .confirm {
+		backface-visibility: hidden;
+		transition: transform 1s;
+	}
+	.confirm {
+		transform: rotateX(180deg);
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		a {
+			width: 100%;
+			box-sizing: border-box;
+			text-align: center;
+		}
+	}
+
+	&.do-confirm {
+		.actions { transform: rotateX(-180deg); }
+		.confirm { transform: rotateX(0deg); }
 	}
 }

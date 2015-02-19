@@ -61,7 +61,10 @@ class skin_commentmoderation {
 						'<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>'.
 						'<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>';
 			$HTML .= '</div>';
-			$HTML .= '<div class="moderation-actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
+			$HTML .= '<div class="moderation-actions">';
+				$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
+				$HTML .= '<div class="confirm"><a class="del">Confirm Delete</a></div>';
+			$HTML .= '</div>';
 
 			$HTML .= '</div>';
 

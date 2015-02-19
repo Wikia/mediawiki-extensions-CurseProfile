@@ -26,6 +26,7 @@ class SpecialCommentModeration extends \SpecialPage {
 	 * @param $params Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $sortBy ) {
+		$this->checkPermissions();
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$wgOut->setPageTitle(wfMessage('commentmoderation-title')->plain());
