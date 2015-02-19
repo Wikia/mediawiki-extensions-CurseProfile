@@ -123,7 +123,7 @@ class CommentReport {
 						$subTable,
 					],
 					['ra.*', 'report_count'],
-					[],
+					['ra_action_taken = 0'],
 					__METHOD__,
 					[
 						'ORDER BY' => 'report_count DESC',
@@ -223,6 +223,9 @@ class CommentReport {
 		];
 		$report = new self($data);
 		$report->initialLocalInsert();
+		if ($this->id == 0) {
+			return false;
+		}
 		$report->initialRedisInsert();
 
 		$report->addReportFrom($wgUser);
@@ -271,6 +274,8 @@ class CommentReport {
 			'ra_curse_id_from' => $this->data['comment']['author'],
 			'ra_comment_text' => $this->data['comment']['text'],
 			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
+			'ra_action_taken' => $this->data['action_taken'],
+			'ra_action_taken_by' => $this->data['action_taken_by'],
 		], __METHOD__);
 		$this->id = $db->insertId();
 	}
