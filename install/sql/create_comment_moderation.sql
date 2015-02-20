@@ -1,7 +1,6 @@
 CREATE TABLE /*_*/user_board_report_archives (
   `ra_id` int(11) PRIMARY KEY auto_increment,
   `ra_comment_id` int(11) NOT NULL default '0',
-  `ra_user_id_from` int(11) NOT NULL default '0',
   `ra_curse_id_from` int(11) NOT NULL default '0',
   `ra_comment_text` text NOT NULL,
   `ra_last_edited` datetime default NULL,
