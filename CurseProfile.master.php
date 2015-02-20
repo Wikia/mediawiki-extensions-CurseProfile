@@ -20,7 +20,7 @@ require_once 'CurseProfile.php';
 $extSyncServices[] = 'CurseProfile\FriendSync';
 $extSyncServices[] = 'CurseProfile\StatsRecache';
 
-$wgAutoloadClasses['CurseProfile\StatsRecache'] = __DIR__.'/classes/StatsRecache.php';
+$wgAutoloadClasses['CurseProfile\StatsRecache'] = __DIR__.'/classes/jobs/StatsRecache.php';
 
 $wgAutoloadClasses['CurseProfile\SpecialProfileStats']		= __DIR__."/specials/SpecialProfileStats.php";
 $wgSpecialPages['ProfileStats']								= 'CurseProfile\SpecialProfileStats';

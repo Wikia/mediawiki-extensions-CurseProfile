@@ -48,10 +48,10 @@ class skin_commentmoderation {
 	public function renderComments($reports) {
 		$HTML = '<div id="commentmoderation" class="comments">';
 
-		foreach ($reports as $rep) {
-			$rep = $rep->data;
+		foreach ($reports as $report) {
+			$rep = $report->data;
 			$author = CurseUser::newFromCurseId($rep['comment']['author']);
-			$HTML .= '<div class="report-item">';
+			$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
 
 			$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
 			$HTML .= '<div class="reported-comment">';

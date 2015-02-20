@@ -263,13 +263,23 @@ class CommentApi extends \CurseApiBase {
 		}
 	}
 
-	public function doDismissReport() {
+	public function doDismissReport($action = 'dismiss') {
+		global $dsSiteKey;
 		$report_id = $this->getMain()->getVal('report_id');
-		list($md5key, $comment_id) = explode(':', $report_id);
-		
+		// if not dealing with a comment originating here
+		if (strpos($report_id, $dsSiteKey) != 0) {
+			ResolveRemoteComment::queue([
+				'report_id' => $report,
+				'action' => $action,
+			]);
+		} else {
+			$report = CommentReport::newFromKey($report_id);
+			$result = $report->resolve($action);
+			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
+		}
 	}
 
 	public function doDeleteFromReport() {
-
+		$this->doDismissReport('delete');
 	}
 }

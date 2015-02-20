@@ -48,12 +48,13 @@ $wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileDa
 $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
 $wgAutoloadClasses['CurseProfile\Friendship']     = $extDir . 'classes/Friendship.php';
 $wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir . 'classes/FriendDisplay.php';
-$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/FriendSync.php';
 $wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi.php';
 $wgAutoloadClasses['CurseProfile\CommentApi']     = $extDir . 'classes/CommentApi.php';
 $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
 $wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir . 'classes/CommentReport.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
+$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/jobs/FriendSync.php';
+$wgAutoloadClasses['CurseProfile\ResolveRemoteComment'] = $extDir . 'classes/jobs/ResolveRemoteComment.php';
 $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 

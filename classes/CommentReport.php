@@ -91,6 +91,13 @@ class CommentReport {
 		}
 	}
 
+	/**
+	 * Retrieve a single report by its unique id
+	 */
+	public static function getReportByKey($key) {
+
+	}
+
 	private static function getReportsRedis($sortStyle, $limit, $offest) {
 		$mouse = CP::loadMouse();
 		switch ($sortStyle) {
@@ -213,7 +220,7 @@ class CommentReport {
 				'text' => $comment['ub_message'],
 				'cid' => $comment['ub_id'],
 				'origin_wiki' => $dsSiteKey,
-				'last_touched' => $comment['last_touched'],
+				'last_touched' => strtotime($comment['last_touched']),
 				'author' => $authorCurseId,
 			],
 			'reports' => [],
@@ -246,13 +253,13 @@ class CommentReport {
 				'text' => $report['ra_comment_text'],
 				'cid' => $report['ra_comment_id'],
 				'origin_wiki' => $dsSiteKey,
-				'last_touched' => $report['ra_last_edited'],
+				'last_touched' => strtotime($report['ra_last_edited']),
 				'author' => $report['ra_curse_id_from'],
 			],
 			'reports' => [], // TODO could be loaded now or on demand with a to-be-written getReports() method
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by'],
-			'first_reported' => $report['ra_first_reported'],
+			'first_reported' => strtotime($report['ra_first_reported']),
 		];
 		$cr = new self($data);
 		return $cr;
@@ -269,7 +276,7 @@ class CommentReport {
 		$db = wfGetDB( DB_MASTER );
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
-			'ra_last_edited' => $this->data['comment']['last_touched'],
+			'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
 			// 'ra_user_id_from' => $this->data['comment']['ub_user_id_from'], // potentially deprecating the use of local user IDs here
 			'ra_curse_id_from' => $this->data['comment']['author'],
 			'ra_comment_text' => $this->data['comment']['text'],
@@ -288,7 +295,7 @@ class CommentReport {
 	 */
 	private function initialRedisInsert() {
 		$mouse = CP::loadMouse();
-		$commentKey = $this->redisReportKey();
+		$commentKey = $this->reportKey();
 		$date = $this->data['first_reported'];
 		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
 		$mouse->redis->zadd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
@@ -300,10 +307,10 @@ class CommentReport {
 	/**
 	 * Get the unique key identifying this reported comment in redis
 	 *
-	 * @access	private
+	 * @access	public
 	 * @return	string
 	 */
-	private function redisReportKey() {
+	public function reportKey() {
 		return sprintf('%s:%s:%s',
 			$this->data['comment']['origin_wiki'],
 			$this->data['comment']['cid'],
@@ -334,7 +341,7 @@ class CommentReport {
 
 		// increment volume index in redis
 		$mouse = CP::loadMouse();
-		$mouse->redis->zincrby(self::REDIS_KEY_VOLUME_INDEX, 1, $this->redisReportKey());
+		$mouse->redis->zincrby(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
 	}
 
 	/**
