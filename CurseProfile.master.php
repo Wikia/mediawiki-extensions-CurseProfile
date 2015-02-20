@@ -19,6 +19,7 @@ require_once 'CurseProfile.php';
 
 $extSyncServices[] = 'CurseProfile\FriendSync';
 $extSyncServices[] = 'CurseProfile\StatsRecache';
+$extSyncServices[] = 'CurseProfile\ResolveRemoteComment';
 
 $wgAutoloadClasses['CurseProfile\StatsRecache'] = __DIR__.'/classes/jobs/StatsRecache.php';
 

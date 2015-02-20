@@ -93,11 +93,51 @@ class CommentReport {
 
 	/**
 	 * Retrieve a single report by its unique id
+	 *
+	 * @param	string	report key as retrieved from reportKey()
+	 * @param	bool	[optional] when set to true, will return null if report does not exist in the current wiki
+	 * @return	obj		CommentReport instance or null if report does not exist
 	 */
-	public static function getReportByKey($key) {
-
+	public static function getReportByKey($key, $onlyLocal = false) {
+		global $dsSiteKey
+		if (strpos($key, $dsSiteKey) != 0) {
+			// report is remote
+			if ($onlyLocal) {
+				return null;
+			}
+			$mouse = CP::loadMouse();
+			$report = $mouse->redis->hget($key);
+			if ($reports) {
+				return new self(unserialize($report));
+			} else {
+				return null;
+			}
+		} else {
+			// report is local
+			list($md5key, $comment_id, $timestamp) = explode(':', $params['report_id']);
+			$db = wfGetDB(DB_SLAVE);
+			$row = $db->selectRow(
+				'user_board_report_archives',
+				['*'],
+				['ra_comment_id='.intval($comment_id), 'ra_last_edited="'.date('Y-m-d H:i:s', $timestamp).'"'],
+				__METHOD__
+			);
+			if ($row) {
+				return self::newFromRow((array)$row);
+			} else {
+				return null;
+			}
+		}
 	}
 
+	/**
+	 * Queries redis data store for reports
+	 *
+	 * @param	string	sort style
+	 * @param	int		max number of reports to return
+	 * @param	int		offset
+	 * @return	array	0 or more CommentReport instances
+	 */
 	private static function getReportsRedis($sortStyle, $limit, $offest) {
 		$mouse = CP::loadMouse();
 		switch ($sortStyle) {
@@ -116,6 +156,14 @@ class CommentReport {
 		return $reports;
 	}
 
+	/**
+	 * Queries the local db for reports
+	 *
+	 * @param	string	sort style
+	 * @param	int		max number of reports to return
+	 * @param	int		offset
+	 * @return	array	0 or more CommentReport instances
+	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
 		$db = wfGetDB(DB_SLAVE);
 		$reports = [];
@@ -262,7 +310,16 @@ class CommentReport {
 			'first_reported' => strtotime($report['ra_first_reported']),
 		];
 		$cr = new self($data);
+		$cr->id = $report['ra_id'];
 		return $cr;
+	}
+
+	/**
+	 * @return	bool	true if report is stored on this wiki
+	 */
+	public function isLocal() {
+		global $dsSiteKey;
+		return $dsSiteKey == $this->data['comment']['origin_wiki'];
 	}
 
 	/**
@@ -297,10 +354,13 @@ class CommentReport {
 		$mouse = CP::loadMouse();
 		$commentKey = $this->reportKey();
 		$date = $this->data['first_reported'];
+		// serialize data into redis
 		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
+
+		// add appropriate indexes
 		$mouse->redis->zadd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
 		$mouse->redis->zadd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
-		$mouse->redis->zadd(self::REDIS_KEY_USER_INDEX.$authorCurseId, $date, $commentKey);
+		$mouse->redis->zadd(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $date, $commentKey);
 		$mouse->redis->zadd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
 	}
 
@@ -326,9 +386,14 @@ class CommentReport {
 	 * @return	void
 	 */
 	private function addReportFrom($user) {
-		if (!isset($this->id)) {
+		if (!isset($this->id) || !$user->curse_id) {
 			return false; // can't add to a comment that hasn't been archived yet
 		}
+
+		$newReport = [
+			'reporter' => $user->curse_id,
+			'timestamp' => time(),
+		];
 
 		// add new report row to local DB
 		$db = wfGetDB( DB_MASTER );
@@ -336,27 +401,90 @@ class CommentReport {
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
 			'ubr_reporter_curse_id' => $user->curse_id,
-			'ubr_reported' => date('Y-m-d H:i:s'),
+			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
 		], __METHOD__);
 
-		// increment volume index in redis
 		$mouse = CP::loadMouse();
+		// increment volume index in redis
 		$mouse->redis->zincrby(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
+
+		// update serialized redis data
+		$this->data['reports'][] = $newReport;
+		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
 	}
 
 	/**
 	 * Dismiss or delete a reported comment
+	 *
+	 * @param	string	action to take on the reported comment. either 'delete' or 'dismiss'
+	 * @param	mixed	[optional] CurseID of acting user or instance of User class, defaults to $wgUser
+	 * @return	bool	true if successful
 	 */
-	public static function archiveReport($action) {
+	public static function resolve($action, $byUser = null) {
+		if (!$this->isLocal()) {
+			return false;
+		}
+		if (is_null($byUser)) {
+			$byUser = $GLOBALS['wgUser']->curse_id;
+		}
+		if (is_object($byUser) && isset($byUser->curse_id)) {
+			$byUser = $byUser->curse_id;
+		}
+		// bail out if no curse ID available after all those tries
+		if (!is_numeric($byUser)) {
+			return false;
+		}
 
+		// update internal data
+		$this->data['action_taken'] = $action;
+		$this->data['action_taken_by'] = $byUser;
+
+		// update data stores
+		return $this->resolveLocal() && $this->resolveRedis();
 	}
 
+	/**
+	 * Marks a report as archived in the local database
+	 *
+	 * @return	bool	success
+	 */
 	private static function archiveLocalReport() {
 		// write 1 or 2 to ra_action_taken column
 		// write curse ID of acting user to ra_action_taken_by
+		$db = wfGetDB(DB_MASTER);
+		return $db->update(
+			'user_board_reports',
+			[
+				'ra_action_taken' => $this->data['action_taken']=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS,
+				'ra_action_taken_by' => $this->data['action_taken_by'],
+			],[
+				'ra_comment_id='.intval($this->data['comment']['cid']),
+				'ra_last_edited="'.date('Y-m-d H:i:s', $this->data['comment']['last_touched']).'"'
+			],
+			__METHOD__
+		);
 	}
 
+	/**
+	 * Marks a report as archived in redis
+	 *
+	 * @return	bool	true
+	 */
 	private static function archiveRedisReport() {
+		$mouse = CP::loadMouse();
+
 		// add key to index for actioned items
+		$mouse->redis->sadd(self::REDIS_KEY_ACTED_INDEX, $this->reportKey());
+
+		// update serialized data
+		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
+
+		// remove key from non-actioned item indexes
+		$mouse->redis->zrem(self::REDIS_KEY_VOLUME_INDEX, $this->reportKey());
+		$mouse->redis->zrem(self::REDIS_KEY_DATE_INDEX, $this->reportKey());
+		$mouse->redis->zrem(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $this->reportKey());
+		$mouse->redis->zrem(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $this->reportKey());
+
+		return true;
 	}
 }

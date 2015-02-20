@@ -28,6 +28,7 @@ class CommentApi extends \CurseApiBase {
 
 			// dismissReport, deleteFromReport
 			'report_id' => 'The unique report key identifying an instance of a comment. "{sitemd5key}:{comment_id}:{edit_timestamp}"',
+			'by_user' => 'The curse ID of the acting user. Defaults to the user currently logged in.'
 
 			// add
 			'curse_id' => 'The id for a user on whose board a comment will be added',
@@ -144,22 +145,30 @@ class CommentApi extends \CurseApiBase {
 			'dismissReport' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
+				'permissionRequired' => 'profile-modcomments',
 				'params' => [
 					'report_id' => [
 						\ApiBase::PARAM_TYPE => 'string',
 						\ApiBase::PARAM_REQUIRED => true,
-					]
+					],
+					'by_user' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+					],
 				]
 			],
 
 			'deleteFromReport' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
+				'permissionRequired' => 'profile-modcomments',
 				'params' => [
 					'report_id' => [
 						\ApiBase::PARAM_TYPE => 'string',
 						\ApiBase::PARAM_REQUIRED => true,
-					]
+					],
+					'by_user' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+					],
 				]
 			],
 		];
@@ -266,14 +275,13 @@ class CommentApi extends \CurseApiBase {
 	public function doDismissReport($action = 'dismiss') {
 		global $dsSiteKey;
 		$report_id = $this->getMain()->getVal('report_id');
-		// if not dealing with a comment originating here
-		if (strpos($report_id, $dsSiteKey) != 0) {
-			ResolveRemoteComment::queue([
-				'report_id' => $report,
-				'action' => $action,
-			]);
+		$byUser = $this->getMain()->getVal('by_user', $this->getUser()->curse_id);
+		$report = CommentReport::newFromKey($report_id, true);
+		// if not dealing with a comment originating here, dispatch it off to the origin wiki
+		if (is_null($report)) {
+			ResolveRemoteComment::queue(['report_id' => $report, 'action' => $action, 'byUser' => $byUser]);
+			$this->getResult()->addValue(null, 'result', 'queued');
 		} else {
-			$report = CommentReport::newFromKey($report_id);
 			$result = $report->resolve($action);
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		}
