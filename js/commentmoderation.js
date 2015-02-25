@@ -27,7 +27,6 @@
 		} else {
 			return;
 		}
-		console.debug(reportKey);
 
 		// do ajax call
 		(new mw.Api()).post({

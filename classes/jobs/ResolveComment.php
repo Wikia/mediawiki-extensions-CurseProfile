@@ -28,13 +28,11 @@ class ResolveComment extends \SyncService\Job {
 			$wikiDb['db_type'] = 'mysqli';
 		}
 
-		try {
-			$db = \DatabaseBase::factory($wikiDb['db_type'], $dbConfig);
-			if ($db->isOpen()) {
-				return $db;
-			}
-		} catch (\Exception $e) {
+		$db = \DatabaseBase::factory($wikiDb['db_type'], $dbConfig);
+		if ($db->isOpen()) {
+			return $db;
 		}
+
 		return false;
 	}
 

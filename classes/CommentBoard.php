@@ -270,6 +270,29 @@ class CommentBoard {
 	}
 
 	/**
+	 * Checks if a user has permissions to leave a comment
+	 *
+	 * @param	obj		int user id or mw User object who owns the potential board
+	 * @param	obj		[optional] mw User object for comment author, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canComment($toUser, $fromUser = null) {
+		if (is_numeric($toUser)) {
+			$toUser = \User::newFromId($toUser);
+		}
+		if (empty($toUser)) {
+			return false;
+		}
+		if (is_null($fromUser)) {
+			global $wgUser;
+			$fromUser = $wgUser;
+		}
+
+		// user must be logged in, must not be blocked, and target must not be blocked (with exception for admins)
+		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (!$toUser->isBlocked() || $fromUser->isAllowed('block'));
+	}
+
+	/**
 	 * Add a public comment to the board
 	 *
 	 * @access	public
@@ -292,7 +315,7 @@ class CommentBoard {
 		} else {
 			$fromUser = \User::newFromId(intval($fromUser));
 		}
-		if ($fromUser->isBlocked() || $toUser->isBlocked()) {
+		if (self::canComment($toUser, $fromUser)) {
 			return false;
 		}
 
@@ -371,7 +394,7 @@ class CommentBoard {
 		$boardOwner = \User::newFromId($comment['ub_user_id']);
 
 		// comment must not be deleted and user must be logged in
-		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && !$boardOwner->isBlocked();
+		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (!$boardOwner->isBlocked() || $user->isAllowed('block'));
 	}
 
 	/**

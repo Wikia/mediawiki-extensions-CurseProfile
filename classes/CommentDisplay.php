@@ -56,7 +56,7 @@ class CommentDisplay {
 	public static function newCommentForm($user_id, $hidden = false) {
 		global $wgUser;
 		$targetUser = \User::newFromId($user_id);
-		if ($wgUser->isLoggedIn() && !$wgUser->isBlocked() && !$targetUser->isBlocked()) {
+		if (CommentBoard::canComment($targetUser)) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			return '
