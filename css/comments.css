@@ -38,6 +38,9 @@
 		height: 2em;
 		margin-bottom:5px;
 	}
+	.commentdisplay .entryform .edit button {
+		margin-left: 0.5em;
+	}
 
 .commentdisplay .overlay {
 	position: absolute;
