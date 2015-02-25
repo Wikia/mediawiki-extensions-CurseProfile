@@ -40,6 +40,8 @@
 	"comment-invalidaction": "An invalid action was attempted.",
 	"comment-adminremoved": "This comment has been removed.",
 	"report-thanks": "Thanks for letting us know. The comment will be reviewed by moderator soon.",
+	"report-confirmdismiss": "Confirm Dismiss",
+	"report-confirmdelete": "Confirm Delete",
 	"comment-invaliduser": "Could not find a user for the given id.",
 	"emptyactivity": "This user hasn't made any edits on this wiki yet",
 	"commentaction": "Post",

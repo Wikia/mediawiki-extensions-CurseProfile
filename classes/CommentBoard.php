@@ -131,7 +131,7 @@ class CommentBoard {
 			return [];
 		}
 
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 
 		// Look up the target comment
 		$res = $db->select(
@@ -283,7 +283,7 @@ class CommentBoard {
 		if (empty($commentText)) {
 			return false;
 		}
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = CP::getDb( DB_MASTER );
 
 		$toUser = \User::newFromId($this->user_id);
 		if (is_null($fromUser)) {
@@ -426,11 +426,11 @@ class CommentBoard {
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	int		id of a comment to remove
-	 * @return	stuff	whatever mouse DB returns
+	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function removeComment($comment_id) {
-		$mouse = CP::loadMouse();
-		return $mouse->DB->update('user_board', ['ub_type' => self::DELETED_MESSAGE], 'ub_id ='.intval($comment_id));
+		$db = CP::getDb(DB_MASTER);
+		return $db->update('user_board', ['ub_type' => self::DELETED_MESSAGE], ['ub_id ='.intval($comment_id)]);
 	}
 
 	/**
@@ -470,10 +470,7 @@ class CommentBoard {
 	 */
 	public static function reportComment($comment_id) {
 		if ($comment_id) {
-			$mouse = CP::loadMouse();
-
-			$rep = CommentReport::newUserReport($comment_id);
-			return $rep;
+			return CommentReport::newUserReport($comment_id);
 		}
 	}
 

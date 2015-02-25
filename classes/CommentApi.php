@@ -26,9 +26,10 @@ class CommentApi extends \CurseApiBase {
 			// getRaw, edit, and remove
 			'comment_id' => 'The the ID of a comment which is being acted upon. Required for remove actions.',
 
-			// dismissReport, deleteFromReport
-			'report_id' => 'The unique report key identifying an instance of a comment. "{sitemd5key}:{comment_id}:{edit_timestamp}"',
-			'by_user' => 'The curse ID of the acting user. Defaults to the user currently logged in.'
+			// resolveReport
+			'reportKey' => 'The unique report key identifying an instance of a comment. "{sitemd5key}:{comment_id}:{edit_timestamp}"',
+			'byUser' => 'The curse ID of the acting user. Defaults to the user currently logged in.',
+			'withAction' => 'One of "delete" or "dismiss".',
 
 			// add
 			'curse_id' => 'The id for a user on whose board a comment will be added',
@@ -142,32 +143,21 @@ class CommentApi extends \CurseApiBase {
 				]
 			],
 
-			'dismissReport' => [
+			'resolveReport' => [
 				'tokenRequired' => true,
-				'postRequired' => true,
+				'postRequired' => false,
 				'permissionRequired' => 'profile-modcomments',
 				'params' => [
-					'report_id' => [
+					'reportKey' => [
 						\ApiBase::PARAM_TYPE => 'string',
 						\ApiBase::PARAM_REQUIRED => true,
 					],
-					'by_user' => [
+					'byUser' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 					],
-				]
-			],
-
-			'deleteFromReport' => [
-				'tokenRequired' => true,
-				'postRequired' => true,
-				'permissionRequired' => 'profile-modcomments',
-				'params' => [
-					'report_id' => [
-						\ApiBase::PARAM_TYPE => 'string',
+					'withAction' => [ // string param with two possible enumerated values:
+						\ApiBase::PARAM_TYPE => ['delete', 'dismiss'],
 						\ApiBase::PARAM_REQUIRED => true,
-					],
-					'by_user' => [
-						\ApiBase::PARAM_TYPE => 'integer',
 					],
 				]
 			],
@@ -272,22 +262,22 @@ class CommentApi extends \CurseApiBase {
 		}
 	}
 
-	public function doDismissReport($action = 'dismiss') {
-		global $dsSiteKey;
-		$report_id = $this->getMain()->getVal('report_id');
-		$byUser = $this->getMain()->getVal('by_user', $this->getUser()->curse_id);
-		$report = CommentReport::newFromKey($report_id, true);
-		// if not dealing with a comment originating here, dispatch it off to the origin wiki
-		if (is_null($report)) {
-			ResolveRemoteComment::queue(['report_id' => $report, 'action' => $action, 'byUser' => $byUser]);
-			$this->getResult()->addValue(null, 'result', 'queued');
-		} else {
-			$result = $report->resolve($action);
-			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
-		}
-	}
+	public function doResolveReport() {
+		$reportKey = $this->getMain()->getVal('reportKey');
+		$jobArgs = [
+			'reportKey' => $reportKey,
+			'action' => $this->getMain()->getVal('withAction'),
+			'byUser' => $this->getMain()->getVal('byUser', $this->getUser()->curse_id),
+		];
 
-	public function doDeleteFromReport() {
-		$this->doDismissReport('delete');
+		// if not dealing with a comment originating here, dispatch it off to the origin wiki
+		if (CommentReport::keyIsLocal($reportKey)) {
+			$output = ResolveComment::run($jobArgs, true, $result);
+			$this->getResult()->addValue(null, 'result', $result==0 ? 'success' : 'error');
+			$this->getResult()->addValue(null, 'output', explode("\n",trim($output)));
+		} else {
+			ResolveComment::queue($jobArgs);
+			$this->getResult()->addValue(null, 'result', 'queued');
+		}
 	}
 }

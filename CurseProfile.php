@@ -54,7 +54,7 @@ $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBo
 $wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir . 'classes/CommentReport.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
 $wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/jobs/FriendSync.php';
-$wgAutoloadClasses['CurseProfile\ResolveRemoteComment'] = $extDir . 'classes/jobs/ResolveRemoteComment.php';
+$wgAutoloadClasses['CurseProfile\ResolveComment'] = $extDir . 'classes/jobs/ResolveComment.php';
 $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 
@@ -116,6 +116,10 @@ $wgResourceModules['ext.curseprofile.commentmoderation'] = [
 	'remoteExtPath' => 'CurseProfile',
 	'dependencies' => ['ext.curseprofile.comments'],
 	'position' => 'top',
+	'messages' => [
+		'report-confirmdismiss',
+		'report-confirmdelete',
+	],
 ];
 
 $wgResourceModules['jquery.timeago'] = [

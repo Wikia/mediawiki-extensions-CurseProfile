@@ -98,8 +98,8 @@ class CommentReport {
 	 * @param	bool	[optional] when set to true, will return null if report does not exist in the current wiki
 	 * @return	obj		CommentReport instance or null if report does not exist
 	 */
-	public static function getReportByKey($key, $onlyLocal = false) {
-		global $dsSiteKey
+	public static function newFromkey($key, $onlyLocal = false) {
+		global $dsSiteKey;
 		if (strpos($key, $dsSiteKey) != 0) {
 			// report is remote
 			if ($onlyLocal) {
@@ -114,8 +114,8 @@ class CommentReport {
 			}
 		} else {
 			// report is local
-			list($md5key, $comment_id, $timestamp) = explode(':', $params['report_id']);
-			$db = wfGetDB(DB_SLAVE);
+			list($md5key, $comment_id, $timestamp) = explode(':', $key);
+			$db = CP::getDb(DB_SLAVE);
 			$row = $db->selectRow(
 				'user_board_report_archives',
 				['*'],
@@ -165,7 +165,7 @@ class CommentReport {
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 		$reports = [];
 		switch ($sortStyle) {
 			case 'byVolume':
@@ -206,7 +206,7 @@ class CommentReport {
 	 * @return	mixed	CommentReport instance that is already saved or null on failure
 	 */
 	public static function newUserReport($comment_id) {
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 		$comment_id = intval($comment_id);
 		if ($comment_id < 1) {
 			return null;
@@ -323,6 +323,15 @@ class CommentReport {
 	}
 
 	/**
+	 * @return	bool	true if report is stored on this wiki
+	 */
+	public static function keyIsLocal($reportKey) {
+		global $dsSiteKey;
+		list($siteKey) = explode(':', $reportKey);
+		return $dsSiteKey == $siteKey;
+	}
+
+	/**
 	 * Insert a new report into the local database
 	 *
 	 * @access	private
@@ -330,7 +339,7 @@ class CommentReport {
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
-		$db = wfGetDB( DB_MASTER );
+		$db = CP::getDb( DB_MASTER );
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
 			'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
@@ -395,7 +404,7 @@ class CommentReport {
 		];
 
 		// add new report row to local DB
-		$db = wfGetDB( DB_MASTER );
+		$db = CP::getDb( DB_MASTER );
 		$db->insert('user_board_reports', [
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
@@ -419,7 +428,7 @@ class CommentReport {
 	 * @param	mixed	[optional] CurseID of acting user or instance of User class, defaults to $wgUser
 	 * @return	bool	true if successful
 	 */
-	public static function resolve($action, $byUser = null) {
+	public function resolve($action, $byUser = null) {
 		if (!$this->isLocal()) {
 			return false;
 		}
@@ -439,7 +448,9 @@ class CommentReport {
 		$this->data['action_taken_by'] = $byUser;
 
 		// update data stores
-		return $this->resolveLocal() && $this->resolveRedis();
+		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid']) )
+			&& $this->resolveInDb()
+			&& $this->resolveInRedis();
 	}
 
 	/**
@@ -447,21 +458,22 @@ class CommentReport {
 	 *
 	 * @return	bool	success
 	 */
-	private static function archiveLocalReport() {
+	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
 		// write curse ID of acting user to ra_action_taken_by
-		$db = wfGetDB(DB_MASTER);
-		return $db->update(
-			'user_board_reports',
+		$db = CP::getDb(DB_MASTER);
+		$result = $db->update(
+			'user_board_report_archives',
 			[
 				'ra_action_taken' => $this->data['action_taken']=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS,
 				'ra_action_taken_by' => $this->data['action_taken_by'],
 			],[
-				'ra_comment_id='.intval($this->data['comment']['cid']),
-				'ra_last_edited="'.date('Y-m-d H:i:s', $this->data['comment']['last_touched']).'"'
+				'ra_comment_id' => intval($this->data['comment']['cid']),
+				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched'])
 			],
 			__METHOD__
 		);
+		return $result;
 	}
 
 	/**
@@ -469,7 +481,7 @@ class CommentReport {
 	 *
 	 * @return	bool	true
 	 */
-	private static function archiveRedisReport() {
+	private function resolveInRedis() {
 		$mouse = CP::loadMouse();
 
 		// add key to index for actioned items
