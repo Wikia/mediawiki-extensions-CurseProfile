@@ -87,8 +87,19 @@ class Hooks {
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI])) {
 			return true;
 		}
-		$profile = new ProfilePage($target);
+		// setup a temp context with the query string serving as the request info
+		// this allows the profile page logic to make decisions on the link URL rather than the current request
+		global $wgUser;
+		$tempContext = new \RequestContext();
+		$tempContext->setRequest(new \FauxRequest($query));
+		$tempContext->setTitle($target);
+		$tempContext->setUser($wgUser);
+		$profile = new ProfilePage($target, $tempContext);
+
 		if ($profile->isProfilePage()) {
+			// remove existing broken option
+			$options = array_diff($options, ['broken']);
+			// force link to be known
 			$options[] = 'known';
 		}
 		return true;

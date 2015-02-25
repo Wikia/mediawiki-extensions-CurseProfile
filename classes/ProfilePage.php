@@ -53,9 +53,13 @@ class ProfilePage extends \Article {
 
 	/**
 	 * @param \Title $title
+	 * @param IContextSource $context
 	 */
-	public function __construct($title) {
+	public function __construct($title, $context = null) {
 		parent::__construct($title);
+		if ($context) {
+			$this->setContext($context);
+		}
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
@@ -84,13 +88,13 @@ class ProfilePage extends \Article {
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
-		$output->setPageTitle($this->mTitle->getPrefixedText());
+		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$output->setArticleFlag(false);
 
 		$layout = $this->profileLayout();
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
 
-		$outputString = \MessageCache::singleton()->parse($layout, $this->mTitle);
+		$outputString = \MessageCache::singleton()->parse($layout, $this->getTitle());
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
@@ -113,9 +117,9 @@ class ProfilePage extends \Article {
 	 * @return	bool
 	 */
 	public function isUserPage($onlyView = true) {
-		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+		return $this->user_id && strpos( $this->getTitle()->getText(), '/' ) === false
 			&& (!$onlyView || $this->actionIsView)
-			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
+			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
 	/**
@@ -124,7 +128,7 @@ class ProfilePage extends \Article {
 	 * @return	bool
 	 */
 	public function isDefaultPage() {
-		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
+		return $this->isUserPage() && $this->getTitle()->getNamespace() == NS_USER;
 	}
 
 	/**
@@ -135,8 +139,8 @@ class ProfilePage extends \Article {
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
-				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-				($this->mTitle->getNamespace() == NS_USER_PROFILE)
+				($this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+				($this->getTitle()->getNamespace() == NS_USER_PROFILE)
 			) && (
 				$this->getContext()->getRequest()->getInt('diff') == 0 &&
 				$this->getContext()->getRequest()->getInt('oldid') == 0 &&
@@ -155,12 +159,12 @@ class ProfilePage extends \Article {
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {
 			return $this->isUserPage($onlyView) && (
-					(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-					($this->mTitle->getNamespace() == NS_USER_WIKI)
+					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+					($this->getTitle()->getNamespace() == NS_USER_WIKI)
 				);
 		} else {
 			return $this->isUserWikiPage(true) || (
-				$this->isUserPage(false) && ($this->mTitle->getNamespace() == NS_USER && !$this->actionIsView)
+				$this->isUserPage(false) && ($this->getTitle()->getNamespace() == NS_USER && !$this->actionIsView)
 			);
 		}
 	}
@@ -171,7 +175,7 @@ class ProfilePage extends \Article {
 	 */
 	public function isSpoofedWikiPage() {
 
-		return $this->mTitle->getNamespace() == NS_USER_WIKI && $this->actionIsView;
+		return $this->getTitle()->getNamespace() == NS_USER_WIKI && $this->actionIsView;
 	}
 
 	/**
@@ -211,7 +215,7 @@ class ProfilePage extends \Article {
 			];
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
-			$links['namespaces']['user']['href'] = $this->mTitle->getLinkURL();
+			$links['namespaces']['user']['href'] = $this->getTitle()->getLinkURL();
 			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->text(); // rename from "User page"
 			$links['namespaces']['user']['class'] = 'selected';
 			// add link to user wiki
