@@ -299,7 +299,7 @@ class CommentBoard {
 	 * @param	integer	the ID of a user
 	 * @param	integer	optional user ID of user posting (defaults to wgUser)
 	 * @param	integer	optional id of a board post that this will be in reply to
-	 * @return	boolean	Success
+	 * @return	integer	ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
@@ -325,7 +325,7 @@ class CommentBoard {
 			$inReplyTo = intval($inReplyTo);
 		}
 
-		$dbw->insert(
+		$success = $dbw->insert(
 			'user_board',
 			array(
 				'ub_in_reply_to' => $inReplyTo,
@@ -340,31 +340,40 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		if ($inReplyTo) {
-			$dbw->update(
-				'user_board',
-				[
-					'ub_last_reply' => date('Y-m-d H:i:s')
-				],
-				['ub_id = ' . $inReplyTo],
-				__METHOD__
-			);
+		if ($success) {
+			$newCommentId = $dbw->insertId();
+		} else {
+			$newCommentId = 0;
 		}
 
-		wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
+		if ($newCommentId) {
+			if ($inReplyTo) {
+				$dbw->update(
+					'user_board',
+					[
+						'ub_last_reply' => date('Y-m-d H:i:s')
+					],
+					['ub_id = ' . $inReplyTo],
+					__METHOD__
+				);
+			}
 
-		if ($toUser->getId() != $fromUser->getId()) {
-			\EchoEvent::create([
-				'type' => 'profile-comment',
-				'agent' => $fromUser,
-				// 'title' => $toUser->getUserPage(),
-				'extra' => [
-					'target_user_id' => $toUser->getId(),
-					'comment_text' => substr($commentText, 0, NotificationFormatter::MAX_PREVIEW_LEN),
-				]
-			]);
+			wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
+
+			if ($toUser->getId() != $fromUser->getId()) {
+				\EchoEvent::create([
+					'type' => 'profile-comment',
+					'agent' => $fromUser,
+					// 'title' => $toUser->getUserPage(),
+					'extra' => [
+						'target_user_id' => $toUser->getId(),
+						'comment_text' => substr($commentText, 0, NotificationFormatter::MAX_PREVIEW_LEN),
+					]
+				]);
+			}
 		}
-		return true;
+
+		return $newCommentId;
 	}
 
 	/**

@@ -12,10 +12,6 @@
  *
 **/
 
-// This file registers ajax functions that should be made available though action=ajax
-
-// Comment boards
-$wgAjaxExportList[] = 'CurseProfile\CommentDisplay::repliesTo';
-
+// This file adds API classes to the registered API modules
 $wgAPIModules['friend'] = 'CurseProfile\FriendApi';
 $wgAPIModules['comment'] = 'CurseProfile\CommentApi';

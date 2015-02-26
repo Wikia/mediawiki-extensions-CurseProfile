@@ -79,6 +79,17 @@ class CommentApi extends \CurseApiBase {
 				]
 			],
 
+			'getReplies' => [
+				'tokenRequired' => false,
+				'postRequired' => false,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+
 			'getRaw' => [
 				'tokenRequired' => false,
 				'postRequired' => false,
@@ -136,10 +147,14 @@ class CommentApi extends \CurseApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
+					'user_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
 					'comment_id' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 						\ApiBase::PARAM_REQUIRED => true,
-					]
+					],
 				]
 			],
 
@@ -209,8 +224,8 @@ class CommentApi extends \CurseApiBase {
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
 	public function doAdd() {
-		// intentional use of value returned from assignment
-		if (! ($toUser = $this->getMain()->getVal('user_id')) ) {
+		$toUser = $this->getMain()->getVal('user_id');
+		if (!$toUser) {
 			$toUser = CP::userIDfromCurseID($this->getMain()->getVal('curse_id'));
 		}
 		$text = $this->getMain()->getVal('text');
@@ -220,6 +235,14 @@ class CommentApi extends \CurseApiBase {
 		$commentSuccess = $board->addComment($text, null, $inreply);
 
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
+	}
+
+	/**
+	 * Returns all replies to a specific comment
+	 */
+	public function doGetReplies() {
+		$replies = CommentDisplay::repliesTo($this->getMain()->getVal('user_id'), $this->getMain()->getVal('comment_id'));
+		$this->getResult()->addValue(null, 'html', $replies);
 	}
 
 	public function doGetRaw() {

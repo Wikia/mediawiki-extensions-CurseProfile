@@ -38,22 +38,26 @@
 		loadReplies: function(e, callback) {
 			var $this = $(this);
 			$this.attr('disabled', 'true');
-			// TODO rewrite this to stop using the deprecated aciton=ajax and use a proper API endpoint
-			commentBoard.ajax('CommentDisplay::repliesTo', [$('.curseprofile').data('userid'), $this.data('id')])
-				.done(function(r){
-					var $r = $(r);
-					$r.find('time.timeago').timeago();
-					$this.closest('.replyset').html($r);
+			(new mw.Api()).post({
+				action: 'comment',
+				do: 'getReplies',
+				user_id: $('.curseprofile').data('userid'),
+				comment_id: $this.data('id')
+			}).done(function(resp) {
+				if (resp.html) {
+					var $replies = $(resp.html);
+					$replies.find('time.timeago').timeago();
+					$this.closest('.replyset').html($replies);
 					$this.attr('disabled', false);
 					$this.detach();
 					if (typeof callback !== 'undefined') {
 						callback();
 					}
-				})
-				.fail(function(code, resp) {
-					$this.attr('disabled', false);
-					console.debug(resp);
-				});
+				}
+			}).fail(function(code, resp) {
+				$this.attr('disabled', false);
+				console.debug(resp);
+			});
 			// if the button is left disabled when detached, the browser will remember and keep it disabled on page reloads
 			// thus it needs to be re-enabled before we get rid of it
 		},
