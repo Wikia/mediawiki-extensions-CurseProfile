@@ -315,7 +315,7 @@ class CommentBoard {
 		} else {
 			$fromUser = \User::newFromId(intval($fromUser));
 		}
-		if (self::canComment($toUser, $fromUser)) {
+		if (!self::canComment($toUser, $fromUser)) {
 			return false;
 		}
 
