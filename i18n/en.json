@@ -123,7 +123,7 @@
 	"echo-dismiss-title-profile-comment": "profile comment",
 	"notification-profile-comment": "[[{{ns:User}}:$1]] has left a comment on [[{{ns:User}}:$2|your profile]].",
 	"notification-profile-comment-email-subj": "$1 has left a comment on your Gamepedia profile!",
-	"notification-profile-comment-email-body": "$1 has left a comment on your profile on {{SITENAME}}. You can read and reply by viewing your profile: {{canonicalurl:{{ns:User}}:$2}}",
+	"notification-profile-comment-email-body": "$1 has left a comment on your profile on {{SITENAME}}. You can read and reply to them here: {{canonicalurl:{{#special:CommentPermalink}}/$3}}",
 	"notification-profile-comment-email-bundle-body": "$1 and $3 {{PLURAL:$4|other|others}} have left a comment on your profile on {{SITENAME}}. You can read and reply by viewing your profile: {{canonicalurl:{{ns:User}}:$2}}",
 	"echo-category-title-friendship": "Friend Request",
 	"echo-pref-tooltip-friendship": "Notify me when someone sends me a friend request.",

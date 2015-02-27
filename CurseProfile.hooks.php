@@ -288,7 +288,7 @@ class Hooks {
 			'email-subject-message' => 'notification-profile-comment-email-subj',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-batch-message' => 'notification-profile-comment-email-body',
-			'email-body-batch-params' => ['agent', 'user'],
+			'email-body-batch-params' => ['agent', 'user', 'comment-id'],
 			'email-body-batch-bundle-message' => 'notification-profile-comment-email-bundle-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 		];
