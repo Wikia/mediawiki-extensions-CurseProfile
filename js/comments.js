@@ -22,19 +22,6 @@
 			$('time.timeago').timeago(); // enable dynamic relative times on comments
 		},
 
-		ajax: function(method, params) {
-			return $.ajax({
-				type: 'GET',
-				url: mw.util.wikiScript(),
-				data: {
-					action: 'ajax',
-					rs: 'CurseProfile\\'+method,
-					rsargs: params
-				},
-				dataType: 'html',
-			});
-		},
-
 		loadReplies: function(e, callback) {
 			var $this = $(this);
 			$this.attr('disabled', 'true');
