@@ -235,15 +235,20 @@ class ProfileData {
 
 	/**
 	 * Create a new ProfileData instance
-	 * @param $user_id
+	 * @param $user local user ID or User instance
 	 */
-	public function __construct($user_id) {
-		$this->user_id = intval($user_id);
-		if ($this->user_id < 1) {
-			// if a user hasn't saved a profile yet, just use the default values
-			$this->user_id = 0;
+	public function __construct($user) {
+		if (is_a($user, 'User')) {
+			$this->user = $user;
+			$this->user_id = $user->getId();
+		} else {
+			$this->user_id = intval($user);
+			if ($this->user_id < 1) {
+				// if a user hasn't saved a profile yet, just use the default values
+				$this->user_id = 0;
+			}
+			$this->user = \User::newFromId($user);
 		}
-		$this->user = \User::newFromId($user_id);
 	}
 
 	/**

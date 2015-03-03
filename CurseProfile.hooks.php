@@ -106,6 +106,38 @@ class Hooks {
 	}
 
 	/**
+	 * Replaces User:Xxx with UserWiki:Xxx in emails when applicable
+	 *
+	 * @param	editor	User whose edit is triggering this email
+	 * @param	title	Title object of the page in question that was updated
+	 * @param	rc		RecentChange instance (new param in 1.24, backported by curse)
+	 * @return	bool
+	 */
+	public static function onAbortEmailNotification($editor, $title, $rc = null) {
+		if ( $rc !== null && $title->getNamespace() == NS_USER && !$title->isSubpage() ) {
+			// look up user by name
+			$user = \User::newFromName($title->getText());
+			$profile = new ProfileData($user);
+			if ($profile->getTypePref()) { // need to replace User:Xxx with UserWiki:Xxx
+				$userWikiTitle = \Title::makeTitle(NS_USER_WIKI, $title->getDBkey(), $title->getFragment());
+
+				// send the email with the new title
+				$enotif = new \EmailNotification();
+				$enotif->notifyOnPageChange( $editor, $userWikiTitle,
+					$rc->mAttribs['rc_timestamp'],
+					$rc->mAttribs['rc_comment'],
+					$rc->mAttribs['rc_minor'],
+					$rc->mAttribs['rc_last_oldid'],
+					$rc->mExtra['pageStatus'] );
+
+				// abort the original email because we have already sent one here
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
 	 *
 	 * @access	public

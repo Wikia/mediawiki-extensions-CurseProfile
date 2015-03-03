@@ -117,7 +117,7 @@ class ProfilePage extends \Article {
 	 * @return	bool
 	 */
 	public function isUserPage($onlyView = true) {
-		return $this->user_id && strpos( $this->getTitle()->getText(), '/' ) === false
+		return $this->user_id && !$this->getTitle()->isSubpage()
 			&& (!$onlyView || $this->actionIsView)
 			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
