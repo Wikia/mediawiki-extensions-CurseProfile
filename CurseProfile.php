@@ -27,7 +27,6 @@ $wgExtensionCredits['specialpage'][] = [
 define('NS_USER_WIKI', 200 );
 define('NS_USER_PROFILE', 202 );
 
-$wgAvailableRights[] = 'userlevel-view';
 $wgAvailableRights[] = 'profile-modcomments';
 
 /******************************************/
