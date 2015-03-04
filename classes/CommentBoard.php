@@ -459,11 +459,31 @@ class CommentBoard {
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	int		id of a comment to remove
+	 * @param	int		[optional] curse ID or User instance of the admin acting, defaults to $wgUser
+	 * @param	int		[optional] unix timestamp to use for deleted time, defaults to now
 	 * @return	stuff	whatever DB->update() returns
 	 */
-	public static function removeComment($comment_id) {
+	public static function removeComment($comment_id, $user = null, $time = null) {
+		if (is_a($user, 'User') && $user->curse_id > 0) {
+			$user = $user->curse_id;
+		} elseif (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser->curse_id;
+		}
+		if (!$time) {
+			$time = time();
+		}
+
 		$db = CP::getDb(DB_MASTER);
-		return $db->update('user_board', ['ub_type' => self::DELETED_MESSAGE], ['ub_id ='.intval($comment_id)]);
+		return $db->update(
+			'user_board',
+			[
+				'ub_type' => self::DELETED_MESSAGE,
+				'ub_admin_acted' => intval($user->curse_id),
+				'ub_admin_acted_at' => $time,
+			],
+			[ 'ub_id ='.intval($comment_id) ]
+		);
 	}
 
 	/**

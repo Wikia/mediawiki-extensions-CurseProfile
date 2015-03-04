@@ -62,7 +62,7 @@ class ResolveComment extends \SyncService\Job {
 		if (!$report) {
 			return 0;
 		}
-		$result = $report->resolve($args['action']);
+		$result = $report->resolve($args['action'], $args['byUser']);
 
 		// revert back to standard db connections
 		CP::setDb(null);

@@ -112,7 +112,8 @@ class CommentDisplay {
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">
-					'.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
+					'.($comment['ub_admin_acted'] && $wgUser->isAllowed('profile-modcomments') ? self::adminAction($comment).', ' : '')
+					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
 					.(CommentBoard::canReply($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
 					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
@@ -150,16 +151,30 @@ class CommentDisplay {
 	}
 
 	/**
+	 * Returns extra info visible only to admins on who and when admin action was taken on a comment
+	 * @param	array	comment data
+	 * @return	string	html fragment
+	 */
+	private static function adminAction($comment) {
+		$admin = \CurseUser::newFromCurseId($comment['ub_admin_acted']);
+		if (!$admin->getName()) {
+			return '';
+		}
+
+		return wfMessage('cp-commentmoderated', $admin->getName())->text().' '.CP::timeTag($comment['ub_admin_acted_at']);
+	}
+
+	/**
 	 * Returns a <time> tag with a comment's post date or last edited date
 	 *
 	 * @param	array	comment data
-	 * @return	stirng	html fragment
+	 * @return	string	html fragment
 	 */
 	private static function timestamp($comment){
 		if (is_null($comment['ub_edited'])) {
-			return CP::timeTag($comment['ub_date']);
+			return wfMessage('cp-commentposted')->text().' '.CP::timeTag($comment['ub_date']);
 		} else {
-			return wfMessage('cp-commentedited').' '.CP::timeTag($comment['ub_edited']);
+			return wfMessage('cp-commentedited')->text().' '.CP::timeTag($comment['ub_edited']);
 		}
 	}
 
