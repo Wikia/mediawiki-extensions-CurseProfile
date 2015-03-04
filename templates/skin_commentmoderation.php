@@ -11,17 +11,24 @@
  * @link		http://www.curse.com/
  *
 **/
-use CurseProfile\CP, CurseProfile\ProfilePage;
+use CurseProfile\CP, CurseProfile\ProfilePage, CurseProfile\CommentReport;
 
 class skin_commentmoderation {
+	// Max number of small reporter avatars to display above a comment
 	const MAX_REPORTER_AVATARS = 3;
 
+	/**
+	 * Renders the group and sort "tabs" at the top of the CommentModeration page
+	 * @param currentStyle string indicating the current sort style
+	 * @return string HTML fragment
+	 */
 	public function sortStyleSelector($currentStyle) {
 		$styles = [
 			'byVolume' => ['By Volume of Reports', 'default'],
 			'byWiki' => ['By Origin Wiki'],
 			'byUser' => ['By Reported User'],
 			'byDate' => ['Most Recent Reports First'],
+			'byActionDate' => ['Moderation Log'],
 		];
 		$HTML = '';
 
@@ -33,7 +40,7 @@ class skin_commentmoderation {
 			if (isset($sort[1])) {
 				$params['href'] = '/Special:CommentModeration';
 			} else {
-				$params['href'] = '/Special:CommendModeration/'.$key;
+				$params['href'] = '/Special:CommentModeration/'.$key;
 			}
 			if ($currentStyle == $key) {
 				$params['style'] = 'font-weight:bold';
@@ -45,6 +52,11 @@ class skin_commentmoderation {
 		return '<p>Group and sort: '.$HTML.'</p>';
 	}
 
+	/**
+	 * Renders the main body of the CommentModeration special page
+	 * @param reports array of CommentReport instances
+	 * @return string HTML fragment
+	 */
 	public function renderComments($reports) {
 		$HTML = '<div id="commentmoderation" class="comments">';
 
@@ -61,10 +73,15 @@ class skin_commentmoderation {
 						'<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>'.
 						'<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>';
 			$HTML .= '</div>';
-			$HTML .= '<div class="moderation-actions">';
-				$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
-				$HTML .= '<div class="confirm"><a class="del">Confirm Delete</a></div>';
-			$HTML .= '</div>';
+
+			if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
+				$HTML .= '<div class="moderation-actions">';
+					$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
+					$HTML .= '<div class="confirm"><a></a></div>';
+				$HTML .= '</div>';
+			} else {
+				$HTML .= '<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
+			}
 
 			$HTML .= '</div>';
 
@@ -76,6 +93,25 @@ class skin_commentmoderation {
 		return $HTML;
 	}
 
+	private function actionTaken($rep) {
+		$user = CurseUser::newFromCurseId($rep->data['action_taken_by']);
+		switch ($rep->data['action_taken']) {
+			case CommentReport::ACTION_DISMISS:
+			$action = 'dis';
+			break;
+
+			case CommentReport::ACTION_DELETE:
+			$action = 'del';
+			break;
+		}
+		return Html::rawElement('span', ['class'=>'action-taken '.$action], wfMessage('report-actiontaken-'.$action, $user->getName())->text().' '.CP::timeTag($rep->data['action_taken_at']));
+	}
+
+	/**
+	 * Produces the introduction line above a reported comment "First reporteded X time ago by [user]:"
+	 * @param rep CommentReport instance
+	 * @return string HTML fragment
+	 */
 	private function itemLine($rep) {
 		if (count($rep['reports']) <= self::MAX_REPORTER_AVATARS) {
 			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']));
@@ -84,6 +120,11 @@ class skin_commentmoderation {
 		}
 	}
 
+	/**
+	 * Creates the small user icons indicating who has reported a comment
+	 * @param reports array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
+	 * @return string HTML fragment
+	 */
 	private function reporterIcons($reports) {
 		$HTML = '';
 		$iter = 0;
@@ -98,6 +139,11 @@ class skin_commentmoderation {
 		return $HTML;
 	}
 
+	/**
+	 * Returns a permalink to a comment on its origin wiki
+	 * @param rep CommentReport instance
+	 * @return string HTML fragment
+	 */
 	private function permalink($rep) {
 		if (defined('CURSEPROFILE_MASTER')) {
 			if ($rep['comment']['origin_wiki'] == 'master') {

@@ -5,7 +5,8 @@ CREATE TABLE /*_*/user_board_report_archives (
   `ra_comment_text` text NOT NULL,
   `ra_last_edited` datetime default NULL,
   `ra_first_reported` datetime default NULL,
-  `ra_action_taken` int(1) default NULL,
+  `ra_action_taken` int(1) default '0',
+  `ra_action_taken_at` datetime default NULL,
   `ra_action_taken_by` int(11) default NULL/* curse id of acting moderator */
 ) /*$wgDBTableOptions*/;
 CREATE UNIQUE INDEX /*i*/ra_comment_report ON /*_*/user_board_report_archives (ra_comment_id,ra_last_edited);

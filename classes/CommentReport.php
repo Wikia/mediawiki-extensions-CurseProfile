@@ -18,6 +18,7 @@ namespace CurseProfile;
  */
 class CommentReport {
 	// actions to take on a report
+	const ACTION_NONE = 0;
 	const ACTION_DISMISS = 1;
 	const ACTION_DELETE = 2;
 
@@ -98,7 +99,7 @@ class CommentReport {
 	 * @param	bool	[optional] when set to true, will return null if report does not exist in the current wiki
 	 * @return	obj		CommentReport instance or null if report does not exist
 	 */
-	public static function newFromkey($key, $onlyLocal = false) {
+	public static function newFromKey($key, $onlyLocal = false) {
 		global $dsSiteKey;
 		if (strpos($key, $dsSiteKey) != 0) {
 			// report is remote
@@ -141,17 +142,22 @@ class CommentReport {
 	private static function getReportsRedis($sortStyle, $limit, $offest) {
 		$mouse = CP::loadMouse();
 		switch ($sortStyle) {
+			case 'byActionDate':
+				$keys = $mouse->redis->zrevrange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit+$offset);
+				break;
+
 			case 'byVolume':
 			default:
 				$keys = $mouse->redis->zrevrange(self::REDIS_KEY_VOLUME_INDEX, $offest, $limit+$offset);
-				if (count($keys)) {
-					// prepend key value to prep mass retrieval from redis
-					$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
-					$reports = call_user_func_array([$mouse->redis, 'hmget'], $keys);
-					$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
-				} else {
-					$reports = [];
-				}
+		}
+
+		if (count($keys)) {
+			// prepend key value to prep mass retrieval from redis
+			$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
+			$reports = call_user_func_array([$mouse->redis, 'hmget'], $keys);
+			$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
+		} else {
+			$reports = [];
 		}
 		return $reports;
 	}
@@ -168,6 +174,20 @@ class CommentReport {
 		$db = CP::getDb(DB_SLAVE);
 		$reports = [];
 		switch ($sortStyle) {
+			case 'byActionDate':
+				$res = $db->select(
+					['user_board_report_archives'],
+					['*'],
+					['ra_action_taken != 0'],
+					__METHOD__,
+					[
+						'ORDER BY' => 'ra_action_taken_at DESC',
+						'LIMIT' => $limit,
+						'OFFSET' => $offset,
+					]
+				);
+				break;
+
 			case 'byVolume':
 			default:
 				// TODO alter scheme to have an incrementing count in the archive table to avoid using a slow count(*) query
@@ -191,9 +211,12 @@ class CommentReport {
 						]
 					]
 				);
-				foreach ($res as $row) {
-						$reports[] = self::newFromRow((array)$row);
-				}
+				break;
+		}
+		if ($res) {
+			foreach ($res as $row) {
+					$reports[] = self::newFromRow((array)$row);
+			}
 		}
 		return $reports;
 	}
@@ -274,6 +297,7 @@ class CommentReport {
 			'reports' => [],
 			'action_taken' => 0,
 			'action_taken_by' => null,
+			'action_taken_at' => null,
 			'first_reported' => time(),
 		];
 		$report = new self($data);
@@ -307,6 +331,7 @@ class CommentReport {
 			'reports' => [], // TODO could be loaded now or on demand with a to-be-written getReports() method
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by'],
+			'action_taken_at' => strtotime($report['ra_action_taken_at']),
 			'first_reported' => strtotime($report['ra_first_reported']),
 		];
 		$cr = new self($data);
@@ -348,6 +373,7 @@ class CommentReport {
 			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
 			'ra_action_taken' => $this->data['action_taken'],
 			'ra_action_taken_by' => $this->data['action_taken_by'],
+			'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
 		], __METHOD__);
 		$this->id = $db->insertId();
 	}
@@ -432,6 +458,9 @@ class CommentReport {
 		if (!$this->isLocal()) {
 			return false;
 		}
+		if ($this->data['action_taken']) {
+			return false;
+		}
 		if (is_null($byUser)) {
 			$byUser = $GLOBALS['wgUser']->curse_id;
 		}
@@ -444,8 +473,9 @@ class CommentReport {
 		}
 
 		// update internal data
-		$this->data['action_taken'] = $action;
+		$this->data['action_taken'] = $action=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS;
 		$this->data['action_taken_by'] = $byUser;
+		$this->data['action_taken_at'] = time();
 
 		// update data stores
 		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid']) )
@@ -465,8 +495,9 @@ class CommentReport {
 		$result = $db->update(
 			'user_board_report_archives',
 			[
-				'ra_action_taken' => $this->data['action_taken']=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS,
+				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by' => $this->data['action_taken_by'],
+				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
 			],[
 				'ra_comment_id' => intval($this->data['comment']['cid']),
 				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched'])
@@ -485,7 +516,7 @@ class CommentReport {
 		$mouse = CP::loadMouse();
 
 		// add key to index for actioned items
-		$mouse->redis->sadd(self::REDIS_KEY_ACTED_INDEX, $this->reportKey());
+		$mouse->redis->zadd(self::REDIS_KEY_ACTED_INDEX, $this->data['action_taken_at'], $this->reportKey());
 
 		// update serialized data
 		$mouse->redis->hset(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));

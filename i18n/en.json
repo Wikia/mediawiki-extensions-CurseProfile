@@ -42,6 +42,8 @@
 	"report-thanks": "Thanks for letting us know. The comment will be reviewed by moderator soon.",
 	"report-confirmdismiss": "Confirm Dismiss",
 	"report-confirmdelete": "Confirm Delete",
+	"report-actiontaken-del": "Deleted by $1",
+	"report-actiontaken-dis": "Dismissed by $1",
 	"comment-invaliduser": "Could not find a user for the given id.",
 	"emptyactivity": "This user hasn't made any edits on this wiki yet",
 	"commentaction": "Post",
