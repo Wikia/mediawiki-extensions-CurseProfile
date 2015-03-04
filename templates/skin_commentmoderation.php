@@ -25,9 +25,9 @@ class skin_commentmoderation {
 	public function sortStyleSelector($currentStyle) {
 		$styles = [
 			'byVolume' => ['By Volume of Reports', 'default'],
-			'byWiki' => ['By Origin Wiki'],
-			'byUser' => ['By Reported User'],
-			'byDate' => ['Most Recent Reports First'],
+			// 'byWiki' => ['By Origin Wiki'],
+			// 'byUser' => ['By Reported User'],
+			// 'byDate' => ['Most Recent Reports First'],
 			'byActionDate' => ['Moderation Log'],
 		];
 		$HTML = '';
