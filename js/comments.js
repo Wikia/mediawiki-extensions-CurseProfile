@@ -17,6 +17,7 @@
 				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
 				.on('click', 'form.edit .cancel', commentBoard.cancelCommentEdit)
 				.on('click', 'a.remove', commentBoard.removeComment)
+				.on('click', 'a.purge', commentBoard.purgeComment)
 				.on('click', 'a.report', commentBoard.reportComment);
 			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
 			$('time.timeago').timeago(); // enable dynamic relative times on comments
@@ -201,6 +202,31 @@
 			}).done(function(resp) {
 				if (resp.html) {
 					$comment.slideUp();
+				}
+			}).fail(function(code, resp) {
+				$this.show();
+				console.dir(resp);
+			});
+		},
+
+		purgeComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+			if ( !window.confirm( mw.message('purge-prompt', $comment.find('a[title^="User:"]').first().text()).text() ) ) {
+				return;
+			}
+			$this.hide();
+			(new mw.Api()).post({
+				action: 'comment',
+				do: 'purge',
+				comment_id: $comment.data('id'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				if (resp.result === 'success') {
+					$comment.slideUp();
+				} else {
+					$this.show();
+					console.dir(resp);
 				}
 			}).fail(function(code, resp) {
 				$this.show();

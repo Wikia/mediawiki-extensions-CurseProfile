@@ -117,6 +117,7 @@ class CommentDisplay {
 					.(CommentBoard::canReply($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
 					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
+					.(CommentBoard::canPurge() ? \Html::element('a', ['href'=>'#', 'class'=>'purge', 'title'=>wfMessage('purgelink-tooltip')], wfMessage('purgelink')) : '')
 					.(CommentBoard::canReport($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'report', 'title'=>wfMessage('reportlink-tooltip')], wfMessage('reportlink')) : '')
 				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])

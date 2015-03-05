@@ -56,6 +56,17 @@ class CommentApi extends \CurseApiBase {
 				],
 			],
 
+			'purge' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+
 			'add' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
@@ -270,6 +281,16 @@ class CommentApi extends \CurseApiBase {
 			CommentBoard::removeComment($comment_id);
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
+		} else {
+			return $this->dieUsageMsg(['comment-invalidaction']);
+		}
+	}
+
+	public function doPurge() {
+		$comment_id = $this->getMain()->getVal('comment_id');
+		if ($comment_id && CommentBoard::canPurge()) {
+			CommentBoard::purgeComment($comment_id);
+			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
 		}

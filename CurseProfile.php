@@ -28,6 +28,7 @@ define('NS_USER_WIKI', 200 );
 define('NS_USER_PROFILE', 202 );
 
 $wgAvailableRights[] = 'profile-modcomments';
+$wgAvailableRights[] = 'profile-purgecomments';
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
@@ -103,6 +104,7 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 	'messages' => [
 		'cancel',
 		'remove-prompt',
+		'purge-prompt',
 		'report-prompt',
 		'report-thanks',
 	],

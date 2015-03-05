@@ -516,6 +516,38 @@ class CommentBoard {
 	}
 
 	/**
+	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
+	 *
+	 * @param	int		id of a comment to remove
+	 * @return	stuff	whatever DB->update() returns
+	 */
+	public static function purgeComment($comment_id) {
+		$db = CP::getDb(DB_MASTER);
+		return $db->delete(
+			'user_board',
+			[ 'ub_id ='.intval($comment_id) ]
+		);
+	}
+
+	/**
+	 * Checks if a user has permissions to permanently comments
+	 *
+	 * @param	obj		[optional] mw User object, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canPurge($user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		} elseif (!is_a($user, 'User')) {
+			return false;
+		}
+
+		// only Curse group has this right
+		return $user->isAllowed('profile-purgecomments');
+	}
+
+	/**
 	 * Send a comment to the moderation queue. Does not check permissions.
 	 *
 	 * @param	int		id of the comment to report
