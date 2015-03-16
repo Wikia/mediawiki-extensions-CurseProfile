@@ -48,7 +48,7 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 		$wgOut->addHTML($mouse->output->commentboard->permalinkHeader($user, $wgOut->getPageTitle()));
 
 		// display single comment while highlighting the selected ID
-		$wgOut->addHTML('<div class="comments">'.CommentDisplay::newCommentForm($user->getId(), true).CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
+		$wgOut->addHTML('<div class="comments noreplies">'.CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
 
 		return;
 	}

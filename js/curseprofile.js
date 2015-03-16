@@ -8,7 +8,6 @@ function CurseProfile($) {
 		});
 		commentBoard.init();
 		friendship.init();
-		window.commentBoard = commentBoard;
 	};
 
 	this.ajax = function(method, params) {
@@ -36,8 +35,6 @@ function CurseProfile($) {
 	commentBoard = {
 		page: 1,
 		replyForm: null,
-		editForm: null,
-		editedComment: null,
 
 		init: function() {
 			$('.reply-count').on('click', commentBoard.loadReplies);
