@@ -1,0 +1,7 @@
+{
+	"@metadata": {
+		"authors": ["Noah Manneschmidt"]
+	},
+	"report-actiontaken-del": "Indicates that a reported comment was deleted by a admin. 1st param is the username",
+	"report-actiontaken-dis": "Indicates that a reported comment was dismissed by a admin. 1st param is the username",
+}
