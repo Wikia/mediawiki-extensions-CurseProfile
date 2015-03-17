@@ -260,6 +260,14 @@ class ProfileData {
 	}
 
 	/**
+	 * Empties the user's "About Me" text
+	 */
+	public function purgeAboutText() {
+		$this->user->setOption('profile-aboutme', '');
+		$this->user->saveSettings();
+	}
+
+	/**
 	 * Returns all the user's location profile data
 	 * @return array possibly including keys: city, state, country, country-flag
 	 */

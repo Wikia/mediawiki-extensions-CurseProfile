@@ -13,5 +13,6 @@
 **/
 
 // This file adds API classes to the registered API modules
+$wgAPIModules['profile'] = 'CurseProfile\ProfileApi';
 $wgAPIModules['friend'] = 'CurseProfile\FriendApi';
 $wgAPIModules['comment'] = 'CurseProfile\CommentApi';

@@ -345,10 +345,13 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function aboutBlock(&$parser) {
-		$mouse = CP::loadMouse();
-		global $wgOut;
+		global $wgOut, $wgUser;
+		$aboutText = $wgOut->parse($this->profile->getAboutText());
+		if (!empty($aboutText) && $wgUser->isAllowed('profile-modcomments')) {
+			$aboutText = \Html::element('a', ['class'=>'rightfloat profilepurge', 'href'=>'#', 'title'=>wfMessage('purgeprofile-tooltip')->plain()], wfMessage('removelink')->plain()).$aboutText;
+		}
 		return [
-			$wgOut->parse($this->profile->getAboutText()),
+			$aboutText,
 			'isHTML' => true
 		];
 	}

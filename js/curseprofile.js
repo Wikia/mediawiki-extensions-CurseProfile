@@ -4,6 +4,7 @@ function CurseProfile($) {
 		$('button.linksub').click(function() {
 			window.location = $(this).data('href');
 		});
+		$('a.profilepurge').click(profile.purgeAboutMe);
 		friendship.init();
 	};
 
@@ -71,6 +72,28 @@ function CurseProfile($) {
 				$this.attr('disabled', false);
 			});
 		}
+	},
+
+	profile = {
+		purgeAboutMe: function(e) {
+			var $this = $(this), $profile = $this.closest('.curseprofile');
+			e.preventDefault();
+			if ( !window.confirm( mw.message('purgeaboutme-prompt').text() ) ) {
+				return;
+			}
+			$this.hide();
+			(new mw.Api()).post({
+				action: 'profile',
+				do: 'purgeAboutMe',
+				userId: $profile.data('userid'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				$('.aboutme').slideUp();
+			}).fail(function(code, resp) {
+				$this.show();
+				console.dir(resp);
+			});
+		},
 	};
 }
 

@@ -43,6 +43,7 @@ $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.na
 $wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
 $wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
 $wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
+$wgAutoloadClasses['CurseProfile\ProfileApi']    = $extDir . 'classes/ProfileApi.php';
 $wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
 $wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileData.php';
 $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
@@ -92,6 +93,9 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'remoteExtPath' => 'CurseProfile',
 	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'mediawiki.user', 'mediawiki.api'],
 	'position' => 'top',
+	'messages' => [
+		'purgeaboutme-prompt',
+	]
 ];
 
 $wgResourceModules['ext.curseprofile.comments'] = [
