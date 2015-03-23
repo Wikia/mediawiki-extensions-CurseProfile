@@ -113,7 +113,7 @@ class CommentDisplay {
 			<div>
 				<div class="right">
 					'.($comment['ub_admin_acted'] && $wgUser->isAllowed('profile-modcomments') ? self::adminAction($comment).', ' : '')
-					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getFullURL()], self::timestamp($comment)).' '
+					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
 					.(CommentBoard::canReply($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
 					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
 					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
