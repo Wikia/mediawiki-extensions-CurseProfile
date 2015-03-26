@@ -491,8 +491,8 @@ class ProfilePage extends \Article {
 		if ($stats) {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
-				'achievementsearned' => 123,
-				"<dd class='achievements'>{{#achievements:local|5}}</dd>",
+				// 'achievementsearned' => 123, /* replace with global achievement count when available */
+				// "<dd class='achievements'>{{#achievements:local|5}}</dd>",
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
@@ -717,7 +717,8 @@ __NOTOC__
 			$this->user->getID(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			( $this->user->curse_id > 0 ? 'true' : '' ),
+			'', // no achievements
+			// ( $this->user->curse_id > 0 ? 'true' : '' ), /* delete above and uncomment for achievement block */
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
