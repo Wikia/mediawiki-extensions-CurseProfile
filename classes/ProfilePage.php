@@ -482,7 +482,7 @@ class ProfilePage extends \Article {
 
 		if ($curse_id > 0) {
 			$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-			$jsonStats = $mouse->curl->fetch(MASTER_WIKI_URL.'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
+			$jsonStats = $mouse->curl->fetch(wfExpandUrl(MASTER_WIKI_URL, PROTO_CURRENT).'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, [], ['username'=>'hydraStats', 'password'=>'8_-csYhS']);
 			$stats = json_decode($jsonStats, true);
 		}
 
