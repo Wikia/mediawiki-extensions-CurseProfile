@@ -103,7 +103,7 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 	'scripts' => ['js/comments.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
+	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api', 'ext.curse.font-awesome'],
 	'position' => 'top',
 	'messages' => [
 		'cancel',
