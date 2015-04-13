@@ -84,7 +84,7 @@ class CommentBoard {
 			$types[] = self::PRIVATE_MESSAGE;
 		}
 
-		if ($this->type == self::BOARDTYPE_ARCHIVES && $asUser->isAllowed('profile-modcomments')) {
+		if ($asUser->isAllowed('profile-modcomments')) {
 			$types[] = self::DELETED_MESSAGE;
 		}
 
