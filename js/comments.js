@@ -106,7 +106,7 @@
 			e.preventDefault();
 
 			// obscure comment with translucent throbber
-			$comment.append('<div class="overlay"></div>');
+			$comment.append('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>');
 
 			// clone and alter new comment form to function as an edit form
 			if (commentBoard.editForm === null) {

@@ -114,11 +114,11 @@ class CommentDisplay {
 				<div class="right">
 					'.($comment['ub_admin_acted'] && $wgUser->isAllowed('profile-modcomments') ? self::adminAction($comment).', ' : '')
 					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
-					.(CommentBoard::canReply($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], wfMessage('replylink')).' ' : '')
-					.(CommentBoard::canEdit($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], wfMessage('commenteditlink')).' ' : '')
-					.(CommentBoard::canRemove($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], wfMessage('removelink')) : '')
-					.(CommentBoard::canPurge() ? \Html::element('a', ['href'=>'#', 'class'=>'purge', 'title'=>wfMessage('purgelink-tooltip')], wfMessage('purgelink')) : '')
-					.(CommentBoard::canReport($comment) ? \Html::element('a', ['href'=>'#', 'class'=>'report', 'title'=>wfMessage('reportlink-tooltip')], wfMessage('reportlink')) : '')
+					.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'newreply', 'title'=>wfMessage('replylink-tooltip')], \Curse::awesomeIcon('reply')).' ' : '')
+					.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'edit', 'title'=>wfMessage('commenteditlink-tooltip')], \Curse::awesomeIcon('pencil')).' ' : '')
+					.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'remove', 'title'=>wfMessage('removelink-tooltip')], \Curse::awesomeIcon('trash-o')) : '')
+					.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href'=>'#', 'class'=>'purge', 'title'=>wfMessage('purgelink-tooltip')], \Curse::awesomeIcon('times')) : '')
+					.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'report', 'title'=>wfMessage('reportlink-tooltip')], \Curse::awesomeIcon('flag')) : '')
 				.'</div>
 				'.CP::userLink($comment['ub_user_id_from'])
 			.'</div>

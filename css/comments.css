@@ -49,10 +49,12 @@
 	height: 100%;
 	width: 100%;
 	background-color: rgba(25, 25, 25, 0.7);
-	background-image: url('/extensions/WikiEditor/modules/images/dialogs/loading-small.gif');
-	background-repeat: no-repeat;
-	background-position: center;
+	display: flex;
+	justify-content: center;
 }
+	.commentdisplay .overlay .fa {
+		align-self: center;
+	}
 
 .comments .avatar {
 	float: left;
