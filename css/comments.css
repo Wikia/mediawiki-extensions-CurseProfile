@@ -7,6 +7,12 @@
 	.commentdisplay .right {
 		float: right;
 	}
+		.commentdisplay .right a {
+			margin-left: 3px;
+		}
+		.commentdisplay .right a.purge {
+			margin-left: 5px;
+		}
 
 .add-comment.hidden {
 	display: none;
