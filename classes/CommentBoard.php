@@ -510,9 +510,10 @@ class CommentBoard {
 			]);
 		}
 
-		// comment must either be on user's own profile, or have the permission
-		return $comment['ub_type'] != self::DELETED_MESSAGE && 
-			($comment['ub_user_id'] == $user->getId() || $user->isAllowed('profile-modcomments'));
+		// comment must either be authored by current user and not be blocked, or have mod permissions
+		return $comment['ub_type'] != self::DELETED_MESSAGE &&
+			( ($comment['ub_user_id'] == $user->getId() && !$user->isBlocked())
+				|| $user->isAllowed('profile-modcomments') );
 	}
 
 	/**
