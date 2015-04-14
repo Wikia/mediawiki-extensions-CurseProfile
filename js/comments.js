@@ -10,8 +10,10 @@
 		editedComment: null,
 
 		init: function() {
+			// attach events
 			$('.reply-count').on('click', commentBoard.loadReplies);
 			$('.comments')
+				.on('click', '.add-comment .submit', commentBoard.preventDoublePost)
 				.on('click', 'a.newreply', commentBoard.newReply)
 				.on('click', 'a.edit', commentBoard.editComment)
 				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
@@ -19,8 +21,19 @@
 				.on('click', 'a.remove', commentBoard.removeComment)
 				.on('click', 'a.purge', commentBoard.purgeComment)
 				.on('click', 'a.report', commentBoard.reportComment);
-			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
-			$('time.timeago').timeago(); // enable dynamic relative times on comments
+
+			// Auto-size comment field
+			$('.commentdisplay .entryform textarea').autosize();
+
+			// Dynamic relative timestamps
+			$('time.timeago').timeago();
+
+			// Avoid cached "disabled" attributes
+			$('.comments button.submit').attr('disabled', false);
+		},
+
+		preventDoublePost: function(e) {
+			$(this).attr('disabled', true);
 		},
 
 		loadReplies: function(e, callback) {
@@ -54,7 +67,7 @@
 			var $replySet, $replyHolder, $textarea, $this = $(this).closest('.commentdisplay'),
 				placeReplyBox = function() {
 					if (commentBoard.replyForm === null) {
-						commentBoard.replyForm = $('.add-comment').clone().removeClass('hidden');
+						commentBoard.replyForm = $('.add-comment').clone().removeClass('hidden add-comment').addClass('add-reply');
 						// Update placeholder to use the reply-specific one
 						$textarea = commentBoard.replyForm.find('textarea');
 						$textarea.prop('placeholder', $textarea.data('replyplaceholder'));
@@ -110,10 +123,10 @@
 
 			// clone and alter new comment form to function as an edit form
 			if (commentBoard.editForm === null) {
-				commentBoard.editForm = $('.add-comment').clone().removeClass('hidden');
+				commentBoard.editForm = $('.add-comment').clone().removeClass('hidden add-comment').addClass('edit-comment');
 				// Update the form to behave as an edit instead of a reply
 				commentBoard.editForm.find('form').addClass('edit');
-				commentBoard.editForm.find('button').addClass('submit')
+				commentBoard.editForm.find('button').text(mw.message('save').text())
 					.after('<input type="hidden" name="comment_id" value="" />')
 					.before('<button class="cancel"></button>').prev().text(mw.message('cancel').text());
 			} else {

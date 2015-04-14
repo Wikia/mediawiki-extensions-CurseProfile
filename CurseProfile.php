@@ -106,6 +106,7 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api', 'ext.curse.font-awesome'],
 	'position' => 'top',
 	'messages' => [
+		'save',
 		'cancel',
 		'remove-prompt',
 		'purge-prompt',
