@@ -104,11 +104,11 @@ function CurseProfile($) {
 				userId: $profile.data('userid')
 			}).done(function(resp) {
 				if (resp.text) {
-					// insert raw comment text in to edit form
-					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
-
 					// insert edit form into DOM to replace throbber
 					$block.hide().after(profile.editForm);
+
+					// insert raw comment text in to edit form
+					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
 				}
 			});
 		},
