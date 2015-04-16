@@ -169,10 +169,6 @@ class CommentApi extends \CurseApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'user_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
-					],
 					'comment_id' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 						\ApiBase::PARAM_REQUIRED => true,
