@@ -76,7 +76,7 @@
 	"removelink-tooltip": "Remove this comment",
 	"restorelink-tooltip": "Undelete this comment",
 	"purgeprofile-tooltip": "Empty this 'about me' section",
-	"purgelink-tooltip": "Permanently delete this comment",
+	"purgelink-tooltip": "Permanently erase this comment",
 	"reportlink-tooltip": "Report this comment",
 	"remove-prompt": "You are about to delete the comment by $1",
 	"purgeaboutme-prompt": "You are about to empty the 'about me' section of this profile",

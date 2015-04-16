@@ -217,7 +217,7 @@
 				if (resp.html) {
 					$comment.addClass('deleted').find('.icon').hide();
 					$this.removeClass('remove').addClass('restore').show()
-						.find('.fa').removeClass('fa-trash-o').addClass('fa-undo');
+						.find('.fa').removeClass('fa-trash').addClass('fa-undo');
 				}
 			}).fail(function(code, resp) {
 				$this.show();
@@ -238,7 +238,7 @@
 				if (resp.result) {
 					$comment.removeClass('deleted');
 					$this.removeClass('restore').addClass('remove').show()
-						.find('.fa').removeClass('fa-undo').addClass('fa-trash-o');
+						.find('.fa').removeClass('fa-undo').addClass('fa-trash');
 				}
 			}).fail(function(code, resp) {
 				$this.show();
