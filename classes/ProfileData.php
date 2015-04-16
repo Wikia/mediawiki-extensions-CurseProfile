@@ -113,6 +113,11 @@ class ProfileData {
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];
+		global $wgUser;
+		if ($wgUser->isBlocked()) {
+			$preferences['profile-aboutme']['help-message'] = 'aboutmehelp-blocked';
+			$preferences['profile-aboutme']['disabled'] = true;
+		}
 		$preferences['profile-avatar'] = [
 			'type' => 'info',
 			'label-message' =>'avatar',
@@ -222,6 +227,11 @@ class ProfileData {
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
 			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+		}
+
+		// don't allow blocked users to change their aboutme text
+		if ($user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
+			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
 		}
 
 		// run hooks on profile preferences (mostly for achievements)

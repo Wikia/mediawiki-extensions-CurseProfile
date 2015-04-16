@@ -55,6 +55,7 @@
 	"tooltip-ca-switch_type": "Switch between profile and wiki page",
 	"aboutme": "About Me",
 	"aboutmehelp": "Wikitext is available for formatting.",
+	"aboutmehelp-blocked": "You cannot edit your profile at this time.",
 	"favoritewiki": "Favorite Wiki",
 	"citylabel": "City",
 	"statelabel": "State/Province",
