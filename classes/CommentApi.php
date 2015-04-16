@@ -23,7 +23,7 @@ class CommentApi extends \CurseApiBase {
 
 	public function getParamDescription() {
 		return array_merge(parent::getParamDescription(), [
-			// getRaw, edit, and remove
+			// getRaw, edit, remove, and restore
 			'comment_id' => 'The the ID of a comment which is being acted upon. Required for remove actions.',
 
 			// resolveReport
@@ -45,6 +45,17 @@ class CommentApi extends \CurseApiBase {
 
 	public function getActions() {
 		return [
+			'restore' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'comment_id' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+
 			'remove' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
@@ -272,6 +283,17 @@ class CommentApi extends \CurseApiBase {
 			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parseInline($text));
 		} else {
 			$this->dieUsageMsg(['comment-invalidaction']);
+		}
+	}
+
+	public function doRestore() {
+		$comment_id = $this->getMain()->getVal('comment_id');
+		if ($comment_id && CommentBoard::canRestore($comment_id)) {
+			CommentBoard::restoreComment($comment_id);
+			$this->getResult()->addValue(null, 'result', 'success');
+			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
+		} else {
+			return $this->dieUsageMsg(['comment-invalidaction']);
 		}
 	}
 

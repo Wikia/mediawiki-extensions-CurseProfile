@@ -517,6 +517,57 @@ class CommentBoard {
 	}
 
 	/**
+	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
+	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
+	 *
+	 * @param	int		id of a comment to remove
+	 * @param	int		[optional] curse ID or User instance of the admin acting, defaults to $wgUser
+	 * @return	stuff	whatever DB->update() returns
+	 */
+	public static function restoreComment($comment_id) {
+		$db = CP::getDb(DB_MASTER);
+		return $db->update(
+			'user_board',
+			[
+				'ub_type' => self::PUBLIC_MESSAGE,
+				'ub_admin_acted' => null,
+				'ub_admin_acted_at' => null,
+			],
+			[ 'ub_id='.intval($comment_id) ]
+		);
+	}
+
+	/**
+	 * Checks if a user has permissions to restore a deleted comment
+	 *
+	 * @param	mixed	int id of comment to check, or array row from user_board table
+	 * @param	obj		[optional] mw User object, defaults to $wgUser
+	 * @return	bool
+	 */
+	public static function canRestore($comment_id, $user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		}
+
+		if (is_array($comment_id)) {
+			$comment = $comment_id;
+		} else {
+			$mouse = CP::loadMouse();
+			$comment = $mouse->DB->selectAndFetch([
+				'select' => 'b.*',
+				'from'   => ['user_board' => 'b'],
+				'where'  => 'b.ub_id = '.intval($comment_id),
+			]);
+		}
+
+		// comment must be deleted, user has mod permissions or was the original author and deleter
+		return $comment['ub_type'] == self::DELETED_MESSAGE &&
+			( $user->isAllowed('profile-modcomments')
+				|| $comment['ub_user_id'] == $user->getId() && $comment['ub_admin_acted'] == $user->getId() );
+	}
+
+	/**
 	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
 	 *
 	 * @param	int		id of a comment to remove

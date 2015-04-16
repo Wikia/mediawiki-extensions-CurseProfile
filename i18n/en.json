@@ -74,6 +74,7 @@
 	"replylink-tooltip": "Reply to this comment",
 	"commenteditlink-tooltip": "Edit this comment",
 	"removelink-tooltip": "Remove this comment",
+	"restorelink-tooltip": "Undelete this comment",
 	"purgeprofile-tooltip": "Empty this 'about me' section",
 	"purgelink-tooltip": "Permanently delete this comment",
 	"reportlink-tooltip": "Report this comment",

@@ -19,6 +19,7 @@
 				.on('click', 'form.edit .submit', commentBoard.submitCommentEdit)
 				.on('click', 'form.edit .cancel', commentBoard.cancelCommentEdit)
 				.on('click', 'a.remove', commentBoard.removeComment)
+				.on('click', 'a.restore', commentBoard.restoreComment)
 				.on('click', 'a.purge', commentBoard.purgeComment)
 				.on('click', 'a.report', commentBoard.reportComment);
 
@@ -214,7 +215,30 @@
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
 				if (resp.html) {
-					$comment.slideUp();
+					$comment.addClass('deleted').find('.icon').hide();
+					$this.removeClass('remove').addClass('restore').show()
+						.find('.fa').removeClass('fa-trash-o').addClass('fa-undo');
+				}
+			}).fail(function(code, resp) {
+				$this.show();
+				console.dir(resp);
+			});
+		},
+
+		restoreComment: function(e) {
+			var $this = $(this), $comment = $this.closest('.commentdisplay');
+			e.preventDefault();
+			$this.hide();
+			(new mw.Api()).post({
+				action: 'comment',
+				do: 'restore',
+				comment_id: $comment.data('id'),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				if (resp.result) {
+					$comment.removeClass('deleted');
+					$this.removeClass('restore').addClass('remove').show()
+						.find('.fa').removeClass('fa-undo').addClass('fa-trash-o');
 				}
 			}).fail(function(code, resp) {
 				$this.show();
