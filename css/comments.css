@@ -33,22 +33,25 @@
 	background-color: hsla(60, 80%, 50%, 0.4);
 }
 
-.commentdisplay .entryform {
-	margin-left: 54px;
-	padding-right: 5px;
+.curseprofile .entryform {
 	text-align: right;
+	position: relative;
 }
-	.commentdisplay .entryform textarea {
+	.curseprofile .entryform textarea {
 		display: block;
 		resize: vertical;
 		height: 2em;
 		margin-bottom:5px;
 	}
-	.commentdisplay .entryform .edit button {
+	.curseprofile .entryform .edit button {
 		margin-left: 0.5em;
 	}
+.commentdisplay .entryform {
+	padding-right: 5px;
+	margin-left: 54px;
+}
 
-.commentdisplay .overlay {
+.curseprofile .overlay {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -58,7 +61,7 @@
 	display: flex;
 	justify-content: center;
 }
-	.commentdisplay .overlay .fa {
+	.curseprofile .overlay .fa {
 		align-self: center;
 	}
 

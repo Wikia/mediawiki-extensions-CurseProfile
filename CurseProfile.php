@@ -91,10 +91,12 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'mediawiki.user', 'mediawiki.api'],
+	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
 	'position' => 'top',
 	'messages' => [
 		'purgeaboutme-prompt',
+		'save',
+		'cancel',
 	]
 ];
 

@@ -100,13 +100,21 @@
 	border-width: 0;
 	padding: 0;
 }
-	.section h3 {
+	.section > h3 {
 		margin:3px 0 8px 0;
+		padding-top: 0;
 	}
 
 div.mainavatar {
 	float: left;
 	margin-right: 6px;
+}
+
+.aboutme {
+	position: relative;
+}
+.userinfo .entryform {
+	clear: left;
 }
 
 .countryflag {

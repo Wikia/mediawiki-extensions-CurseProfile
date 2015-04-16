@@ -270,10 +270,12 @@ class ProfileData {
 	}
 
 	/**
-	 * Empties the user's "About Me" text
+	 * Set the user's "About Me" text
+	 *
+	 * @param  string  the new text for the user's aboutme
 	 */
-	public function purgeAboutText() {
-		$this->user->setOption('profile-aboutme', '');
+	public function setAboutText($text) {
+		$this->user->setOption('profile-aboutme', $text);
 		$this->user->saveSettings();
 	}
 

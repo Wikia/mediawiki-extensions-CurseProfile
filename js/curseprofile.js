@@ -4,7 +4,10 @@ function CurseProfile($) {
 		$('button.linksub').click(function() {
 			window.location = $(this).data('href');
 		});
-		$('a.profilepurge').click(profile.purgeAboutMe);
+		$('.userinfo')
+			.on('click', 'a.profileedit', profile.editAboutMe)
+			.on('click', 'button.cancel', profile.cancelEdit)
+			.on('click', 'button.save', profile.saveAboutMe);
 		friendship.init();
 	};
 
@@ -75,23 +78,74 @@ function CurseProfile($) {
 	},
 
 	profile = {
-		purgeAboutMe: function(e) {
-			var $this = $(this), $profile = $this.closest('.curseprofile');
+		editForm: null,
+		overlay: $('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>'),
+
+		editAboutMe: function(e) {
+			var $this = $(this), $profile = $('.curseprofile'), $block = $('.aboutme');
 			e.preventDefault();
-			if ( !window.confirm( mw.message('purgeaboutme-prompt').text() ) ) {
-				return;
+
+			// obscure comment with translucent throbber
+			$block.append(profile.overlay);
+
+			// create new form to function as an edit form
+			if (profile.editForm === null) {
+				profile.editForm = $('<div>').addClass('entryform');
+				profile.editForm.append('<form><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+				profile.editForm.find('button.cancel').text(mw.message('cancel').text());
+				profile.editForm.find('button.save').text(mw.message('save').text());
+				profile.editForm.find('textarea').autosize();
 			}
-			$this.hide();
+
+			// use API to download raw comment text
 			(new mw.Api()).post({
 				action: 'profile',
-				do: 'purgeAboutMe',
+				do: 'getRawAboutMe',
+				userId: $profile.data('userid')
+			}).done(function(resp) {
+				if (resp.text) {
+					// insert raw comment text in to edit form
+					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
+
+					// insert edit form into DOM to replace throbber
+					$block.hide().after(profile.editForm);
+				}
+			});
+		},
+
+		cancelEdit: function(e) {
+			var $block = $('.aboutme');
+			if (e && e.preventDefault) {
+				e.preventDefault();
+			}
+
+			// remove edit form and show old comment content
+			profile.overlay.detach();
+			profile.editForm.detach();
+			$block.show();
+		},
+
+		saveAboutMe: function(e) {
+			var $this = $(this), $block = $('.aboutme'), $profile = $('.curseprofile'), api = new mw.Api();
+			e.preventDefault();
+
+			// overlay throbber
+			profile.editForm.append(profile.overlay);
+
+			// use API to post new comment text
+			api.post({
+				action: 'profile',
+				do: 'editAboutMe',
 				userId: $profile.data('userid'),
+				text: profile.editForm.find('textarea').val(),
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
-				$('.aboutme').slideUp();
-			}).fail(function(code, resp) {
-				$this.show();
-				console.dir(resp);
+				if (resp.result === 'success') {
+					// replace the text of the old comment object
+					$block.html(resp.parsedContent);
+					// end the editing context
+					profile.cancelEdit();
+				}
 			});
 		},
 	};

@@ -115,16 +115,19 @@
 			}
 		},
 
+		overlay: '<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>',
+
 		editComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
 
 			// obscure comment with translucent throbber
-			$comment.append('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>');
+			$comment.append(commentBoard.overlay);
 
 			// clone and alter new comment form to function as an edit form
 			if (commentBoard.editForm === null) {
 				commentBoard.editForm = $('.add-comment').clone().removeClass('hidden add-comment').addClass('edit-comment');
+				commentBoard.editForm.find('textarea').autosize();
 				// Update the form to behave as an edit instead of a reply
 				commentBoard.editForm.find('form').addClass('edit');
 				commentBoard.editForm.find('button').text(mw.message('save').text())
@@ -147,7 +150,7 @@
 			}).done(function(resp) {
 				if (resp.text) {
 					// insert raw comment text in to edit form
-					commentBoard.editForm.find('textarea').val(resp.text);
+					commentBoard.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
 
 					// insert edit form into DOM to replace throbber
 					commentBoard.editForm.append($comment.find('.replyset'));
@@ -182,7 +185,7 @@
 			e.preventDefault();
 
 			// overlay throbber
-			commentBoard.editForm.append('<div class="overlay"></div>');
+			commentBoard.editForm.append(commentBoard.overlay);
 
 			// use API to post new comment text
 			api.post({

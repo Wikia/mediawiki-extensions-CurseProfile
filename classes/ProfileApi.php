@@ -29,12 +29,28 @@ class ProfileApi extends \CurseApiBase {
 
 	public function getActions() {
 		return [
-			'purgeAboutMe' => [
-				'tokenRequired' => true,
-				'postRequired' => true,
+			'getRawAboutMe' => [
+				'permissionRequired' => 'profile-modcomments',
 				'params' => [
 					'userId' => [
 						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_MIN => 1,
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+			'editAboutMe' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'permissionRequired' => 'profile-modcomments',
+				'params' => [
+					'userId' => [
+						\ApiBase::PARAM_TYPE => 'integer',
+						\ApiBase::PARAM_MIN => 1,
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+					'text' => [
+						\ApiBase::PARAM_TYPE => 'string',
 						\ApiBase::PARAM_REQUIRED => true,
 					],
 				],
@@ -42,15 +58,18 @@ class ProfileApi extends \CurseApiBase {
 		];
 	}
 
-	public function doPurgeAboutMe() {
-		global $wgUser;
-		$userId = $this->getMain()->getVal('userId');
-		if ($userId && $wgUser->isAllowed('profile-modcomments')) {
-			$profileData = new ProfileData($userId);
-			$profileData->purgeAboutText();
-			$this->getResult()->addValue(null, 'result', 'success');
-		} else {
-			return $this->dieUsageMsg(['comment-invalidaction']);
-		}
+	public function doGetRawAboutMe() {
+		$profileData = new ProfileData($this->getMain()->getVal('userId'));
+		$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
+	}
+
+	public function doEditAboutMe() {
+		$profileData = new ProfileData($this->getMain()->getVal('userId'));
+		$text = $this->getMain()->getVal('text');
+		$profileData->setAboutText($text);
+		$this->getResult()->addValue(null, 'result', 'success');
+		// add parsed text to result
+		global $wgOut;
+		$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
 	}
 }

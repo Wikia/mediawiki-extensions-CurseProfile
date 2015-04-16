@@ -348,7 +348,7 @@ class ProfilePage extends \Article {
 		global $wgOut, $wgUser;
 		$aboutText = $wgOut->parse($this->profile->getAboutText());
 		if (!empty($aboutText) && $wgUser->isAllowed('profile-modcomments')) {
-			$aboutText = \Html::rawElement('a', ['class'=>'rightfloat profilepurge', 'href'=>'#', 'title'=>wfMessage('purgeprofile-tooltip')->plain()], \Curse::awesomeIcon('trash')).$aboutText;
+			$aboutText = \Html::rawElement('a', ['class'=>'rightfloat profileedit', 'href'=>'#', 'title'=>wfMessage('editaboutme-tooltip')->plain()], \Curse::awesomeIcon('pencil')).$aboutText;
 		}
 		return [
 			$aboutText,
@@ -662,7 +662,7 @@ class ProfilePage extends \Article {
 		return sprintf('
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
-		<div class="borderless section">
+		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
 				<h1>%1$s</h1>
