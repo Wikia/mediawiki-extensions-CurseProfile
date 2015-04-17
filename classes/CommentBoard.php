@@ -63,32 +63,36 @@ class CommentBoard {
 	}
 
 	/**
-	 * Returns an array of visibility constants that should be visable for the given user id
+	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
 	 *
-	 * @param	int		ID of a user
-	 * @return	array	INTs from the list of visibility CONST
+	 * @param   string  [optional] table prefix to use for generated column names
+	 * @param   object  [optional] mw User object doing the viewing (defaults to wgUser)
+	 * @return  string  a single SQL condition entirely enclosed in parenthesis
 	 */
-	private function getViewableTypes($asUser) {
-		$types = [self::PUBLIC_MESSAGE];
-
+	private static function visibleClause($prefix = '', $asUser = null) {
 		if (is_null($asUser)) {
 			global $wgUser;
-			$asUser = $wgUser->getID();
-		}
-		if (!($asUser instanceof \User)) {
+			$asUser = $wgUser->getId();
+		} else {
 			$asUser = \User::newFromId($asUser);
-			$asUser->load();
 		}
-
-		if ($this->user_id == $asUser->getId()) {
-			$types[] = self::PRIVATE_MESSAGE;
+		if (!empty($prefix)) {
+			$prefix .= '.';
 		}
 
 		if ($asUser->isAllowed('profile-modcomments')) {
-			$types[] = self::DELETED_MESSAGE;
+			// admins see everything
+			return '1=1';
+		} else {
+			$conditions = [];
+			// everyone sees public messages
+			$conditions[] = $prefix.'ub_type = 0';
+			// see private if you are author or recipient
+			$conditions[] = sprintf('%1$sub_type = 1 AND (%1$sub_user_id = %2$s OR %1$sub_user_id_from = %2$s)', $prefix, $asUser->getId());
+			// see deleted if you are the author
+			$conditions[] = sprintf('%1$sub_type = -1 AND %1$sub_user_id_from = %2$s', $prefix, $asUser->getId());
+			return '( ('.implode(') OR (', $conditions).') )';
 		}
-
-		return $types;
 	}
 
 	/**
@@ -103,13 +107,12 @@ class CommentBoard {
 		} else {
 			$inReplyTo = intval($inReplyTo);
 		}
-		$types = $this->getViewableTypes($asUser);
 
 		$mouse = CP::loadMouse();
 		$res = $mouse->DB->select([
 			'select' => 'count(*) as count',
 			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_in_reply_to = '.$inReplyTo.' AND b.ub_user_id = '.$this->user_id,
+			'where'  => self::visibleClause('b', $asUser).' AND b.ub_in_reply_to = '.$inReplyTo.' AND b.ub_user_id = '.$this->user_id,
 		]);
 
 		$row = $mouse->DB->fetch($res);
@@ -119,10 +122,10 @@ class CommentBoard {
 	/**
 	 * Look up a single comment given a comment id (for display from a permalink)
 	 *
-	 * @param	int		id of a user board comment
-	 * @param	bool	[optional] true by default, if given ID is a reply, will fetch parent comment as well
-	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
-	 * @return	array	an array of comment data in the same format as getComments.
+	 * @param   int     id of a user board comment
+	 * @param   bool    [optional] true by default, if given ID is a reply, will fetch parent comment as well
+	 * @param   int     [optional] user ID of user viewing (defaults to wgUser)
+	 * @return  array   an array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
 	public static function getCommentById($comment_id, $withParent = true, $asUser = null) {
@@ -154,13 +157,11 @@ class CommentBoard {
 			$rootId = $comment_id;
 		}
 
-		$board = new self($comment['ub_user_id'], self::BOARDTYPE_ARCHIVES);
-		$types = $board->getViewableTypes($asUser);
-
-		if (!in_array($comment['ub_type'], $types)) {
+		if (!self::canView($comment)) {
 			return [];
 		}
 
+		$board = new self($comment['ub_user_id'], self::BOARDTYPE_ARCHIVES);
 		$comment = $board->getCommentsWithConditions("AND ub_id = $rootId", $asUser, 0, 1);
 		// force loading all replies instead of just 5
 		$comment[0]['replies'] = $board->getReplies($rootId, $asUser, 0);
@@ -179,13 +180,11 @@ class CommentBoard {
 	private function getCommentsWithConditions($conditions, $asUser = null, $startAt = 0, $limit = 100) {
 		$mouse = CP::loadMouse();
 
-		$types = $this->getViewableTypes($asUser);
-
 		// Fetch top level comments
 		$res = $mouse->DB->select([
 			'select' => 'b.*, IFNULL(b.ub_last_reply, b.ub_date) AS last_updated',
 			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_type IN ('.implode(',',$types).') '.$conditions,
+			'where'  => self::visibleClause('b', $asUser).' '.$conditions,
 			'order'  => 'last_updated DESC',
 			'limit'  => [$startAt, $limit],
 		]);
@@ -247,14 +246,13 @@ class CommentBoard {
 	 * @return	array	array of reply data
 	 */
 	public function getReplies($rootComment, $asUser = null, $limit = 5) {
-		$types = $this->getViewableTypes($asUser);
 		$mouse = CP::loadMouse();
 
 		// Fetch comments
 		$selOpt = [
 			'select' => 'b.*',
 			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_type IN ('.implode(',',$types).') AND b.ub_in_reply_to = '.$rootComment.' AND b.ub_user_id = '.$this->user_id,
+			'where'  => self::visibleClause('b', $asUser).' AND b.ub_in_reply_to = '.$rootComment.' AND b.ub_user_id = '.$this->user_id,
 			'order'  => 'b.ub_date DESC',
 		];
 		if ($limit > 0) {
@@ -267,6 +265,40 @@ class CommentBoard {
 		}
 
 		return array_reverse($comments);
+	}
+
+	/**
+	 * Checks if a user should be able to view a specific comment
+	 *
+	 * @param   mixed   int id of comment to check, or array row from user_board table
+	 * @param   object  [optional] mw User object, defaults to $wgUser
+	 * @return  bool
+	 */
+	public static function canView($comment_id, $user = null) {
+		if (is_null($user)) {
+			global $wgUser;
+			$user = $wgUser;
+		}
+		// early check for admin status
+		if ($user->isAllowed('profile-modcomments')) {
+			return true;
+		}
+
+		if (is_array($comment_id)) {
+			$comment = $comment_id;
+		} else {
+			$mouse = CP::loadMouse();
+			$comment = $mouse->DB->selectAndFetch([
+				'select' => 'b.*',
+				'from'   => ['user_board' => 'b'],
+				'where'  => 'b.ub_id = '.intval($comment_id),
+			]);
+		}
+
+		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient
+		return $comment['ub_type'] == self::PUBLIC_MESSAGE
+			|| ($comment['ub_type'] == self::PRIVATE_MESSAGE && $comment['ub_user_id'] == $user->getId() && $comment['ub_user_id_from'] == $user->getId())
+			|| ($comment['ub_type'] == self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId());
 	}
 
 	/**
