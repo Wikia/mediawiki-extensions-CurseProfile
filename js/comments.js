@@ -71,7 +71,7 @@
 						commentBoard.replyForm = $('.add-comment').clone().removeClass('hidden add-comment').addClass('add-reply');
 						// Update placeholder to use the reply-specific one
 						$textarea = commentBoard.replyForm.find('textarea');
-						$textarea.prop('placeholder', $textarea.data('replyplaceholder'));
+						$textarea.prop('placeholder', $textarea.data('replyplaceholder')).autosize();
 					} else {
 						commentBoard.replyForm.detach();
 						$textarea = commentBoard.replyForm.find('textarea');
