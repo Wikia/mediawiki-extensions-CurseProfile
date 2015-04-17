@@ -273,9 +273,9 @@ class CommentBoard {
 	 * Add a public comment to the board
 	 *
 	 * @access	public
-	 * @param	integer	the ID of a user
-	 * @param	integer	optional user ID of user posting (defaults to wgUser)
-	 * @param	integer	optional id of a board post that this will be in reply to
+	 * @param	string	Comment Text
+	 * @param	integer	[Optional] User ID of user posting (defaults to wgUser)
+	 * @param	integer	[Optional] ID of a board post that this will be in reply to
 	 * @return	boolean	Success
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
@@ -317,7 +317,7 @@ class CommentBoard {
 			__METHOD__
 		);
 
-		wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
+		wfRunHooks('CurseProfileAddComment', [$fromUser, $fromUser->getId(), $this->user_id, $inReplyTo, $commentText]);
 
 		if ($toUser->getId() != $fromUser->getId()) {
 			\EchoEvent::create([
