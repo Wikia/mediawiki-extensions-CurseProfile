@@ -34,7 +34,8 @@
 		},
 
 		preventDoublePost: function(e) {
-			$(this).attr('disabled', true);
+			e.preventDefault();
+			$(this).attr('disabled', true).closest('form').submit();
 		},
 
 		loadReplies: function(e, callback) {
