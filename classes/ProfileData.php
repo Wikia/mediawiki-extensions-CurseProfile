@@ -338,15 +338,19 @@ class ProfileData {
 
 	/**
 	 * Returns the decoded wiki data available by the allsites API
-	 * TODO rewrite this to use a DerivativeRequest object and avoid using curl
 	 *
 	 * @return array
 	 */
 	public static function getWikiSites() {
-		global $wgServer;
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonSites = $mouse->curl->fetch(wfExpandUrl($wgServer, PROTO_CURRENT).'/api.php?action=allsites&do=getSiteStats&format=json');
-		return json_decode($jsonSites, true);
+		global $wgRequest;
+		$api = new \ApiMain(new \DerivativeRequest($wgRequest, ['action'=>'allsites', 'do'=>'getSiteStats']));
+		try {
+			$api->execute();
+		} catch (\UsageException $e) {
+			// TODO: Figure out a better error handler here.
+			return false;
+		}
+		return $api->getResultData();
 	}
 
 	/**
