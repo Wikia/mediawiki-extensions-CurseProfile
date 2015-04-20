@@ -72,7 +72,7 @@ class CommentBoard {
 	private static function visibleClause($prefix = '', $asUser = null) {
 		if (is_null($asUser)) {
 			global $wgUser;
-			$asUser = $wgUser->getId();
+			$asUser = $wgUser;
 		} else {
 			$asUser = \User::newFromId($asUser);
 		}
