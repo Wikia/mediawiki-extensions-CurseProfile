@@ -130,7 +130,13 @@ class skin_commentmoderation {
 		$iter = 0;
 		foreach ($reports as $rep) {
 			$reporter = CurseUser::newFromCurseId($rep['reporter']);
-			$HTML .= ProfilePage::userAvatar($nothing, 24, $reporter->getEmail(), $reporter->getName())[0];
+			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
+			$HTML .= \Html::rawElement(
+				'a', [
+					'href' => $reporter->getUserPage()->getLinkURL()
+				], 
+				ProfilePage::userAvatar($nothing, 24, $reporter->getEmail(), $reporter->getName(), "title='$title'")[0]
+			);
 			$iter += 1;
 			if ($iter >= self::MAX_REPORTER_AVATARS) {
 				break;
