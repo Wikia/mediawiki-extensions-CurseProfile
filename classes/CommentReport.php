@@ -328,7 +328,7 @@ class CommentReport {
 				'last_touched' => strtotime($report['ra_last_edited']),
 				'author' => $report['ra_curse_id_from'],
 			],
-			'reports' => [], // TODO could be loaded now or on demand with a to-be-written getReports() method
+			'reports' => self::getReportsForId($report['ra_comment_id']),
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by'],
 			'action_taken_at' => strtotime($report['ra_action_taken_at']),
@@ -337,6 +337,30 @@ class CommentReport {
 		$cr = new self($data);
 		$cr->id = $report['ra_id'];
 		return $cr;
+	}
+
+	/**
+	 * Loads individual user reports for a given comment report
+	 *
+	 * @param   int     the ra_comment_id from the user_board_report_archives table
+	 * @return  array   with sub arrays for each report having keys reporter => curse_id, timestamp
+	 */
+	private static function getReportsForId($id) {
+		$db = CP::getDb(DB_SLAVE);
+		$res = $db->select(
+			['user_board_reports'],
+			['ubr_reporter_curse_id as reporter', 'ubr_reported as timestamp'],
+			['ubr_report_archive_id = '.intval($id)],
+			__METHOD__,
+			[ 'ORDER BY' => 'ubr_reported ASC' ]
+		);
+		$reports = [];
+		foreach ($res as $row) {
+			$report = (array)$row;
+			$report['timestamp'] = strtotime($report['timestamp']);
+			$reports[] = $report;
+		}
+		return $reports;
 	}
 
 	/**

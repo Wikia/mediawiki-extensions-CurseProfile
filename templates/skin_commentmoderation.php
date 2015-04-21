@@ -113,10 +113,10 @@ class skin_commentmoderation {
 	 * @return string HTML fragment
 	 */
 	private function itemLine($rep) {
-		if (count($rep['reports']) <= self::MAX_REPORTER_AVATARS) {
-			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']));
+		if (count($rep->data['reports']) <= self::MAX_REPORTER_AVATARS) {
+			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep->data['first_reported']), $this->reporterIcons($rep->data['reports']));
 		} else {
-			return sprintf(wfMessage('commentmoderation-item-andothers')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']), count($rep['reports'])-self::MAX_REPORTER_AVATARS);
+			return sprintf(wfMessage('commentmoderation-item-andothers')->text(), CP::timeTag($rep->data['first_reported']), $this->reporterIcons($rep->data['reports']), count($rep->data['reports'])-self::MAX_REPORTER_AVATARS);
 		}
 	}
 

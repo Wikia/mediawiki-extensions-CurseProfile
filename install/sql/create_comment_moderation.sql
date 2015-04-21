@@ -16,7 +16,6 @@ CREATE INDEX /*i*/ra_first_reported ON /*_*/user_board_report_archives (ra_first
 
 CREATE TABLE /*_*/user_board_reports (
   `ubr_report_archive_id` int(11) NOT NULL,
-  `ubr_reporter_id` int(11) NOT NULL,
   `ubr_reporter_curse_id` int(11) NOT NULL,
   `ubr_reported` datetime default NULL
 ) /*$wgDBTableOptions*/;
