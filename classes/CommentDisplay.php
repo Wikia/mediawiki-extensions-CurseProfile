@@ -112,7 +112,7 @@ class CommentDisplay {
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>
 				<div class="right">
-					'.($comment['ub_admin_acted'] && $wgUser->isAllowed('profile-modcomments') ? self::adminAction($comment).', ' : '')
+					'.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
 					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
 					.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon newreply', 'title'=>wfMessage('replylink-tooltip')], \Curse::awesomeIcon('reply')).' ' : '')
 					.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon edit', 'title'=>wfMessage('commenteditlink-tooltip')], \Curse::awesomeIcon('pencil')).' ' : '')
