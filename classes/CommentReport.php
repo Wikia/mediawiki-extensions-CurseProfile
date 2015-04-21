@@ -328,7 +328,7 @@ class CommentReport {
 				'last_touched' => strtotime($report['ra_last_edited']),
 				'author' => $report['ra_curse_id_from'],
 			],
-			'reports' => self::getReportsForId($report['ra_comment_id']),
+			'reports' => self::getReportsForId($report['ra_id']),
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by'],
 			'action_taken_at' => strtotime($report['ra_action_taken_at']),
