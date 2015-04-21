@@ -49,7 +49,7 @@ class skin_commentmoderation {
 			$HTML .= Html::element('a', $params, $sort[0]);
 		}
 
-		return '<p>Group and sort: '.$HTML.'</p>';
+		return '<p>View: '.$HTML.'</p>';
 	}
 
 	/**
