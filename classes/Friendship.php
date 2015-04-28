@@ -309,39 +309,52 @@ class Friendship {
 
 	/**
 	 * Treats the current database info as authoritative and corrects redis to match
-	 * TODO, currently incomplete implementation
+	 * If instance of Friendship was created with a null curse ID, will sync entire table
 	 *
+	 * @param	ILogger	instance of a logger if output is desired
 	 * @return	null
 	 */
-	public function syncToRedis() {
+	public function syncToRedis(\SyncService\ILogger $logger = null) {
 		if (!defined('CURSEPROFILE_MASTER')) {
 			return;
+		}
+		if (is_null($logger)) {
+			$log = function($str, $time=null) {};
+		} else {
+			$log = function($str, $time=null) use ($logger) {
+				$logger->outputLine($str, $time);
+			};
 		}
 		$mouse = CP::loadMouse();
 
 		$res = $mouse->DB->select([
 			'select' => 'ur.*',
 			'from'   => ['user_relationship' => 'ur'],
-			'where'  => "ur.r_user_id = {$this->curse_id} AND ur.r_type = 1",
+			'where'  => "ur.r_type = 1".($this->curse_id < 1 ? NULL : " AND (ur.r_user_id = {$this->curse_id} OR ur.r_user_id_relation = {$this->curse_id})"),
 		]);
 		while ($friend = $mouse->DB->fetch($res)) {
-			$mouse->redis->sadd($this->friendListRedisKey(), $friend['r_user_id_relation']);
-			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $this->curse_id);
+			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
+			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
+			$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
 		}
 
 		$res = $mouse->DB->select([
 			'select' => 'ur.*',
 			'from'   => ['user_relationship_request' => 'ur'],
-			'where'  => "ur.ur_user_id = {$this->curse_id} AND ur.ur_type = 1",
+			'where'  => "ur.ur_type = 1".($this->curse_id < 1 ? NULL : " AND (ur.ur_user_id_from = {$this->curse_id} OR ur.ur_user_id_to = {$this->curse_id})"),
 		]);
-		while ($friend = $mouse->DB->fetch($res)) {
-			$mouse->redis->sadd($this->friendListRedisKey(), $friend['r_user_id_relation']);
-			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $this->curse_id);
+		while ($friendReq = $mouse->DB->fetch($res)) {
+			$mouse->redis->hset($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
+			$mouse->redis->sadd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
+			$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
 		}
 	}
 
 	/**
-	 * This will write a given change to the database
+	 * This will write a given change to the database. Called by FriendSync job.
+	 *
+	 * @param	array	args sent to the FriendSync job
+	 * @return	int		exit code: 0 for success, 1 for failure
 	 */
 	public function saveToDB($args) {
 		if (!defined('CURSEPROFILE_MASTER')) {

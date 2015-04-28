@@ -15,20 +15,20 @@
 /******************************************/
 /* Credits                                */
 /******************************************/
-$wgExtensionCredits['specialpage'][] = array(
-												'path'				=> __FILE__,
-												'name'				=> 'Curse Profile',
-												'author'			=> 'Noah Manneschmidt, Curse Inc&copy;',
-												'descriptionmsg'	=> 'curseprofile_description',
-												'version'			=> '1.0' //Must be a string or Mediawiki will turn it into an integer.
-											);
+$wgExtensionCredits['specialpage'][] = [
+	'path'				=> __FILE__,
+	'name'				=> 'Curse Profile',
+	'author'			=> 'Noah Manneschmidt, Curse Inc&copy;',
+	'descriptionmsg'	=> 'curseprofile_description',
+	'version'			=> '1.5' //Must be a string or Mediawiki will turn it into an integer.
+];
 
 
 define('NS_USER_WIKI', 200 );
 define('NS_USER_PROFILE', 202 );
 
-$wgAvailableRights[] = 'userlevel-view';
 $wgAvailableRights[] = 'profile-modcomments';
+$wgAvailableRights[] = 'profile-purgecomments';
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
@@ -43,16 +43,19 @@ $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.na
 $wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
 $wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
 $wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
+$wgAutoloadClasses['CurseProfile\ProfileApi']    = $extDir . 'classes/ProfileApi.php';
 $wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
 $wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileData.php';
 $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
 $wgAutoloadClasses['CurseProfile\Friendship']     = $extDir . 'classes/Friendship.php';
 $wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir . 'classes/FriendDisplay.php';
-$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/FriendSync.php';
 $wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi.php';
 $wgAutoloadClasses['CurseProfile\CommentApi']     = $extDir . 'classes/CommentApi.php';
 $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
+$wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir . 'classes/CommentReport.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
+$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/jobs/FriendSync.php';
+$wgAutoloadClasses['CurseProfile\ResolveComment'] = $extDir . 'classes/jobs/ResolveComment.php';
 $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 
@@ -68,13 +71,16 @@ $wgSpecialPageGroups['Friends']								= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comments/SpecialAddComment.php";
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
-$wgSpecialPageGroups['AddComment']							= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentBoard']		= "{$extDir}/specials/comments/SpecialCommentBoard.php";
 $wgSpecialPages['CommentBoard']								= 'CurseProfile\SpecialCommentBoard';
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentPermalink']	= "{$extDir}/specials/comments/SpecialCommentPermalink.php";
 $wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalink';
+
+$wgAutoloadClasses['CurseProfile\SpecialCommentModeration']	= "{$extDir}/specials/comments/SpecialCommentModeration.php";
+$wgSpecialPages['CommentModeration']						= 'CurseProfile\SpecialCommentModeration';
+$wgSpecialPageGroups['CommentModeration']					= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
@@ -85,22 +91,57 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'scripts' => ['js/curseprofile.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'mediawiki.user', 'mediawiki.api', 'jquery.timeago', 'jquery.autosize'],
+	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
 	'position' => 'top',
 	'messages' => [
+		'purgeaboutme-prompt',
+		'save',
 		'cancel',
+	]
+];
+
+$wgResourceModules['ext.curseprofile.comments'] = [
+	'styles' => ['css/comments.css'],
+	'scripts' => ['js/comments.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api', 'ext.curse.font-awesome'],
+	'position' => 'top',
+	'messages' => [
+		'save',
+		'cancel',
+		'remove-prompt',
+		'purge-prompt',
+		'report-prompt',
+		'report-thanks',
 	],
 ];
+
+$wgResourceModules['ext.curseprofile.commentmoderation'] = [
+	'styles' => ['css/commentmoderation.less'],
+	'scripts' => ['js/commentmoderation.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['ext.curseprofile.comments'],
+	'position' => 'top',
+	'messages' => [
+		'report-confirmdismiss',
+		'report-confirmdelete',
+	],
+];
+
 $wgResourceModules['jquery.timeago'] = [
 	'scripts' => ['js/jquery.timeago.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
+
 $wgResourceModules['jquery.autosize'] = [
 	'scripts' => ['js/jquery.autosize.min.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
+
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',
 ]; // allows sites to customize by editing MediaWiki:CurseProfile.css
@@ -109,10 +150,12 @@ $wgResourceModules['ext.curseprofile.customskin'] = [
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['LinkBegin'][]						= 'CurseProfile\Hooks::onLinkBegin';
+$wgHooks['AbortEmailNotification'][]		= 'CurseProfile\Hooks::onAbortEmailNotification';
 $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
 $wgHooks['ArticleUpdateBeforeRedirect'][]	= 'CurseProfile\Hooks::onArticleUpdateBeforeRedirect';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
 $wgHooks['LoadExtensionSchemaUpdates'][]	= 'CurseProfile\Hooks::onLoadExtensionSchemaUpdates';
+$wgHooks['UnitTestsList'][]					= 'CurseProfile\Hooks::onUnitTestsList';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';
 $wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces';
 $wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';

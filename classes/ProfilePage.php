@@ -53,9 +53,13 @@ class ProfilePage extends \Article {
 
 	/**
 	 * @param \Title $title
+	 * @param IContextSource $context
 	 */
-	public function __construct($title) {
+	public function __construct($title, $context = null) {
 		parent::__construct($title);
+		if ($context) {
+			$this->setContext($context);
+		}
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$this->user_name = $title->getText();
 		$this->user = \User::newFromName($title->getText());
@@ -84,13 +88,13 @@ class ProfilePage extends \Article {
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
-		$output->setPageTitle($this->mTitle->getPrefixedText());
+		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$output->setArticleFlag(false);
 
 		$layout = $this->profileLayout();
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
 
-		$outputString = \MessageCache::singleton()->parse($layout, $this->mTitle);
+		$outputString = \MessageCache::singleton()->parse($layout, $this->getTitle());
 		if ($outputString instanceOf \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
@@ -113,9 +117,9 @@ class ProfilePage extends \Article {
 	 * @return	bool
 	 */
 	public function isUserPage($onlyView = true) {
-		return $this->user_id && strpos( $this->mTitle->getText(), '/' ) === false
+		return $this->user_id && !$this->getTitle()->isSubpage()
 			&& (!$onlyView || $this->actionIsView)
-			&& in_array($this->mTitle->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
+			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
 	}
 
 	/**
@@ -124,7 +128,7 @@ class ProfilePage extends \Article {
 	 * @return	bool
 	 */
 	public function isDefaultPage() {
-		return $this->isUserPage() && $this->mTitle->getNamespace() == NS_USER;
+		return $this->isUserPage() && $this->getTitle()->getNamespace() == NS_USER;
 	}
 
 	/**
@@ -135,9 +139,15 @@ class ProfilePage extends \Article {
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
-				($this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-				($this->mTitle->getNamespace() == NS_USER_PROFILE)
-			) && ($this->getContext()->getRequest()->getInt('diff') == 0 && $this->getContext()->getRequest()->getInt('oldid') == 0);
+				($this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+				($this->getTitle()->getNamespace() == NS_USER_PROFILE)
+			) && (
+				$this->getContext()->getRequest()->getInt('diff') == 0 &&
+				$this->getContext()->getRequest()->getInt('oldid') == 0 &&
+				// The rcid parameter is deprecated and nonfunctional in any recent version of MW.
+				// However, CurseProfile creates unexpected behavior if left unsupported here
+				$this->getContext()->getRequest()->getInt('rcid') == 0
+			);
 	}
 
 	/**
@@ -149,12 +159,12 @@ class ProfilePage extends \Article {
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {
 			return $this->isUserPage($onlyView) && (
-					(!$this->profile->getTypePref() && $this->mTitle->getNamespace() == NS_USER) ||
-					($this->mTitle->getNamespace() == NS_USER_WIKI)
+					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+					($this->getTitle()->getNamespace() == NS_USER_WIKI)
 				);
 		} else {
 			return $this->isUserWikiPage(true) || (
-				$this->isUserPage(false) && ($this->mTitle->getNamespace() == NS_USER && !$this->actionIsView)
+				$this->isUserPage(false) && ($this->getTitle()->getNamespace() == NS_USER && !$this->actionIsView)
 			);
 		}
 	}
@@ -165,7 +175,7 @@ class ProfilePage extends \Article {
 	 */
 	public function isSpoofedWikiPage() {
 
-		return $this->mTitle->getNamespace() == NS_USER_WIKI && $this->actionIsView;
+		return $this->getTitle()->getNamespace() == NS_USER_WIKI && $this->actionIsView;
 	}
 
 	/**
@@ -205,7 +215,7 @@ class ProfilePage extends \Article {
 			];
 
 			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
-			$links['namespaces']['user']['href'] = $this->mTitle->getLinkURL();
+			$links['namespaces']['user']['href'] = $this->getTitle()->getLinkURL();
 			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->text(); // rename from "User page"
 			$links['namespaces']['user']['class'] = 'selected';
 			// add link to user wiki
@@ -335,10 +345,13 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function aboutBlock(&$parser) {
-		$mouse = CP::loadMouse();
-		global $wgOut;
+		global $wgOut, $wgUser;
+		$aboutText = $wgOut->parse($this->profile->getAboutText());
+		if (!empty($aboutText) && $wgUser->isAllowed('profile-modcomments')) {
+			$aboutText = \Html::rawElement('a', ['class'=>'rightfloat profileedit', 'href'=>'#', 'title'=>wfMessage('editaboutme-tooltip')->plain()], \Curse::awesomeIcon('pencil')).$aboutText;
+		}
 		return [
-			$wgOut->parse($this->profile->getAboutText()),
+			$aboutText,
 			'isHTML' => true
 		];
 	}
@@ -462,7 +475,7 @@ class ProfilePage extends \Article {
 	 * Performs the work for the parser tag that displays user statistics.
 	 * The numbers themselves are pulled from the dataminer api
 	 *
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
 		$curse_id = $this->user->curse_id;
@@ -478,6 +491,8 @@ class ProfilePage extends \Article {
 		if ($stats) {
 			$totalStats = $stats[$curse_id]['global']['total'];
 			$statsOutput = [
+				// 'achievementsearned' => 123, /* replace with global achievement count when available */
+				// "<dd class='achievements'>{{#achievements:local|5}}</dd>",
 				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
@@ -490,6 +505,7 @@ class ProfilePage extends \Article {
 			];
 		} else {
 			$statsOutput = [
+				'achievementsearned' => 0,
 				'wikisedited' => 0,
 				'totalcontribs' => [ 0,
 					'totaledits' => 0,
@@ -535,10 +551,9 @@ class ProfilePage extends \Article {
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
-				if (!is_string($msgKey)) {
-					continue;
+				if (is_string($msgKey)) {
+					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				}
-				$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
@@ -554,6 +569,32 @@ class ProfilePage extends \Article {
 			} else {
 				return $input;
 			}
+		}
+	}
+
+	/**
+	 * Display the icons of the recent achievements the user has earned, for the sidebar
+	 *
+	 * @param	object	parser reference
+	 * @param	string	type of query. one of: local, global (default)
+	 * @param	int		maximum number to display
+	 * @return	array
+	 */
+	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
+		if ($type === 'local') {
+			$earned = \achievementsHooks::getAchievementProgressForDisplay($this->user->curse_id, $limit);
+			$output = '';
+			foreach ($earned as $ach) {
+				$icon = \Html::rawElement('div', ['class'=>'icon'],
+					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
+				);
+				$output .= $icon;
+			}
+			return [$output, 'isHTML' => true];
+		}
+
+		if ($type === 'global') {
+			return 'TODO: Mega Achievements';
 		}
 	}
 
@@ -621,7 +662,7 @@ class ProfilePage extends \Article {
 		return sprintf('
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
-		<div class="borderless section">
+		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
 				<h1>%1$s</h1>
@@ -660,14 +701,25 @@ class ProfilePage extends \Article {
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
+		{{#if: %5$s | <div class="section achievements">
+			<h3>'.wfMessage('cp-achievementssection').'</h3>
+			<h4>'.wfMessage('achievements-local')->plain().'</h4>
+			{{#achievements:local|20}}
+			<h4>'.wfMessage('achievements-global').'</h4>
+			{{#achievements:global|20}}
+		</div> }}
 	</div>
+	{{#if: %6$s | <div class="blocked"></div> }}
 </div>
 __NOTOC__
 ',
 			$this->user_name,
 			$this->user->getID(),
 			$this->user->getEmail(),
-			$this->user->getTitleKey()
+			$this->user->getTitleKey(),
+			'', // no achievements
+			// ( $this->user->curse_id > 0 ? 'true' : '' ), /* delete above and uncomment for achievement block */
+			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
 }

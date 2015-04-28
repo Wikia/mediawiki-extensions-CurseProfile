@@ -10,7 +10,7 @@ CREATE TABLE /*_*/user_relationship_request (
   `ur_user_id_to` int(5) unsigned NOT NULL default '0',
   `ur_user_name_to` varchar(255) NOT NULL default '',
   `ur_status` int(2) default '0',
-  `ur_type` int(2) default NULL,
+  `ur_type` int(2) default NULL, /* 1 = friend, other relationship types could be added later (2 = enemy?) */
   `ur_message` varchar(255) default NULL,
   `ur_date` datetime default NULL
 ) /*$wgDBTableOptions*/;

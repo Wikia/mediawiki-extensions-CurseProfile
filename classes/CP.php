@@ -17,7 +17,12 @@ namespace CurseProfile;
  * Assorted utility functions
  */
 class CP {
+	/**
+	 * Cached mouse instance returned by loadMouse. May be overwritten with setMouse.
+	 * @var		object	mouse instance
+	 */
 	protected static $mouse;
+
 	/**
 	 * Initializes the mouse singleton for use anywhere
 	 *
@@ -48,9 +53,43 @@ class CP {
 		return self::$mouse;
 	}
 
-	// Will this work?
+	/**
+	 * Overrides the mouse object returned by the previous loadMouse method.
+	 * Useful for forcing all curse profile classes to use a child wiki's DB while in the master wiki context.
+	 *
+	 * @param	object	mouse instance
+	 */
 	public static function setMouse($mouse) {
 		self::$mouse = $mouse;
+	}
+
+	/**
+	 * The db connection override for comment reporting actions
+	 * @var		object	mw DB connection
+	 */
+	private static $db;
+
+	/**
+	 * Overrides the MW db connections used by CurseProfile objects.
+	 * Useful for operating on child wikis from master wiki context.
+	 *
+	 * @param	object	mw DB connection
+	 */
+	public static function setDb($db) {
+		self::$db = $db;
+	}
+
+	/**
+	 * Returns a db connection to use
+	 *
+	 * @param	int		mw db id (DB_MASTER or DB_SLAVE)
+	 * @return	object	mw db connection
+	 */
+	public static function getDb($id) {
+		if (isset(self::$db)) {
+			return self::$db;
+		}
+		return wfGetDB($id);
 	}
 
 	/**
@@ -92,7 +131,10 @@ class CP {
 	 * after adding timeago.yarp.com to the page
 	 */
 	public static function timeTag($timestamp) {
-		$timestamp = strtotime($timestamp);
+		// quick sanity check to see if the argument might already be a unix timestamp
+		if (!is_numeric($timestamp) || $timestamp < 100000 || $timestamp > 3000000000) {
+			$timestamp = strtotime($timestamp);
+		}
 		$iso8601 = date('c', $timestamp);
 		$readableTime = date('H:i, d F Y (e)', $timestamp);
 		return '<time class="timeago" datetime="'.$iso8601.'">at '.$readableTime.'</time>';

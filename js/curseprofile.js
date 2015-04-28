@@ -1,145 +1,20 @@
 function CurseProfile($) {
 	'use strict';
 	this.init = function() {
-		self.user_id = $('.curseprofile').data('userid');
-		$('time.timeago').timeago(); // enable dynamic relative times on recent activity and comments
 		$('button.linksub').click(function() {
 			window.location = $(this).data('href');
 		});
-		commentBoard.init();
+		$('.userinfo')
+			.on('click', 'a.profileedit', profile.editAboutMe)
+			.on('click', 'button.cancel', profile.cancelEdit)
+			.on('click', 'button.save', profile.saveAboutMe);
 		friendship.init();
 	};
-
-	this.ajax = function(method, params) {
-		return $.ajax({
-			type: 'GET',
-			url: mw.util.wikiScript(),
-			data: {
-				action: 'ajax',
-				rs: 'CurseProfile\\'+method,
-				rsargs: params
-			},
-			dataType: 'html',
-		});
-	};
-
-	/**
-	 * Because the 'this' reference shifts around due to jQuery callbacks and such,
-	 * the variable 'self' will be used as a convenient shortcut back to the CurseProfile instance.
-	 */
-	var self = this,
-
-	/**
-	 * All functionality for comment boards
-	 */
-	commentBoard = {
-		page: 1,
-		replyForm: null,
-
-		init: function() {
-			$('.reply-count').on('click', commentBoard.loadReplies);
-			$('.comments')
-				.on('click', 'a.newreply', commentBoard.newReply)
-				.on('click', 'a.remove', commentBoard.removeComment);
-			$('.commentdisplay .entryform textarea').autosize(); // grow as more text is entered
-		},
-
-		loadReplies: function(e, callback) {
-			var $this = $(this);
-			$this.attr('disabled', 'true');
-			self.ajax('CommentDisplay::repliesTo', [self.user_id, $this.data('id')])
-				.done(function(r){
-					var $r = $(r);
-					$r.find('time.timeago').timeago();
-					$this.closest('.replyset').html($r);
-					$this.attr('disabled', false);
-					$this.detach();
-					if (typeof callback !== 'undefined') {
-						callback();
-					}
-				})
-				.fail(function(code, resp) {
-					$this.attr('disabled', false);
-					console.debug(resp);
-				});
-			// if the button is left disabled when detached, the browser will remember and keep it disabled on page reloads
-			// thus it needs to be re-enabled before we get rid of it
-		},
-
-		newReply: function(e) {
-			var $replySet, $replyHolder, $textarea, $this = $(this).closest('.commentdisplay'),
-				placeReplyBox = function() {
-					if (commentBoard.replyForm === null) {
-						commentBoard.replyForm = $('.add-comment').clone();
-						// Update placeholder to use the reply-specific one
-						$textarea = commentBoard.replyForm.find('textarea');
-						$textarea.prop('placeholder', $textarea.data('replyplaceholder'));
-					} else {
-						commentBoard.replyForm.detach();
-						$textarea = commentBoard.replyForm.find('textarea');
-					}
-
-					// append to the .replyset
-					commentBoard.replyForm.appendTo($replySet);
-					// set which this will be a reply to
-					commentBoard.replyForm.find('[name=inreplyto]').attr('value', $replyHolder.data('id'));
-					$textarea.focus();
-				};
-			e.preventDefault();
-
-			// Get top level comment
-			$replyHolder = $this.parents('.commentdisplay');
-			if ($replyHolder.length === 0) {
-				$replyHolder = $this;
-			}
-
-			// check for .replyset below
-			$replySet = $replyHolder.find('.replyset');
-			// create or load a new one if it doesn't exist
-			if ($replySet.length === 0) {
-				// check for .reply-count button
-				if ($replyHolder.find('.reply-count').length === 0) {
-					// create a replyset if replies do not exist
-					$replySet = $('<div class="replyset"></div>');
-					$replyHolder.append($replySet);
-				} else {
-					// load replies if they exist
-					$replyHolder.find('.reply-count').trigger('click', function() {
-						$replySet = $replyHolder.find('.replyset');
-						placeReplyBox();
-					});
-				}
-			}
-
-			if ($replySet.length !== 0) {
-				placeReplyBox();
-			}
-		},
-
-		removeComment: function(e) {
-			var $this = $(this), $comment = $this.closest('.commentdisplay');
-			e.preventDefault();
-			$this.hide();
-			(new mw.Api()).post({
-				action: 'comment',
-				do: 'remove',
-				comment_id: $comment.data('id'),
-				token: mw.user.tokens.get('editToken')
-			}).done(function(resp) {
-				if (resp.html) {
-					$comment.slideUp();
-				}
-			}).fail(function(code, resp) {
-				$this.show();
-				console.dir(resp);
-			});
-		}
-	},
 
 	/**
 	 * All friending-related ajax functions
 	 */
-	friendship = {
+	var friendship = {
 		init: function() {
 			$(document).on('click', '.friendship-action', friendship.sendAction);
 			$('#senddirectreq').on('click', friendship.sendDirectReq);
@@ -200,6 +75,79 @@ function CurseProfile($) {
 				$this.attr('disabled', false);
 			});
 		}
+	},
+
+	profile = {
+		editForm: null,
+		overlay: $('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>'),
+
+		editAboutMe: function(e) {
+			var $this = $(this), $profile = $('.curseprofile'), $block = $('.aboutme');
+			e.preventDefault();
+
+			// obscure comment with translucent throbber
+			$block.append(profile.overlay);
+
+			// create new form to function as an edit form
+			if (profile.editForm === null) {
+				profile.editForm = $('<div>').addClass('entryform');
+				profile.editForm.append('<form><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+				profile.editForm.find('button.cancel').text(mw.message('cancel').text());
+				profile.editForm.find('button.save').text(mw.message('save').text());
+				profile.editForm.find('textarea').autosize();
+			}
+
+			// use API to download raw comment text
+			(new mw.Api()).post({
+				action: 'profile',
+				do: 'getRawAboutMe',
+				userId: $profile.data('userid')
+			}).done(function(resp) {
+				if (resp.text) {
+					// insert edit form into DOM to replace throbber
+					$block.hide().after(profile.editForm);
+
+					// insert raw comment text in to edit form
+					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
+				}
+			});
+		},
+
+		cancelEdit: function(e) {
+			var $block = $('.aboutme');
+			if (e && e.preventDefault) {
+				e.preventDefault();
+			}
+
+			// remove edit form and show old comment content
+			profile.overlay.detach();
+			profile.editForm.detach();
+			$block.show();
+		},
+
+		saveAboutMe: function(e) {
+			var $this = $(this), $block = $('.aboutme'), $profile = $('.curseprofile'), api = new mw.Api();
+			e.preventDefault();
+
+			// overlay throbber
+			profile.editForm.append(profile.overlay);
+
+			// use API to post new comment text
+			api.post({
+				action: 'profile',
+				do: 'editAboutMe',
+				userId: $profile.data('userid'),
+				text: profile.editForm.find('textarea').val(),
+				token: mw.user.tokens.get('editToken')
+			}).done(function(resp) {
+				if (resp.result === 'success') {
+					// replace the text of the old comment object
+					$block.html(resp.parsedContent);
+					// end the editing context
+					profile.cancelEdit();
+				}
+			});
+		},
 	};
 }
 

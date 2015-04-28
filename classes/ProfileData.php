@@ -113,6 +113,11 @@ class ProfileData {
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];
+		global $wgUser;
+		if ($wgUser->isBlocked()) {
+			$preferences['profile-aboutme']['help-message'] = 'aboutmehelp-blocked';
+			$preferences['profile-aboutme']['disabled'] = true;
+		}
 		$preferences['profile-avatar'] = [
 			'type' => 'info',
 			'label-message' =>'avatar',
@@ -224,6 +229,11 @@ class ProfileData {
 			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
 		}
 
+		// don't allow blocked users to change their aboutme text
+		if ($user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
+			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
+		}
+
 		// run hooks on profile preferences (mostly for achievements)
 		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
@@ -235,15 +245,20 @@ class ProfileData {
 
 	/**
 	 * Create a new ProfileData instance
-	 * @param $user_id
+	 * @param $user local user ID or User instance
 	 */
-	public function __construct($user_id) {
-		$this->user_id = intval($user_id);
-		if ($this->user_id < 1) {
-			// if a user hasn't saved a profile yet, just use the default values
-			$this->user_id = 0;
+	public function __construct($user) {
+		if (is_a($user, 'User')) {
+			$this->user = $user;
+			$this->user_id = $user->getId();
+		} else {
+			$this->user_id = intval($user);
+			if ($this->user_id < 1) {
+				// if a user hasn't saved a profile yet, just use the default values
+				$this->user_id = 0;
+			}
+			$this->user = \User::newFromId($user);
 		}
-		$this->user = \User::newFromId($user_id);
 	}
 
 	/**
@@ -252,6 +267,16 @@ class ProfileData {
 	 */
 	public function getAboutText() {
 		return $this->user->getOption('profile-aboutme');
+	}
+
+	/**
+	 * Set the user's "About Me" text
+	 *
+	 * @param  string  the new text for the user's aboutme
+	 */
+	public function setAboutText($text) {
+		$this->user->setOption('profile-aboutme', $text);
+		$this->user->saveSettings();
 	}
 
 	/**
@@ -313,15 +338,19 @@ class ProfileData {
 
 	/**
 	 * Returns the decoded wiki data available by the allsites API
-	 * TODO rewrite this to use a DerivativeRequest object and avoid using curl
 	 *
 	 * @return array
 	 */
 	public static function getWikiSites() {
-		global $wgServer;
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
-		$jsonSites = $mouse->curl->fetch(wfExpandUrl($wgServer, PROTO_CURRENT).'/api.php?action=allsites&do=getSiteStats&format=json');
-		return json_decode($jsonSites, true);
+		global $wgRequest;
+		$api = new \ApiMain(new \DerivativeRequest($wgRequest, ['action'=>'allsites', 'do'=>'getSiteStats']));
+		try {
+			$api->execute();
+		} catch (\UsageException $e) {
+			// TODO: Figure out a better error handler here.
+			return false;
+		}
+		return $api->getResultData();
 	}
 
 	/**

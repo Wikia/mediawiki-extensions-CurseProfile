@@ -45,7 +45,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		}
 
 		// Fix missing or incorrect username segment in the path
-		if ($user->getName() != $user_name) {
+		if ($user->getTitleKey() != $user_name) {
 			$fixedPath = '/Special:CommentBoard/'.$user_id.'/'.$user->getTitleKey();
 			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
 				$fixedPath .= '?'.$_SERVER['QUERY_STRING'];
@@ -58,7 +58,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$itemsPerPage = 50;
 		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
-		$wgOut->addModules('ext.curseprofile.profilepage');
+		$wgOut->addModules('ext.curseprofile.comments');
 		$wgOut->addModules('ext.curse.pagination');
 		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
 		$mouse->output->loadTemplate('commentboard');

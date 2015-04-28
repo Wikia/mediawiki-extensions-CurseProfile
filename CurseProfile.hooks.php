@@ -45,6 +45,7 @@ class Hooks {
 			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline due to parser issues)
 			$parser->setFunctionHook('userlevel',			[self::$profilePage, 'userLevel']);
 			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
+			//$parser->setFunctionHook('achievements',		[self::$profilePage, 'recentAchievements']);
 
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
@@ -86,9 +87,52 @@ class Hooks {
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI])) {
 			return true;
 		}
-		$profile = new ProfilePage($target);
+		// setup a temp context with the query string serving as the request info
+		// this allows the profile page logic to make decisions on the link URL rather than the current request
+		global $wgUser;
+		$tempContext = new \RequestContext();
+		$tempContext->setRequest(new \FauxRequest($query));
+		$tempContext->setTitle($target);
+		$tempContext->setUser($wgUser);
+		$profile = new ProfilePage($target, $tempContext);
+
 		if ($profile->isProfilePage()) {
+			// remove existing broken option
+			$options = array_diff($options, ['broken']);
+			// force link to be known
 			$options[] = 'known';
+		}
+		return true;
+	}
+
+	/**
+	 * Replaces User:Xxx with UserWiki:Xxx in emails when applicable
+	 *
+	 * @param	editor	User whose edit is triggering this email
+	 * @param	title	Title object of the page in question that was updated
+	 * @param	rc		RecentChange instance (new param in 1.24, backported by curse)
+	 * @return	bool
+	 */
+	public static function onAbortEmailNotification($editor, $title, $rc = null) {
+		if ( $rc !== null && $title->getNamespace() == NS_USER && !$title->isSubpage() ) {
+			// look up user by name
+			$user = \User::newFromName($title->getText());
+			$profile = new ProfileData($user);
+			if ($profile->getTypePref()) { // need to replace User:Xxx with UserWiki:Xxx
+				$userWikiTitle = \Title::makeTitle(NS_USER_WIKI, $title->getDBkey(), $title->getFragment());
+
+				// send the email with the new title
+				$enotif = new \EmailNotification();
+				$enotif->notifyOnPageChange( $editor, $userWikiTitle,
+					$rc->mAttribs['rc_timestamp'],
+					$rc->mAttribs['rc_comment'],
+					$rc->mAttribs['rc_minor'],
+					$rc->mAttribs['rc_last_oldid'],
+					$rc->mExtra['pageStatus'] );
+
+				// abort the original email because we have already sent one here
+				return false;
+			}
 		}
 		return true;
 	}
@@ -160,15 +204,32 @@ class Hooks {
 
 		// Add tables that may exist for previous users of SocialProfile
 		$updater->addExtensionUpdate(array('addTable', 'user_board', "{$extDir}/install/sql/create_user_board.sql", true));
+		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/create_comment_moderation.sql", true));
 
 		// Update tables with extra fields for our use
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
+		$updater->addExtensionField('user_board', 'ub_edited', "{$extDir}/upgrade/sql/add_user_board_edit_and_reply_date.sql", true);
+		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);
+		$updater->addExtensionField('user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/add_user_board_admin_action_log.sql", true);
 
 		if (defined('CURSEPROFILE_MASTER')) {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/create_user_relationship.sql", true));
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/create_user_relationship_request.sql", true));
 		}
 
+		return true;
+	}
+
+	/**
+	 * Add unit tests to the mediawiki test framework
+	 *
+	 * @access	public
+	 * @param	array	$files
+	 * @return	boolean	true
+	 */
+	public static function onUnitTestsList( &$files ) {
+		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
+		$files = array_merge( $files, glob(__DIR__.'/tests/phpunit/*Test.php'));
 		return true;
 	}
 
@@ -261,7 +322,7 @@ class Hooks {
 			'email-subject-message' => 'notification-profile-comment-email-subj',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-batch-message' => 'notification-profile-comment-email-body',
-			'email-body-batch-params' => ['agent', 'user'],
+			'email-body-batch-params' => ['agent', 'user', 'comment-id'],
 			'email-body-batch-bundle-message' => 'notification-profile-comment-email-bundle-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 		];

@@ -1,0 +1,73 @@
+.button-hue(@hue) {
+	color: hsl(@hue, 100%, 30%);
+	background-color: hsl(@hue, 80%, 85%);
+	&:hover {
+		background-color: hsl(@hue, 80%, 80%);
+	}
+}
+
+.reported-comment:after {
+	content: '';
+	clear: both;
+	display: block;
+}
+
+.reported-comment {
+	border: 2px solid goldenrod;
+	background-color: lightyellow;
+	border-radius: 5px;
+	color: #222;
+	padding: 5px;
+}
+
+.moderation-actions {
+	float: right;
+}
+
+.moderation-actions {
+	position: relative;
+	perspective: 200px;
+
+	.del, .dis {
+		display: inline-block;
+		border: 1px solid;
+		padding: 3px 6px 3px 22px;
+		border-radius: 3px;
+		background-repeat: no-repeat;
+	}
+	a.del, a.dis {
+		cursor: pointer;
+	}
+	.del {
+		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAYAAACEYr13AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAIhAAACIQBDVcC+gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAEcSURBVDiN7ZOxSgNhEIS/iT9ykKTQys5ahBTaaKXPYGnnK9hJUilaH+QNAlr6DDbBykawFWxMaRFESHFr4USOyxFzvQvDDnsz8+/d8RMRVAGMgAIIowBGtdoac9emHDg2cs+6VX2StAucAC1+KnNPwJH5mntf0pd5AdwLePOpzzSrHjDFqw3q3m8ZgIG9jEsfqynGAtaBJ+ARuFtx/VPgENhPETGT9Am8RsTDKm5JB0AvImatmodtSck8k5SZJ0ntqn4hABgC5+Y3Bp4Nq+JUE7BpUOrV+dINGtV/QP1fKAxKvTpfCJgCHfML4MP8sqTNgQ3zjj2/AbfAtaQX4B3YkrQzd0raLvE94AzoA8yvZgZcARP+voETa7OI4BtGkK9dKq1MDQAAAABJRU5ErkJggg2b20f64a75b0a7a41eeab2edb99d81b3');
+		background-position: 3px 5px;
+		.button-hue(0);
+	}
+	.dis {
+		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAv0lEQVR4AYXRIS9HcRyF8Y97XwHB2C5DMDPvQFQU4aZbZCOZwK4gCAiSJqqYzUb57041r0GQbHe7Jiim/cTvRvg9b+Cc5xwA5hy596736NgyBGN2DM7VKlM2nBocKAC482xRwKyRTglse1H6z4MW5n1YEkBhAtN6K7Qu/G305AYcOuNWI4AtyTpY0/FmAUHlyxVg3GeozFgFl77tARARjWTfpqSGiIiSJ5If10CUDE12vZoEQjMzVG7q/FnZu38BgFc7M2il/W8AAAAASUVORK5CYIIf95a9a2ebaa300ef544e67cf0c354946');
+		background-position: 3px 7px;
+		.button-hue(120);
+	}
+
+	.actions, .confirm {
+		backface-visibility: hidden;
+		transition: transform 700ms cubic-bezier(0.36, -0.55, 0.63, 1.5);
+	}
+	.confirm {
+		transform: rotateX(180deg);
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		a {
+			width: 100%;
+			box-sizing: border-box;
+			text-align: center;
+		}
+	}
+
+	&.do-confirm {
+		.actions { transform: rotateX(-180deg); }
+		.confirm { transform: rotateX(0deg); }
+	}
+}

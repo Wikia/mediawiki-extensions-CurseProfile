@@ -41,14 +41,14 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 
 		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
-		$wgOut->addModules('ext.curseprofile.profilepage');
+		$wgOut->addModules('ext.curseprofile.comments');
 		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
 		$mouse->output->loadTemplate('commentboard');
 
 		$wgOut->addHTML($mouse->output->commentboard->permalinkHeader($user, $wgOut->getPageTitle()));
 
 		// display single comment while highlighting the selected ID
-		$wgOut->addHTML('<div class="comments noreplies">'.CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
+		$wgOut->addHTML('<div class="comments">'.CommentDisplay::newCommentForm($user->getId(), true).CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
 
 		return;
 	}
