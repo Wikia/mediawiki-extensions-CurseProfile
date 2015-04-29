@@ -204,7 +204,13 @@ class Hooks {
 
 		// Add tables that may exist for previous users of SocialProfile
 		$updater->addExtensionUpdate(array('addTable', 'user_board', "{$extDir}/install/sql/create_user_board.sql", true));
-		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/create_comment_moderation.sql", true));
+		$updater->addExtensionUpdate(array('addTable', 'user_board_report_archives', "{$extDir}/install/sql/curseprofile_table_user_board_report_archives.sql", true));
+		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/curseprofile_table_user_board_reports.sql", true));
+
+		//Repair tables that might be missing indexes.
+		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_comment_report', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_comment_report.sql", true]);
+		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_curse_id_from', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_curse_id_from.sql", true]);
+		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_first_reported', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_first_reported.sql", true]);
 
 		// Update tables with extra fields for our use
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
