@@ -9,7 +9,7 @@ CREATE TABLE /*_*/user_board (
   `ub_type` int(5) default '0',
   `ub_date` datetime default NULL,
   `ub_last_reply` datetime default NULL,
-  `ub_edited` datetime deftult NULL,
+  `ub_edited` datetime default NULL,
   `ub_admin_acted` int(11) DEFAULT NULL COMMENT 'Curse ID of admin who moderated',
   `ub_admin_acted_at` datetime DEFAULT NULL
 ) /*$wgDBTableOptions*/;
