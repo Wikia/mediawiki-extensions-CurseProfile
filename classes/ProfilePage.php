@@ -306,7 +306,7 @@ class ProfilePage extends \Article {
 			if (in_array($group, $this->restrictedGroups)) {
 				continue;
 			}
-			$HTML .= '<li>'.ucwords(str_replace("_", " ", htmlspecialchars($group))).'</li>';
+			$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 
 		}
 		$HTML .= '</ul>';
