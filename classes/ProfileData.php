@@ -238,7 +238,6 @@ class ProfileData {
 		foreach(self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $field, $preferences[$field]]);
-				break;
 			}
 		}
 	}
