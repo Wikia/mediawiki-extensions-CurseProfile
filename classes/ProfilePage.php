@@ -717,8 +717,7 @@ __NOTOC__
 			$this->user->getID(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			'', // no achievements
-			// ( $this->user->curse_id > 0 ? 'true' : '' ), /* delete above and uncomment for achievement block */
+			( $this->user->curse_id > 0 ? 'true' : '' ),
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
