@@ -582,7 +582,7 @@ class ProfilePage extends \Article {
 	 */
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
 		if ($type === 'local') {
-			$earned = \achievementsHooks::getAchievementProgressForDisplay($this->user->curse_id, $limit);
+			$earned = \achievementsHooks::getAchievementProgress($this->user->curse_id, true, $limit);
 			$output = '';
 			foreach ($earned as $ach) {
 				$icon = \Html::rawElement('div', ['class'=>'icon'],
@@ -594,7 +594,16 @@ class ProfilePage extends \Article {
 		}
 
 		if ($type === 'global') {
-			return 'TODO: Mega Achievements';
+			$earned = \achievementsHooks::getMegaAchievementProgress($this->user->curse_id, true, $limit);
+			return;
+			$output = '';
+			foreach ($earned as $ach) {
+				$icon = \Html::rawElement('div', ['class'=>'icon'],
+					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
+				);
+				$output .= $icon;
+			}
+			return [$output, 'isHTML' => true];
 		}
 	}
 
