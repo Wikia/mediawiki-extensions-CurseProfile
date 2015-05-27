@@ -45,7 +45,7 @@ class Hooks {
 			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline due to parser issues)
 			$parser->setFunctionHook('userlevel',			[self::$profilePage, 'userLevel']);
 			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
-			//$parser->setFunctionHook('achievements',		[self::$profilePage, 'recentAchievements']);
+			$parser->setFunctionHook('achievements',		[self::$profilePage, 'recentAchievements']);
 
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
