@@ -557,6 +557,10 @@ class ProfilePage extends \Article {
 				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
+					// If there a value to be displayed on the right of a parent list, let's discard that value before we continue looping over pieces.
+					if (isset($value[0])) {
+						array_shift($value);
+					}
 					$output .= $this->generateStatsDL($value);
 				}
 			}
