@@ -83,7 +83,8 @@
 .achievements .icon {
 	display: inline-block;
 }
-.achievements .icon {
+.achievements .icon img {
+	margin: 0 2px;
 	max-height: 32px;
 	max-width: 32px;
 	min-height: 32px;
