@@ -535,6 +535,10 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
+		if ($curse_id > 1 && class_exists("\achievementsHooks")) {
+			$statsOutput['achievementsearned'] = \achievementsHooks::getTotalEarnedAchievements($curse_id);
+		}
+
 		$HTML = $this->generateStatsDL($statsOutput);
 
 		return $HTML;
@@ -587,6 +591,13 @@ class ProfilePage extends \Article {
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
 		$output = '';
 
+		if (!class_exists("\achievementsHooks")) {
+			return [
+				$output,
+				'isHTML'	=> true
+			];
+		}
+
 		if ($type === 'local') {
 			$earned = \achievementsHooks::getAchievementProgress($this->user->curse_id, true, $limit);
 		}
@@ -601,6 +612,8 @@ class ProfilePage extends \Article {
 				'isHTML'	=> true
 			];
 		}
+		$achievementCache = $type.'AchievementProgress';
+		$this->$achievementCache = $earned;
 
 		foreach ($earned as $ach) {
 			$output .= \Html::rawElement(
@@ -721,7 +734,7 @@ class ProfilePage extends \Article {
 			{{#recentactivity: %2$s}}
 		</div>
 		<div class="comments section">
-			<p class="rightfloat">[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
+			<p class="rightfloat">[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink')->plain().']]</p>
 			<h3>'.wfMessage('cp-recentcommentssection').'</h3>
 			{{#comments: %2$s}}
 		</div>
@@ -736,15 +749,15 @@ class ProfilePage extends \Article {
 			<div class="favorite">{{#favwiki:}}</div>
 		</div>
 		<div class="section stats">
-			<h3>'.wfMessage('cp-statisticssection').'</h3>
+			<h3>'.wfMessage('cp-statisticssection')->plain().'</h3>
 			<USERSTATS>
 			{{#friendlist: %2$s}}
 		</div>
 		{{#if: %5$s | <div class="section achievements">
-			<h3>'.wfMessage('cp-achievementssection').'</h3>
+			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
 			<h4>'.wfMessage('achievements-local')->plain().'</h4>
 			{{#achievements:local|20}}
-			<h4>'.wfMessage('achievements-global').'</h4>
+			<h4>'.wfMessage('achievements-global')->plain().'</h4>
 			{{#achievements:global|20}}
 		</div> }}
 	</div>
