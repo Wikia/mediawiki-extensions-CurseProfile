@@ -536,7 +536,7 @@ class ProfilePage extends \Article {
 		}
 
 		if ($curse_id > 1 && class_exists("\achievementsHooks")) {
-			$statsOutput['achievementsearned'] = \achievementsHooks::getTotalEarnedAchievements($curse_id);
+			$statsOutput['achievementsearned'] = \achievementsHooks::getTotalEarnedAchievements($curse_id) + \achievementsHooks::getTotalEarnedMegaAchievements($curse_id);
 		}
 
 		$HTML = $this->generateStatsDL($statsOutput);
