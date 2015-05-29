@@ -598,9 +598,16 @@ class ProfilePage extends \Article {
 		}
 
 		if ($type === 'global') {
-			$earned = \achievementsHooks::getMegaAchievementProgress($this->user->curse_id, true, $limit);
-			return;
 			$output = '';
+
+			$earned = \achievementsHooks::getMegaAchievementProgress($this->user->curse_id, true, $limit);
+			if ($earned === false) {
+				return [
+					$output,
+					'isHTML'	=> true
+				];
+			}
+			return;
 			foreach ($earned as $ach) {
 				$icon = \Html::rawElement('div', ['class'=>'icon'],
 					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
