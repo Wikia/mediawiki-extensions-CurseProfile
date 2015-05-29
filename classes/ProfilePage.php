@@ -627,7 +627,14 @@ class ProfilePage extends \Article {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = \Html::element('img', ['class'=>'level', 'title'=>$tier['text'], 'src' => $tier['image_large']]);
+				$HTML = \Html::element(
+					'img',
+					[
+						'class'	=> 'level',
+						'title'	=> $tier['text'],
+						'src'	=> $tier['image_large']
+					]
+				);
 			} else {
 				break;
 			}
@@ -648,7 +655,14 @@ class ProfilePage extends \Article {
 		$HTML = FriendDisplay::addFriendButton($this->user_id);
 
 		if ($this->viewingSelf()) {
-			$HTML .= \Html::element('button', ['data-href'=>'/Special:Preferences#mw-prefsection-personal-info-public', 'class'=>'linksub'], wfMessage('cp-editprofile')->plain());
+			$HTML .= \Html::element(
+				'button',
+				[
+					'data-href'	=> \Title::newFromText('Special:Preferences')->getFullURL().'#mw-prefsection-personal-info-public',
+					'class'		=> 'linksub'
+				],
+				wfMessage('cp-editprofile')->plain()
+			);
 		}
 
 		return [
