@@ -557,6 +557,10 @@ class ProfilePage extends \Article {
 				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
 				// add the sub-list if there is one
 				if (is_array($value)) {
+					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
+					if (isset($value[0])) {
+						array_shift($value);
+					}
 					$output .= $this->generateStatsDL($value);
 				}
 			}
@@ -632,7 +636,14 @@ class ProfilePage extends \Article {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = \Html::element('img', ['class'=>'level', 'title'=>$tier['text'], 'src' => $tier['image_large']]);
+				$HTML = \Html::element(
+					'img',
+					[
+						'class'	=> 'level',
+						'title'	=> $tier['text'],
+						'src'	=> $tier['image_large']
+					]
+				);
 			} else {
 				break;
 			}
@@ -653,7 +664,14 @@ class ProfilePage extends \Article {
 		$HTML = FriendDisplay::addFriendButton($this->user_id);
 
 		if ($this->viewingSelf()) {
-			$HTML .= \Html::element('button', ['data-href'=>'/Special:Preferences#mw-prefsection-personal-info-public', 'class'=>'linksub'], wfMessage('cp-editprofile')->plain());
+			$HTML .= \Html::element(
+				'button',
+				[
+					'data-href'	=> \Title::newFromText('Special:Preferences')->getFullURL().'#mw-prefsection-personal-info-public',
+					'class'		=> 'linksub'
+				],
+				wfMessage('cp-editprofile')->plain()
+			);
 		}
 
 		return [
