@@ -585,37 +585,42 @@ class ProfilePage extends \Article {
 	 * @return	array
 	 */
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
+		$output = '';
+
 		if ($type === 'local') {
 			$earned = \achievementsHooks::getAchievementProgress($this->user->curse_id, true, $limit);
-			$output = '';
-			foreach ($earned as $ach) {
-				$icon = \Html::rawElement('div', ['class'=>'icon'],
-					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
-				);
-				$output .= $icon;
-			}
-			return [$output, 'isHTML' => true];
 		}
 
 		if ($type === 'global') {
-			$output = '';
-
 			$earned = \achievementsHooks::getMegaAchievementProgress($this->user->curse_id, true, $limit);
-			if ($earned === false) {
-				return [
-					$output,
-					'isHTML'	=> true
-				];
-			}
-			return;
-			foreach ($earned as $ach) {
-				$icon = \Html::rawElement('div', ['class'=>'icon'],
-					\Html::element('img', ['src'=>$ach['image_url'], 'title'=>$ach['name']])
-				);
-				$output .= $icon;
-			}
-			return [$output, 'isHTML' => true];
 		}
+
+		if ($earned === false) {
+			return [
+				$output,
+				'isHTML'	=> true
+			];
+		}
+
+		foreach ($earned as $ach) {
+			$output .= \Html::rawElement(
+				'div',
+				[
+					'class'	=> 'icon'
+				],
+				\Html::element(
+					'img',
+					[
+						'src'	=> $ach['image_url'],
+						'title'	=> $ach['name']
+					]
+				)
+			);
+		}
+		return [
+			$output,
+			'isHTML' => true
+		];
 	}
 
 	/**
