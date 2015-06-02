@@ -754,7 +754,7 @@ class ProfilePage extends \Article {
 			{{#friendlist: %2$s}}
 		</div>
 		{{#if: %5$s | <div class="section achievements">
-			<h3><a href="[[Special:Achievements]]">'.wfMessage('cp-achievementssection')->plain().'</a></h3>
+			<h3>[[Special:Achievements '.wfMessage('cp-achievementssection')->plain().']]</h3>
 			<h4>'.wfMessage('achievements-local')->plain().'</h4>
 			{{#achievements:local|20}}
 			<h4>'.wfMessage('achievements-global')->plain().'</h4>
