@@ -4,4 +4,5 @@
 	},
 	"report-actiontaken-del": "Indicates that a reported comment was deleted by a admin. 1st param is the username",
 	"report-actiontaken-dis": "Indicates that a reported comment was dismissed by a admin. 1st param is the username",
+	"empty_about_text": "Describes to the owner of a profile how to edit their about me section when it is blank."
 }

@@ -263,10 +263,12 @@ class ProfileData {
 
 	/**
 	 * Get the user's "About Me" text
-	 * @return string
+	 *
+	 * @access	public
+	 * @return	string
 	 */
 	public function getAboutText() {
-		return $this->user->getOption('profile-aboutme');
+		return (string) $this->user->getOption('profile-aboutme');
 	}
 
 	/**

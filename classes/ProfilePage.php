@@ -347,8 +347,19 @@ class ProfilePage extends \Article {
 	public function aboutBlock(&$parser) {
 		global $wgOut, $wgUser;
 		$aboutText = $wgOut->parse($this->profile->getAboutText());
-		if (!empty($aboutText) && $wgUser->isAllowed('profile-modcomments')) {
-			$aboutText = \Html::rawElement('a', ['class'=>'rightfloat profileedit', 'href'=>'#', 'title'=>wfMessage('editaboutme-tooltip')->plain()], \Curse::awesomeIcon('pencil')).$aboutText;
+		if (empty($aboutText)) {
+			$aboutText = wfMessage('empty_about_text')->plain();
+		}
+		if ($wgUser->isAllowed('profile-modcomments') || $wgUser->isLoggedIn()) {
+			$aboutText = \Html::rawElement(
+				'a',
+				[
+					'class'	=> 'rightfloat profileedit',
+					'href'	=> '#',
+					'title' =>	wfMessage('editaboutme-tooltip')->plain()
+				],
+				\Curse::awesomeIcon('pencil')
+			).$aboutText;
 		}
 		return [
 			$aboutText,

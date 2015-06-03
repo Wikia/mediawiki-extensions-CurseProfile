@@ -111,6 +111,7 @@ div.mainavatar {
 }
 
 .aboutme {
+	clear: both;
 	position: relative;
 }
 .userinfo .entryform {
