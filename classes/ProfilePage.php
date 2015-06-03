@@ -350,7 +350,7 @@ class ProfilePage extends \Article {
 		if (empty($aboutText)) {
 			$aboutText = wfMessage('empty_about_text')->plain();
 		}
-		if ($wgUser->isAllowed('profile-modcomments') || $wgUser->isLoggedIn()) {
+		if ($wgUser->isAllowed('profile-modcomments') || $this->viewingSelf()) {
 			$aboutText = \Html::rawElement(
 				'a',
 				[
