@@ -148,7 +148,7 @@
 	"profilestats-empty": "Empty",
 	"profilestats-filled": ">1 field",
 	"profilestats-avgFriends": "Users with at least 1 friend avg $1 friends.",
-	"achievementsearned": "[Achievements ([[Special:Achievements|View All]])",
+	"achievementsearned": "Achievements ([[Special:Achievements|View All]])",
 	"ach_view_all": "View All",
 	"achievements-local": "{{SITENAME}}",
 	"achievements-global": "Mega Achievements",
