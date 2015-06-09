@@ -4,10 +4,15 @@ function CurseProfile($) {
 		$('button.linksub').click(function() {
 			window.location = $(this).data('href');
 		});
-		$('.userinfo')
-			.on('click', 'a.profileedit', profile.editAboutMe)
-			.on('click', 'button.cancel', profile.cancelEdit)
-			.on('click', 'button.save', profile.saveAboutMe);
+
+		if ($('.userinfo a.profileedit').length > 0) {
+			$('.userinfo')
+				.on('click', 'a.profileedit', profile.editAboutMe)
+				.on('click', '.aboutme', profile.editAboutMe)
+				.on('click', 'button.cancel', profile.cancelEdit)
+				.on('click', 'button.save', profile.saveAboutMe);
+			$('.userinfo .aboutme').css({cursor: 'pointer'});
+		}
 		friendship.init();
 	};
 
@@ -103,12 +108,14 @@ function CurseProfile($) {
 				do: 'getRawAboutMe',
 				userId: $profile.data('userid')
 			}).done(function(resp) {
-				if (resp.text) {
+				if (resp.text !== null) {
 					// insert edit form into DOM to replace throbber
 					$block.hide().after(profile.editForm);
 
 					// insert raw comment text in to edit form
 					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
+				} else {
+					profile.cancelEdit();
 				}
 			});
 		},
@@ -126,7 +133,7 @@ function CurseProfile($) {
 		},
 
 		saveAboutMe: function(e) {
-			var $this = $(this), $block = $('.aboutme'), $profile = $('.curseprofile'), api = new mw.Api();
+			var $this = $(this), $block = $('.aboutme'), $profile = $('.curseprofile'), $editPencil = $('.aboutme a.profileedit'), api = new mw.Api();
 			e.preventDefault();
 
 			// overlay throbber
@@ -142,7 +149,9 @@ function CurseProfile($) {
 			}).done(function(resp) {
 				if (resp.result === 'success') {
 					// replace the text of the old comment object
+					$editPencil.detach();
 					$block.html(resp.parsedContent);
+					$block.prepend($editPencil);
 					// end the editing context
 					profile.cancelEdit();
 				}

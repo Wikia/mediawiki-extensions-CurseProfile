@@ -156,5 +156,6 @@
 	"commentmoderation-empty": "There are no comments in the moderation queue.",
 	"commentmoderation-title": "Curse Profile Comment Moderation",
 	"commentmoderation-item": "First reported %1$s by %2$s:",
-	"commentmoderation-item-andothers": "First reported %1$s by %2$s and %3$d others:"
+	"commentmoderation-item-andothers": "First reported %1$s by %2$s and %3$d others:",
+	"empty_about_text": "Your information about yourself is blank, click to edit."
 }

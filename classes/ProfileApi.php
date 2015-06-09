@@ -51,7 +51,6 @@ class ProfileApi extends \CurseApiBase {
 	public function getActions() {
 		return [
 			'getRawAboutMe' => [
-				'permissionRequired' => 'profile-modcomments',
 				'params' => [
 					'userId' => [
 						\ApiBase::PARAM_TYPE => 'integer',
@@ -63,7 +62,6 @@ class ProfileApi extends \CurseApiBase {
 			'editAboutMe' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
-				'permissionRequired' => 'profile-modcomments',
 				'params' => [
 					'userId' => [
 						\ApiBase::PARAM_TYPE		=> 'integer',
@@ -86,8 +84,10 @@ class ProfileApi extends \CurseApiBase {
 	 * @return	void
 	 */
 	public function doGetRawAboutMe() {
-		$profileData = new ProfileData($this->getMain()->getVal('userId'));
-		$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
+		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
+			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+			$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
+		}
 	}
 
 	/**
@@ -99,11 +99,13 @@ class ProfileApi extends \CurseApiBase {
 	public function doEditAboutMe() {
 		global $wgOut;
 
-		$profileData = new ProfileData($this->getMain()->getVal('userId'));
-		$text = $this->getMain()->getVal('text');
-		$profileData->setAboutText($text);
-		$this->getResult()->addValue(null, 'result', 'success');
-		// add parsed text to result
-		$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
+		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
+			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+			$text = $this->getMain()->getVal('text');
+			$profileData->setAboutText($text);
+			$this->getResult()->addValue(null, 'result', 'success');
+			// add parsed text to result
+			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
+		}
 	}
 }
