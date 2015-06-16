@@ -49,7 +49,7 @@ class ProfilePage extends \Article {
 	 * An array of groups to be excluded from display on profiles
 	 * @var array
 	 */
-	private $restrictedGroups = ['Curse_Admin', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
+	private $restrictedGroups = ['Curse_Admin', 'Curse_Community', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
 
 	/**
 	 * @param \Title $title
