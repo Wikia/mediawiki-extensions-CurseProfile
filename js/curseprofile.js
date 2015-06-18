@@ -156,7 +156,7 @@ function CurseProfile($) {
 					profile.cancelEdit();
 				}
 			});
-		},
+		}
 	};
 }
 
