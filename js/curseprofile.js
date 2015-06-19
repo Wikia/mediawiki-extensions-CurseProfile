@@ -8,10 +8,8 @@ function CurseProfile($) {
 		if ($('.userinfo a.profileedit').length > 0) {
 			$('.userinfo')
 				.on('click', 'a.profileedit', profile.editAboutMe)
-				.on('click', '.aboutme', profile.editAboutMe)
 				.on('click', 'button.cancel', profile.cancelEdit)
 				.on('click', 'button.save', profile.saveAboutMe);
-			$('.userinfo .aboutme').css({cursor: 'pointer'});
 		}
 		friendship.init();
 	};
