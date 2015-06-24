@@ -557,7 +557,7 @@ class ProfilePage extends \Article {
 			if ($megaProgress !== false) {
 				$earned += $megaProgress->getTotalEarned();
 			}
-			$statsOutput['achievementsearned'] = $earned
+			$statsOutput['achievementsearned'] = $earned;
 		}
 
 		$HTML = $this->generateStatsDL($statsOutput);
