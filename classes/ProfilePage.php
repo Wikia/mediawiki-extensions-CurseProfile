@@ -622,14 +622,14 @@ class ProfilePage extends \Article {
 		if ($type === 'local') {
 			$progress = \Achievements\Progress::newFromCurseId($curse_id);
 			if ($progress !== false) {
-				$earned = $progress->getTotalEarned();
+				$earned = $progress->getRecentlyEarned($limit);
 			}
 		}
 
 		if ($type === 'global') {
 			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
 			if ($megaProgress !== false) {
-				$earned = $megaProgress->getTotalEarned();
+				$earned = $megaProgress->getRecentlyEarned($limit);
 			}
 		}
 
@@ -651,8 +651,8 @@ class ProfilePage extends \Article {
 				\Html::element(
 					'img',
 					[
-						'src'	=> $ach['image_url'],
-						'title'	=> $ach['name']
+						'src'	=> $ach->getImageUrl(),
+						'title'	=> $ach->getName()
 					]
 				)
 			);
