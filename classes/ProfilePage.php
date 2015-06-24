@@ -546,8 +546,18 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		if ($curse_id > 1 && class_exists("\achievementsHooks")) {
-			$statsOutput['achievementsearned'] = \achievementsHooks::getTotalEarnedAchievements($curse_id) + \achievementsHooks::getTotalEarnedMegaAchievements($curse_id);
+		if ($curse_id > 1 && class_exists("\AchievementsHooks")) {
+			$earned = 0;
+
+			$progress = \Achievements\Progress::newFromCurseId($curse_id);
+			if ($progress !== false) {
+				$earned += $progress->getTotalEarned();
+			}
+			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
+			if ($megaProgress !== false) {
+				$earned += $megaProgress->getTotalEarned();
+			}
+			$statsOutput['achievementsearned'] = $earned
 		}
 
 		$HTML = $this->generateStatsDL($statsOutput);
@@ -602,7 +612,7 @@ class ProfilePage extends \Article {
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
 		$output = '';
 
-		if (!class_exists("\achievementsHooks")) {
+		if (!class_exists("\AchievementsHooks")) {
 			return [
 				$output,
 				'isHTML'	=> true
@@ -610,11 +620,17 @@ class ProfilePage extends \Article {
 		}
 
 		if ($type === 'local') {
-			$earned = \achievementsHooks::getAchievementProgress($this->user->curse_id, true, $limit);
+			$progress = \Achievements\Progress::newFromCurseId($curse_id);
+			if ($progress !== false) {
+				$earned = $progress->getTotalEarned();
+			}
 		}
 
 		if ($type === 'global') {
-			$earned = \achievementsHooks::getMegaAchievementProgress($this->user->curse_id, true, $limit);
+			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
+			if ($megaProgress !== false) {
+				$earned = $megaProgress->getTotalEarned();
+			}
 		}
 
 		if ($earned === false) {
