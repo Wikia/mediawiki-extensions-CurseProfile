@@ -622,14 +622,14 @@ class ProfilePage extends \Article {
 		if ($type === 'local') {
 			$progress = \Achievements\Progress::newFromCurseId($curse_id);
 			if ($progress !== false) {
-				$earned = $progress->getRecentlyEarned($limit);
+				$earned = $progress->getRecentlyEarnedAchievements($limit);
 			}
 		}
 
 		if ($type === 'global') {
 			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
 			if ($megaProgress !== false) {
-				$earned = $megaProgress->getRecentlyEarned($limit);
+				$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
 			}
 		}
 
