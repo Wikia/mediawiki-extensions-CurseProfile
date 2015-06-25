@@ -619,15 +619,16 @@ class ProfilePage extends \Article {
 			];
 		}
 
+		$earned = false;
 		if ($type === 'local') {
-			$progress = \Achievements\Progress::newFromCurseId($curse_id);
+			$progress = \Achievements\Progress::newFromCurseId($this->user->curse_id);
 			if ($progress !== false) {
 				$earned = $progress->getRecentlyEarnedAchievements($limit);
 			}
 		}
 
 		if ($type === 'global') {
-			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
+			$megaProgress = \Achievements\MegaProgress::newFromCurseId($this->user->curse_id);
 			if ($megaProgress !== false) {
 				$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
 			}
