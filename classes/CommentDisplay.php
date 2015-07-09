@@ -124,7 +124,7 @@ class CommentDisplay {
 				'.CP::userLink($comment['ub_user_id_from'])
 			.'</div>
 			<div class="commentbody">
-				'.$wgOut->parseInline($comment['ub_message']).'
+				'.$wgOut->parse($comment['ub_message']).'
 			</div>';
 			if (isset($comment['replies'])) {
 				$HTML .= '<div class="replyset">';
@@ -137,7 +137,7 @@ class CommentDisplay {
 					// force parsing this message because MW won't replace plurals as expected
 					// due to this all happening inside the wfMessage()->parse() call that
 					// generates the entire profile
-					$viewReplies = $wgOut->parseInline(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
+					$viewReplies = $wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
 					$HTML .= "
 					<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='$repliesTooltip'>$viewReplies</button>";
 				}

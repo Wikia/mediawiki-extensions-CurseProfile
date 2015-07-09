@@ -276,7 +276,7 @@ class CommentApi extends \CurseApiBase {
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			global $wgOut;
-			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parseInline($text));
+			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
 		} else {
 			$this->dieUsageMsg(['comment-invalidaction']);
 		}
