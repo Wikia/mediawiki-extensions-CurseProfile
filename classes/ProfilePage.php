@@ -76,7 +76,8 @@ class ProfilePage extends \Article {
 			$this->user = \User::newFromId(0);
 			$this->user_id = 0;
 		}
-		$this->mobile = \CurseExtension::isMobileSkin(\RequestContext::getMain()->getSkin());
+
+		$this->mobile = \CurseExtension::isMobileSkin($this->getContext()->getSkin());
 		$this->profile = new ProfileData($this->user_id);
 	}
 
