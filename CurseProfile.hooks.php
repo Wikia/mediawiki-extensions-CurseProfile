@@ -350,4 +350,21 @@ class Hooks {
 		}
 		return true;
 	}
+
+	/**
+	 * Add CurseProfile CSS to Mobile Skin
+	 *
+	 * @access	public
+	 * @param	object	SkinTemplate Object
+	 * @param	array	Array of Modules to Modify
+	 * @return	boolean True
+	 */
+	static public function onSkinMinervaDefaultModules($skin, &$modules) {
+		$modules = array_merge(
+			['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile']],
+			$modules
+		);
+
+		return true;
+	}
 }

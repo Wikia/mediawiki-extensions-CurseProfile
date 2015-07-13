@@ -130,12 +130,18 @@ class CP {
 	 * Craetes a time tag that can be converted to a dynamic relative time
 	 * after adding timeago.yarp.com to the page
 	 */
-	public static function timeTag($timestamp) {
+	public static function timeTag($timestamp, $mobile = false) {
 		// quick sanity check to see if the argument might already be a unix timestamp
 		if (!is_numeric($timestamp) || $timestamp < 100000 || $timestamp > 3000000000) {
 			$timestamp = strtotime($timestamp);
 		}
 		$iso8601 = date('c', $timestamp);
+
+		if ($mobile) {
+			$readableTime = date('h:i d-t-Y (e)', $timestamp);
+			return '<time class="timeago" datetime="'.$iso8601.'">'.$readableTime.'</time>';
+		}
+
 		$readableTime = date('H:i, d F Y (e)', $timestamp);
 		return '<time class="timeago" datetime="'.$iso8601.'">at '.$readableTime.'</time>';
 	}
