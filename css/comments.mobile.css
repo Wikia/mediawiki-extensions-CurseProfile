@@ -18,8 +18,8 @@
 	display: none;
 }
 
-.commentdisplay .avatar {
-	width:45px;
+div.commentdisplay .avatar {
+	padding-right:5px;
 	float:left;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .commentbody {
-	margin-left:45px;
+	clear:left;
 }
 
 .curseprofile .overlay {
@@ -74,21 +74,10 @@
 	align-self: center;
 }
 
-.comments .avatar {
-	float: left;
-	width: 0;
-	margin-right: 54px;
-}
-
 .replyset {
 	padding-left: 25px;
 }
-.replyset .avatar, .avatar {
-	-webkit-transform: scale(0.75);
-	-webkit-transform-origin: top left;
-	transform: scale(0.75);
-	transform-origin: top left;
-}
+
 .replyset .entryform {
 	margin-left: 40px;
 }

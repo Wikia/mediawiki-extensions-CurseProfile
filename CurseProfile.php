@@ -138,7 +138,8 @@ $wgResourceModules['a.ext.curseprofile.profilepage.mobile'] = [
 		'css/curseprofile.mobile.css',
 		'css/comments.mobile.css',
 	],
-	'dependencies'		=> ['jquery.timeago'],
+	'scripts' => ['js/comments.js'],
+	'dependencies'		=> ['jquery.timeago', 'jquery.autosize'],
 	'remoteBasePath'	=> 'CurseProfile',
 	'localBasePath'		=> $extDir,
 	'position'			=> 'top'

@@ -114,9 +114,11 @@ class CommentDisplay {
 			$type .= ' highlighted';
 		}
 
+		$avatarSize = ($mobile ? 36 : 48);
+
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
-			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
+			<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>';
 				if (!$mobile) {
 					$HTML .= '<div class="right">'
