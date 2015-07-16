@@ -4,18 +4,23 @@
 	margin-bottom: 0.7em;
 	position: relative;
 }
-	.commentdisplay .right {
-		float: right;
-	}
-		.commentdisplay .right a {
-			margin-left: 3px;
-		}
-		.commentdisplay .right a.purge {
-			margin-left: 5px;
-		}
+.commentdisplay .right {
+	float: right;
+}
+.commentdisplay .right a {
+	margin-left: 3px;
+}
+.commentdisplay .right a.purge {
+	margin-left: 5px;
+}
 
 .add-comment.hidden {
 	display: none;
+}
+
+div.commentdisplay .avatar {
+	padding-right:5px;
+	float:left;
 }
 
 .commentdisplay.deleted {
@@ -37,22 +42,22 @@
 	text-align: right;
 	position: relative;
 }
-	.curseprofile .entryform textarea {
-		display: block;
-		resize: vertical;
-		height: 2em;
-		margin-bottom:5px;
-	}
-	.curseprofile .entryform .edit button {
-		margin-left: 0.5em;
-	}
+.curseprofile .entryform textarea {
+	display: block;
+	resize: vertical;
+	height: 2em;
+	margin-bottom:5px;
+}
+.curseprofile .entryform .edit button {
+	margin-left: 0.5em;
+}
 .commentdisplay .entryform {
 	padding-right: 5px;
 	margin-left: 54px;
 }
 
 .commentbody {
-	margin-left:54px;
+	clear:left;
 }
 
 .curseprofile .overlay {
@@ -65,26 +70,14 @@
 	display: flex;
 	justify-content: center;
 }
-	.curseprofile .overlay .fa {
-		align-self: center;
-	}
-
-.comments .avatar {
-	float: left;
-	width: 0;
-	margin-right: 54px;
+.curseprofile .overlay .fa {
+	align-self: center;
 }
 
 .replyset {
-	padding-left: 54px;
+	padding-left: 25px;
 }
-	.replyset .avatar {
-		-webkit-transform: scale(0.75);
-		-webkit-transform-origin: top left;
-		transform: scale(0.75);
-		transform-origin: top left;
-		margin-right: 40px;
-	}
-	.replyset .entryform {
-		margin-left: 40px;
-	}
+
+.replyset .entryform {
+	margin-left: 40px;
+}

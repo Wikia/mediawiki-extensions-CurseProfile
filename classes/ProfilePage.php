@@ -52,6 +52,12 @@ class ProfilePage extends \Article {
 	private $restrictedGroups = ['Curse_Admin', 'Curse_Community', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
 
 	/**
+	 * Whether or not we're on a mobile view.
+	 * @var	bool
+	 */
+	private $mobile;
+
+	/**
 	 * @param \Title $title
 	 * @param IContextSource $context
 	 */
@@ -70,6 +76,8 @@ class ProfilePage extends \Article {
 			$this->user = \User::newFromId(0);
 			$this->user_id = 0;
 		}
+
+		$this->mobile = \CurseExtension::isMobileSkin($this->getContext()->getSkin());
 		$this->profile = new ProfileData($this->user_id);
 	}
 
@@ -91,7 +99,7 @@ class ProfilePage extends \Article {
 		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$output->setArticleFlag(false);
 
-		$layout = $this->profileLayout();
+		$layout = ($this->mobile ? $this->mobileProfileLayout() : $this->profileLayout());
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
 
 		$outputString = \MessageCache::singleton()->parse($layout, $this->getTitle());
@@ -239,20 +247,6 @@ class ProfilePage extends \Article {
 				'text'		=> wfMessage('contributions')->text(),
 				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
 			];
-
-			// only offer to edit the profile if you are the owner
-			/* removed because buttons preferred
-			if ($this->viewingSelf()) {
-				$links['views']['edit_profile'] = [
-					'class'		=> false,
-					'text'		=> wfMessage('cp-editprofile')->plain(),
-					'href'		=> '/Special:Preferences#mw-prefsection-personal-info-public',
-				];
-			} elseif ($wgUser->isLoggedIn()) { // only offer friending when not viewing yourself
-				// add link to add, confirm, or remove friend
-				FriendDisplay::addFriendLink($this->user_id, $links);
-			}
-			*/
 		}
 
 		// links specific to a user wiki page
@@ -573,13 +567,24 @@ class ProfilePage extends \Article {
 	 */
 	private function generateStatsDL($input) {
 		global $wgUser;
+
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
+					if ($msgKey == 'totalfriends' && $this->mobile) {
+						$output .= "<dt>".wfMessage('totalfriends-mobile')."</dt>";
+					} else {
+						$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
+					}
 				}
-				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+
+				if(($value == null && $msgKey != '') || (is_array($value) &&$value[0] == null)) {
+					$output .= "<dd>0</dd>";
+				} else {
+					$output .= "<dd>" . $this->generateStatsDL((is_array($value) && isset($value[0])) ? $value[0] : $value) . "</dd>";
+				}
+
 				// add the sub-list if there is one
 				if (is_array($value)) {
 					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
@@ -798,6 +803,48 @@ __NOTOC__
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
 			( $this->user->curse_id > 0 ? 'true' : '' ),
+			( $this->user->isBlocked() ? 'true' : '' )
+		);
+	}
+
+	/**
+	 * Defines the HTML structure of the profile page for mobile devices.
+	 *
+	 * @return	string
+	 */
+	protected function mobileProfileLayout() {
+		return sprintf('
+<div class="curseprofile" id="mf-curseprofile" data-userid="%2$s">
+		<div class="userinfo section">
+			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
+			<div class="usericons rightfloat">
+				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
+				{{#profilelinks:}}
+			</div>
+		</div>
+		<h1>'.wfMessage('cp-mobile-aboutme').'</h1>
+		{{#aboutme:}}
+		<h1>'.wfMessage('cp-mobile-groups').'</h1>
+		{{#groups:}}
+		<h1>'.wfMessage('cp-statisticssection').'</h1>
+		<USERSTATS>
+		{{#friendlist: %2$s}}
+		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
+		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
+		{{#recentactivity: %2$s}}
+		<h1>'.wfMessage('cp-recentcommentssection').'</h1>
+		<p>[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
+		{{#comments: %2$s}}
+	{{#if: %6$s | <div class="blocked"></div> }}
+</div>
+__NOTOC__
+',
+			$this->user_name,
+			$this->user->getID(),
+			$this->user->getEmail(),
+			$this->user->getTitleKey(),
+			'', // no achievements
+			// ( $this->user->curse_id > 0 ? 'true' : '' ), /* delete above and uncomment for achievement block */
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}

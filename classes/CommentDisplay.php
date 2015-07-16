@@ -25,19 +25,25 @@ class CommentDisplay {
 	 * @return	array	with html at index 0
 	 */
 	public static function comments(&$parser, $user_id = '') {
+		$mobile = false;
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
 			return 'Invalid user ID given';
 		}
+
+		if (\CurseExtension::isMobileSkin(\RequestContext::getMain()->getSkin())) {
+			$mobile = true;
+		}
+
 		$HTML = '';
 
-		$HTML .= self::newCommentForm($user_id);
+		$HTML .= self::newCommentForm($user_id, false, $mobile);
 
 		$board = new CommentBoard($user_id);
 		$comments = $board->getComments();
 
 		foreach ($comments as $comment) {
-			$HTML .= self::singleComment($comment);
+			$HTML .= self::singleComment($comment, false, $mobile);
 		}
 
 		return [
@@ -51,12 +57,13 @@ class CommentDisplay {
 	 *
 	 * @param	int		id of the user whose comment board will recieve a new comment via this form
 	 * @param	bool	if true, the form will have an added class to be hidden by css
+	 * @param	bool	if true, the form will add the mobilefrontend class for parsing.
 	 * @return	string	html fragment or empty string
 	 */
-	public static function newCommentForm($user_id, $hidden = false) {
+	public static function newCommentForm($user_id, $hidden = false, $mobile = false) {
 		global $wgUser;
 		$targetUser = \User::newFromId($user_id);
-		if (CommentBoard::canComment($targetUser)) {
+		if (CommentBoard::canComment($targetUser) && !$mobile) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			return '
@@ -82,7 +89,7 @@ class CommentDisplay {
 	 * @param	int		[optional] id of a comment to highlight from among those displayed
 	 * @return	string	html for display
 	 */
-	public static function singleComment($comment, $highlight = false) {
+	public static function singleComment($comment, $highlight = false, $mobile = false) {
 		global $wgOut, $wgUser;
 
 		$HTML = '';
@@ -107,24 +114,33 @@ class CommentDisplay {
 			$type .= ' highlighted';
 		}
 
+		$avatarSize = ($mobile ? 36 : 48);
+
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
-			<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $cUser->getEmail(), $cUser->getName())[0].'</div>
-			<div>
-				<div class="right">
-					'.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
-					.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
-					.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon newreply', 'title'=>wfMessage('replylink-tooltip')], \Curse::awesomeIcon('reply')).' ' : '')
-					.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon edit', 'title'=>wfMessage('commenteditlink-tooltip')], \Curse::awesomeIcon('pencil')).' ' : '')
-					.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon remove', 'title'=>wfMessage('removelink-tooltip')], \Curse::awesomeIcon('trash')) : '')
-					.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon restore', 'title'=>wfMessage('restorelink-tooltip')], \Curse::awesomeIcon('undo')) : '')
-					.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon purge', 'title'=>wfMessage('purgelink-tooltip')], \Curse::awesomeIcon('eraser')) : '')
-					.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href'=>'#', 'class'=>'icon report', 'title'=>wfMessage('reportlink-tooltip')], \Curse::awesomeIcon('flag')) : '')
-				.'</div>
-				'.CP::userLink($comment['ub_user_id_from'])
-			.'</div>
+			<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
+			<div>';
+				if (!$mobile) {
+					$HTML .= '<div class="right">'
+						.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
+						.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
+						.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \Curse::awesomeIcon('reply')) . ' ' : '')
+						.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \Curse::awesomeIcon('pencil')) . ' ' : '')
+						.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \Curse::awesomeIcon('trash')) : '')
+						.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \Curse::awesomeIcon('undo')) : '')
+						.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \Curse::awesomeIcon('eraser')) : '')
+						.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \Curse::awesomeIcon('flag')) : '')
+						.'</div>'
+						.CP::userLink($comment['ub_user_id_from']);
+					} else {
+						$HTML .= CP::userLink($comment['ub_user_id_from'])
+							.'<div>'
+							.\Html::rawElement('a', ['href' =>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::mobileTimestamp($comment))
+							.'</div>';
+					}
+		$HTML .= '</div>
 			<div class="commentbody">
-				'.$wgOut->parseInline($comment['ub_message']).'
+				'.$wgOut->parse($comment['ub_message']).'
 			</div>';
 			if (isset($comment['replies'])) {
 				$HTML .= '<div class="replyset">';
@@ -137,13 +153,13 @@ class CommentDisplay {
 					// force parsing this message because MW won't replace plurals as expected
 					// due to this all happening inside the wfMessage()->parse() call that
 					// generates the entire profile
-					$viewReplies = $wgOut->parseInline(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
+					$viewReplies = $wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
 					$HTML .= "
 					<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='$repliesTooltip'>$viewReplies</button>";
 				}
 
 				foreach ($comment['replies'] as $reply) {
-					$HTML .= self::singleComment($reply, $highlight);
+					$HTML .= self::singleComment($reply, $highlight, $mobile);
 				}
 				$HTML .= '</div>';
 			}
@@ -177,6 +193,20 @@ class CommentDisplay {
 			return wfMessage('cp-commentposted')->text().' '.CP::timeTag($comment['ub_date']);
 		} else {
 			return wfMessage('cp-commentedited')->text().' '.CP::timeTag($comment['ub_edited']);
+		}
+	}
+
+	/**
+	 * Returns a <time> tag with a comment's post date or last edited date for mobile.
+	 *
+	 * @param	array	comment data
+	 * @return	string	html fragment
+	 */
+	private static function mobileTimestamp($comment) {
+		if (is_null($comment['ub_edited'])) {
+			return CP::timeTag($comment['ub_date'], true);
+		} else {
+			return CP::timeTag($comment['ub_edited'], true);
 		}
 	}
 

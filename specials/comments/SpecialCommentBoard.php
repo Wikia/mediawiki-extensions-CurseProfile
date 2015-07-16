@@ -33,6 +33,8 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 			return;
 		}
 
+		$mobile = \CurseExtension::isMobileSkin($wgOut->getSkin());
+
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
 		list($user_id, $user_name) = explode('/', $path);
@@ -58,7 +60,9 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$itemsPerPage = 50;
 		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
-		$wgOut->addModules('ext.curseprofile.comments');
+		if (!$mobile) {
+			$wgOut->addModules('ext.curseprofile.comments');
+		}
 		$wgOut->addModules('ext.curse.pagination');
 		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
 		$mouse->output->loadTemplate('commentboard');
@@ -77,7 +81,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$pagination = $mouse->output->generatePagination($total, $itemsPerPage, $start);
 		$pagination = $mouse->output->paginationTemplate($pagination);
 
-		$wgOut->addHTML($mouse->output->commentboard->comments($comments, $user_id, $pagination));
+		$wgOut->addHTML($mouse->output->commentboard->comments($comments, $user_id, $pagination, $mobile));
 
 		return;
 	}

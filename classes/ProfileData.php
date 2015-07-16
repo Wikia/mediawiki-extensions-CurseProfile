@@ -321,18 +321,13 @@ class ProfileData {
 
 	/**
 	 * Returns more complete info on the wiki chosen as the user's favorite
-	 * TODO make this able to look up wiki info directly from the hash rather than sifting through all site info
 	 *
 	 * @return array
 	 */
 	public function getFavoriteWiki() {
-		$sites = self::getWikiSites();
-		if ($sites) {
-			foreach ($sites['data']['wikis'] as $wiki) {
-				if ($wiki['md5_key'] == $this->user->getOption('profile-favwiki')) {
-					return $wiki;
-				}
-			}
+		if ($this->user->getOption('profile-favwiki')) {
+			$sites = self::getWikiSites($this->user->getOption('profile-favwiki'));
+			return $sites['data'];
 		}
 		return [];
 	}
@@ -342,9 +337,9 @@ class ProfileData {
 	 *
 	 * @return array
 	 */
-	public static function getWikiSites() {
+	public static function getWikiSites($siteKey = null) {
 		global $wgRequest;
-		$api = new \ApiMain(new \DerivativeRequest($wgRequest, ['action'=>'allsites', 'do'=>'getSiteStats']));
+		$api = new \ApiMain(new \DerivativeRequest($wgRequest, ['action'=>'allsites', 'do'=>'getSiteStats', 'site_key' => $siteKey]));
 		try {
 			$api->execute();
 		} catch (\UsageException $e) {

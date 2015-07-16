@@ -130,13 +130,30 @@ $wgResourceModules['ext.curseprofile.commentmoderation'] = [
 	],
 ];
 
+// needs to load early, so it has an 'a' prefix
+$wgResourceModules['a.ext.curseprofile.profilepage.mobile'] = [
+	'targets' => ['mobile'],
+	'group' => 'site',
+	'styles'			=> [
+		'css/curseprofile.mobile.css',
+		'css/comments.mobile.css',
+	],
+	'scripts' => ['js/comments.js'],
+	'dependencies'		=> ['jquery.timeago', 'jquery.autosize'],
+	'remoteBasePath'	=> 'CurseProfile',
+	'localBasePath'		=> $extDir,
+	'position'			=> 'top'
+];
+
 $wgResourceModules['jquery.timeago'] = [
+	'targets'	=> ['desktop', 'mobile'],
 	'scripts' => ['js/jquery.timeago.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
 
 $wgResourceModules['jquery.autosize'] = [
+	'targets'	=> ['desktop', 'mobile'],
 	'scripts' => ['js/jquery.autosize.min.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
@@ -163,6 +180,7 @@ $wgHooks['UserGetDefaultOptions'][]			= 'CurseProfile\Hooks::onUserGetDefaultOpt
 $wgHooks['UserSaveOptions'][]				= 'CurseProfile\Hooks::onUserSaveOptions';
 $wgHooks['BeforeCreateEchoEvent'][]			= 'CurseProfile\Hooks::onBeforeCreateEchoEvent';
 $wgHooks['EchoGetDefaultNotifiedUsers'][]	= 'CurseProfile\Hooks::onEchoGetDefaultNotifiedUsers';
+$wgHooks['SkinMinervaDefaultModules'][]		= 'CurseProfile\Hooks::onSkinMinervaDefaultModules';
 
 // Ajax Setup
 require_once('CurseProfile.ajax.php');
