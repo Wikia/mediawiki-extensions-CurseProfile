@@ -553,22 +553,17 @@ class ProfilePage extends \Article {
 	 */
 	private function generateStatsDL($input) {
 		global $wgUser;
-
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					if ($msgKey == 'totalfriends' && $this->mobile) {
-						$output .= "<dt>".wfMessage('totalfriends-mobile')."</dt>";
-					} else {
-						$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
-					}
+					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				}
-
-				$output .= "<dd>" . $this->determineValue($value) . "</dd>";
-
+				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+				// add the sub-list if there is one
 				if (is_array($value)) {
-					if (array_key_exists(0, $value)) {
+					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
+					if (isset($value[0])) {
 						array_shift($value);
 					}
 					$output .= $this->generateStatsDL($value);
@@ -585,24 +580,6 @@ class ProfilePage extends \Article {
 			}
 		}
 	}
-
-	/**
-	 * Determine the correct value for a variable
-	 * @param	$value	mixed
-	 * @return	mixed	int|string
-	 */
-	public function determineValue($value) {
-		if (is_array($value)) {
-			return $this->determineValue($value[0]);
-		} elseif (is_numeric($value)) {
-			return number_format($value);
-		} elseif (is_null($value)) {
-			return 0;
-		} else {
-			return $value;
-		}
-	}
-
 
 	/**
 	 * Display the icons of the recent achievements the user has earned, for the sidebar
