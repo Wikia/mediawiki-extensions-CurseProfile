@@ -568,7 +568,9 @@ class ProfilePage extends \Article {
 				$output .= "<dd>" . $this->determineValue($value) . "</dd>";
 
 				if (is_array($value)) {
-					array_shift($value);
+					if (array_key_exists(0, $value)) {
+						array_shift($value);
+					}
 					$output .= $this->generateStatsDL($value);
 				}
 			}
