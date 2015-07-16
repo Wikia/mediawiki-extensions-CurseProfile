@@ -565,18 +565,10 @@ class ProfilePage extends \Article {
 					}
 				}
 
-				if(($value == null && $msgKey != '') || (is_array($value) &&$value[0] == null)) {
-					$output .= "<dd>0</dd>";
-				} else {
-					$output .= "<dd>" . $this->generateStatsDL((is_array($value) && isset($value[0])) ? $value[0] : $value) . "</dd>";
-				}
+				$output .= "<dd>" . $this->determineValue($value) . "</dd>";
 
-				// add the sub-list if there is one
 				if (is_array($value)) {
-					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
-					if (isset($value[0])) {
-						array_shift($value);
-					}
+					array_shift($value);
 					$output .= $this->generateStatsDL($value);
 				}
 			}
@@ -591,6 +583,24 @@ class ProfilePage extends \Article {
 			}
 		}
 	}
+
+	/**
+	 * Determine the correct value for a variable
+	 * @param	$value	mixed
+	 * @return	mixed	int|string
+	 */
+	public function determineValue($value) {
+		if (is_array($value)) {
+			return $this->determineValue($value[0]);
+		} elseif (is_numeric($value)) {
+			return number_format($value);
+		} elseif (is_null($value)) {
+			return 0;
+		} else {
+			return $value;
+		}
+	}
+
 
 	/**
 	 * Display the icons of the recent achievements the user has earned, for the sidebar
