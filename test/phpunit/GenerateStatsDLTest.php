@@ -37,9 +37,9 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt>&lt;a&gt;</dt><dd>10</dd>'
-				.'<dt>&lt;b&gt;</dt><dd>2,000</dd>'
-				.'<dt>&lt;c&gt;</dt><dd>3,455</dd>'
+				.'<dt><a></dt><dd>10</dd>'
+				.'<dt><b></dt><dd>2,000</dd>'
+				.'<dt><c></dt><dd>3,455</dd>'
 			.'</dl>',
 			$this->stats->generateStatsDL($template),
 			'A flat list should generate a simple definition list'
@@ -58,14 +58,14 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt>&lt;a&gt;</dt><dd>10</dd>'
-				.'<dt>&lt;b&gt;</dt><dd>2,000</dd>'
+				.'<dt><a></dt><dd>10</dd>'
+				.'<dt><b></dt><dd>2,000</dd>'
 				.'<dl>'
-					.'<dt>&lt;d&gt;</dt><dd>500</dd>'
-					.'<dt>&lt;e&gt;</dt><dd>1,500</dd>'
-					.'<dt>&lt;f&gt;</dt><dd>nothing</dd>'
+					.'<dt><d></dt><dd>500</dd>'
+					.'<dt><e></dt><dd>1,500</dd>'
+					.'<dt><f></dt><dd>nothing</dd>'
 				.'</dl>'
-				.'<dt>&lt;c&gt;</dt><dd>3,455</dd>'
+				.'<dt><c></dt><dd>3,455</dd>'
 			.'</dl>',
 			$this->stats->generateStatsDL($template),
 			'A nested list with a rollup should produce a nested list with a number across from its header'
@@ -84,14 +84,14 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt>&lt;a&gt;</dt><dd>10</dd>'
-				.'<dt>&lt;b&gt;</dt>'
+				.'<dt><a></dt><dd>10</dd>'
+				.'<dt><b></dt>'
 				.'<dl>'
-					.'<dt>&lt;d&gt;</dt><dd>500</dd>'
-					.'<dt>&lt;e&gt;</dt><dd>1,500</dd>'
-					.'<dt>&lt;f&gt;</dt><dd>nothing</dd>'
+					.'<dt><d></dt><dd>500</dd>'
+					.'<dt><e></dt><dd>1,500</dd>'
+					.'<dt><f></dt><dd>nothing</dd>'
 				.'</dl>'
-				.'<dt>&lt;c&gt;</dt><dd>3,455</dd>'
+				.'<dt><c></dt><dd>3,455</dd>'
 			.'</dl>',
 			$this->stats->generateStatsDL($template),
 			'A nested list with a rollup should produce a nested list with a number across from its header'

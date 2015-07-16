@@ -557,7 +557,7 @@ class ProfilePage extends \Article {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->escaped()."</dt>";
+					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				}
 				// check for sub-list, if there is one
 				if (is_array($value)) {
