@@ -553,6 +553,7 @@ class ProfilePage extends \Article {
 	 */
 	private function generateStatsDL($input) {
 		global $wgUser;
+
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
@@ -563,7 +564,13 @@ class ProfilePage extends \Article {
 						$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 					}
 				}
-				$output .= "<dd>".$this->generateStatsDL( ( is_array($value) && isset($value[0]) ) ? $value[0] : $value )."</dd>";
+
+				if(($value == null && $msgKey != '') || (is_array($value) &&$value[0] == null)) {
+					$output .= "<dd>0</dd>";
+				} else {
+					$output .= "<dd>" . $this->generateStatsDL((is_array($value) && isset($value[0])) ? $value[0] : $value) . "</dd>";
+				}
+
 				// add the sub-list if there is one
 				if (is_array($value)) {
 					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
@@ -757,7 +764,7 @@ __NOTOC__
 	 */
 	protected function mobileProfileLayout() {
 		return sprintf('
-<div class="curseprofile mf-curseprofile" data-userid="%2$s">
+<div class="curseprofile" id="mf-curseprofile" data-userid="%2$s">
 		<div class="userinfo section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="usericons rightfloat">
@@ -765,29 +772,19 @@ __NOTOC__
 				{{#profilelinks:}}
 			</div>
 		</div>
-		<div class="aboutme section">
-			<h1>'.wfMessage('cp-mobile-aboutme').'</h1>
-			{{#aboutme:}}
-		</div>
-		<div class="mygroups section">
-			<h1>'.wfMessage('cp-mobile-groups').'</h1>
-			{{#groups:}}
-		</div>
-		<div class="stats section">
-			<h1>'.wfMessage('cp-statisticssection').'</h1>
-			<USERSTATS>
-			{{#friendlist: %2$s}}
-		</div>
-		<div class="activity section">
-			<h1>'.wfMessage('cp-recentactivitysection').'</h1>
-			<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
-			{{#recentactivity: %2$s}}
-		</div>
-		<div class="comments section">
-			<h1>'.wfMessage('cp-recentcommentssection').'</h1>
-			<p>[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
-			{{#comments: %2$s}}
-		</div>
+		<h1>'.wfMessage('cp-mobile-aboutme').'</h1>
+		{{#aboutme:}}
+		<h1>'.wfMessage('cp-mobile-groups').'</h1>
+		{{#groups:}}
+		<h1>'.wfMessage('cp-statisticssection').'</h1>
+		<USERSTATS>
+		{{#friendlist: %2$s}}
+		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
+		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
+		{{#recentactivity: %2$s}}
+		<h1>'.wfMessage('cp-recentcommentssection').'</h1>
+		<p>[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
+		{{#comments: %2$s}}
 	{{#if: %6$s | <div class="blocked"></div> }}
 </div>
 __NOTOC__

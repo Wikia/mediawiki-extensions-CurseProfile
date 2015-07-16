@@ -90,3 +90,24 @@ img.GP-brand {
 	vertical-align: bottom;
 	margin: 0;
 }
+
+/* Sidebar stats display */
+#content_block_2 {
+	border:none;
+}
+#content_block_2 > dl {
+	width:85%;
+	min-width: 10.5em;
+}
+#content_block_2 dl dl {
+	margin-left: 1em;
+	clear: both;
+}
+#content_block_2 dt {
+	float: left;
+	clear: both;
+	white-space: pre-line;
+}
+#content_block_2 dd {
+	float:right;
+}
