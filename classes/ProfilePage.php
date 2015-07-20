@@ -565,33 +565,27 @@ class ProfilePage extends \Article {
 	 * @param	mixed	arrays will generate a new list, other values will be directly returned
 	 * @return	string	html DL fragment or $input if it is not an array
 	 */
-	private function generateStatsDL($input) {
+	public function generateStatsDL($input) {
 		global $wgUser;
-
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					if ($msgKey == 'totalfriends' && $this->mobile) {
-						$output .= "<dt>".wfMessage('totalfriends-mobile')."</dt>";
-					} else {
-						$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
-					}
+					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
 				}
-
-				if(($value == null && $msgKey != '') || (is_array($value) &&$value[0] == null)) {
-					$output .= "<dd>0</dd>";
-				} else {
-					$output .= "<dd>" . $this->generateStatsDL((is_array($value) && isset($value[0])) ? $value[0] : $value) . "</dd>";
-				}
-
-				// add the sub-list if there is one
+				// check for sub-list, if there is one
 				if (is_array($value)) {
-					// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
-					if (isset($value[0])) {
+					// might have a roll-up total for the sub-list's header
+					if (array_key_exists(0, $value)) {
+						$output .= "<dd>".$this->generateStatsDL( $value[0] )."</dd>";
+						// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
 						array_shift($value);
 					}
+					// generate the sub-list
 					$output .= $this->generateStatsDL($value);
+				} else {
+					// not a sub-list, just add a plain value
+					$output .= "<dd>".$this->generateStatsDL( $value )."</dd>";
 				}
 			}
 			$output .= "</dl>";
@@ -600,6 +594,8 @@ class ProfilePage extends \Article {
 			// just a simple value
 			if (is_numeric($input)) {
 				return number_format($input);
+			} elseif (is_null($input)) {
+				return '0';
 			} else {
 				return $input;
 			}
