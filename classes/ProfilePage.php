@@ -621,7 +621,7 @@ class ProfilePage extends \Article {
 		}
 
 		$achievementCache = $type.'AchievementProgress';
-		if (is_array($this->$achievementCache)) {
+		if (property_exists($this, $achievementCache) && is_array($this->$achievementCache)) {
 			$earned = $this->$achievementCache;
 		} else {
 			$earned = false;
