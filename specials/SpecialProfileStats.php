@@ -13,21 +13,14 @@
 **/
 namespace CurseProfile;
 
-class SpecialProfileStats extends \SpecialPage {
+class SpecialProfileStats extends \Curse\SpecialPage {
 	public function __construct() {
-		parent::__construct( 'ProfileStats' );
-
-		global $wgRequest, $wgUser, $wgOut;
-		$this->wgRequest	= $wgRequest;
-		$this->wgUser		= $wgUser;
-		$this->output		= $this->getOutput();
+		parent::__construct( 'ProfileStats', 'profilestats' );
 	}
 
 	public function execute( $path ) {
 		$this->setHeaders();
-		if (!$this->wgUser->isAllowed('profilestats')) {
-			throw new \PermissionsError('profilestats');
-		}
+		$this->checkPermissions();
 
 		$this->mouse = \mouseNest::getMouse();
 		global $IP;
@@ -42,14 +35,6 @@ class SpecialProfileStats extends \SpecialPage {
 
 		$this->output->addModules('ext.curseprofile.profilestats');
 		$this->output->addHTML($this->buildOutput());
-	}
-
-	public function isListed() {
-		return $this->wgUser->isAllowed('profilestats');
-	}
-
-	public function isRestricted() {
-		return true;
 	}
 
 	/**
