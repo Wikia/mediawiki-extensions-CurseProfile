@@ -43,7 +43,7 @@ $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.na
 $wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
 $wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
 $wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
-$wgAutoloadClasses['CurseProfile\ProfileApi']    = $extDir . 'classes/ProfileApi.php';
+$wgAutoloadClasses['CurseProfile\ProfileApi']     = $extDir . 'classes/ProfileApi.php';
 $wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
 $wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileData.php';
 $wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
@@ -63,11 +63,9 @@ $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/Res
 
 $wgAutoloadClasses['CurseProfile\SpecialManageFriends']		= "{$extDir}/specials/friends/SpecialManageFriends.php";
 $wgSpecialPages['ManageFriends']							= 'CurseProfile\SpecialManageFriends';
-$wgSpecialPageGroups['ManageFriends']						= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialFriends']			= "{$extDir}/specials/friends/SpecialFriends.php";
 $wgSpecialPages['Friends']									= 'CurseProfile\SpecialFriends';
-$wgSpecialPageGroups['Friends']								= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialAddComment']		= "{$extDir}/specials/comments/SpecialAddComment.php";
 $wgSpecialPages['AddComment']								= 'CurseProfile\SpecialAddComment';
@@ -80,7 +78,6 @@ $wgSpecialPages['CommentPermalink']							= 'CurseProfile\SpecialCommentPermalin
 
 $wgAutoloadClasses['CurseProfile\SpecialCommentModeration']	= "{$extDir}/specials/comments/SpecialCommentModeration.php";
 $wgSpecialPages['CommentModeration']						= 'CurseProfile\SpecialCommentModeration';
-$wgSpecialPageGroups['CommentModeration']					= 'users';
 
 $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
