@@ -786,8 +786,10 @@ class ProfilePage extends \Article {
 			<h3>'.wfMessage('cp-achievementssection')->plain().' ([[Special:Achievements|'.wfMessage('ach_view_all')->plain().']])</h3>
 			<h4>'.wfMessage('achievements-local')->plain().'</h4>
 			{{#achievements:local|20}}
+			{{#if: {{#achievements:global|20}}|
 			<h4>'.wfMessage('achievements-global')->plain().'</h4>
 			{{#achievements:global|20}}
+			}}
 		</div> }}
 	</div>
 	{{#if: %6$s | <div class="blocked"></div> }}
