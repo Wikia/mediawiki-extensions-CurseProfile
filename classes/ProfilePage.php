@@ -620,18 +620,25 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		$earned = false;
-		if ($type === 'local') {
-			$progress = \Achievements\Progress::newFromCurseId($this->user->curse_id);
-			if ($progress !== false) {
-				$earned = $progress->getRecentlyEarnedAchievements($limit);
+		$achievementCache = $type.'AchievementProgress';
+		if (is_array($this->$achievementCache)) {
+			$earned = $this->$achievementCache;
+		} else {
+			$earned = false;
+			if ($type === 'local') {
+				$progress = \Achievements\Progress::newFromCurseId($this->user->curse_id);
+				if ($progress !== false) {
+					$earned = $progress->getRecentlyEarnedAchievements($limit);
+					$this->$achievementCache = $earned;
+				}
 			}
-		}
 
-		if ($type === 'global') {
-			$megaProgress = \Achievements\MegaProgress::newFromCurseId($this->user->curse_id);
-			if ($megaProgress !== false) {
-				$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
+			if ($type === 'global') {
+				$megaProgress = \Achievements\MegaProgress::newFromCurseId($this->user->curse_id);
+				if ($megaProgress !== false) {
+					$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
+					$this->$achievementCache = $earned;
+				}
 			}
 		}
 
@@ -641,8 +648,6 @@ class ProfilePage extends \Article {
 				'isHTML'	=> true
 			];
 		}
-		$achievementCache = $type.'AchievementProgress';
-		$this->$achievementCache = $earned;
 
 		foreach ($earned as $ach) {
 			$output .= \Html::rawElement(
