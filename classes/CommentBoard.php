@@ -157,7 +157,7 @@ class CommentBoard {
 			$rootId = $comment_id;
 		}
 
-		if (!self::canView($comment)) {
+		if (!self::canView($comment, $asUser)) {
 			return [];
 		}
 
