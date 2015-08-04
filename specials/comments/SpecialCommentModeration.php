@@ -18,6 +18,10 @@ class SpecialCommentModeration extends \SpecialPage {
 		parent::__construct( 'CommentModeration', 'profile-modcomments' );
 	}
 
+	public function getGroupName() {
+		return 'users';
+	}
+
 	private $sortStyle;
 
 	/**
