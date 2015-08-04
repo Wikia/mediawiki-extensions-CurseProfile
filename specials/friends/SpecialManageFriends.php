@@ -23,6 +23,10 @@ class SpecialManageFriends extends \SpecialPage {
 		parent::__construct( 'ManageFriends' );
 	}
 
+	public function getGroupName() {
+		return 'users';
+	}
+
 	public function execute( $param ) {
 		$this->setHeaders();
 		$this->outputHeader();

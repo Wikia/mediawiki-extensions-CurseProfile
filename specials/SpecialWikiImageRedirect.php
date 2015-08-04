@@ -2,7 +2,7 @@
 /**
  * Curse Inc.
  * Curse Profile
- * Display stats on the adoption rate of CurseProfile across hydra
+ * Allows deferred loading of logo images for gamepedia wikis
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.

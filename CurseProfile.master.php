@@ -25,7 +25,6 @@ $wgAutoloadClasses['CurseProfile\StatsRecache'] = __DIR__.'/classes/jobs/StatsRe
 
 $wgAutoloadClasses['CurseProfile\SpecialProfileStats']		= __DIR__."/specials/SpecialProfileStats.php";
 $wgSpecialPages['ProfileStats']								= 'CurseProfile\SpecialProfileStats';
-$wgSpecialPageGroups['ProfileStats']						= 'wiki';
 
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilestats'] = [
