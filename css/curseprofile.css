@@ -80,15 +80,22 @@
 	clear: both;
 	margin-left: 0;
 }
+
 .achievements .icon {
 	display: inline-block;
 }
+
 .achievements .icon img {
 	margin: 0 2px;
 	max-height: 32px;
 	max-width: 32px;
 	min-height: 32px;
 	min-width: 32px;
+}
+
+.achievements .icon.global {
+	display: block;
+	margin-bottom: 3px;
 }
 
 .section {

@@ -656,7 +656,7 @@ class ProfilePage extends \Article {
 			$output .= \Html::rawElement(
 				'div',
 				[
-					'class'	=> 'icon'
+					'class'	=> ['icon', $type]
 				],
 				\Html::element(
 					'img',
@@ -664,7 +664,7 @@ class ProfilePage extends \Article {
 						'src'	=> $ach->getImageUrl(),
 						'title'	=> $ach->getName()
 					]
-				)
+				).($type == 'global' ? $ach->getName() : null)
 			);
 		}
 		return [
