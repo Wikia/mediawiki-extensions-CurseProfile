@@ -78,14 +78,11 @@ class ProfileData {
 		$wikiOptions = [
 			'---' => '',
 		];
-		$wikiSites = self::getWikiSites();
-		if ($wikiSites) {
-			foreach ($wikiSites['data']['wikis'] as $wiki) {
-				if ($wiki['group_domain']) {
-					$wiki['wiki_name'] = $wiki['wiki_name']. " ({$wiki['wiki_language']})";
-				}
-				$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
+		foreach (self::getWikiSites() as $wiki) {
+			if ($wiki['group_domain']) {
+				$wiki['wiki_name'] = $wiki['wiki_name']. " ({$wiki['wiki_language']})";
 			}
+			$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
 		}
 		ksort($wikiOptions);
 
@@ -327,26 +324,38 @@ class ProfileData {
 	public function getFavoriteWiki() {
 		if ($this->user->getOption('profile-favwiki')) {
 			$sites = self::getWikiSites($this->user->getOption('profile-favwiki'));
-			return $sites['data'];
+			return current($sites) ? current($sites) : [];
 		}
 		return [];
 	}
 
 	/**
-	 * Returns the decoded wiki data available by the allsites API
+	 * Returns the decoded wiki data available in redis
 	 *
-	 * @return array
+	 * @param string $siteKey md5 key for wanted site
+	 * @return array of wiki data arrays
 	 */
 	public static function getWikiSites($siteKey = null) {
-		global $wgRequest;
-		$api = new \ApiMain(new \DerivativeRequest($wgRequest, ['action'=>'allsites', 'do'=>'getSiteStats', 'site_key' => $siteKey]));
-		try {
-			$api->execute();
-		} catch (\UsageException $e) {
-			// TODO: Figure out a better error handler here.
-			return false;
+		$mouse = \mouseNest::getMouse();
+		if (is_null($siteKey)) {
+			$sites = $mouse->redis->smembers('dynamicsettings:siteHashes');
+		} else {
+			$sites = [$siteKey];
 		}
-		return $api->getResultData();
+		$ret = [];
+		if (!empty($sites)) {
+			foreach ($sites as $md5) {
+				$data = $wikiData = $mouse->redis->hgetall('dynamicsettings:siteInfo:'.$md5);
+				if (empty($data)) {
+					continue;
+				}
+				foreach ($data as $field => $val) {
+					$data[$field] = unserialize($val);
+				}
+				$ret[] = $data;
+			}
+		}
+		return $ret;
 	}
 
 	/**
