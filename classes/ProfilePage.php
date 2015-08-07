@@ -662,9 +662,9 @@ class ProfilePage extends \Article {
 					'img',
 					[
 						'src'	=> $ach->getImageUrl(),
-						'title'	=> $ach->getName()
+						'title'	=> $ach->getName()."\n".$ach->getDescription()
 					]
-				).($type == 'global' ? $ach->getName() : null)
+				).($type == 'global' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
 			);
 		}
 		return [
