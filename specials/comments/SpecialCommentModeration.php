@@ -58,8 +58,7 @@ class SpecialCommentModeration extends \SpecialPage {
 			$content = $mouse->output->commentmoderation->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
-		$pagination = $mouse->output->generatePagination($total, $itemsPerPage, $start);
-		$pagination = $mouse->output->paginationTemplate($pagination);
+		$pagination = Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($mouse->output->commentmoderation->sortStyleSelector($this->sortStyle));
 		$wgOut->addHTML($pagination);
