@@ -143,7 +143,7 @@ class Hooks {
 	 * @access	public
 	 * @param	object	Title object
 	 * @param	mixed	Article object or null
-	 * @return	void
+	 * @return	bool
 	 */
 	public static function onArticleFromTitle(\Title &$title, &$article) {
 		global $wgRequest, $wgOut;
@@ -360,10 +360,12 @@ class Hooks {
 	 * @return	boolean True
 	 */
 	static public function onSkinMinervaDefaultModules($skin, &$modules) {
-		$modules = array_merge(
-			['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile']],
-			$modules
-		);
+		if(self::$profilePage instanceOf \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
+			$modules = array_merge(
+				['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile']],
+				$modules
+			);
+		}
 
 		return true;
 	}
