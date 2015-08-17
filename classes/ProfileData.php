@@ -51,11 +51,13 @@ class ProfileData {
 	 * @return string
 	 */
 	public function getProfilePath() {
+		global $wgScriptPath;
 		if (!$this->getTypePref()) {
-			return "/UserProfile:".$this->user->getTitleKey();
+			$path = "/UserProfile:".$this->user->getTitleKey();
 		} else {
-			return "/User:".$this->user->getTitleKey();
+			$path = "/User:".$this->user->getTitleKey();
 		}
+		return wfExpandUrl($wgScriptPath.$path);
 	}
 
 	/**
@@ -63,11 +65,13 @@ class ProfileData {
 	 * @return string
 	 */
 	public function getUserWikiPath() {
+		global $wgScriptPath;
 		if ($this->getTypePref()) {
-			return "/UserWiki:".$this->user->getTitleKey();
+			$path = "/UserWiki:".$this->user->getTitleKey();
 		} else {
-			return "/User:".$this->user->getTitleKey();
+			$path = "/User:".$this->user->getTitleKey();
 		}
+		return wfExpandUrl($wgScriptPath.$path);
 	}
 
 	/**
