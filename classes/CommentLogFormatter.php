@@ -26,6 +26,10 @@ class CommentLogFormatter extends \LogFormatter {
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
+		if (!empty($parameters[3])) {
+			$parameters[3] = ['raw' => \Html::rawElement('a', ['href' =>\SpecialPage::getTitleFor('CommentPermalink', $parameters[3])->getLinkURL()], 'comment')];
+		}
+
 		return $parameters;
 	}
 }
