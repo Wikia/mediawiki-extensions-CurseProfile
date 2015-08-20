@@ -12,7 +12,6 @@
  *
 **/
 namespace CurseProfile;
-use GuzzleHttp\Url;
 
 /**
  * Class that manages a 'wall' of comments on a user profile page
