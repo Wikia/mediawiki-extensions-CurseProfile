@@ -160,5 +160,10 @@
 	"commentmoderation-item-andothers": "First reported %1$s by %2$s and %3$d others:",
 	"empty_about_text": "Your information about yourself is blank, click to edit.",
 	"cp-mobile-aboutme": "About Me",
-	"cp-mobile-groups": "Groups"
+	"cp-mobile-groups": "Groups",
+	"curseprofile_log_name": "Curse Profile Comment Log",
+	"curseprofile_log_description": "This is the log of Curse Profile comments that have been created/edited.",
+	"logentry-curseprofile-comment-created": "$1 left a comment on $2's profile",
+	"logentry-curseprofile-comment-replied": "$1 replied to a comment on $2's profile",
+	"logentry-curseprofile-comment-edited": "$1 edited their comment on $2's profile"
 }

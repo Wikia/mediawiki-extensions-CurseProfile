@@ -58,6 +58,7 @@ $wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/jobs/Frie
 $wgAutoloadClasses['CurseProfile\ResolveComment'] = $extDir . 'classes/jobs/ResolveComment.php';
 $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
+$wgAutoloadClasses['CurseProfile\CommentLogFormatter'] = $extDir . 'classes/CommentLogFormatter.php';
 
 // Special Pages
 
@@ -83,10 +84,12 @@ $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/special
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
 
 // Recent Changes Logs
-$wgLogTypes['curseprofile']							= 'curseprofile';
-$wgLogNames['curseprofile']							= 'curseprofile_log_name';
-$wgLogHeaders['curseprofile']						= 'curseprofile_log_description';
-$wgLogActionHandlers['curseprofile/comment']		= 'CommentLogFormatter';
+$wgLogTypes['curseprofile']								= 'curseprofile';
+$wgLogNames['curseprofile']								= 'curseprofile_log_name';
+$wgLogHeaders['curseprofile']							= 'curseprofile_log_description';
+$wgLogActionsHandlers['curseprofile/comment-created']	= '\CurseProfile\CommentLogFormatter';
+$wgLogActionsHandlers['curseprofile/comment-replied']	= '\CurseProfile\CommentLogFormatter';
+$wgLogActionsHandlers['curseprofile/comment-edited']	= '\CurseProfile\CommentLogFormatter';
 
 // Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [

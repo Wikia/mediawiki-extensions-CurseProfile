@@ -17,5 +17,15 @@ namespace CurseProfile;
  * A class that will handle log formating for Recent Changes
  */
 class CommentLogFormatter extends \LogFormatter {
+	/**
+	 * Handle custom log parameters for SpriteSheet class.
+	 *
+	 * @access	public
+	 * @return	array	Extract and parsed parameters.
+	 */
+	protected function getMessageParameters() {
+		$parameters = parent::getMessageParameters();
 
+		return $parameters;
+	}
 }

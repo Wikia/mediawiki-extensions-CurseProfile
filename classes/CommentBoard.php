@@ -334,6 +334,7 @@ class CommentBoard {
 	 * @return	integer	ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
+		$extra = [];
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
@@ -379,7 +380,9 @@ class CommentBoard {
 		}
 
 		if ($newCommentId) {
+			$action = 'created';
 			if ($inReplyTo) {
+				$extra['reply'] = 1;
 				$dbw->update(
 					'user_board',
 					[
@@ -388,6 +391,7 @@ class CommentBoard {
 					['ub_id = ' . $inReplyTo],
 					__METHOD__
 				);
+				$action = 'replied';
 			}
 
 			wfRunHooks('CurseProfileAddComment', [$fromUser, $this->user_id, $inReplyTo, $commentText]);
@@ -404,6 +408,17 @@ class CommentBoard {
 					]
 				]);
 			}
+
+			// Insert an entry into the Log
+			$log = new \LogPage('curseprofile');
+			$log->addEntry(
+				'comment-'.$action,
+				\Title::newFromURL('User:'.$toUser->getName()),
+				null,
+				$extra,
+				$fromUser
+			);
+
 		}
 
 		return $newCommentId;
@@ -448,6 +463,16 @@ class CommentBoard {
 	 */
 	public static function editComment($comment_id, $message) {
 		$mouse = CP::loadMouse();
+
+		$log = new \LogPage('curseprofile');
+		$log->addEntry(
+			'comment',
+			$title,
+			null,
+			$extra,
+			$wgUser
+		);
+
 		return $mouse->DB->update(
 			'user_board',
 			[
