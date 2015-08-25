@@ -22,7 +22,7 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		$md5 = $this->getRequest()->getVal('md5');
 
-		if ($md5) {
+		if (!empty($md5)) {
 			// Try to use a cached value from redis
 			if ($mouse->redis->exists('wikiavatar:' . $md5)) {
 				$this->getOutput()->redirect($mouse->redis->get('wikiavatar:' . $md5));
