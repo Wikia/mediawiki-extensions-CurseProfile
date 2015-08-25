@@ -22,22 +22,26 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		$md5 = $this->getRequest()->getVal('md5');
 
-		// Try to use a cached value from redis
-		if ($mouse->redis->exists('wikiavatar:'.$md5)) {
-			$this->getOutput()->redirect($mouse->redis->get('wikiavatar:'.$md5));
-			return;
+		if (!empty($md5)) {
+			// Try to use a cached value from redis
+			if ($mouse->redis->exists('wikiavatar:' . $md5)) {
+				$this->getOutput()->redirect($mouse->redis->get('wikiavatar:' . $md5));
+				return;
+			}
+
+			// fallback to direct lookup from the gamepedia.com api
+			$result = $mouse->curl->post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5=' . urlencode($md5), [], [], true);
+			$json = json_decode($result, true);
+			if ($json && isset($json['AvatarUrl'])) {
+				// cache to redis
+				$mouse->redis->set('wikiavatar:' . $md5, $json['AvatarUrl']);
+				$mouse->redis->expire('wikiavatar:' . $md5, 86400); // discard after 24 hrs
+				$this->getOutput()->redirect($json['AvatarUrl']);
+			} else {
+				$this->getOutput()->showFileNotFoundError($md5);
+			}
 		}
 
-		// fallback to direct lookup from the gamepedia.com api
-		$result = $mouse->curl->post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5), [], [], true);
-		$json = json_decode($result, true);
-		if ($json && isset($json['AvatarUrl'])) {
-			// cache to redis
-			$mouse->redis->set('wikiavatar:'.$md5, $json['AvatarUrl']);
-			$mouse->redis->expire('wikiavatar:'.$md5, 86400); // discard after 24 hrs
-			$this->getOutput()->redirect($json['AvatarUrl']);
-		} else {
-			$this->getOutput()->showFileNotFoundError($md5);
-		}
+		$this->getOutput()->showUnexpectedValueError('Wiki Key', $md5);
 	}
 }
