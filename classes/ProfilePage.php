@@ -804,7 +804,7 @@ __NOTOC__
 			$this->user->getID(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			( $this->user->curse_id > 0 ? 'false' : '' ),
+			( $this->user->curse_id > 0 ? '' : '' ),
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
