@@ -540,7 +540,7 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		if ($curse_id > 1 && class_exists("\AchievementsHooks")) {
+		if ($curse_id > 1 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
 			$earned = 0;
 
 			$progress = \Achievements\Progress::newFromCurseId($curse_id);
