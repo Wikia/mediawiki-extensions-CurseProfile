@@ -78,7 +78,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		}
 
 		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
-		$pagination = Curse::generatePaginationHtml($total, $itemsPerPage, $start);
+		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($mouse->output->commentboard->comments($comments, $user_id, $pagination, $mobile));
 

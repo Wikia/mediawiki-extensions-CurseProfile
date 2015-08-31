@@ -54,7 +54,7 @@ class SpecialManageFriends extends \SpecialPage {
 		$rcvd = $f->getReceivedRequests();
 		$sent = $f->getSentRequests();
 		// $wgOut->addModules('ext.curse.pagination');
-		// $pagination = Curse::generatePaginationHtml($total, $itemsPerPage, $start);
+		// $pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($mouse->output->managefriends->manage($friends, $rcvd, $sent));
 

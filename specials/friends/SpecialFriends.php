@@ -78,7 +78,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 
 		// $comments = $board->getComments(null, $start, $itemsPerPage, -1);
 		// $wgOut->addModules('ext.curse.pagination');
-		// $pagination = Curse::generatePaginationHtml($total, $itemsPerPage, $start);
+		// $pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($mouse->output->managefriends->display($friends));
 
