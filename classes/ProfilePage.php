@@ -462,8 +462,8 @@ class ProfilePage extends \Article {
 		}
 
 		$imgPath = CP::getWikiImageByHash($wiki['md5_key']);
-		if (!empty($imgPath)) {
-			$HTML = \Html::element('img', ['src'=>$imgPath, 'height'=>118, 'width'=>157, 'alt'=>$wiki['wiki_name']]);
+		if (!empty($imgPath) && !empty($wiki['md5_key'])) {
+			$HTML = \Html::element('img', ['src' => $imgPath, 'height' => 118, 'width' => 157, 'alt' => $wiki['wiki_name']]);
 		} else {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
