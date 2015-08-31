@@ -613,7 +613,7 @@ class ProfilePage extends \Article {
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
 		$output = '';
 
-		if (!class_exists("\AchievementsHooks")) {
+		if (!class_exists("\AchievementsHooks") || AchievementsHooks::inMaintenance()) {
 			return [
 				$output,
 				'isHTML'	=> true
