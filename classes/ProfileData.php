@@ -356,7 +356,7 @@ class ProfileData {
 				foreach ($data as $field => $val) {
 					$data[$field] = unserialize($val);
 				}
-				$ret[] = $data;
+				$ret[$md5] = $data;
 			}
 		}
 		return $ret;
