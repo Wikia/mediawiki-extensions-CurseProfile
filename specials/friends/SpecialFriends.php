@@ -50,17 +50,18 @@ class SpecialFriends extends \UnlistedSpecialPage {
 
 		// when viewing your own friends list, use the manage page
 		if ($this->getUser()->getId() == $user->getId()) {
-			$wgOut->redirect('/Special:ManageFriends');
+			$specialManageFriends = \Title::newFromText('Special:ManageFriends');
+			$wgOut->redirect($specialManageFriends->getFullURL());
 			return;
 		}
 
 		// Fix missing or incorrect username segment in the path
 		if ($user->getTitleKey() != $user_name) {
-			$fixedPath = '/Special:Friends/'.$user_id.'/'.$user->getTitleKey();
+			$specialManageFriends = \Title::newFromText('Special:Friends/'.$user_id.'/'.$user->getTitleKey());
 			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
-				$fixedPath .= '?'.$_SERVER['QUERY_STRING'];
+				$query = '?'.$_SERVER['QUERY_STRING'];
 			}
-			$wgOut->redirect($fixedPath);
+			$wgOut->redirect($specialManageFriends.$query);
 			return;
 		}
 

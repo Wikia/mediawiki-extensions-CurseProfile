@@ -748,6 +748,8 @@ class ProfilePage extends \Article {
 	 * @return	string
 	 */
 	protected function profileLayout() {
+		global $wgUser;
+
 		return sprintf('
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
@@ -790,7 +792,7 @@ class ProfilePage extends \Article {
 			<USERSTATS>
 		</div>
 		<div class="section friends">
-			<h3>'.wfMessage('cp-friendssection', ($this->viewingSelf() ? $this->user->getId() : ''), $this->user->getId())->plain().'</h3>
+			<h3>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId())->plain().'</h3>
 			{{#friendlist: %2$s}}
 		</div>
 		{{#if: %5$s | <div class="section achievements">
