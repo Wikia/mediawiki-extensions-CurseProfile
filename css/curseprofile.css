@@ -81,19 +81,19 @@
 	margin-left: 0;
 }
 
-.achievements .icon {
+.section.achievements .icon {
 	display: inline-block;
 }
 
-.achievements .icon img {
-	margin: 0 2px;
+.section.achievements .icon img {
+	margin: 2px;
 	max-height: 32px;
 	max-width: 32px;
 	min-height: 32px;
 	min-width: 32px;
 }
 
-.achievements .icon.global {
+.section.achievements .icon.global {
 	display: block;
 	margin-bottom: 3px;
 }
