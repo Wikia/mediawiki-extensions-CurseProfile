@@ -840,8 +840,10 @@ __NOTOC__
 		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h1>
 		{{#friendlist: %2$s}}
 		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
+		<div class="section achievements">
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
+		</div>
 		}}
 		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
 		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>

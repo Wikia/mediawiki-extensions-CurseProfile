@@ -122,11 +122,11 @@ ul.friends {
 		word-wrap: break-word;
 	}
 
-.curseprofile .achievements .icon {
+.section.achievements .icon {
 	display: inline-block;
 }
 
-.curseprofile .achievements .icon img {
+.section.achievements .icon img {
 	margin: 2px;
 	max-height: 32px;
 	max-width: 32px;
@@ -134,7 +134,7 @@ ul.friends {
 	min-width: 32px;
 }
 
-.curseprofile .achievements .icon.global {
+.section.achievements .icon.global {
 	display: block;
 	margin-bottom: 3px;
 }
