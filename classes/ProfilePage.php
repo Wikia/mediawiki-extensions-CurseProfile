@@ -837,9 +837,9 @@ __NOTOC__
 		{{#groups:}}
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
 		<USERSTATS>
-		<h1 class="section friends">'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h1>
+		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h1>
 		{{#friendlist: %2$s}}
-		{{#if: %5$s | <h1 class="section achievements">'.wfMessage('cp-achievementssection')->plain().'</h1>
+		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
 		}}

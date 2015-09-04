@@ -111,3 +111,30 @@ img.GP-brand {
 #content_block_2 dd {
 	float:right;
 }
+
+/* Sidebar friend list */
+ul.friends {
+	list-style: none;
+	margin-left: 0;
+}
+	.friends li {
+		white-space: nowrap;
+		word-wrap: break-word;
+	}
+
+.curseprofile .achievements .icon {
+	display: inline-block;
+}
+
+.curseprofile .achievements .icon img {
+	margin: 2px;
+	max-height: 32px;
+	max-width: 32px;
+	min-height: 32px;
+	min-width: 32px;
+}
+
+.curseprofile .achievements .icon.global {
+	display: block;
+	margin-bottom: 3px;
+}
