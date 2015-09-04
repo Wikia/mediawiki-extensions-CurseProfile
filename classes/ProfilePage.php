@@ -790,7 +790,7 @@ class ProfilePage extends \Article {
 			<USERSTATS>
 		</div>
 		<div class="section friends">
-			<h3>'.wfMessage('cp-friendssection')->plain().'</h3>
+			<h3>'.wfMessage('totalfriends', '', $this->user->curse_id)->plain().'</h3>
 			{{#friendlist: %2$s}}
 		</div>
 		{{#if: %5$s | <div class="section achievements">
