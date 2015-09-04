@@ -788,6 +788,9 @@ class ProfilePage extends \Article {
 		<div class="section stats">
 			<h3>'.wfMessage('cp-statisticssection')->plain().'</h3>
 			<USERSTATS>
+		</div>
+		<div class="section friends">
+			<h3>'.wfMessage('cp-friendssection')->plain().' ([[Special:Achievements|'.wfMessage('ach_view_all')->plain().']])</h3>
 			{{#friendlist: %2$s}}
 		</div>
 		{{#if: %5$s | <div class="section achievements">
