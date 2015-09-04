@@ -820,6 +820,8 @@ __NOTOC__
 	 * @return	string
 	 */
 	protected function mobileProfileLayout() {
+		global $wgUser;
+
 		return sprintf('
 <div class="curseprofile" id="mf-curseprofile" data-userid="%2$s">
 		<div class="userinfo section">
@@ -835,7 +837,7 @@ __NOTOC__
 		{{#groups:}}
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
 		<USERSTATS>
-		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain()).'</h1>
+		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h1>
 		{{#friendlist: %2$s}}
 		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 			{{#achievements:local|20}}
