@@ -306,7 +306,7 @@ ul.friends {
 	}
 
 @media screen and (min-width: 1260px) {
-	.stats ul.friends {
+	.section.friends ul.friends {
 		-moz-columns: 2;
 		-webkit-columns: 2;
 		columns: 2;
@@ -314,7 +314,7 @@ ul.friends {
 }
 
 @media screen and (min-width: 1800px) {
-	.stats ul.friends {
+	.section.friends ul.friends {
 		-moz-columns: 3;
 		-webkit-columns: 3;
 		columns: 3;
