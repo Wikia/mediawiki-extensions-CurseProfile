@@ -835,7 +835,12 @@ __NOTOC__
 		{{#groups:}}
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
 		<USERSTATS>
+		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain()).'</h1>
 		{{#friendlist: %2$s}}
+		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
+			{{#achievements:local|20}}
+			{{#achievements:global|20}}
+		}}
 		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
 		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
 		{{#recentactivity: %2$s}}
@@ -850,8 +855,7 @@ __NOTOC__
 			$this->user->getId(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			'', // no achievements
-			// ( $this->user->curse_id > 0 ? 'true' : '' ), /* delete above and uncomment for achievement block */
+			( $this->user->curse_id > 0 ? 'true' : '' ),
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
