@@ -57,11 +57,11 @@ class SpecialFriends extends \UnlistedSpecialPage {
 
 		// Fix missing or incorrect username segment in the path
 		if ($user->getTitleKey() != $user_name) {
-			$specialManageFriends = \Title::newFromText('Special:Friends/'.$user_id.'/'.$user->getTitleKey());
+			$specialFriends = \Title::newFromText('Special:Friends/'.$user_id.'/'.$user->getTitleKey());
 			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
 				$query = '?'.$_SERVER['QUERY_STRING'];
 			}
-			$wgOut->redirect($specialManageFriends.$query);
+			$wgOut->redirect($specialFriends->getFullURL().$query);
 			return;
 		}
 
