@@ -190,3 +190,5 @@ $wgHooks['SkinMinervaDefaultModules'][]		= 'CurseProfile\Hooks::onSkinMinervaDef
 
 // Ajax Setup
 require_once('CurseProfile.ajax.php');
+
+$wgCPEditsToComment = 1;

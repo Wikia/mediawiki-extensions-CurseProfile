@@ -433,6 +433,7 @@ class CommentBoard {
 	 * @return	bool
 	 */
 	public static function canReply($comment_id, $user = null) {
+		global $wgCPEditsToComment;
 		if (is_null($user)) {
 			global $wgUser;
 			$user = $wgUser;
@@ -452,7 +453,7 @@ class CommentBoard {
 		$boardOwner = \User::newFromId($comment['ub_user_id']);
 
 		// comment must not be deleted and user must be logged in
-		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (!$boardOwner->isBlocked() || $user->isAllowed('block'));
+		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (!$boardOwner->isBlocked() || $user->isAllowed('block')) && $user->getEditCount() >= $wgCPEditsToComment;
 	}
 
 	/**
@@ -706,5 +707,47 @@ class CommentBoard {
 
 		// user must be logged-in to report, comment must be public (not deleted), and no point in reporting if user can remove it themselves
 		return !$user->isAnon() && !$user->isAllowed('profile-modcomments') && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
+	}
+
+	/**
+	 * Filter text through abuse filters.
+	 *
+	 * @access	private
+	 * @param	string	Text to check against abuse filters.
+	 * @return	boolean Passed abuse filters.
+	 */
+	private function checkAbuseFilters($text) {
+		/*if (class_exists("AbuseFilterHooks") && method_exists("AbuseFilterHooks::filterEdit")) {
+			$status = Status::newGood();
+
+			AbuseFilterHooks::filterEdit($context, null, $text, $status, '', true);
+
+			if (!$status->isOK()) {
+				$msg = $status->getErrorsArray();
+				$msg = $msg[0];
+
+				// Use the error message key name as error code, the first parameter is the filter description.
+				if ($msg instanceof Message) {
+					// For forward compatibility: In case we switch over towards using Message objects someday.
+					// (see the todo for AbuseFilter::buildStatus)
+					$code = $msg->getKey();
+					$filterDescription = $msg->getParams();
+					$filterDescription = $filterDescription[0];
+					$warning = $msg->parse();
+				} else {
+					$code = array_shift($msg);
+					$filterDescription = $msg[0];
+					$warning = wfMessage($code)->params($msg)->parse();
+				}
+
+				$result = [
+					'code' => $code,
+					'info' => 'Hit AbuseFilter: '.$filterDescription,
+					'warning' => $warning
+				];
+			}
+
+			return $status->isOK();
+		}*/
 	}
 }
