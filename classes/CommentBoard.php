@@ -453,7 +453,7 @@ class CommentBoard {
 		$boardOwner = \User::newFromId($comment['ub_user_id']);
 
 		// comment must not be deleted and user must be logged in
-		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (!$boardOwner->isBlocked() || $user->isAllowed('block')) && $user->getEditCount() >= $wgCPEditsToComment;
+		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (($user->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $user->isAllowed('block'));
 	}
 
 	/**
