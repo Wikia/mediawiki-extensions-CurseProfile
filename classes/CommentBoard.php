@@ -321,7 +321,7 @@ class CommentBoard {
 		}
 
 		// user must be logged in, must not be blocked, and target must not be blocked (with exception for admins)
-		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (!$toUser->isBlocked() || $fromUser->isAllowed('block'));
+		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($user->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $user->isAllowed('block'));
 	}
 
 	/**
@@ -434,6 +434,7 @@ class CommentBoard {
 	 */
 	public static function canReply($comment_id, $user = null) {
 		global $wgCPEditsToComment;
+
 		if (is_null($user)) {
 			global $wgUser;
 			$user = $wgUser;
