@@ -321,7 +321,7 @@ class CommentBoard {
 		}
 
 		// user must be logged in, must not be blocked, and target must not be blocked (with exception for admins)
-		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($user->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $user->isAllowed('block'));
+		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $fromUser->isAllowed('block'));
 	}
 
 	/**
