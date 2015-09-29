@@ -309,6 +309,8 @@ class CommentBoard {
 	 * @return	bool
 	 */
 	public static function canComment($toUser, $fromUser = null) {
+		global $wgCPEditsToComment;
+
 		if (is_numeric($toUser)) {
 			$toUser = \User::newFromId($toUser);
 		}
@@ -321,7 +323,7 @@ class CommentBoard {
 		}
 
 		// user must be logged in, must not be blocked, and target must not be blocked (with exception for admins)
-		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $fromUser->isAllowed('block'));
+		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
 	}
 
 	/**
