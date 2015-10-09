@@ -39,9 +39,12 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 		$this->templateHydralytics = new \TemplateHydralytics();
 
 		// Data built by StatsRecache job, refer to its contents for data format
-		$data = $this->mouse->redis->hgetall('profilestats');
-		foreach ($data as $k => $v) {
-			$this->profileStats[$k] = unserialize($v);
+		$this->profileStats = [];
+		$profileStats = $this->mouse->redis->hgetall('profilestats');
+		if (is_array($profileStats) && count($profileStats)) {
+			foreach ($profileStats as $key => $value) {
+				$this->profileStats[$key] = unserialize($value);
+			}
 		}
 
 		$this->output->addModules('ext.curseprofile.profilestats');
