@@ -14,23 +14,34 @@
 namespace CurseProfile;
 
 class SpecialProfileStats extends \Curse\SpecialPage {
+	/**
+	 * Main Constructor
+	 *
+	 * @access	public
+	 * @return	void
+	 */
 	public function __construct() {
-		parent::__construct( 'ProfileStats', 'profilestats' );
+		parent::__construct('ProfileStats', 'profilestats');
 	}
 
+	/**
+	 * Main Executor
+	 *
+	 * @access	public
+	 * @return	void	[Outputs to screen]
+	 */
 	public function execute( $path ) {
 		$this->setHeaders();
 		$this->checkPermissions();
 
 		$this->mouse = \mouseNest::getMouse();
-		global $IP;
-		$this->mouse->output->addTemplateFolder($IP.'/extensions/Hydralytics/templates');
-		$this->mouse->output->loadTemplate('hydralytics');
+
+		$this->templateHydralytics = new \TemplateHydralytics();
 
 		// Data built by StatsRecache job, refer to its contents for data format
 		$data = $this->mouse->redis->hgetall('profilestats');
 		foreach ($data as $k => $v) {
-			$this->$k = unserialize($v);
+			$this->profileStats[$k] = unserialize($v);
 		}
 
 		$this->output->addModules('ext.curseprofile.profilestats');
@@ -38,25 +49,28 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 	}
 
 	/**
-	 * Builds the html output of the special page
+	 * Builds the HTML output of the special page.
+	 *
+	 * @access	private
 	 * @return	string	html content
 	 */
 	private function buildOutput() {
-		$HTML = '';
+		$lastRunTime = intval($this->profileStats['lastRunTime']);
+		$HTML = wfMessage('profilestats_last_run_time', ($lastRunTime > 0 ? wfTimestamp(TS_DB, intval($this->profileStats['lastRunTime'])) : wfMessage('last_run_never')))->escaped();
 
 		$HTML .= "
 			<div id='ps-adoption'>
-				".$this->mouse->output->hydralytics->chartJS('Overall Adoption', $this->users, 'pie')."
+				".$this->templateHydralytics->chartJS('Overall Adoption', $this->profileStats['users'], 'pie')."
 				<div class='chart' id='chart-".md5('Overall Adoption')."'>
 					<div class='loading'>Loading...</div>
 				</div>
-				<div id='adoption-chart'>".$this->buildTable($this->users,['key'=>'Profile Type','value'=>'Users'])."</div>
+				<div id='adoption-chart'>".$this->buildTable($this->profileStats['users'], ['key' => 'Profile Type', 'value' => 'Users'])."</div>
 			</div>";
 
 		$HTML .= "<h2>Actual Usage Stats</h2>"
 		."<div id='friends-system'><h3>Friends System</h3>"
-			.$this->buildTable($this->friends, ['key'=>'Number of Friends', 'value'=>'Users'])
-			."<p>".wfMessage('profilestats-avgFriends', $this->avgFriends)->escaped()."</p>"
+			.$this->buildTable($this->profileStats['friends'], ['key' => 'Number of Friends', 'value' => 'Users'])
+			."<p>".wfMessage('profilestats-avgFriends', $this->profileStats['avgFriends'])->escaped()."</p>"
 		."</div>"
 		."<div id='profile-creation'><h3>Profile Creation</h3>".$this->buildTable($this->profileContent, ['key'=>'Content in Profile','value'=>'Users'])."</div>"
 		."<div id='favorite-wikis'><h3>Favorite Wikis</h3>".$this->buildTable($this->favoriteWikis, ['key'=>'Wiki','value'=>'Favorites'], [$this, 'wikiNameFromHash'], true)."</div>";

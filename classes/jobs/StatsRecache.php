@@ -149,6 +149,7 @@ class StatsRecache extends \SyncService\Job {
 		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
 			$this->mouse->redis->hset('profilestats', $prop, serialize($this->$prop));
 		}
+		$this->mouse->redis->hset('profilestats', 'lastRunTime', time());
 		$this->outputLine('Done.', time());
 	}
 }

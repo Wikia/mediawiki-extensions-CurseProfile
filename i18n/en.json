@@ -151,6 +151,8 @@
 	"profilestats-empty": "Empty",
 	"profilestats-filled": ">1 field",
 	"profilestats-avgFriends": "Users with at least 1 friend avg $1 friends.",
+	"profilestats_last_run_time": "Last Run Time: $1",
+	"last_run_never": "Never",
 	"achievementsearned": "Achievements",
 	"achievements-local": "{{SITENAME}}",
 	"achievements-global": "Mega Achievements",
