@@ -43,9 +43,7 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 		$profileStats = $this->mouse->redis->hgetall('profilestats');
 		if (is_array($profileStats) && count($profileStats)) {
 			foreach ($profileStats as $key => $value) {
-				if ($key != 'lastRunTime') {
-					$this->profileStats[$key] = unserialize($value);
-				}
+				$this->profileStats[$key] = unserialize($value);
 			}
 		}
 
