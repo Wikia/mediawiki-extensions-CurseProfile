@@ -124,7 +124,7 @@ class StatsRecache extends \SyncService\Job {
 			// get customization stats
 			$params = ['useroptions:'.$row['curse_id']] + ProfileData::$editProfileFields;
 			$profileFields = call_user_func_array([$this->mouse->redis, 'hmget'], $params);
-			if (array_filter($profileFields)) {
+			if (is_array($profileFields) && array_filter($profileFields)) {
 				$this->profileContent['filled'] += 1;
 			} else {
 				$this->profileContent['empty'] += 1;
