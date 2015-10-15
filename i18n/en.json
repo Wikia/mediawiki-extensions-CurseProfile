@@ -111,6 +111,7 @@
 	"totalpatrols": "Patrols",
 	"totalfriends": "Friends",
 	"totalfriends-mobile": "Friends",
+	"commentboard": "Comment Board",
 	"commentboard-empty": "There are no comments on this user's board.",
 	"commentboard-invalid-title": "Invalid Comment Link",
 	"commentboard-invalid": "Sorry, no comment exists for this link.",
