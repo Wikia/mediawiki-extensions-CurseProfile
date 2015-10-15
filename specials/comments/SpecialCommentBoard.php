@@ -64,10 +64,9 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 			$wgOut->addModules('ext.curseprofile.comments');
 		}
 		$wgOut->addModules('ext.curse.pagination');
-		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
-		$mouse->output->loadTemplate('commentboard');
+		$templateCommentBoard = new TemplateCommentBoard;
 
-		$wgOut->addHTML($mouse->output->commentboard->header($user, $wgOut->getPageTitle()));
+		$wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
 		$board = new CommentBoard($user_id, CommentBoard::BOARDTYPE_ARCHIVES);
 
@@ -80,7 +79,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
 		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($mouse->output->commentboard->comments($comments, $user_id, $pagination, $mobile));
+		$wgOut->addHTML($templateCommentBoard->comments($comments, $user_id, $pagination, $mobile));
 
 		return;
 	}

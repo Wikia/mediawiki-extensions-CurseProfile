@@ -36,9 +36,7 @@ class SpecialCommentModeration extends \SpecialPage {
 		$wgOut->setPageTitle(wfMessage('commentmoderation-title')->plain());
 		$wgOut->addModules('ext.curseprofile.commentmoderation');
 		$wgOut->addModules('ext.curse.pagination');
-		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
-		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
-		$mouse->output->loadTemplate('commentmoderation');
+		$templateCommentModeration = new TemplateCommentModeration;
 		$this->setHeaders();
 
 		$this->sortStyle = $sortBy;
@@ -55,12 +53,12 @@ class SpecialCommentModeration extends \SpecialPage {
 			$wgOut->addWikiMsg('commentmoderation-empty');
 			return;
 		} else {
-			$content = $mouse->output->commentmoderation->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
+			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
 		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($mouse->output->commentmoderation->sortStyleSelector($this->sortStyle));
+		$wgOut->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
 		$wgOut->addHTML($pagination);
 		$wgOut->addHTML($content);
 		$wgOut->addHTML($pagination);
