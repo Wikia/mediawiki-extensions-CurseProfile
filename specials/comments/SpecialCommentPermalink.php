@@ -42,9 +42,9 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
 		$wgOut->addModules('ext.curseprofile.comments');
-		$templateCommentPermalink = new \TemplateCommentPermalink;
+		$templateCommentBoard = new \TemplateCommentBoard;
 
-		$wgOut->addHTML($templateCommentPermalink->permalinkHeader($user, $wgOut->getPageTitle()));
+		$wgOut->addHTML($templateCommentBoard->permalinkHeader($user, $wgOut->getPageTitle()));
 
 		// display single comment while highlighting the selected ID
 		$wgOut->addHTML('<div class="comments">'.CommentDisplay::newCommentForm($user->getId(), true).CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
