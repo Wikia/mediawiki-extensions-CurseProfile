@@ -44,7 +44,7 @@ class SpecialManageFriends extends \SpecialPage {
 		$wgOut->addModules('ext.curseprofile.profilepage');
 		$templateManageFriends = new TemplateManageFriends;
 
-		// $wgOut->addHTML($mouse->output->commentboard->header($user, $wgOut->getPageTitle()));
+		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
 		$f = new Friendship($user->curse_id);
 
