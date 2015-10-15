@@ -12,7 +12,7 @@
  *
 **/
 
-class skin_commentboard {
+class TemplateCommentBoard {
 	/**
 	 * Output HTML
 	 *

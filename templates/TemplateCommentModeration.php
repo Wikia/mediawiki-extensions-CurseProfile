@@ -13,7 +13,7 @@
 **/
 use CurseProfile\CP, CurseProfile\ProfilePage, CurseProfile\CommentReport;
 
-class skin_commentmoderation {
+class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
 	const MAX_REPORTER_AVATARS = 3;
 

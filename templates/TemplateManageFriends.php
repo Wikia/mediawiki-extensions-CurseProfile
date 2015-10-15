@@ -12,7 +12,7 @@
  *
 **/
 
-class skin_managefriends {
+class TemplateManageFriends {
 	/**
 	 * Output HTML
 	 *
