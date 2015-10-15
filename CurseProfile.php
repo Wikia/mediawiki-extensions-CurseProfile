@@ -60,8 +60,11 @@ $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/No
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 $wgAutoloadClasses['CurseProfile\CommentLogFormatter'] = $extDir . 'classes/CommentLogFormatter.php';
 
-// Special Pages
+$wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/specials/TemplateCommentBoard.php";
+$wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/specials/TemplateCommentModeration.php";
+$wgAutoloadClasses['TemplateManageFriends']			= "{$extDir}/specials/TemplateManageFriends.php";
 
+//Special Pages
 $wgAutoloadClasses['CurseProfile\SpecialManageFriends']		= "{$extDir}/specials/friends/SpecialManageFriends.php";
 $wgSpecialPages['ManageFriends']							= 'CurseProfile\SpecialManageFriends';
 
@@ -136,7 +139,7 @@ $wgResourceModules['ext.curseprofile.commentmoderation'] = [
 	],
 ];
 
-// needs to load early, so it has an 'a' prefix
+//Needs to load early, so it has an 'a' prefix.
 $wgResourceModules['a.ext.curseprofile.profilepage.mobile'] = [
 	'targets' => ['mobile'],
 	'group' => 'site',
@@ -167,9 +170,9 @@ $wgResourceModules['jquery.autosize'] = [
 
 $wgResourceModules['ext.curseprofile.customskin'] = [
 	'class' => 'CurseProfile\ResourceLoaderModule',
-]; // allows sites to customize by editing MediaWiki:CurseProfile.css
+]; //Allows sites to customize by editing MediaWiki:CurseProfile.css
 
-// Hooks
+//Hooks
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['LinkBegin'][]						= 'CurseProfile\Hooks::onLinkBegin';
@@ -188,7 +191,7 @@ $wgHooks['BeforeCreateEchoEvent'][]			= 'CurseProfile\Hooks::onBeforeCreateEchoE
 $wgHooks['EchoGetDefaultNotifiedUsers'][]	= 'CurseProfile\Hooks::onEchoGetDefaultNotifiedUsers';
 $wgHooks['SkinMinervaDefaultModules'][]		= 'CurseProfile\Hooks::onSkinMinervaDefaultModules';
 
-// Ajax Setup
+//Ajax Setup
 require_once('CurseProfile.ajax.php');
 
 $wgCPEditsToComment = 1;
