@@ -41,10 +41,8 @@ class SpecialManageFriends extends \SpecialPage {
 
 		// $start = $wgRequest->getInt('st');
 		// $itemsPerPage = 50;
-		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->addModules('ext.curseprofile.profilepage');
-		$mouse->output->addTemplateFolder(dirname(dirname(__DIR__)).'/templates');
-		$mouse->output->loadTemplate('managefriends');
+		$templateManageFriends = new TemplateManageFriends;
 
 		// $wgOut->addHTML($mouse->output->commentboard->header($user, $wgOut->getPageTitle()));
 
@@ -56,7 +54,7 @@ class SpecialManageFriends extends \SpecialPage {
 		// $wgOut->addModules('ext.curse.pagination');
 		// $pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($mouse->output->managefriends->manage($friends, $rcvd, $sent));
+		$wgOut->addHTML($templateManageFriends->manage($friends, $rcvd, $sent));
 
 		return;
 	}
