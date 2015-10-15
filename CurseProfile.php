@@ -60,9 +60,9 @@ $wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/No
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
 $wgAutoloadClasses['CurseProfile\CommentLogFormatter'] = $extDir . 'classes/CommentLogFormatter.php';
 
-$wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/specials/TemplateCommentBoard.php";
-$wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/specials/TemplateCommentModeration.php";
-$wgAutoloadClasses['TemplateManageFriends']			= "{$extDir}/specials/TemplateManageFriends.php";
+$wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/templates/TemplateCommentBoard.php";
+$wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/templates/TemplateCommentModeration.php";
+$wgAutoloadClasses['TemplateManageFriends']			= "{$extDir}/templates/TemplateManageFriends.php";
 
 //Special Pages
 $wgAutoloadClasses['CurseProfile\SpecialManageFriends']		= "{$extDir}/specials/friends/SpecialManageFriends.php";
