@@ -18,6 +18,12 @@ namespace CurseProfile;
  * Redirects to ManageFriends when viewing one's own friends page.
  */
 class SpecialFriends extends \UnlistedSpecialPage {
+	/**
+	 * Main Constructor
+	 *
+	 * @access	public
+	 * @return	void
+	 */
 	public function __construct() {
 		parent::__construct( 'Friends' );
 	}
@@ -25,14 +31,15 @@ class SpecialFriends extends \UnlistedSpecialPage {
 	/**
 	 * Show the special page
 	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
+	 * @access	public
+	 * @param	string	$path - Mixed: parameter(s) passed to the page or null.
 	 */
-	public function execute( $path ) {
+	public function execute($path) {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$this->setHeaders();
 		if (empty($path)) {
-			$wgOut->addWikiMsg('commentboard-invalid');
+			$wgOut->addWikiMsg('friendsboard-invalid');
 			$wgOut->setStatusCode(404);
 			return;
 		}
@@ -43,7 +50,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$user = \User::newFromId($user_id);
 		$user->load();
 		if (!$user || $user->isAnon()) {
-			$wgOut->addWikiMsg('commentboard-invalid');
+			$wgOut->addWikiMsg('friendsboard-invalid');
 			$wgOut->setStatusCode(404);
 			return;
 		}
