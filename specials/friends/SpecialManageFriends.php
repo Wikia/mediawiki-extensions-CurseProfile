@@ -42,7 +42,7 @@ class SpecialManageFriends extends \SpecialPage {
 		// $start = $wgRequest->getInt('st');
 		// $itemsPerPage = 50;
 		$wgOut->addModules('ext.curseprofile.profilepage');
-		$templateManageFriends = new TemplateManageFriends;
+		$templateManageFriends = new \TemplateManageFriends;
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 

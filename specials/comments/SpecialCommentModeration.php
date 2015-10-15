@@ -36,7 +36,7 @@ class SpecialCommentModeration extends \SpecialPage {
 		$wgOut->setPageTitle(wfMessage('commentmoderation-title')->plain());
 		$wgOut->addModules('ext.curseprofile.commentmoderation');
 		$wgOut->addModules('ext.curse.pagination');
-		$templateCommentModeration = new TemplateCommentModeration;
+		$templateCommentModeration = new \TemplateCommentModeration;
 		$this->setHeaders();
 
 		$this->sortStyle = $sortBy;

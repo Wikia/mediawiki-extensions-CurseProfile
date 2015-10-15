@@ -64,7 +64,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 			$wgOut->addModules('ext.curseprofile.comments');
 		}
 		$wgOut->addModules('ext.curse.pagination');
-		$templateCommentBoard = new TemplateCommentBoard;
+		$templateCommentBoard = new \TemplateCommentBoard;
 
 		$wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
