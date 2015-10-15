@@ -76,7 +76,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		// $itemsPerPage = 50;
 		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
 		$wgOut->addModules('ext.curseprofile.profilepage');
-		$templateFriends = new \TemplateManageFriends;
+		$templateManageFriends = new \TemplateManageFriends;
 
 		$f = new Friendship($user->curse_id);
 
