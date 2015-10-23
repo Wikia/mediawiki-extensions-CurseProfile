@@ -18,6 +18,12 @@ class SpecialCommentModeration extends \SpecialPage {
 		parent::__construct( 'CommentModeration', 'profile-modcomments' );
 	}
 
+	/**
+	 * Return the group name for this special page.
+	 *
+	 * @access	protected
+	 * @return	string
+	 */
 	protected function getGroupName() {
 		return 'users';
 	}

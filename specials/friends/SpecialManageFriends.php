@@ -23,6 +23,12 @@ class SpecialManageFriends extends \SpecialPage {
 		parent::__construct( 'ManageFriends' );
 	}
 
+	/**
+	 * Return the group name for this special page.
+	 *
+	 * @access	protected
+	 * @return	string
+	 */
 	protected function getGroupName() {
 		return 'users';
 	}
