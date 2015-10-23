@@ -23,7 +23,7 @@ class SpecialManageFriends extends \SpecialPage {
 		parent::__construct( 'ManageFriends' );
 	}
 
-	public function getGroupName() {
+	protected function getGroupName() {
 		return 'users';
 	}
 

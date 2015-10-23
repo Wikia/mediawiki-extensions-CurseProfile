@@ -26,26 +26,13 @@ class CP {
 	/**
 	 * Initializes the mouse singleton for use anywhere
 	 *
-	 * @param	array	[optional] extra modules that should be loaded
-	 * @param	array	[optional] extra settings to be added (ignored if mouse was previously loaded elsewhere)
+	 * @access	public
+	 * @param	array	[optional] Extra modules that should be loaded.
 	 * @return	object	mouse instance
 	 */
-	public static function loadMouse($extraModules=[], $extraSettings=[]) {
+	public static function loadMouse($extraModules = []) {
 		if (!isset(self::$mouse)) {
-			if (!defined('SITE_DIR')) {
-				define('SITE_DIR', dirname(dirname(dirname(__DIR__))));
-			}
-			if (!defined('SITES_FOLDER')) {
-				define('SITES_FOLDER', SITE_DIR.'/sites');
-			}
-			$settings = ['file' => SITE_DIR.'/LocalSettings.php'];
-			if (!empty($extraSettings)) {
-				$settings = array_merge($settings, $extraSettings);
-			}
-			if (!class_exists('mouseHole')) {
-				require_once(SITE_DIR.'/mouse/mouse.php');
-			}
-			self::$mouse = \mouseHole::instance(array('config' => 'mouseConfigMediawiki', 'DB' => 'mouseDatabaseMysqli', 'redis' => 'mouseCacheRedis'), $settings);
+			self::$mouse = \mouseNest::getMouse();
 		}
 		if (!empty($extraModules)) {
 			self::$mouse->loadClasses($extraModules);
