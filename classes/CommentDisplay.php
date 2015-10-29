@@ -218,7 +218,7 @@ class CommentDisplay {
 	 * @param	int		the id of the comment for which replies need to be loaded
 	 * @return	string	html for display
 	 */
-	public static function repliesTo($userId, $comment_id) {
+	public static function repliesTo($userId, $commentId) {
 		$userId = intval($userId);
 		if ($userId < 1) {
 			return 'Invalid user ID given';
@@ -226,7 +226,7 @@ class CommentDisplay {
 		$HTML = '';
 
 		$board = new CommentBoard($userId);
-		$comments = $board->getReplies($comment_id, null, -1);
+		$comments = $board->getReplies($commentId, null, -1);
 
 		if (empty($comments)) {
 			$HTML = wfMessage('cp-nocommentreplies');
