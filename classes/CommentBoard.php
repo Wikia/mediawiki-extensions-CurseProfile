@@ -176,7 +176,6 @@ class CommentBoard {
 			['ub_id' => intval($commentId)],
 			__METHOD__
 		);
-		$result->free();
 
 		return $result->fetchRow();
 	}
