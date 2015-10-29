@@ -55,6 +55,7 @@ class CommentBoard {
 	 * @param	int		the ID of a user
 	 */
 	public function __construct($user_id, $type = self::BOARDTYPE_RECENT) {
+		$this->DB = wfGetDB(DB_MASTER);
 		$this->user_id = intval($user_id);
 		$this->type = intval($type);
 		if ($this->user_id < 1) {
@@ -188,8 +189,7 @@ class CommentBoard {
 			$conditions = [];
 		}
 		//Fetch top level comments.
-		$DB = wfGetDB(DB_SLAVE);
-		$results = $DB->select(
+		$results = $this->DB->select(
 			['user_board'],
 			[
 				'*',
@@ -219,15 +219,23 @@ class CommentBoard {
 			return $comments;
 		}
 
-		// Count many replies each comment in this chunk has
-		$repliesRes = $mouse->DB->select([
-			'select' => 'b.ub_in_reply_to as ub_id, COUNT(*) as replies',
-			'from'   => ['user_board' => 'b'],
-			'where'  => 'b.ub_in_reply_to IN ('.implode(',',array_keys($commentIds)).')',
-			'group'  => 'b.ub_in_reply_to',
-		]);
-		// TODO: fetch replies for all comments in a single DB query?
-		while ($row = $mouse->DB->fetch($repliesRes)) {
+		//Count many replies each comment in this chunk has.
+		$results = $this->DB->select(
+				['user_board'],
+				[
+					'ub_in_reply_to AS ub_id',
+					'COUNT(*) as replies'
+				],
+				[
+					'ub_in_reply_to' => array_keys($commentIds)
+				],
+				__METHOD__,
+				[
+					'GROUP BY'	=> 'ub_in_reply_to'
+				]
+			);
+		//@TODO: fetch replies for all comments in a single DB query?
+		while ($row = $result->fetchRow()) {
 			$comments[$commentIds[$row['ub_id']]]['reply_count'] = intval($row['replies']);
 			// retrieve replies if there are any
 			if ($row['replies'] > 0) {
@@ -239,8 +247,9 @@ class CommentBoard {
 	}
 
 	/**
-	 * Gets all comments on the board
+	 * Gets all comments on the board.
 	 *
+	 * @access	public
 	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
 	 * @param	int		[optional] number of comments to skip when loading more
 	 * @param	int		[optional] number of top-level items to return
@@ -248,9 +257,12 @@ class CommentBoard {
 	 * @return	array	an array of comment data (text and user info)
 	 */
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
-		$searchConditions = ' AND b.ub_in_reply_to = 0 AND b.ub_user_id = '.$this->user_id;
+		$searchConditions = [
+			'ub_in_reply_to'	=> 0,
+			'ub_user_id'		=> $this->user_id
+		];
 		if ($maxAge >= 0) {
-			$searchConditions .= ' AND IFNULL(b.ub_last_reply, b.ub_date) >= "'.date('Y-m-d H:i:s', time()-$maxAge*86400).'"';
+			$searchConditions['IFNULL(b.ub_last_reply, b.ub_date) >= '.$this->DB->addQuotes(date('Y-m-d H:i:s', time()-$maxAge*86400));
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}

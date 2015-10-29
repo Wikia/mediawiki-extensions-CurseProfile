@@ -15,7 +15,7 @@
 // This file is included only by the master wiki and adds extra functionality
 
 define('CURSEPROFILE_MASTER', true);
-require_once 'CurseProfile.php';
+require_once('CurseProfile.php');
 
 $extSyncServices[] = 'CurseProfile\FriendSync';
 $extSyncServices[] = 'CurseProfile\StatsRecache';

@@ -367,6 +367,42 @@ class Friendship {
 
 		$mouse = CP::loadMouse();
 		switch ($args['task']) {
+			/* Saving this for when mouse can be removed for job called functions.
+			case 'add':
+				$this->DB->insert(
+					'user_relationship_request',
+					[
+						'ur_user_id_from' => $this->curse_id,
+						'ur_user_id_to'   => $args['target'],
+						'ur_type'         => 1,
+						'ur_date'         => date('Y-m-d H:i:s'),
+					],
+					__METHOD__
+				);
+				break;
+			case 'confirm':
+				$this->DB->insert(
+					'user_relationship',
+					[
+						'r_user_id'          => $this->curse_id,
+						'r_user_id_relation' => $args['target'],
+						'r_type'             => 1,
+						'r_date'             => date('Y-m-d H:i:s'),
+					],
+					__METHOD__
+				);
+				$this->DB->insert(
+					'user_relationship',
+					[
+						'r_user_id'          => $args['target'],
+						'r_user_id_relation' => $this->curse_id,
+						'r_type'             => 1,
+						'r_date'             => date('Y-m-d H:i:s'),
+					],
+					__METHOD__
+				);
+				//Intentional fall-through.
+			*/
 			case 'add':
 				$mouse->DB->insert('user_relationship_request', [
 					'ur_user_id_from' => $this->curse_id,
