@@ -66,7 +66,7 @@ class CommentDisplay {
 		if (CommentBoard::canComment($targetUser) && !$mobile) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			$page = Title::newFromText("Special:AddComment/".$userId);
+			$page = \Title::newFromText("Special:AddComment/".$userId);
 			return '
 			<div class="commentdisplay add-comment'.($hidden ? ' hidden' : '').'">
 				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
