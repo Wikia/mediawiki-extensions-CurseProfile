@@ -325,7 +325,7 @@ class CommentBoard {
 			global $wgUser;
 			$user = $wgUser;
 		}
-		// early check for admin status
+		//Early check for admin status.
 		if ($user->isAllowed('profile-modcomments')) {
 			return true;
 		}
@@ -336,7 +336,7 @@ class CommentBoard {
 			$comment = self::queryCommentById($commentId);
 		}
 
-		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient
+		//PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
 		return $comment['ub_type'] == self::PUBLIC_MESSAGE
 			|| ($comment['ub_type'] == self::PRIVATE_MESSAGE && $comment['ub_user_id'] == $user->getId() && $comment['ub_user_id_from'] == $user->getId())
 			|| ($comment['ub_type'] == self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId());
