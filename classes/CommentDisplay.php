@@ -24,10 +24,10 @@ class CommentDisplay {
 	 * @param	int		id of the user whose recent comments should be displayed
 	 * @return	array	with html at index 0
 	 */
-	public static function comments(&$parser, $user_id = '') {
+	public static function comments(&$parser, $userId = '') {
 		$mobile = false;
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
+		$userId = intval($userId);
+		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 
@@ -37,9 +37,9 @@ class CommentDisplay {
 
 		$HTML = '';
 
-		$HTML .= self::newCommentForm($user_id, false, $mobile);
+		$HTML .= self::newCommentForm($userId, false, $mobile);
 
-		$board = new CommentBoard($user_id);
+		$board = new CommentBoard($userId);
 		$comments = $board->getComments();
 
 		foreach ($comments as $comment) {
@@ -60,17 +60,18 @@ class CommentDisplay {
 	 * @param	bool	if true, the form will add the mobilefrontend class for parsing.
 	 * @return	string	html fragment or empty string
 	 */
-	public static function newCommentForm($user_id, $hidden = false, $mobile = false) {
+	public static function newCommentForm($userId, $hidden = false, $mobile = false) {
 		global $wgUser;
-		$targetUser = \User::newFromId($user_id);
+		$targetUser = \User::newFromId($userId);
 		if (CommentBoard::canComment($targetUser) && !$mobile) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
+			$page = Title::newFromText("Special:AddComment/".$userId);
 			return '
 			<div class="commentdisplay add-comment'.($hidden ? ' hidden' : '').'">
 				<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $wgUser->getEmail(), $wgUser->getName())[0].'</div>
 				<div class="entryform">
-					<form action="/Special:AddComment/'.$user_id.'" method="post">
+					<form action="'.$page->getFullUrl().'" method="post">
 						<textarea name="message" maxlength="'.CommentBoard::MAX_LENGTH.'" data-replyplaceholder="'.$replyPlaceholder.'" placeholder="'.$commentPlaceholder.'"></textarea>
 						<button name="inreplyto" class="submit" value="0">'.wfMessage('commentaction')->escaped().'</button>
 						'.\Html::hidden('token', $wgUser->getEditToken()).'
@@ -217,14 +218,14 @@ class CommentDisplay {
 	 * @param	int		the id of the comment for which replies need to be loaded
 	 * @return	string	html for display
 	 */
-	public static function repliesTo($user_id, $comment_id) {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
+	public static function repliesTo($userId, $comment_id) {
+		$userId = intval($userId);
+		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 		$HTML = '';
 
-		$board = new CommentBoard($user_id);
+		$board = new CommentBoard($userId);
 		$comments = $board->getReplies($comment_id, null, -1);
 
 		if (empty($comments)) {
