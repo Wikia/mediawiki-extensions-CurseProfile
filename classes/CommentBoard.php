@@ -89,9 +89,9 @@ class CommentBoard {
 			//Everyone sees public messages.
 			$conditions[] = 'user_board.ub_type = 0';
 			//See private if you are author or recipient.
-			$conditions[] = sprintf('user_board.sub_type = 1 AND (user_board.sub_user_id = %2$s OR user_board.sub_user_id_from = %2$s)', $asUser->getId());
+			$conditions[] = sprintf('user_board.sub_type = 1 AND (user_board.sub_user_id = %1$s OR user_board.sub_user_id_from = %1$s)', $asUser->getId());
 			//See deleted if you are the author.
-			$conditions[] = sprintf('user_board.sub_type = -1 AND user_board.sub_user_id_from = %2$s', $asUser->getId());
+			$conditions[] = sprintf('user_board.sub_type = -1 AND user_board.sub_user_id_from = %1$s', $asUser->getId());
 			return '( ('.implode(') OR (', $conditions).') )';
 		}
 	}
