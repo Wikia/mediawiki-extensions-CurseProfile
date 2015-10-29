@@ -65,11 +65,11 @@ class CommentBoard {
 	/**
 	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
 	 *
-	 * @param   string  [optional] table prefix to use for generated column names
+	 * @access	private
 	 * @param   object  [optional] mw User object doing the viewing (defaults to wgUser)
 	 * @return  string  a single SQL condition entirely enclosed in parenthesis
 	 */
-	private static function visibleClause($prefix = '', $asUser = null) {
+	static private function visibleClause($asUser = null) {
 		if (is_null($asUser)) {
 			global $wgUser;
 			$asUser = $wgUser;
@@ -85,12 +85,12 @@ class CommentBoard {
 			return '1=1';
 		} else {
 			$conditions = [];
-			// everyone sees public messages
-			$conditions[] = $prefix.'ub_type = 0';
-			// see private if you are author or recipient
-			$conditions[] = sprintf('%1$sub_type = 1 AND (%1$sub_user_id = %2$s OR %1$sub_user_id_from = %2$s)', $prefix, $asUser->getId());
-			// see deleted if you are the author
-			$conditions[] = sprintf('%1$sub_type = -1 AND %1$sub_user_id_from = %2$s', $prefix, $asUser->getId());
+			//Everyone sees public messages.
+			$conditions[] = 'user_board.ub_type = 0';
+			//See private if you are author or recipient.
+			$conditions[] = sprintf('user_board.sub_type = 1 AND (user_board.sub_user_id = %2$s OR user_board.sub_user_id_from = %2$s)', $asUser->getId());
+			//See deleted if you are the author.
+			$conditions[] = sprintf('user_board.sub_type = -1 AND user_board.sub_user_id_from = %2$s', $asUser->getId());
 			return '( ('.implode(') OR (', $conditions).') )';
 		}
 	}
@@ -108,15 +108,20 @@ class CommentBoard {
 			$inReplyTo = intval($inReplyTo);
 		}
 
-		$mouse = CP::loadMouse();
-		$res = $mouse->DB->select([
-			'select' => 'count(*) as count',
-			'from'   => ['user_board' => 'b'],
-			'where'  => self::visibleClause('b', $asUser).' AND b.ub_in_reply_to = '.$inReplyTo.' AND b.ub_user_id = '.$this->user_id,
-		]);
+		$DB = wfGetDB(DB_SLAVE);
+		$results = $DB->select(
+			['user_board'],
+			['count(*) as total'],
+			[
+				self::visibleClause($asUser),
+				'ub_in_reply_to'	=> $inReplyTo,
+				'ub_user_id'		=> $this->user_id
+			],
+			__METHOD__
+		);
 
-		$row = $mouse->DB->fetch($res);
-		return $row['count'];
+		$row = $results->fetchRow();
+		return $row['total'];
 	}
 
 	/**
@@ -134,7 +139,7 @@ class CommentBoard {
 			return [];
 		}
 
-		$db = CP::getDb(DB_SLAVE);
+		$db = wfGetDB(DB_SLAVE);
 
 		// Look up the target comment
 		$res = $db->select(
@@ -162,7 +167,7 @@ class CommentBoard {
 		}
 
 		$board = new self($comment['ub_user_id'], self::BOARDTYPE_ARCHIVES);
-		$comment = $board->getCommentsWithConditions("AND ub_id = $rootId", $asUser, 0, 1);
+		$comment = $board->getCommentsWithConditions(['ub_id' => $rootId], $asUser, 0, 1);
 		// force loading all replies instead of just 5
 		$comment[0]['replies'] = $board->getReplies($rootId, $asUser, 0);
 		return $comment;
@@ -171,27 +176,40 @@ class CommentBoard {
 	/**
 	 * Generic comment retrieval utility function. Automatically limits to viewable types.
 	 *
-	 * @param	string	sql conditions applied to the user_board table query
-	 * @param	int		[optional] user ID of user viewing (defaults to wgUser)
-	 * @param	int		[optional] number of comments to skip when loading more
-	 * @param	int		[optional] number of top-level items to return
+	 * @access	private
+	 * @param	array	SQL conditions applied to the user_board table query.  Will be merged with existing conditions.
+	 * @param	integer	[Optional] User ID of user viewing. (Defaults to wgUser)
+	 * @param	integer	[Optional] Number of comments to skip when loading more.
+	 * @param	integer	[Optional] Number of top-level items to return.
 	 * @return	array	comments!
 	 */
 	private function getCommentsWithConditions($conditions, $asUser = null, $startAt = 0, $limit = 100) {
-		$mouse = CP::loadMouse();
+		if (!is_array($conditions)) {
+			$conditions = [];
+		}
+		//Fetch top level comments.
+		$DB = wfGetDB(DB_SLAVE);
+		$results = $DB->select(
+			['user_board'],
+			[
+				'*',
+				'IFNULL(ub_last_reply, ub_date) AS last_updated'
+			],
+			array_merge([
+				self::visibleClause($asUser),
+			], $conditions),
+			__METHOD__,
+			[
+				'ORDER BY'	=> 'last_updated DESC',
+				'OFFSET'	=> $startAt,
+				'LIMIT'		=> $limit
+			]
+		);
 
-		// Fetch top level comments
-		$res = $mouse->DB->select([
-			'select' => 'b.*, IFNULL(b.ub_last_reply, b.ub_date) AS last_updated',
-			'from'   => ['user_board' => 'b'],
-			'where'  => self::visibleClause('b', $asUser).' '.$conditions,
-			'order'  => 'last_updated DESC',
-			'limit'  => [$startAt, $limit],
-		]);
 		$comments = [];
 		$commentIds = []; // will contain a mapping of commentId => array index within $comments
 		// (for fast lookup of a comment by id when inserting replies)
-		while ($row = $mouse->DB->fetch($res)){
+		while ($row = $result->fetchRow()) {
 			$commentIds[$row['ub_id']] = count($comments);
 			$row['reply_count'] = 0;
 			$comments[] = $row;
@@ -252,7 +270,7 @@ class CommentBoard {
 		$selOpt = [
 			'select' => 'b.*',
 			'from'   => ['user_board' => 'b'],
-			'where'  => self::visibleClause('b', $asUser).' AND b.ub_in_reply_to = '.$rootComment.' AND b.ub_user_id = '.$this->user_id,
+			'where'  => self::visibleClause($asUser).' AND b.ub_in_reply_to = '.$rootComment.' AND b.ub_user_id = '.$this->user_id,
 			'order'  => 'b.ub_date DESC',
 		];
 		if ($limit > 0) {
@@ -341,7 +359,7 @@ class CommentBoard {
 		if (empty($commentText)) {
 			return false;
 		}
-		$dbw = CP::getDb( DB_MASTER );
+		$dbw = wfGetDB( DB_MASTER );
 
 		$toUser = \User::newFromId($this->user_id);
 		if (is_null($fromUser)) {
@@ -546,7 +564,7 @@ class CommentBoard {
 			$time = time();
 		}
 
-		$db = CP::getDb(DB_MASTER);
+		$db = wfGetDB(DB_MASTER);
 		return $db->update(
 			'user_board',
 			[
@@ -598,7 +616,7 @@ class CommentBoard {
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function restoreComment($comment_id) {
-		$db = CP::getDb(DB_MASTER);
+		$db = wfGetDB(DB_MASTER);
 		return $db->update(
 			'user_board',
 			[
@@ -647,7 +665,7 @@ class CommentBoard {
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function purgeComment($comment_id) {
-		$db = CP::getDb(DB_MASTER);
+		$db = wfGetDB(DB_MASTER);
 		return $db->delete(
 			'user_board',
 			[ 'ub_id ='.intval($comment_id) ]
