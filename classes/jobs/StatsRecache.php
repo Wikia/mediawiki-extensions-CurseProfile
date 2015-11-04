@@ -2,7 +2,7 @@
 /**
  * Curse Inc.
  * Curse Profile
- * Display stats on the adoption rate of CurseProfile across hydra
+ * Display stats on the adoption rate of CurseProfile across Hydra.
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
@@ -24,50 +24,44 @@ class StatsRecache extends \SyncService\Job {
 		$mouse = \mouseNest::getMouse();
 		$sites = \DynamicSettings\Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
-			$database = $wiki->getDatabase();
-			\mouseHole::$settings[$wiki->getSiteKey()] = [
-				'server'		=> $database['db_server'],
-				'port'			=> $database['db_port'],
-				'database'		=> $database['db_name'],
-				'user'			=> $database['db_user'],
-				'pass'			=> $database['db_password'],
-				'use_database'	=> false
-			];
-			$wiki_dbs[$wiki->getSiteKey()] = 'mouseDatabaseMysqli';
+			$this->dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
 			$wikiKeys[] = $wiki->getSiteKey();
 		}
+		//Add the master into the lists so it gets processed over.
+		$this->dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
+		$wikis['master'] = 'Master Wiki';
 
 		unset($sites);
-		$mouse->loadClasses($wiki_dbs);
-
-		// include the master DB for good measure
-		$wikiKeys[] = 'DB';
 
 		foreach ($wikiKeys as $dbKey) {
 			try {
-				$mouse->$dbKey->init();
+				$db = $this->dbs[$dbKey]->getConnection(DB_MASTER);
 			} catch (\Exception $e) {
-				$mouse->output->sendLine(__METHOD__." - Unable to connect to database.\n", time());
+				$this->outputLine(__METHOD__." - Unable to connect to database.", time());
 				continue;
 			}
 
-			$res = $mouse->$dbKey->select([
-				'select' => 'up.up_value',
-				'from' => ['user_properties'=>'up'],
-				'add_join' => [[
-					'select' => 'u.curse_id',
-					'from' => ['user'=>'u'],
-					'on' => 'up.up_user = u.user_id',
-					'type' => 'left'
-				]],
-				'where' => 'up.up_property = \'profile-pref\' AND u.curse_id > 0'
-			]);
+			$results = $db->select(
+				['user_properties', 'user'],
+				['up_value', 'curse_id'],
+				[
+					'up_property' => 'profile-pref',
+					'curse_id > 0'
+				],
+				__METHOD__,
+				[],
+				[
+					'user' => [
+						'LEFT JOIN', 'up_user = user_id'
+					]
+				]
+			);
 
-			while ($row = $mouse->$dbKey->fetch($res)) {
+			while ($row = $results->fetchRow()) {
 				$mouse->redis->hset('profilestats:lastpref', $row['curse_id'], $row['up_value']);
 			}
 
-			$mouse->$dbKey->disconnect();
+			$db->close();
 		}
 	}
 
