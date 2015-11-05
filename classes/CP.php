@@ -86,14 +86,17 @@ class CP {
 	 * @return	int		curse id
 	 */
 	public static function curseIDfromUserID($user_id) {
-		self::loadMouse();
-		$res = self::$mouse->DB->select([
-			'select'	=> 'u.curse_id',
-			'from'		=> ['user' => 'u'],
-			'where'		=> 'u.user_id = '.intval($user_id),
-			'limit'		=> '1',
-		]);
-		return self::$mouse->DB->fetch($res)['curse_id'];
+		$db = self::getDb();
+		$result = $db->select(
+			['user'],
+			['curse_id'],
+			['user_id' => $user_id],
+			__METHOD__
+		);
+
+		$user = $result->fetchRow();
+
+		return $user['curse_id'];
 	}
 
 	/**
@@ -103,14 +106,16 @@ class CP {
 	 * @return	int		user id
 	 */
 	public static function userIDfromCurseID($curse_id) {
-		self::loadMouse();
-		$res = self::$mouse->DB->select([
-			'select'	=> 'u.user_id',
-			'from'		=> ['user' => 'u'],
-			'where'		=> 'u.curse_id = '.intval($curse_id),
-			'limit'		=> '1',
-		]);
-		return self::$mouse->DB->fetch($res)['user_id'];
+		$db = self::getDb();
+		$result = $db->select(
+			['user'],
+			['user_id'],
+			['curse_id' => $curse_id],
+			__METHOD__
+		);
+
+		$user = $result->fetchRow();
+		return $user['user_id'];
 	}
 
 	/**

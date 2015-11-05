@@ -10,29 +10,19 @@ class ResolveComment extends \SyncService\Job {
 	 * Look up a wiki by md5key and open a connection to its database
 	 *
 	 * @access	public
-	 * @param	string	md5 key for the wiki
-	 * @return	object	active MW database connection
+	 * @param	string	MD5 key for the wiki
+	 * @return	object	Active MW database connection
 	 */
 	public static function getWikiDB($dbKey) {
-		$wiki = Wiki::loadFromHash($dbKey);
-		$wikiDb = $wiki->getDatabase();
-
-		$dbConfig = [
-			'host'			=> $wikiDb['db_server'].':'.$wikiDb['db_port'],
-			'dbname'		=> $wikiDb['db_name'],
-			'user'			=> $wikiDb['db_user'],
-			'password'		=> $wikiDb['db_password'],
-		];
-		// prefer mysqli over mysql connection
-		if ($wikiDb['db_type']=='mysql') {
-			$wikiDb['db_type'] = 'mysqli';
+		try {
+			$wiki = Wiki::loadFromHash($dbKey);
+			if ($wiki !== false) {
+				$db = $wiki->getDatabaseLB()->getConnection(DB_MASTER);
+				return $db;
+			}
+		} catch (DBConnectionError $e) {
+			//Doot doot, just fall down to false below.
 		}
-
-		$db = \DatabaseBase::factory($wikiDb['db_type'], $dbConfig);
-		if ($db->isOpen()) {
-			return $db;
-		}
-
 		return false;
 	}
 
@@ -48,13 +38,13 @@ class ResolveComment extends \SyncService\Job {
 	public function execute($args = []) {
 		if (!CommentReport::keyIsLocal($args['reportKey'])) {
 			list($md5key, $comment_id, $timestamp) = explode(':', $args['reportKey']);
-			// get direct DB connection to the origin wiki
+			//Get direct DB connection to the origin wiki.
 			$db = self::getWikiDb($md5key);
 		} else {
 			$db = null;
 		}
 
-		// have all curse profile use this db connection for now
+		//Have all curse profile use this db connection for now.
 		CP::setDb($db);
 
 		$this->outputLine("Resolving reported comment {$args['reportKey']} with action {$args['action']} for admin {$args['byUser']}", time());
@@ -64,7 +54,7 @@ class ResolveComment extends \SyncService\Job {
 		}
 		$result = $report->resolve($args['action'], $args['byUser']);
 
-		// revert back to standard db connections
+		//Revert back to standard db connections.
 		CP::setDb(null);
 		if ($db) {
 			$db->close();
