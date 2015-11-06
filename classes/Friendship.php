@@ -50,18 +50,18 @@ class Friendship {
 			return -1;
 		}
 
-		$mouse = CP::loadMouse();
+		$redis = \RedisCache::getMaster();
 
 		// first check for existing friends
-		if ($mouse->redis->sismember($this->friendListRedisKey(), $toUser)) {
+		if ($redis->sismember($this->friendListRedisKey(), $toUser)) {
 			return self::FRIENDS;
 		}
 
 		// check for pending requests
-		if ($mouse->redis->hexists($this->requestsRedisKey(), $toUser)) {
+		if ($redis->hexists($this->requestsRedisKey(), $toUser)) {
 			return self::REQUEST_RECEIVED;
 		}
-		if ($mouse->redis->hexists($this->requestsRedisKey($toUser), $this->curse_id)) {
+		if ($redis->hexists($this->requestsRedisKey($toUser), $this->curse_id)) {
 			return self::REQUEST_SENT;
 		}
 
@@ -82,8 +82,8 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
-		$mouse = CP::loadMouse();
-		return $mouse->redis->smembers($this->friendListRedisKey($user));
+		$redis = \RedisCache::getMaster();
+		return $redis->smembers($this->friendListRedisKey($user));
 	}
 
 	/**
@@ -100,8 +100,8 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
-		$mouse = CP::loadMouse();
-		return $mouse->redis->scard($this->friendListRedisKey($user));
+		$redis = \RedisCache::getMaster();
+		return $redis->scard($this->friendListRedisKey($user));
 	}
 
 	/**
@@ -115,8 +115,8 @@ class Friendship {
 			return [];
 		}
 
-		$mouse = CP::loadMouse();
-		return $mouse->redis->hgetall($this->requestsRedisKey());
+		$redis = \RedisCache::getMaster();
+		return $redis->hgetall($this->requestsRedisKey());
 	}
 
 	/**
@@ -129,8 +129,8 @@ class Friendship {
 			return [];
 		}
 
-		$mouse = CP::loadMouse();
-		return $mouse->redis->smembers($this->sentRequestsRedisKey());
+		$redis = \RedisCache::getMaster();
+		return $redis->smembers($this->sentRequestsRedisKey());
 	}
 
 	/**
@@ -194,9 +194,9 @@ class Friendship {
 			return false;
 		}
 
-		$mouse = CP::loadMouse();
-		$mouse->redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
-		$mouse->redis->sadd($this->sentRequestsRedisKey(), $toUser);
+		$redis = \RedisCache::getMaster();
+		$redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
+		$redis->sadd($this->sentRequestsRedisKey(), $toUser);
 
 		global $wgUser;
 		\EchoEvent::create([
@@ -255,16 +255,16 @@ class Friendship {
 			return false;
 		}
 
-		$mouse = CP::loadMouse();
+		$redis = \RedisCache::getMaster();
 
 		// delete pending request
-		$mouse->redis->hdel($this->requestsRedisKey(), $toUser);
-		$mouse->redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+		$redis->hdel($this->requestsRedisKey(), $toUser);
+		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
 
 		if ($response == 'accept') {
 			// add reciprocal friendship
-			$mouse->redis->sadd($this->friendListRedisKey(), $toUser);
-			$mouse->redis->sadd($this->friendListRedisKey($toUser), $this->curse_id);
+			$redis->sadd($this->friendListRedisKey(), $toUser);
+			$redis->sadd($this->friendListRedisKey($toUser), $this->curse_id);
 		}
 
 		return true;
@@ -288,19 +288,19 @@ class Friendship {
 			'target' => $toUser
 		]);
 
-		$mouse = CP::loadMouse();
+		$redis = \RedisCache::getMaster();
 
 		// remove pending incoming requests
-		$mouse->redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
-		$mouse->redis->hdel($this->requestsRedisKey(), $toUser);
+		$redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
+		$redis->hdel($this->requestsRedisKey(), $toUser);
 
 		// remove sent request references
-		$mouse->redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
-		$mouse->redis->srem($this->sentRequestsRedisKey(), $toUser);
+		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+		$redis->srem($this->sentRequestsRedisKey(), $toUser);
 
 		// remove existing friendship
-		$mouse->redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
-		$mouse->redis->srem($this->friendListRedisKey(), $toUser);
+		$redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
+		$redis->srem($this->friendListRedisKey(), $toUser);
 
 		wfRunHooks('CurseProfileRemoveFriend', [$this->curse_id, $toUser]);
 
@@ -325,7 +325,7 @@ class Friendship {
 				$logger->outputLine($str, $time);
 			};
 		}
-		$mouse = CP::loadMouse();
+		$redis = \RedisCache::getMaster();
 		$db = CP::getDb(DB_MASTER);
 
 		$where = ['r_type' => 1];
@@ -340,8 +340,8 @@ class Friendship {
 		);
 
 		while ($friend = $results->fetchRow()) {
-			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
-			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
+			$redis->sadd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
+			$redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
 			$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
 		}
 
@@ -357,8 +357,8 @@ class Friendship {
 		);
 
 		while ($friendReq = $results->fetchRow()) {
-			$mouse->redis->hset($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
-			$mouse->redis->sadd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
+			$redis->hset($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
+			$redis->sadd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
 			$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
 		}
 	}

@@ -40,7 +40,6 @@ class FriendDisplay {
 			return;
 		}
 
-		$mouse = CP::loadMouse();
 		$curse_id = CP::curseIDfromUserID($wgUser->getID());
 		$friendship = new Friendship($curse_id);
 		if ($isCurseId) {
@@ -148,7 +147,6 @@ class FriendDisplay {
 
 	public static function friendlist(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
-		$mouse = CP::loadMouse();
 		$friendship = new Friendship(CP::curseIDfromUserID($user_id));
 		$friends = $friendship->getFriends();
 		if (count($friends) == 0) {

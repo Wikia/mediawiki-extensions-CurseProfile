@@ -21,7 +21,7 @@ class StatsRecache extends \SyncService\Job {
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
 	public static function populateLastPref() {
-		$mouse = \mouseNest::getMouse();
+		$redis = \RedisCache::getMaster();
 		$sites = \DynamicSettings\Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
 			$this->dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
@@ -58,7 +58,7 @@ class StatsRecache extends \SyncService\Job {
 			);
 
 			while ($row = $results->fetchRow()) {
-				$mouse->redis->hset('profilestats:lastpref', $row['curse_id'], $row['up_value']);
+				$redis->hset('profilestats:lastpref', $row['curse_id'], $row['up_value']);
 			}
 
 			$db->close();
@@ -99,7 +99,7 @@ class StatsRecache extends \SyncService\Job {
 
 		while ($row = $res->fetchRow()) {
 			// get primary adoption stats
-			$lastPref = $this->mouse->redis->hget('profilestats:lastpref', $row['curse_id']);
+			$lastPref = $this->redis->hget('profilestats:lastpref', $row['curse_id']);
 			if ($lastPref || $lastPref == NULL) {
 				$this->users['profile'] += 1;
 			} else {
@@ -117,14 +117,14 @@ class StatsRecache extends \SyncService\Job {
 
 			// get customization stats
 			$params = ['useroptions:'.$row['curse_id']] + ProfileData::$editProfileFields;
-			$profileFields = call_user_func_array([$this->mouse->redis, 'hmget'], $params);
+			$profileFields = call_user_func_array([$this->redis, 'hmget'], $params);
 			if (is_array($profileFields) && array_filter($profileFields)) {
 				$this->profileContent['filled'] += 1;
 			} else {
 				$this->profileContent['empty'] += 1;
 			}
 
-			$favWiki = $this->mouse->redis->hget('useroptions:'.$row['curse_id'], 'profile-favwiki');
+			$favWiki = $this->redis->hget('useroptions:'.$row['curse_id'], 'profile-favwiki');
 			if ($favWiki) {
 				$this->favoriteWikis[$favWiki] += 1;
 			}
@@ -141,9 +141,9 @@ class StatsRecache extends \SyncService\Job {
 		$this->outputLine('Saving results into redis', time());
 		// save results into redis for display on the stats page
 		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
-			$this->mouse->redis->hset('profilestats', $prop, serialize($this->$prop));
+			$this->redis->hset('profilestats', $prop, serialize($this->$prop));
 		}
-		$this->mouse->redis->hset('profilestats', 'lastRunTime', serialize(time()));
+		$this->redis->hset('profilestats', 'lastRunTime', serialize(time()));
 		$this->outputLine('Done.', time());
 	}
 }

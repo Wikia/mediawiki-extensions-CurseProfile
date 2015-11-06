@@ -24,8 +24,8 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 
 		if (!empty($md5)) {
 			// Try to use a cached value from redis
-			if ($mouse->redis->exists('wikiavatar:' . $md5)) {
-				$this->getOutput()->redirect($mouse->redis->get('wikiavatar:' . $md5));
+			if ($redis->exists('wikiavatar:' . $md5)) {
+				$this->getOutput()->redirect($redis->get('wikiavatar:' . $md5));
 				return;
 			}
 
@@ -34,8 +34,8 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 			$json = json_decode($result, true);
 			if ($json && isset($json['AvatarUrl'])) {
 				// cache to redis
-				$mouse->redis->set('wikiavatar:' . $md5, $json['AvatarUrl']);
-				$mouse->redis->expire('wikiavatar:' . $md5, 86400); // discard after 24 hrs
+				$redis->set('wikiavatar:' . $md5, $json['AvatarUrl']);
+				$redis->expire('wikiavatar:' . $md5, 86400); // discard after 24 hrs
 				$this->getOutput()->redirect($json['AvatarUrl']);
 			} else {
 				$this->getOutput()->showFileNotFoundError($md5);

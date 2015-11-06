@@ -34,13 +34,13 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 		$this->setHeaders();
 		$this->checkPermissions();
 
-		$this->mouse = \mouseNest::getMouse();
+		$this->redis = \RedisCache::getMaster();
 
 		$this->templateHydralytics = new \TemplateHydralytics();
 
 		// Data built by StatsRecache job, refer to its contents for data format
 		$this->profileStats = [];
-		$profileStats = $this->mouse->redis->hgetall('profilestats');
+		$profileStats = $this->redis->hgetall('profilestats');
 		if (is_array($profileStats) && count($profileStats)) {
 			foreach ($profileStats as $key => $value) {
 				$this->profileStats[$key] = unserialize($value);

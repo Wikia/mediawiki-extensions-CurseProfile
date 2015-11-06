@@ -224,10 +224,10 @@ class ProfileData {
 
 		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
 		if (isset($preferences['profile-pref'])) {
-			$mouse = \mouseNest::getMouse();
+			$redis = \RedisCache::getMaster();
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
-			$mouse->redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+			$redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
 		}
 
 		// don't allow blocked users to change their aboutme text
@@ -340,16 +340,16 @@ class ProfileData {
 	 * @return array of wiki data arrays
 	 */
 	public static function getWikiSites($siteKey = null) {
-		$mouse = \mouseNest::getMouse();
+		$redis = \RedisCache::getMaster();
 		if (is_null($siteKey)) {
-			$sites = $mouse->redis->smembers('dynamicsettings:siteHashes');
+			$sites = $redis->smembers('dynamicsettings:siteHashes');
 		} else {
 			$sites = [$siteKey];
 		}
 		$ret = [];
 		if (!empty($sites)) {
 			foreach ($sites as $md5) {
-				$data = $wikiData = $mouse->redis->hgetall('dynamicsettings:siteInfo:'.$md5);
+				$data = $wikiData = $redis->hgetall('dynamicsettings:siteInfo:'.$md5);
 				if (empty($data)) {
 					continue;
 				}

@@ -315,7 +315,6 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function location(&$parser) {
-		$mouse = CP::loadMouse();
 		$locations = $this->profile->getLocations();
 
 		if (isset($locations['country-flag'])) {
@@ -368,7 +367,6 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function profileLinks(&$parser) {
-		$mouse = CP::loadMouse();
 		$profileLinks = $this->profile->getProfileLinks();
 
 		if (count($profileLinks) == 0) {
@@ -455,7 +453,6 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function favoriteWiki(&$parser) {
-		$mouse = CP::loadMouse();
 		$wiki = $this->profile->getFavoriteWiki();
 		if (empty($wiki)) {
 			return '';
@@ -685,9 +682,9 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		$mouse = CP::loadMouse();
+		$redis = \RedisCache::getMaster();
 		$userPoints = \PointsDisplay::pointsForCurseId($this->user->curse_id)['score'];
-		$levelDefinitions = $mouse->redis->getUnserialized('wikipoints::levels');
+		$levelDefinitions = $redis->getUnserialized('wikipoints::levels');
 
 		if (!is_array($levelDefinitions)) {
 			return '';

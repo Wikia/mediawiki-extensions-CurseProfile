@@ -32,7 +32,7 @@ class CP {
 	 */
 	public static function loadMouse($extraModules = []) {
 		if (!isset(self::$mouse)) {
-			self::$mouse = \mouseNest::getMouse();
+			self::$redis = \RedisCache::getMaster();
 		}
 		if (!empty($extraModules)) {
 			self::$mouse->loadClasses($extraModules);
