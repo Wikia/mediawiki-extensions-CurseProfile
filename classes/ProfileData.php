@@ -342,7 +342,7 @@ class ProfileData {
 	public static function getWikiSites($siteKey = null) {
 		$redis = \RedisCache::getMaster();
 		if (is_null($siteKey)) {
-			$sites = $redis->smembers('dynamicsettings:siteHashes');
+			$sites = $redis->sMembers('dynamicsettings:siteHashes');
 		} else {
 			$sites = [$siteKey];
 		}

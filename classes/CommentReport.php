@@ -154,7 +154,7 @@ class CommentReport {
 		if (count($keys)) {
 			// prepend key value to prep mass retrieval from redis
 			$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
-			$reports = call_user_func_array([$redis, 'hmget'], $keys);
+			$reports = call_user_func_array([$redis, 'hMGet'], $keys);
 			$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
 		} else {
 			$reports = [];

@@ -53,7 +53,7 @@ class Friendship {
 		$redis = \RedisCache::getMaster();
 
 		// first check for existing friends
-		if ($redis->sismember($this->friendListRedisKey(), $toUser)) {
+		if ($redis->sIsMember($this->friendListRedisKey(), $toUser)) {
 			return self::FRIENDS;
 		}
 
@@ -83,7 +83,7 @@ class Friendship {
 			$user = $this->curse_id;
 		}
 		$redis = \RedisCache::getMaster();
-		return $redis->smembers($this->friendListRedisKey($user));
+		return $redis->sMembers($this->friendListRedisKey($user));
 	}
 
 	/**
@@ -130,7 +130,7 @@ class Friendship {
 		}
 
 		$redis = \RedisCache::getMaster();
-		return $redis->smembers($this->sentRequestsRedisKey());
+		return $redis->sMembers($this->sentRequestsRedisKey());
 	}
 
 	/**
@@ -259,7 +259,7 @@ class Friendship {
 
 		// delete pending request
 		$redis->hDel($this->requestsRedisKey(), $toUser);
-		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+		$redis->sRem($this->sentRequestsRedisKey($toUser), $this->curse_id);
 
 		if ($response == 'accept') {
 			// add reciprocal friendship
@@ -295,12 +295,12 @@ class Friendship {
 		$redis->hDel($this->requestsRedisKey(), $toUser);
 
 		// remove sent request references
-		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
-		$redis->srem($this->sentRequestsRedisKey(), $toUser);
+		$redis->sRem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+		$redis->sRem($this->sentRequestsRedisKey(), $toUser);
 
 		// remove existing friendship
-		$redis->srem($this->friendListRedisKey($toUser), $this->curse_id);
-		$redis->srem($this->friendListRedisKey(), $toUser);
+		$redis->sRem($this->friendListRedisKey($toUser), $this->curse_id);
+		$redis->sRem($this->friendListRedisKey(), $toUser);
 
 		wfRunHooks('CurseProfileRemoveFriend', [$this->curse_id, $toUser]);
 
