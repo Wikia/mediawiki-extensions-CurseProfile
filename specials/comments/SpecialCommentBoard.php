@@ -58,7 +58,6 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 50;
-		$mouse = CP::loadMouse(['output' => 'mouseOutputOutput']);
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
 		if (!$mobile) {
 			$wgOut->addModules('ext.curseprofile.comments');
