@@ -169,17 +169,20 @@ class FriendDisplay {
 	 * @return	string	html UL list
 	 */
 	public static function listFromArray($curseIDs = [], $manageButtons = false) {
-		$mouse = CP::loadMouse();
-		$friendDataRes = $mouse->DB->select([
-			'select'	=> 'u.*',
-			'from'		=> ['user' => 'u'],
-			'where'		=> 'curse_id IN ('.implode(',',$curseIDs).')',
-			'order'		=> 'u.user_touched DESC',
-			'limit'		=> '10'
-		]);
+		$db = CP::getDb(DB_MASTER);
+		$results = $db->select(
+			['user'],
+			['*'],
+			['curse_id' => $curseIDs],
+			__METHOD__,
+			[
+				'LIMIT'		=> 10,
+				'ORDER BY'	=> 'user_touched DESC'
+			]
+		);
 
 		$friendData = [];
-		while ($row = $mouse->DB->fetch($friendDataRes)) {
+		while ($row = $results->fetchRow()) {
 			$friendData[] = $row;
 		}
 

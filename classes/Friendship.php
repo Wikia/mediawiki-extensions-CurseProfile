@@ -326,24 +326,37 @@ class Friendship {
 			};
 		}
 		$mouse = CP::loadMouse();
+		$db = CP::getDb(DB_MASTER);
 
-		$res = $mouse->DB->select([
-			'select' => 'ur.*',
-			'from'   => ['user_relationship' => 'ur'],
-			'where'  => "ur.r_type = 1".($this->curse_id < 1 ? NULL : " AND (ur.r_user_id = {$this->curse_id} OR ur.r_user_id_relation = {$this->curse_id})"),
-		]);
-		while ($friend = $mouse->DB->fetch($res)) {
+		$where = ['r_type' => 1];
+		if ($this->curse_id > 0) {
+			$where[] = "(r_user_id = ".$db->addQuotes($this->curse_id)." OR r_user_id_relation = ".$db->addQuotes($this->curse_id);
+		}
+		$results = $db->select(
+			['user_relationship'],
+			['*'],
+			$where,
+			__METHOD__
+		);
+
+		while ($friend = $results->fetchRow()) {
 			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
 			$mouse->redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
 			$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
 		}
 
-		$res = $mouse->DB->select([
-			'select' => 'ur.*',
-			'from'   => ['user_relationship_request' => 'ur'],
-			'where'  => "ur.ur_type = 1".($this->curse_id < 1 ? NULL : " AND (ur.ur_user_id_from = {$this->curse_id} OR ur.ur_user_id_to = {$this->curse_id})"),
-		]);
-		while ($friendReq = $mouse->DB->fetch($res)) {
+		$where = ['ur_type' => 1];
+		if ($this->curse_id > 0) {
+			$where[] = "(ur_user_id_from = ".$db->addQuotes($this->curse_id)." OR ur_user_id_to = ".$db->addQuotes($this->curse_id);
+		}
+		$results = $db->select(
+			['user_relationship_request'],
+			['*'],
+			$where,
+			__METHOD__
+		);
+
+		while ($friendReq = $results->fetchRow()) {
 			$mouse->redis->hset($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
 			$mouse->redis->sadd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
 			$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
@@ -365,11 +378,10 @@ class Friendship {
 			return 1;
 		}
 
-		$mouse = CP::loadMouse();
+		$db = CP::getDb(DB_MASTER);
 		switch ($args['task']) {
-			/* Saving this for when mouse can be removed for job called functions.
 			case 'add':
-				$this->DB->insert(
+				$db->insert(
 					'user_relationship_request',
 					[
 						'ur_user_id_from' => $this->curse_id,
@@ -381,7 +393,7 @@ class Friendship {
 				);
 				break;
 			case 'confirm':
-				$this->DB->insert(
+				$db->insert(
 					'user_relationship',
 					[
 						'r_user_id'          => $this->curse_id,
@@ -391,7 +403,7 @@ class Friendship {
 					],
 					__METHOD__
 				);
-				$this->DB->insert(
+				$db->insert(
 					'user_relationship',
 					[
 						'r_user_id'          => $args['target'],
@@ -402,41 +414,42 @@ class Friendship {
 					__METHOD__
 				);
 				//Intentional fall-through.
-			*/
-			case 'add':
-				$mouse->DB->insert('user_relationship_request', [
-					'ur_user_id_from' => $this->curse_id,
-					'ur_user_id_to'   => $args['target'],
-					'ur_type'         => 1,
-					'ur_date'         => date( 'Y-m-d H:i:s' ),
-				]);
-				break;
-
-			case 'confirm':
-				$mouse->DB->insert('user_relationship', [
-					'r_user_id'          => $this->curse_id,
-					'r_user_id_relation' => $args['target'],
-					'r_type'             => 1,
-					'r_date'             => date( 'Y-m-d H:i:s' ),
-				]);
-				$mouse->DB->insert('user_relationship', [
-					'r_user_id'          => $args['target'],
-					'r_user_id_relation' => $this->curse_id,
-					'r_type'             => 1,
-					'r_date'             => date( 'Y-m-d H:i:s' ),
-				]);
-				// intentional fall-through
-
 			case 'ignore':
-				$mouse->DB->delete('user_relationship_request', "ur_user_id_from = {$args['target']} AND ur_user_id_to = {$this->curse_id}");
+				$db->delete(
+					'user_relationship_request',
+					[
+						'ur_user_id_from'	=> $args['target'],
+						'ur_user_id_to'		=> $this->curse_id
+					],
+					__METHOD__
+				);
 				break;
-
 			case 'remove':
-				$mouse->DB->delete('user_relationship', "r_user_id = {$args['target']} AND r_user_id_relation = {$this->curse_id}");
-				$mouse->DB->delete('user_relationship', "r_user_id = {$this->curse_id} AND r_user_id_relation = {$args['target']}");
-				$mouse->DB->delete('user_relationship_request', "ur_user_id_from = {$this->curse_id} AND ur_user_id_to = {$args['target']}");
+				$db->delete(
+					'user_relationship',
+					[
+						'r_user_id'				=> $args['target'],
+						'r_user_id_relation'	=> $this->curse_id
+					],
+					__METHOD__
+				);
+				$db->delete(
+					'user_relationship',
+					[
+						'r_user_id'				=> $this->curse_id,
+						'r_user_id_relation'	=> $args['target']
+					],
+					__METHOD__
+				);
+				$db->delete(
+					'user_relationship_request',
+					[
+						'ur_user_id_from'	=> $this->curse_id,
+						'ur_user_id_to'		=> $args['target']
+					],
+					__METHOD__
+				);
 				break;
-
 			default:
 				return 1;
 		}

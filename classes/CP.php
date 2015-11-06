@@ -86,7 +86,7 @@ class CP {
 	 * @return	int		curse id
 	 */
 	public static function curseIDfromUserID($user_id) {
-		$db = self::getDb();
+		$db = self::getDb(DB_MASTER);
 		$result = $db->select(
 			['user'],
 			['curse_id'],
@@ -106,7 +106,7 @@ class CP {
 	 * @return	int		user id
 	 */
 	public static function userIDfromCurseID($curse_id) {
-		$db = self::getDb();
+		$db = self::getDb(DB_MASTER);
 		$result = $db->select(
 			['user'],
 			['user_id'],

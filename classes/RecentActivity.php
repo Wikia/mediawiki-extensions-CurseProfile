@@ -63,10 +63,23 @@ class RecentActivity {
 	 * Fetches 10 recent revisions authored by given user id and returns as an array
 	 */
 	private static function fetchRecentRevisions($user_id) {
-		$mouse = CP::loadMouse();;
-		$res = $mouse->DB->query("SELECT * FROM revision WHERE rev_user = $user_id AND rev_deleted = 0 ORDER BY rev_timestamp DESC LIMIT 10");
+		$db = CP::getDb(DB_MASTER);
+		$results = $db->select(
+			['revision'],
+			['*'],
+			[
+				'rev_user'		=> $user_id,
+				'rev_deleted'	=> 0
+			],
+			__METHOD__,
+			[
+				'ORDER BY'	=> 'rev_timestamp DESC',
+				'LIMIT'		=> 10
+			]
+		);
+
 		$rows = [];
-		while ($row = $mouse->DB->fetch($res)) {
+		while ($row = $results->fetchRow()) {
 			$rows[] = $row;
 		}
 		return $rows;
