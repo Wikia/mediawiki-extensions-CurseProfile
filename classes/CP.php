@@ -18,36 +18,6 @@ namespace CurseProfile;
  */
 class CP {
 	/**
-	 * Cached mouse instance returned by loadMouse. May be overwritten with setMouse.
-	 * @var		object	mouse instance
-	 */
-	protected static $redis;
-
-	/**
-	 * Initializes the mouse singleton for use anywhere
-	 *
-	 * @access	public
-	 * @param	array	[optional] Extra modules that should be loaded.
-	 * @return	object	mouse instance
-	 */
-	public static function loadMouse($extraModules = []) {
-		if (!isset(self::$redis)) {
-			self::$redis = \RedisCache::getClient('cache');
-		}
-		return self::$redis;
-	}
-
-	/**
-	 * Overrides the mouse object returned by the previous loadMouse method.
-	 * Useful for forcing all curse profile classes to use a child wiki's DB while in the master wiki context.
-	 *
-	 * @param	object	mouse instance
-	 */
-	public static function setMouse($mouse) {
-		self::$mouse = $mouse;
-	}
-
-	/**
 	 * The db connection override for comment reporting actions
 	 * @var		object	mw DB connection
 	 */

@@ -19,7 +19,6 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 	}
 
 	public function execute( $path ) {
-		$mouse = CP::loadMouse(['curl' => 'mouseTransferCurl']);
 		$md5 = $this->getRequest()->getVal('md5');
 
 		if (!empty($md5)) {

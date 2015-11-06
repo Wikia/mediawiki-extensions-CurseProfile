@@ -18,7 +18,6 @@ namespace CurseProfile;
  */
 class FriendSync extends \SyncService\Job {
 	public function execute($args = []) {
-		CP::setMouse((object)['DB'=>$this->DB,'redis'=>$this->redis]);
 		$friendship = new Friendship($args['actor']);
 		return $friendship->saveToDB($args);
 	}
