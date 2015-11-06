@@ -64,15 +64,15 @@ class CommentReport {
 		// TODO: alternately query the DB directly if this is not running on the master wiki
 		switch ($sortStyle) {
 			case 'byWiki':
-				return $redis->zcard(self::REDIS_KEY_WIKI_INDEX.$qualifier);
+				return $redis->zCard(self::REDIS_KEY_WIKI_INDEX.$qualifier);
 
 			case 'byUser':
-				return $redis->zcard(self::REDIS_KEY_USER_INDEX.$qualifier);
+				return $redis->zCard(self::REDIS_KEY_USER_INDEX.$qualifier);
 
 			case 'byDate':
 			case 'byVolume':
 			default: // date and volume keys should always be the same
-				return $redis->zcard(self::REDIS_KEY_VOLUME_INDEX);
+				return $redis->zCard(self::REDIS_KEY_VOLUME_INDEX);
 		}
 	}
 
@@ -143,12 +143,12 @@ class CommentReport {
 		$redis = \RedisCache::getMaster();
 		switch ($sortStyle) {
 			case 'byActionDate':
-				$keys = $redis->zrevrange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit+$offset);
+				$keys = $redis->zRevRange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit+$offset);
 				break;
 
 			case 'byVolume':
 			default:
-				$keys = $redis->zrevrange(self::REDIS_KEY_VOLUME_INDEX, $offest, $limit+$offset);
+				$keys = $redis->zRevRange(self::REDIS_KEY_VOLUME_INDEX, $offest, $limit+$offset);
 		}
 
 		if (count($keys)) {
@@ -416,10 +416,10 @@ class CommentReport {
 		$redis->hSet(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
 
 		// add appropriate indexes
-		$redis->zadd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
-		$redis->zadd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
-		$redis->zadd(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $date, $commentKey);
-		$redis->zadd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
+		$redis->zAdd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
+		$redis->zAdd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
+		$redis->zAdd(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $date, $commentKey);
+		$redis->zAdd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
 	}
 
 	/**
@@ -464,7 +464,7 @@ class CommentReport {
 
 		$redis = \RedisCache::getMaster();
 		// increment volume index in redis
-		$redis->zincrby(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
+		$redis->zIncrBy(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
 
 		// update serialized redis data
 		$this->data['reports'][] = $newReport;
@@ -540,16 +540,16 @@ class CommentReport {
 		$redis = \RedisCache::getMaster();
 
 		// add key to index for actioned items
-		$redis->zadd(self::REDIS_KEY_ACTED_INDEX, $this->data['action_taken_at'], $this->reportKey());
+		$redis->zAdd(self::REDIS_KEY_ACTED_INDEX, $this->data['action_taken_at'], $this->reportKey());
 
 		// update serialized data
 		$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
 
 		// remove key from non-actioned item indexes
-		$redis->zrem(self::REDIS_KEY_VOLUME_INDEX, $this->reportKey());
-		$redis->zrem(self::REDIS_KEY_DATE_INDEX, $this->reportKey());
-		$redis->zrem(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $this->reportKey());
-		$redis->zrem(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $this->reportKey());
+		$redis->zRem(self::REDIS_KEY_VOLUME_INDEX, $this->reportKey());
+		$redis->zRem(self::REDIS_KEY_DATE_INDEX, $this->reportKey());
+		$redis->zRem(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $this->reportKey());
+		$redis->zRem(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $this->reportKey());
 
 		return true;
 	}
