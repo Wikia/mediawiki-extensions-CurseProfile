@@ -21,7 +21,7 @@ class StatsRecache extends \SyncService\Job {
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
 	public static function populateLastPref() {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		$sites = \DynamicSettings\Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
 			$this->dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();

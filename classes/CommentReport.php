@@ -60,7 +60,7 @@ class CommentReport {
 	 * @return	int
 	 */
 	public static function getCount($sortStyle, $qualifier = null) {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		// TODO: alternately query the DB directly if this is not running on the master wiki
 		switch ($sortStyle) {
 			case 'byWiki':
@@ -106,7 +106,7 @@ class CommentReport {
 			if ($onlyLocal) {
 				return null;
 			}
-			$redis = \RedisCache::getMaster();
+			$redis = \RedisCache::getClient('cache');
 			$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
 			if ($report !== false) {
 				return new self(unserialize($report));
@@ -140,7 +140,7 @@ class CommentReport {
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsRedis($sortStyle, $limit, $offest) {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		switch ($sortStyle) {
 			case 'byActionDate':
 				$keys = $redis->zRevRange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit+$offset);
@@ -407,7 +407,7 @@ class CommentReport {
 	 * @return	void
 	 */
 	private function initialRedisInsert() {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		$commentKey = $this->reportKey();
 		$date = $this->data['first_reported'];
 		// serialize data into redis
@@ -460,7 +460,7 @@ class CommentReport {
 			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
 		], __METHOD__);
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		// increment volume index in redis
 		$redis->zIncrBy(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
 
@@ -535,7 +535,7 @@ class CommentReport {
 	 * @return	bool	true
 	 */
 	private function resolveInRedis() {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 
 		// add key to index for actioned items
 		$redis->zAdd(self::REDIS_KEY_ACTED_INDEX, $this->data['action_taken_at'], $this->reportKey());

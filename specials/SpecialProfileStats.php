@@ -34,7 +34,7 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 		$this->setHeaders();
 		$this->checkPermissions();
 
-		$this->redis = \RedisCache::getMaster();
+		$this->redis = \RedisCache::getClient('cache');
 
 		$this->templateHydralytics = new \TemplateHydralytics();
 

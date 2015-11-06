@@ -682,9 +682,9 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		$userPoints = \PointsDisplay::pointsForCurseId($this->user->curse_id)['score'];
-		$levelDefinitions = $redis->getUnserialized('wikipoints::levels');
+		$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
 
 		if (!is_array($levelDefinitions)) {
 			return '';

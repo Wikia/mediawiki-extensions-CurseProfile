@@ -32,7 +32,7 @@ class CP {
 	 */
 	public static function loadMouse($extraModules = []) {
 		if (!isset(self::$redis)) {
-			self::$redis = \RedisCache::getMaster();
+			self::$redis = \RedisCache::getClient('cache');
 		}
 		return self::$redis;
 	}

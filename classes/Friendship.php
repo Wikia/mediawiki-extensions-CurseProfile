@@ -50,7 +50,7 @@ class Friendship {
 			return -1;
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 
 		// first check for existing friends
 		if ($redis->sIsMember($this->friendListRedisKey(), $toUser)) {
@@ -82,7 +82,7 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		return $redis->sMembers($this->friendListRedisKey($user));
 	}
 
@@ -100,7 +100,7 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->curse_id;
 		}
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		return $redis->sCard($this->friendListRedisKey($user));
 	}
 
@@ -115,7 +115,7 @@ class Friendship {
 			return [];
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		return $redis->hGetAll($this->requestsRedisKey());
 	}
 
@@ -129,7 +129,7 @@ class Friendship {
 			return [];
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		return $redis->sMembers($this->sentRequestsRedisKey());
 	}
 
@@ -194,7 +194,7 @@ class Friendship {
 			return false;
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		$redis->hSet($this->requestsRedisKey($toUser), $this->curse_id, '{}');
 		$redis->sAdd($this->sentRequestsRedisKey(), $toUser);
 
@@ -255,7 +255,7 @@ class Friendship {
 			return false;
 		}
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 
 		// delete pending request
 		$redis->hDel($this->requestsRedisKey(), $toUser);
@@ -288,7 +288,7 @@ class Friendship {
 			'target' => $toUser
 		]);
 
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 
 		// remove pending incoming requests
 		$redis->hDel($this->requestsRedisKey($toUser), $this->curse_id);
@@ -325,7 +325,7 @@ class Friendship {
 				$logger->outputLine($str, $time);
 			};
 		}
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		$db = CP::getDb(DB_MASTER);
 
 		$where = ['r_type' => 1];

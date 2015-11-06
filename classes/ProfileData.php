@@ -224,7 +224,7 @@ class ProfileData {
 
 		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
 		if (isset($preferences['profile-pref'])) {
-			$redis = \RedisCache::getMaster();
+			$redis = \RedisCache::getClient('cache');
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
 			$redis->hSet('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
@@ -340,7 +340,7 @@ class ProfileData {
 	 * @return array of wiki data arrays
 	 */
 	public static function getWikiSites($siteKey = null) {
-		$redis = \RedisCache::getMaster();
+		$redis = \RedisCache::getClient('cache');
 		if (is_null($siteKey)) {
 			$sites = $redis->sMembers('dynamicsettings:siteHashes');
 		} else {
