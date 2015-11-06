@@ -54,7 +54,7 @@ class TemplateCommentBoard {
 	 *
 	 * @access	public
 	 * @param	array	array of comments
-	 * @param	int		id of user to whom this comment list belongs
+	 * @param	integer	id of user to whom this comment list belongs
 	 * @param	string	[optional] built HTML fragment for pagination
 	 * @return	string	Built HTML
 	 */

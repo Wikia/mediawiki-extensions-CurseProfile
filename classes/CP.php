@@ -69,7 +69,7 @@ class CP {
 	/**
 	 * Returns a db connection to use
 	 *
-	 * @param	int		mw db id (DB_MASTER or DB_SLAVE)
+	 * @param	integer	mw db id (DB_MASTER or DB_SLAVE)
 	 * @return	object	mw db connection
 	 */
 	public static function getDb($id) {
@@ -82,8 +82,8 @@ class CP {
 	/**
 	 * Returns a curse id from the local database for a given user id
 	 *
-	 * @param	int		user id
-	 * @return	int		curse id
+	 * @param	integer	user id
+	 * @return	integer	curse id
 	 */
 	public static function curseIDfromUserID($user_id) {
 		$db = self::getDb(DB_MASTER);
@@ -102,8 +102,8 @@ class CP {
 	/**
 	 * Returns a user id from the local database for a given curse id
 	 *
-	 * @param	int		curse id
-	 * @return	int		user id
+	 * @param	integer	curse id
+	 * @return	integer	user id
 	 */
 	public static function userIDfromCurseID($curse_id) {
 		$db = self::getDb(DB_MASTER);

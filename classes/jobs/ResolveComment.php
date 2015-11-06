@@ -33,7 +33,7 @@ class ResolveComment extends \SyncService\Job {
 	 *   reportKey: unique key identifying the reported comment
 	 *   action: 'dismiss' or 'delete'
 	 *   byUser: curse ID of admin acting
-	 * @return	int		return code
+	 * @return	integer	return code
 	 */
 	public function execute($args = []) {
 		if (!CommentReport::keyIsLocal($args['reportKey'])) {

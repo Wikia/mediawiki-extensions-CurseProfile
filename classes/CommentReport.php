@@ -80,8 +80,8 @@ class CommentReport {
 	 * Main retrieval function to get data out of redis or the local db
 	 *
 	 * @param	string	$sortStyle [optional] default byVolume
-	 * @param	int		$limit [optional] default 10
-	 * @param	int		$offset [optional] default 0
+	 * @param	integer	$limit [optional] default 10
+	 * @param	integer	$offset [optional] default 0
 	 * @return	array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
@@ -135,8 +135,8 @@ class CommentReport {
 	 * Queries redis data store for reports
 	 *
 	 * @param	string	sort style
-	 * @param	int		max number of reports to return
-	 * @param	int		offset
+	 * @param	integer	max number of reports to return
+	 * @param	integer	offset
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsRedis($sortStyle, $limit, $offest) {
@@ -166,8 +166,8 @@ class CommentReport {
 	 * Queries the local db for reports
 	 *
 	 * @param	string	sort style
-	 * @param	int		max number of reports to return
-	 * @param	int		offset
+	 * @param	integer	max number of reports to return
+	 * @param	integer	offset
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
@@ -225,7 +225,7 @@ class CommentReport {
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
-	 * @param	int		id of a local comment
+	 * @param	integer	id of a local comment
 	 * @return	mixed	CommentReport instance that is already saved or null on failure
 	 */
 	public static function newUserReport($comment_id) {

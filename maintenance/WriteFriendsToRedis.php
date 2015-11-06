@@ -64,7 +64,7 @@ class WriteFriendsToRedis extends \Maintenance implements \SyncService\ILogger {
 	 * copied from /SyncService/Worker
 	 *
 	 * @param	string	the message to output
-	 * @param	int		[optional] timestamp with which to prefix the message
+	 * @param	integer	[optional] timestamp with which to prefix the message
 	 * @return	void
 	 */
 	public function outputLine($message, $time = null) {

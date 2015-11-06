@@ -20,7 +20,7 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param	int		user id or curse id of the profile page being viewed
+	 * @param	integer	user id or curse id of the profile page being viewed
 	 * @param	array	reference to the links array into which the links will be inserted
 	 * @param	boolean	determines the function of the first arg
 	 * @return	void
@@ -103,7 +103,7 @@ class FriendDisplay {
 	}
 
 	/**
-	 * @param	int		user id or curse id of the user on which the buttons will act
+	 * @param	integer	user id or curse id of the user on which the buttons will act
 	 * @param	boolean	determines the function of the previous arg
 	 * @return	string	html button stuff
 	 */

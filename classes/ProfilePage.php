@@ -268,7 +268,7 @@ class ProfilePage extends \Article {
 	 * Prints a gravatar image tag for a user
 	 *
 	 * @param	parser
-	 * @param	int		the square size of the avatar to display
+	 * @param	integer	the square size of the avatar to display
 	 * @param	string	user's email address
 	 * @param	string	the user's username
 	 * @param	string	additional html attributes to include in the IMG tag
@@ -607,7 +607,7 @@ class ProfilePage extends \Article {
 	 *
 	 * @param	object	parser reference
 	 * @param	string	type of query. one of: local, global (default)
-	 * @param	int		maximum number to display
+	 * @param	integer	maximum number to display
 	 * @return	array
 	 */
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {

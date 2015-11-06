@@ -32,7 +32,7 @@ class Friendship {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param	int		curse ID of a user
+	 * @param	integer	curse ID of a user
 	 */
 	public function __construct($curse_id) {
 		$this->curse_id = intval($curse_id);
@@ -41,8 +41,8 @@ class Friendship {
 	/**
 	 * Check the relationship status between two users.
 	 *
-	 * @param	int		curse ID of a user
-	 * @return	int		-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
+	 * @param	integer	curse ID of a user
+	 * @return	integer	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
 	public function getRelationship($toUser) {
 		$toUser = intval($toUser);
@@ -71,7 +71,7 @@ class Friendship {
 	/**
 	 * Returns the array of curse IDs for this or another user's friends
 	 *
-	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->curse_id)
 	 * @return	array	curse IDs of friends
 	 */
 	public function getFriends($user = null) {
@@ -89,8 +89,8 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @param	int		optional curse ID of a user (default $this->curse_id)
-	 * @return	int		a number of friends
+	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @return	integer	a number of friends
 	 */
 	public function getFriendCount($user = null) {
 		if ($this->curse_id < 1) {
@@ -136,7 +136,7 @@ class Friendship {
 	/**
 	 * Generates a redis key for the hash of pending requests received
 	 *
-	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->curse_id)
 	 * @return	string	redis key to be used
 	 */
 	private function requestsRedisKey($user = null) {
@@ -149,7 +149,7 @@ class Friendship {
 	/**
 	 * Generates a redis key for the set of pending requests sent
 	 *
-	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->curse_id)
 	 * @return	string	redis key to be used
 	 */
 	private function sentRequestsRedisKey($user = null) {
@@ -162,7 +162,7 @@ class Friendship {
 	/**
 	 * Generates a redis key for a set of friends
 	 *
-	 * @param	int		optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->curse_id)
 	 * @return	string	redis key to be used
 	 */
 	private function friendListRedisKey($user = null) {
@@ -175,7 +175,7 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @param	int		curse ID of a user
+	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function sendRequest($toUser) {
@@ -216,7 +216,7 @@ class Friendship {
 	/**
 	 * Accepts a pending request
 	 *
-	 * @param	int		curse ID of a user
+	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toUser) {
@@ -226,7 +226,7 @@ class Friendship {
 	/**
 	 * Ignores and dismisses a pending request
 	 *
-	 * @param	int		curse ID of a user
+	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function ignoreRequest($toUser) {
@@ -236,7 +236,7 @@ class Friendship {
 	/**
 	 * Shared logic between accepting and ignoring pending requests
 	 *
-	 * @param	int		user id of whose request is being responded to
+	 * @param	integer	user id of whose request is being responded to
 	 * @param	string	responce being sent. one of 'accept' or 'ignore'
 	 * @return	bool	true on success
 	 */
@@ -273,7 +273,7 @@ class Friendship {
 	/**
 	 * Removes a friend relationship, or cancels a pending request
 	 *
-	 * @param	int		curse ID of a user
+	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function removeFriend($toUser) {
@@ -367,7 +367,7 @@ class Friendship {
 	 * This will write a given change to the database. Called by FriendSync job.
 	 *
 	 * @param	array	args sent to the FriendSync job
-	 * @return	int		exit code: 0 for success, 1 for failure
+	 * @return	integer	exit code: 0 for success, 1 for failure
 	 */
 	public function saveToDB($args) {
 		if (!defined('CURSEPROFILE_MASTER')) {

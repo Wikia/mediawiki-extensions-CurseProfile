@@ -21,7 +21,7 @@ class CommentDisplay {
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
 	 * @param	object	parser instance
-	 * @param	int		id of the user whose recent comments should be displayed
+	 * @param	integer	id of the user whose recent comments should be displayed
 	 * @return	array	with html at index 0
 	 */
 	public static function comments(&$parser, $userId = '') {
@@ -55,7 +55,7 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param	int		id of the user whose comment board will recieve a new comment via this form
+	 * @param	integer	id of the user whose comment board will recieve a new comment via this form
 	 * @param	bool	if true, the form will have an added class to be hidden by css
 	 * @param	bool	if true, the form will add the mobilefrontend class for parsing.
 	 * @return	string	html fragment or empty string
@@ -87,7 +87,7 @@ class CommentDisplay {
 	 * Returns html display for a single profile comment
 	 *
 	 * @param	array	structured comment data as returned by CommentBoard
-	 * @param	int		[optional] id of a comment to highlight from among those displayed
+	 * @param	integer	[optional] id of a comment to highlight from among those displayed
 	 * @return	string	html for display
 	 */
 	public static function singleComment($comment, $highlight = false, $mobile = false) {
@@ -214,8 +214,8 @@ class CommentDisplay {
 	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
-	 * @param	int		the id of the user the parent comment belongs to
-	 * @param	int		the id of the comment for which replies need to be loaded
+	 * @param	integer	the id of the user the parent comment belongs to
+	 * @param	integer	the id of the comment for which replies need to be loaded
 	 * @return	string	html for display
 	 */
 	public static function repliesTo($userId, $commentId) {
