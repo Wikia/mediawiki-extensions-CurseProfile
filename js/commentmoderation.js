@@ -36,7 +36,7 @@
 			withAction: action,
 			token: mw.user.tokens.get('editToken')
 		}).done(function(resp) {
-			var success = resp.result === 'success';
+			var success = resp.result === 'success' || resp.result === 'queued';
 
 			cancel();
 			if (success) {
