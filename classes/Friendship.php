@@ -58,10 +58,10 @@ class Friendship {
 		}
 
 		// check for pending requests
-		if ($redis->hexists($this->requestsRedisKey(), $toUser)) {
+		if ($redis->hExists($this->requestsRedisKey(), $toUser)) {
 			return self::REQUEST_RECEIVED;
 		}
-		if ($redis->hexists($this->requestsRedisKey($toUser), $this->curse_id)) {
+		if ($redis->hExists($this->requestsRedisKey($toUser), $this->curse_id)) {
 			return self::REQUEST_SENT;
 		}
 
@@ -258,7 +258,7 @@ class Friendship {
 		$redis = \RedisCache::getMaster();
 
 		// delete pending request
-		$redis->hdel($this->requestsRedisKey(), $toUser);
+		$redis->hDel($this->requestsRedisKey(), $toUser);
 		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
 
 		if ($response == 'accept') {
@@ -291,8 +291,8 @@ class Friendship {
 		$redis = \RedisCache::getMaster();
 
 		// remove pending incoming requests
-		$redis->hdel($this->requestsRedisKey($toUser), $this->curse_id);
-		$redis->hdel($this->requestsRedisKey(), $toUser);
+		$redis->hDel($this->requestsRedisKey($toUser), $this->curse_id);
+		$redis->hDel($this->requestsRedisKey(), $toUser);
 
 		// remove sent request references
 		$redis->srem($this->sentRequestsRedisKey($toUser), $this->curse_id);
