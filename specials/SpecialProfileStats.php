@@ -40,7 +40,7 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 
 		// Data built by StatsRecache job, refer to its contents for data format
 		$this->profileStats = [];
-		$profileStats = $this->redis->hgetall('profilestats');
+		$profileStats = $this->redis->hGetAll('profilestats');
 		if (is_array($profileStats) && count($profileStats)) {
 			foreach ($profileStats as $key => $value) {
 				$this->profileStats[$key] = unserialize($value);

@@ -107,7 +107,7 @@ class CommentReport {
 				return null;
 			}
 			$redis = \RedisCache::getMaster();
-			$report = $redis->hget($key);
+			$report = $redis->hGet($key);
 			if ($reports) {
 				return new self(unserialize($report));
 			} else {
@@ -413,7 +413,7 @@ class CommentReport {
 		$commentKey = $this->reportKey();
 		$date = $this->data['first_reported'];
 		// serialize data into redis
-		$redis->hset(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
+		$redis->hSet(self::REDIS_KEY_REPORTS, $commentKey, serialize($this->data));
 
 		// add appropriate indexes
 		$redis->zadd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
@@ -468,7 +468,7 @@ class CommentReport {
 
 		// update serialized redis data
 		$this->data['reports'][] = $newReport;
-		$redis->hset(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
+		$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
 	}
 
 	/**
@@ -543,7 +543,7 @@ class CommentReport {
 		$redis->zadd(self::REDIS_KEY_ACTED_INDEX, $this->data['action_taken_at'], $this->reportKey());
 
 		// update serialized data
-		$redis->hset(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
+		$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
 
 		// remove key from non-actioned item indexes
 		$redis->zrem(self::REDIS_KEY_VOLUME_INDEX, $this->reportKey());

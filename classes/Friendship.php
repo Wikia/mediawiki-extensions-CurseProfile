@@ -101,7 +101,7 @@ class Friendship {
 			$user = $this->curse_id;
 		}
 		$redis = \RedisCache::getMaster();
-		return $redis->scard($this->friendListRedisKey($user));
+		return $redis->sCard($this->friendListRedisKey($user));
 	}
 
 	/**
@@ -116,7 +116,7 @@ class Friendship {
 		}
 
 		$redis = \RedisCache::getMaster();
-		return $redis->hgetall($this->requestsRedisKey());
+		return $redis->hGetAll($this->requestsRedisKey());
 	}
 
 	/**
@@ -195,8 +195,8 @@ class Friendship {
 		}
 
 		$redis = \RedisCache::getMaster();
-		$redis->hset($this->requestsRedisKey($toUser), $this->curse_id, '{}');
-		$redis->sadd($this->sentRequestsRedisKey(), $toUser);
+		$redis->hSet($this->requestsRedisKey($toUser), $this->curse_id, '{}');
+		$redis->sAdd($this->sentRequestsRedisKey(), $toUser);
 
 		global $wgUser;
 		\EchoEvent::create([
@@ -263,8 +263,8 @@ class Friendship {
 
 		if ($response == 'accept') {
 			// add reciprocal friendship
-			$redis->sadd($this->friendListRedisKey(), $toUser);
-			$redis->sadd($this->friendListRedisKey($toUser), $this->curse_id);
+			$redis->sAdd($this->friendListRedisKey(), $toUser);
+			$redis->sAdd($this->friendListRedisKey($toUser), $this->curse_id);
 		}
 
 		return true;
@@ -340,8 +340,8 @@ class Friendship {
 		);
 
 		while ($friend = $results->fetchRow()) {
-			$redis->sadd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
-			$redis->sadd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
+			$redis->sAdd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
+			$redis->sAdd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
 			$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
 		}
 
@@ -357,8 +357,8 @@ class Friendship {
 		);
 
 		while ($friendReq = $results->fetchRow()) {
-			$redis->hset($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
-			$redis->sadd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
+			$redis->hSet($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
+			$redis->sAdd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
 			$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
 		}
 	}

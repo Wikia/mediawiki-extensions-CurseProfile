@@ -21,7 +21,7 @@ class CP {
 	 * Cached mouse instance returned by loadMouse. May be overwritten with setMouse.
 	 * @var		object	mouse instance
 	 */
-	protected static $mouse;
+	protected static $redis;
 
 	/**
 	 * Initializes the mouse singleton for use anywhere
@@ -31,13 +31,10 @@ class CP {
 	 * @return	object	mouse instance
 	 */
 	public static function loadMouse($extraModules = []) {
-		if (!isset(self::$mouse)) {
+		if (!isset(self::$redis)) {
 			self::$redis = \RedisCache::getMaster();
 		}
-		if (!empty($extraModules)) {
-			self::$mouse->loadClasses($extraModules);
-		}
-		return self::$mouse;
+		return self::$redis;
 	}
 
 	/**

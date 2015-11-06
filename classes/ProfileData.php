@@ -227,7 +227,7 @@ class ProfileData {
 			$redis = \RedisCache::getMaster();
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
-			$redis->hset('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+			$redis->hSet('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
 		}
 
 		// don't allow blocked users to change their aboutme text
@@ -349,7 +349,7 @@ class ProfileData {
 		$ret = [];
 		if (!empty($sites)) {
 			foreach ($sites as $md5) {
-				$data = $wikiData = $redis->hgetall('dynamicsettings:siteInfo:'.$md5);
+				$data = $wikiData = $redis->hGetAll('dynamicsettings:siteInfo:'.$md5);
 				if (empty($data)) {
 					continue;
 				}
