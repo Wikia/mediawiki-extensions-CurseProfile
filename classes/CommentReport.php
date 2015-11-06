@@ -107,8 +107,8 @@ class CommentReport {
 				return null;
 			}
 			$redis = \RedisCache::getMaster();
-			$report = $redis->hGet($key);
-			if ($reports) {
+			$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
+			if ($report !== false) {
 				return new self(unserialize($report));
 			} else {
 				return null;
@@ -152,9 +152,7 @@ class CommentReport {
 		}
 
 		if (count($keys)) {
-			// prepend key value to prep mass retrieval from redis
-			$keys = array_merge([self::REDIS_KEY_REPORTS], $keys);
-			$reports = call_user_func_array([$redis, 'hMGet'], $keys);
+			$reports = $redis->hMGet(self::REDIS_KEY_REPORTS, $keys);
 			$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
 		} else {
 			$reports = [];
