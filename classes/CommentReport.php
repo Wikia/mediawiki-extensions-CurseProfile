@@ -116,7 +116,7 @@ class CommentReport {
 		} else {
 			// report is local
 			list($md5key, $comment_id, $timestamp) = explode(':', $key);
-			$db = wfGetDB(DB_SLAVE);
+			$db = CP::getDb(DB_SLAVE);
 			$row = $db->selectRow(
 				'user_board_report_archives',
 				['*'],
@@ -171,7 +171,7 @@ class CommentReport {
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 		$reports = [];
 		switch ($sortStyle) {
 			case 'byActionDate':
@@ -229,7 +229,7 @@ class CommentReport {
 	 * @return	mixed	CommentReport instance that is already saved or null on failure
 	 */
 	public static function newUserReport($comment_id) {
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 		$comment_id = intval($comment_id);
 		if ($comment_id < 1) {
 			return null;
@@ -346,7 +346,7 @@ class CommentReport {
 	 * @return  array   with sub arrays for each report having keys reporter => curse_id, timestamp
 	 */
 	private static function getReportsForId($id) {
-		$db = wfGetDB(DB_SLAVE);
+		$db = CP::getDb(DB_SLAVE);
 		$res = $db->select(
 			['user_board_reports'],
 			['ubr_reporter_curse_id as reporter', 'ubr_reported as timestamp'],
@@ -388,7 +388,7 @@ class CommentReport {
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
-		$db = wfGetDB( DB_MASTER );
+		$db = CP::getDb(DB_MASTER);
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
 			'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
@@ -454,7 +454,7 @@ class CommentReport {
 		];
 
 		// add new report row to local DB
-		$db = wfGetDB( DB_MASTER );
+		$db = CP::getDb(DB_MASTER);
 		$db->insert('user_board_reports', [
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
@@ -515,7 +515,7 @@ class CommentReport {
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
 		// write curse ID of acting user to ra_action_taken_by
-		$db = wfGetDB(DB_MASTER);
+		$db = CP::getDb(DB_MASTER);
 		$result = $db->update(
 			'user_board_report_archives',
 			[

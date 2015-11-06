@@ -55,7 +55,7 @@ class CommentBoard {
 	 * @param	integer	the ID of a user
 	 */
 	public function __construct($user_id, $type = self::BOARDTYPE_RECENT) {
-		$this->DB = wfGetDB(DB_MASTER);
+		$this->DB = CP::getDb(DB_MASTER);
 		$this->user_id = intval($user_id);
 		$this->type = intval($type);
 		if ($this->user_id < 1) {
@@ -106,7 +106,7 @@ class CommentBoard {
 			$inReplyTo = intval($inReplyTo);
 		}
 
-		$DB = wfGetDB(DB_SLAVE);
+		$DB = CP::getDb(DB_SLAVE);
 		$results = $DB->select(
 			['user_board'],
 			['count(*) as total'],
@@ -169,7 +169,7 @@ class CommentBoard {
 	 * @return	void
 	 */
 	static private function queryCommentById($commentId) {
-		$DB = wfGetDB(DB_MASTER);
+		$DB = CP::getDb(DB_MASTER);
 		$result = $DB->select(
 			['user_board'],
 			['*'],
@@ -382,7 +382,7 @@ class CommentBoard {
 		if (empty($commentText)) {
 			return false;
 		}
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = CP::getDb(DB_MASTER);
 
 		$toUser = \User::newFromId($this->user_id);
 		if (is_null($fromUser)) {
@@ -505,7 +505,7 @@ class CommentBoard {
 	public static function editComment($commentId, $message) {
 		global $wgUser;
 
-		$DB = wfGetDB(DB_MASTER);
+		$DB = CP::getDb(DB_MASTER);
 		$commentId = intval($commentId);
 
 		// Preparing stuff for the Log Entry
@@ -579,7 +579,7 @@ class CommentBoard {
 			$time = time();
 		}
 
-		$db = wfGetDB(DB_MASTER);
+		$db = CP::getDb(DB_MASTER);
 		return $db->update(
 			'user_board',
 			[
@@ -626,7 +626,7 @@ class CommentBoard {
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function restoreComment($commentId) {
-		$db = wfGetDB(DB_MASTER);
+		$db = CP::getDb(DB_MASTER);
 		return $db->update(
 			'user_board',
 			[
@@ -670,7 +670,7 @@ class CommentBoard {
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function purgeComment($commentId) {
-		$db = wfGetDB(DB_MASTER);
+		$db = CP::getDb(DB_MASTER);
 		return $db->delete(
 			'user_board',
 			[ 'ub_id ='.intval($commentId) ]
