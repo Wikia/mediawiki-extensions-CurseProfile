@@ -29,7 +29,7 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 			}
 
 			// fallback to direct lookup from the gamepedia.com api
-			$result = Http::post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5));
+			$result = \Http::post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5));
 			$json = json_decode($result, true);
 			if ($json && isset($json['AvatarUrl'])) {
 				// cache to redis

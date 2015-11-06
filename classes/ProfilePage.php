@@ -483,7 +483,7 @@ class ProfilePage extends \Article {
 		$curse_id = $this->user->curse_id;
 
 		if ($curse_id > 0) {
-			$jsonStats = Http::post(wfExpandUrl(MASTER_WIKI_URL, PROTO_CURRENT).'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, ['postData' => ['username' => 'hydraStats', 'password' => '8_-csYhS']]);
+			$jsonStats = \Http::post(wfExpandUrl(MASTER_WIKI_URL, PROTO_CURRENT).'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, ['postData' => ['username' => 'hydraStats', 'password' => '8_-csYhS']]);
 			$stats = json_decode($jsonStats, true);
 		}
 
