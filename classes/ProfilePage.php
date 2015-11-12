@@ -483,7 +483,7 @@ class ProfilePage extends \Article {
 		$curseId = $this->user->curse_id;
 
 		if ($curseId > 0) {
-			$stats = dataMiner::getUserGlobalStats([$curseId]);
+			$stats = \dataMiner::getUserGlobalStats([$curseId]);
 		}
 
 		//Leys are message keys fed to wfMessage().
