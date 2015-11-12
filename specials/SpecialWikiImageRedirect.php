@@ -20,8 +20,9 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 
 	public function execute( $path ) {
 		$md5 = $this->getRequest()->getVal('md5');
+		$redis = RedisCache::getClient('cache');
 
-		if (!empty($md5)) {
+		if (!empty($md5) && $redis !== false) {
 			// Try to use a cached value from redis
 			if ($redis->exists('wikiavatar:' . $md5)) {
 				$this->getOutput()->redirect($redis->get('wikiavatar:' . $md5));
