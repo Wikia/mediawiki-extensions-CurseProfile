@@ -480,21 +480,18 @@ class ProfilePage extends \Article {
 	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
-		$curse_id = $this->user->curse_id;
+		$curseId = $this->user->curse_id;
 
-		if ($curse_id > 0) {
-			$jsonStats = \Http::post(wfExpandUrl(MASTER_WIKI_URL, PROTO_CURRENT).'/api.php?action=dataminer&do=getUserGlobalStats&curse_id='.$curse_id, ['postData' => ['username' => 'hydraStats', 'password' => '8_-csYhS']]);
-			$stats = json_decode($jsonStats, true);
+		if ($curseId > 0) {
+			$stats = dataMiner::getUserGlobalStats([$curseId]);
 		}
 
-		// keys are message keys fed to wfMessage()
-		// values are numbers or an array of sub-stats with a number at key 0
-		if ($stats) {
-			$totalStats = $stats[$curse_id]['global']['total'];
+		//Leys are message keys fed to wfMessage().
+		//Values are numbers or an array of sub-stats with a number at key 0.
+		if (is_array($stats)) {
+			$totalStats = $stats[$curseId]['global']['total'];
 			$statsOutput = [
-				// 'achievementsearned' => 123, /* replace with global achievement count when available */
-				// "<dd class='achievements'>{{#achievements:local|5}}</dd>",
-				'wikisedited' => $stats[$curse_id]['other']['wikis_contributed'],
+				'wikisedited' => $stats[$curseId]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
 					'totaldeletes' => $totalStats['deletes'],
@@ -518,9 +515,9 @@ class ProfilePage extends \Article {
 
 		global $wgServer;
 
-		if ($curse_id > 1 && method_exists('PointsDisplay', 'pointsForCurseId')) {
-			$statsOutput['localrank'] = \PointsDisplay::pointsForCurseId($curse_id, \WikiPoints::domainToNamespace($wgServer))['rank'];
-			$statsOutput['globalrank'] = \PointsDisplay::pointsForCurseId($curse_id)['rank'];
+		if ($curseId > 0 && method_exists('PointsDisplay', 'pointsForCurseId')) {
+			$statsOutput['localrank'] = \PointsDisplay::pointsForCurseId($curseId, \WikiPoints::domainToNamespace($wgServer))['rank'];
+			$statsOutput['globalrank'] = \PointsDisplay::pointsForCurseId($curseId)['rank'];
 
 			if (empty($statsOutput['localrank'])) {
 				unset($statsOutput['localrank']);
@@ -536,14 +533,14 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		if ($curse_id > 1 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
+		if ($curseId > 0 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
 			$earned = 0;
 
-			$progress = \Achievements\Progress::newFromCurseId($curse_id);
+			$progress = \Achievements\Progress::newFromCurseId($curseId);
 			if ($progress !== false) {
 				$earned += $progress->getTotalEarned();
 			}
-			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curse_id);
+			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curseId);
 			if ($megaProgress !== false) {
 				$earned += $megaProgress->getTotalEarned();
 			}
