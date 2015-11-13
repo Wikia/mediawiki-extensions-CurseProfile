@@ -181,7 +181,7 @@ class CommentBoard {
 	}
 
 	/**
-	 * Generic comment retrieval utility function. Automatically limits to viewable types.
+	 * Generic comment retrieval utility function.  Automatically limits to viewable types.
 	 *
 	 * @access	private
 	 * @param	array	SQL conditions applied to the user_board table query.  Will be merged with existing conditions.
@@ -268,7 +268,7 @@ class CommentBoard {
 			'ub_user_id'		=> $this->user_id
 		];
 		if ($maxAge >= 0) {
-			$searchConditions['IFNULL(b.ub_last_reply, b.ub_date) >= '.$this->DB->addQuotes(date('Y-m-d H:i:s', time()-$maxAge*86400))];
+			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= '.$this->DB->addQuotes(date('Y-m-d H:i:s', time()-$maxAge*86400));
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}
