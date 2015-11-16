@@ -106,8 +106,13 @@ class CommentReport {
 			if ($onlyLocal) {
 				return null;
 			}
-			$redis = \RedisCache::getClient('cache');
-			$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
+			try {
+				$redis = \RedisCache::getClient('cache');
+				$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
+			} catch (RedisException $e) {
+				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+				return null;
+			}
 			if ($report !== false) {
 				return new self(unserialize($report));
 			} else {

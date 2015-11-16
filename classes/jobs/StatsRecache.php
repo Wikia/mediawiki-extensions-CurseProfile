@@ -99,7 +99,12 @@ class StatsRecache extends \SyncService\Job {
 
 		while ($row = $res->fetchRow()) {
 			// get primary adoption stats
-			$lastPref = $this->redis->hGet('profilestats:lastpref', $row['curse_id']);
+			try {
+				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['curse_id']);
+			} catch (RedisException $e) {
+				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+				return;
+			}
 			if ($lastPref || $lastPref == NULL) {
 				$this->users['profile'] += 1;
 			} else {
@@ -123,7 +128,12 @@ class StatsRecache extends \SyncService\Job {
 				$this->profileContent['empty'] += 1;
 			}
 
-			$favWiki = $this->redis->hGet('useroptions:'.$row['curse_id'], 'profile-favwiki');
+			try {
+				$favWiki = $this->redis->hGet('useroptions:'.$row['curse_id'], 'profile-favwiki');
+			} catch (RedisException $e) {
+				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+				return;
+			}
 			if ($favWiki) {
 				$this->favoriteWikis[$favWiki] += 1;
 			}
@@ -140,7 +150,12 @@ class StatsRecache extends \SyncService\Job {
 		$this->outputLine('Saving results into redis', time());
 		// save results into redis for display on the stats page
 		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
-			$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
+			try {
+				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
+			} catch (RedisException $e) {
+				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+				return;
+			}
 		}
 		$this->redis->hSet('profilestats', 'lastRunTime', serialize(time()));
 		$this->outputLine('Done.', time());
