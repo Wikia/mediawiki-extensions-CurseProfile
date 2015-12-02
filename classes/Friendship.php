@@ -51,18 +51,26 @@ class Friendship {
 		}
 
 		$redis = \RedisCache::getClient('cache');
-
-		// first check for existing friends
-		if ($redis->sIsMember($this->friendListRedisKey(), $toUser)) {
-			return self::FRIENDS;
+		if ($redis === false) {
+			return -1;
 		}
 
-		// check for pending requests
-		if ($redis->hExists($this->requestsRedisKey(), $toUser)) {
-			return self::REQUEST_RECEIVED;
-		}
-		if ($redis->hExists($this->requestsRedisKey($toUser), $this->curse_id)) {
-			return self::REQUEST_SENT;
+		try {
+			//First check for existing friends.
+			if ($redis->sIsMember($this->friendListRedisKey(), $toUser)) {
+				return self::FRIENDS;
+			}
+
+			//Check for pending requests.
+			if ($redis->hExists($this->requestsRedisKey(), $toUser)) {
+				return self::REQUEST_RECEIVED;
+			}
+			if ($redis->hExists($this->requestsRedisKey($toUser), $this->curse_id)) {
+				return self::REQUEST_SENT;
+			}
+		} catch (RedisException $e) {
+			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			return -1;
 		}
 
 		return self::STRANGERS; // assumption when not found in redis
