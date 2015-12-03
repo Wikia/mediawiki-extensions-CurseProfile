@@ -24,8 +24,8 @@ $wgExtensionCredits['specialpage'][] = [
 ];
 
 
-define('NS_USER_WIKI', 200 );
-define('NS_USER_PROFILE', 202 );
+define('NS_USER_WIKI', 200);
+define('NS_USER_PROFILE', 202);
 
 $wgAvailableRights[] = 'profile-modcomments';
 $wgAvailableRights[] = 'profile-purgecomments';
@@ -36,7 +36,7 @@ $wgAvailableRights[] = 'profile-purgecomments';
 $extDir = __DIR__ . '/';
 
 $wgMessagesDirs['CurseProfile'] = $extDir . 'i18n';
-$wgExtensionMessagesFiles['CurseProfile']			= "{$extDir}/CurseProfile.i18n.php";
+$wgExtensionMessagesFiles['SpecialCurseProfile']	= "{$extDir}/CurseProfile.alias.php";
 $wgExtensionMessagesFiles['CurseProfileMagic']		= "{$extDir}/CurseProfile.i18n.magic.php";
 $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.namespaces.php";
 
