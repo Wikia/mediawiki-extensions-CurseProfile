@@ -15,7 +15,12 @@ $specialPageAliases = [];
 
 /** English (English) */
 $specialPageAliases['en'] = [
-	'CommentBoard' => ['CommentBoard'],
-	'CommentModeration' => ['CommentModeration'],
-	'ManageFriends' => ['ManageFriends']
+	'AddComment'		=> ['AddComment'],
+	'CommentBoard'		=> ['CommentBoard'],
+	'CommentModeration'	=> ['CommentModeration'],
+	'CommentPeramlink'	=> ['CommentPeramlink'],
+	'Friends'			=> ['Friends'],
+	'ManageFriends'		=> ['ManageFriends'],
+	'ProfileStats'		=> ['ProfileStats'],
+	'WikiImageRedirect'	=> ['WikiImageRedirect']
 ];
