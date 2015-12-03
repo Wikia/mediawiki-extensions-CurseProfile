@@ -36,7 +36,7 @@ $wgAvailableRights[] = 'profile-purgecomments';
 $extDir = __DIR__ . '/';
 
 $wgMessagesDirs['CurseProfile'] = $extDir . 'i18n';
-$wgExtensionMessagesFiles['SpecialCurseProfile']	= "{$extDir}/CurseProfile.alias.php";
+$wgExtensionMessagesFiles['CurseProfileAlias']		= "{$extDir}/CurseProfile.alias.php";
 $wgExtensionMessagesFiles['CurseProfileMagic']		= "{$extDir}/CurseProfile.i18n.magic.php";
 $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.namespaces.php";
 
