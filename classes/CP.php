@@ -47,45 +47,6 @@ class CP {
 	}
 
 	/**
-	 * Returns a curse id from the local database for a given user id
-	 *
-	 * @param	integer	user id
-	 * @return	integer	curse id
-	 */
-	public static function curseIDfromUserID($user_id) {
-		$db = self::getDb(DB_MASTER);
-		$result = $db->select(
-			['user'],
-			['curse_id'],
-			['user_id' => $user_id],
-			__METHOD__
-		);
-
-		$user = $result->fetchRow();
-
-		return $user['curse_id'];
-	}
-
-	/**
-	 * Returns a user id from the local database for a given curse id
-	 *
-	 * @param	integer	curse id
-	 * @return	integer	user id
-	 */
-	public static function userIDfromCurseID($curse_id) {
-		$db = self::getDb(DB_MASTER);
-		$result = $db->select(
-			['user'],
-			['user_id'],
-			['curse_id' => $curse_id],
-			__METHOD__
-		);
-
-		$user = $result->fetchRow();
-		return $user['user_id'];
-	}
-
-	/**
 	 * Craetes a time tag that can be converted to a dynamic relative time
 	 * after adding timeago.yarp.com to the page
 	 */

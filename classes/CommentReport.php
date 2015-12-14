@@ -286,7 +286,7 @@ class CommentReport {
 	 */
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
-		$authorCurseId = CP::curseIDfromUserID($comment['ub_user_id_from']);
+		$authorCurseId = \CurseAuthUser::globalIdFromUserId($comment['ub_user_id_from']);
 
 		// insert data into redis and update indexes
 		$data = [

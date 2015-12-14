@@ -212,7 +212,7 @@ class Friendship {
 			'agent' => $wgUser,
 			// 'title' => $wgUser->getUserPage(),
 			'extra' => [
-				'target_user_id' => CP::userIDfromCurseID($toUser)
+				'target_user_id' => \CurseAuthUser::userIdFromGlobalId($toUser)
 			]
 		]);
 
