@@ -447,12 +447,13 @@ class CommentReport {
 	 * @return	void
 	 */
 	private function addReportFrom($user) {
-		if (!isset($this->id) || !$user->curse_id) {
+		$curseUser = \CurseAuthUser::getInstance($user);
+		if (!isset($this->id) || !$curseUser->getId()) {
 			return false; // can't add to a comment that hasn't been archived yet
 		}
 
 		$newReport = [
-			'reporter' => $user->curse_id,
+			'reporter' => $curseUser->getId(),
 			'timestamp' => time(),
 		];
 
@@ -461,7 +462,7 @@ class CommentReport {
 		$db->insert('user_board_reports', [
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
-			'ubr_reporter_curse_id' => $user->curse_id,
+			'ubr_reporter_curse_id' => $curseUser->getId(),
 			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
 		], __METHOD__);
 
@@ -475,11 +476,11 @@ class CommentReport {
 	}
 
 	/**
-	 * Dismiss or delete a reported comment
+	 * Dismiss or delete a reported comment/
 	 *
-	 * @param	string	action to take on the reported comment. either 'delete' or 'dismiss'
-	 * @param	mixed	[optional] CurseID of acting user or instance of User class, defaults to $wgUser
-	 * @return	bool	true if successful
+	 * @param	string	Action to take on the reported comment. either 'delete' or 'dismiss'
+	 * @param	mixed	[Optional] User object of the acting user, defaults to $wgUser.
+	 * @return	boolean	true if successful
 	 */
 	public function resolve($action, $byUser = null) {
 		if (!$this->isLocal()) {
@@ -489,23 +490,22 @@ class CommentReport {
 			return false;
 		}
 		if (is_null($byUser)) {
-			$byUser = $GLOBALS['wgUser']->curse_id;
+			$curseUser = \CurseAuthUser::getInstance($GLOBALS['wgUser']);
+		} elseif ($byUser instanceof User) {
+			$curseUser = \CurseAuthUser::getInstance($byUser);
 		}
-		if (is_object($byUser) && isset($byUser->curse_id)) {
-			$byUser = $byUser->curse_id;
-		}
-		// bail out if no curse ID available after all those tries
-		if (!is_numeric($byUser)) {
+		//Need a Curse ID to continue;
+		if (!$curseUser->getId()) {
 			return false;
 		}
 
 		// update internal data
 		$this->data['action_taken'] = $action=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS;
-		$this->data['action_taken_by'] = $byUser;
+		$this->data['action_taken_by'] = $curseUser->getId();
 		$this->data['action_taken_at'] = time();
 
 		// update data stores
-		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid']) )
+		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $byUser) )
 			&& $this->resolveInDb()
 			&& $this->resolveInRedis();
 	}

@@ -480,7 +480,8 @@ class ProfilePage extends \Article {
 	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
-		$curseId = $this->user->curse_id;
+		$curseUser = \CurseAuthUser::getInstance($this->user);
+		$curseId = $curseUser->getId();
 
 		if ($curseId > 0) {
 			$stats = \dataMiner::getUserGlobalStats([$curseId]);
@@ -613,13 +614,14 @@ class ProfilePage extends \Article {
 			];
 		}
 
+		$curseUser = \CurseAuthUser::getInstance($this->user);
 		$achievementCache = $type.'AchievementProgress';
 		if (property_exists($this, $achievementCache) && is_array($this->$achievementCache)) {
 			$earned = $this->$achievementCache;
 		} else {
 			$earned = false;
 			if ($type === 'local') {
-				$progress = \Achievements\Progress::newFromCurseId($this->user->curse_id);
+				$progress = \Achievements\Progress::newFromCurseId($curseUser->getId());
 				if ($progress !== false) {
 					$earned = $progress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
@@ -627,7 +629,7 @@ class ProfilePage extends \Article {
 			}
 
 			if ($type === 'global') {
-				$megaProgress = \Achievements\MegaProgress::newFromCurseId($this->user->curse_id);
+				$megaProgress = \Achievements\MegaProgress::newFromCurseId($curseUser->getId());
 				if ($megaProgress !== false) {
 					$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
@@ -673,13 +675,14 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel(&$parser) {
+		$curseUser = \CurseAuthUser::getInstance($this->user);
 		// Check for existance of wikipoints functions
-		if ($this->user->curse_id < 1 || !method_exists('PointsDisplay', 'pointsForCurseId')) {
+		if (!$curseUser->getId() || !method_exists('PointsDisplay', 'pointsForCurseId')) {
 			return '';
 		}
 
 		$redis = \RedisCache::getClient('cache');
-		$userPoints = \PointsDisplay::pointsForCurseId($this->user->curse_id)['score'];
+		$userPoints = \PointsDisplay::pointsForCurseId($curseUser->getId())['score'];
 		$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
 
 		if (!is_array($levelDefinitions)) {
@@ -743,6 +746,8 @@ class ProfilePage extends \Article {
 	protected function profileLayout() {
 		global $wgUser;
 
+		$curseUser = \CurseAuthUser::getInstance($this->user);
+
 		return sprintf('
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
@@ -802,7 +807,7 @@ __NOTOC__
 			$this->user->getID(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			( $this->user->curse_id > 0 ? 'true' : '' ),
+			( $curseUser->getId() ? 'true' : '' ),
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}
@@ -814,6 +819,8 @@ __NOTOC__
 	 */
 	protected function mobileProfileLayout() {
 		global $wgUser;
+
+		$curseUser = \CurseAuthUser::getInstance($this->user);
 
 		return sprintf('
 <div class="curseprofile" id="mf-curseprofile" data-userid="%2$s">
@@ -852,7 +859,7 @@ __NOTOC__
 			$this->user->getId(),
 			$this->user->getEmail(),
 			$this->user->getTitleKey(),
-			( $this->user->curse_id > 0 ? 'true' : '' ),
+			( $curseUser->getId() ? 'true' : '' ),
 			( $this->user->isBlocked() ? 'true' : '' )
 		);
 	}

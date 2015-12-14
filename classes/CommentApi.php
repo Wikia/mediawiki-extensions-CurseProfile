@@ -325,11 +325,12 @@ class CommentApi extends \CurseApiBase {
 	}
 
 	public function doResolveReport() {
+		$curseUser = \CurseAuthUser::getInstance($this->getUser());
 		$reportKey = $this->getMain()->getVal('reportKey');
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getMain()->getVal('byUser', $this->getUser()->curse_id),
+			'byUser' => $this->getMain()->getVal('byUser', $curseUser->getId()),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki
