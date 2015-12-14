@@ -571,7 +571,7 @@ class CommentBoard {
 	public static function removeComment($commentId, $user = null, $time = null) {
 		if (is_a($user, 'User')) {
 			$curseUser = \CurseAuthUser::getInstance($user);
-		} else (is_null($user)) {
+		} else {
 			global $wgUser;
 
 			$curseUser = \CurseAuthUser::getInstance($wgUser);
