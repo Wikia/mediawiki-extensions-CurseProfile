@@ -64,8 +64,10 @@ class FriendApi extends \CurseApiBase {
 
 	public function execute() {
 		global $wgUser;
+
 		$wgUser->load();
-		$this->f = new Friendship($wgUser->curse_id);
+		$curseUser = \CurseAuthUser::getInstance($wgUser);
+		$this->f = new Friendship($curseUser->getId());
 		parent::execute();
 	}
 
@@ -79,11 +81,12 @@ class FriendApi extends \CurseApiBase {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 
-		if ($targetUser->curse_id < 1) {
+		$curseTargetUser = \CurseAuthUser::getInstance($targetUser);
+		if (!$curseTargetUser->getId()) {
 			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->text(), 'friendrequest-direct-unmerged');
 		}
 
-		$result = $this->f->sendRequest($targetUser->curse_id);
+		$result = $this->f->sendRequest($curseTargetUser->getId());
 		if (!$result) {
 			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}
