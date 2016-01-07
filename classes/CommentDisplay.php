@@ -141,7 +141,7 @@ class CommentDisplay {
 					}
 		$HTML .= '</div>
 			<div class="commentbody">
-				'.$wgOut->parse($comment['ub_message']).'
+				'.$wgOut->parse(htmlentities($comment['ub_message'], ENT_QUOTES)).'
 			</div>';
 			if (isset($comment['replies'])) {
 				$HTML .= '<div class="replyset">';
