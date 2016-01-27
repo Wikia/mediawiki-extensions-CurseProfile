@@ -39,13 +39,10 @@ class NotificationPresentationModel extends \EchoEventPresentationModel {
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
 	public function getPrimaryLink() {
-		return array(
-			'url' => $this->event->getTitle()->getLocalURL( array(
-				'oldid' => 'prev',
-				'diff' => $this->event->getExtraParam( 'revid' )
-			) ),
-			'label' => $this->msg( 'notification-link-text-view-message' )->text(),
-		);
+		return [
+			'url' => $this->event->getAgent()->getUserPage()->getLocalURL(),
+			'label' => $this->msg('notification-link-text-view-profile')->text(),
+		];
 	}
 
 	/**
@@ -65,7 +62,7 @@ class NotificationPresentationModel extends \EchoEventPresentationModel {
 	 *               result of this function (FIXME).
 	 */
 	public function getSecondaryLinks() {
-		return array();
+		return [];
 	}
 }
 
