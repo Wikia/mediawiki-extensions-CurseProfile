@@ -11,12 +11,12 @@
  * @link		http://www.curse.com/
  *
 **/
-namespace CurseProfile;
+namespace CurseProfile\Echo;
 
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class NotificationPresentationModel extends \EchoEventPresentationModel {
+class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	/**
 	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
@@ -40,7 +40,7 @@ class NotificationPresentationModel extends \EchoEventPresentationModel {
 	 */
 	public function getPrimaryLink() {
 		return [
-			'url' => $this->event->getAgent()->getUserPage()->getLocalURL(),
+			'url' => $this->event->getUser()->getUserPage()->getLocalURL(),
 			'label' => $this->msg('notification-link-text-view-profile')->text(),
 		];
 	}
@@ -62,7 +62,7 @@ class NotificationPresentationModel extends \EchoEventPresentationModel {
 	 *               result of this function (FIXME).
 	 */
 	public function getSecondaryLinks() {
-		return [];
+		return [$this->getAgentLink()];
 	}
 }
 

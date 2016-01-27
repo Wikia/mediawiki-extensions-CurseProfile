@@ -55,11 +55,12 @@ $wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir.'classes/CommentBoar
 $wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir.'classes/CommentReport.php';
 $wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir.'classes/CommentDisplay.php';
 $wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir.'classes/jobs/FriendSync.php';
-$wgAutoloadClasses['CurseProfile\ResolveComment'] 					= $extDir.'classes/jobs/ResolveComment.php';
-$wgAutoloadClasses['CurseProfile\NotificationFormatter']			= $extDir.'classes/NotificationFormatter.php';
-$wgAutoloadClasses['CurseProfile\NotificationPresentationModel']	= $extDir.'classes/NotificationPresentationModel.php';
-$wgAutoloadClasses['CurseProfile\ResourceLoaderModule']				= $extDir.'classes/ResourceLoaderModule.php';
-$wgAutoloadClasses['CurseProfile\CommentLogFormatter']				= $extDir.'classes/CommentLogFormatter.php';
+$wgAutoloadClasses['CurseProfile\ResolveComment'] 				= $extDir.'classes/jobs/ResolveComment.php';
+$wgAutoloadClasses['CurseProfile\NotificationFormatter']		= $extDir.'classes/echo/NotificationFormatter.php';
+$wgAutoloadClasses['CurseProfile\CommentPresentationModel']		= $extDir.'classes/echo/CommentPresentationModel.php';
+$wgAutoloadClasses['CurseProfile\FriendshipPresentationModel']	= $extDir.'classes/echo/FriendshipPresentationModel.php';
+$wgAutoloadClasses['CurseProfile\ResourceLoaderModule']			= $extDir.'classes/ResourceLoaderModule.php';
+$wgAutoloadClasses['CurseProfile\CommentLogFormatter']			= $extDir.'classes/CommentLogFormatter.php';
 
 $wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/templates/TemplateCommentBoard.php";
 $wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/templates/TemplateCommentModeration.php";
