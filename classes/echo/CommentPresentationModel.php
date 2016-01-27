@@ -41,7 +41,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	public function getPrimaryLink() {
 		if ($this->event->getTitle() !== null) {
 			return [
-				'url' => $this->event->getTitle()->getLocalURL().($this->event->getExtraParam('comment_id') > 0 ? '#'.$this->event->getExtraParam('comment_id') : null),
+				'url' => $this->event->getTitle()->getLocalURL().($this->event->getExtraParam('comment_id') > 0 ? '#comment'.$this->event->getExtraParam('comment_id') : null),
 				'label' => $this->msg('notification-link-text-view-profile')->text(),
 			];
 		} else {
