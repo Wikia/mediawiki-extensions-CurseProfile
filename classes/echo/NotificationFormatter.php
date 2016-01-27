@@ -11,7 +11,7 @@
  * @link		http://www.curse.com/
  *
 **/
-namespace CurseProfile\Echo;
+namespace CurseProfile\MWEcho;
 
 /**
  * Class that formats notifications for profile comments and friend requests
