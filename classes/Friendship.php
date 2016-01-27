@@ -235,7 +235,7 @@ class Friendship {
 		\EchoEvent::create([
 			'type' => 'friendship-request',
 			'agent' => $wgUser,
-			// 'title' => $wgUser->getUserPage(),
+			'title' => $wgUser->getUserPage(),
 			'extra' => [
 				'target_user_id' => \CurseAuthUser::userIdFromGlobalId($toUser)
 			]

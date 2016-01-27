@@ -444,7 +444,7 @@ class CommentBoard {
 				\EchoEvent::create([
 					'type' => 'profile-comment',
 					'agent' => $fromUser,
-					// 'title' => $toUser->getUserPage(),
+					'title' => $toUser->getUserPage(),
 					'extra' => [
 						'target_user_id' => $toUser->getId(),
 						'comment_text' => substr($commentText, 0, NotificationFormatter::MAX_PREVIEW_LEN),
