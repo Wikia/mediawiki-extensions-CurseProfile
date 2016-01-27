@@ -16,7 +16,7 @@ namespace CurseProfile\MWEcho;
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class FriendshipPresentationModel extends \EchoEventPresentationModel {
+class CommentPresentationModel extends \EchoEventPresentationModel {
 	/**
 	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
