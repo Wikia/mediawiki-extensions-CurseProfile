@@ -298,7 +298,23 @@ class Hooks {
 			'tooltip' => 'echo-pref-tooltip-friendship',
 			'priority' => 3,
 		];
+		$notifications['edit-thank'] = array(
+			'primary-link' => array( 'message' => 'notification-link-text-view-edit', 'destination' => 'diff' ),
+			'category' => 'edit-thank',
+			'group' => 'positive',
+			'presentation-model' => 'EchoThanksPresentationModel',
+			'formatter-class' => 'EchoThanksFormatter',
+			'title-message' => 'notification-thanks',
+			'title-params' => array( 'agent', 'difflink', 'title' ),
+			'payload' => array( 'summary' ),
+			'email-subject-message' => 'notification-thanks-email-subject',
+			'email-subject-params' => array( 'agent' ),
+			'email-body-batch-message' => 'notification-thanks-email-batch-body',
+			'email-body-batch-params' => array( 'agent', 'title' ),
+			'icon' => 'thanks',
+		);
 		$notifications['friendship-request'] = [
+			'primary-link' => array( 'message' => 'notification-link-text-view-message', 'destination' => 'diff' ),
 			'category' => 'friendship',
 			'group' => 'interactive',
 			'icon' => 'gratitude',
@@ -318,6 +334,7 @@ class Hooks {
 			'priority' => 4,
 		];
 		$notifications['profile-comment'] = [
+			'primary-link' => array( 'message' => 'notification-link-text-view-message', 'destination' => 'diff' ),
 			'category' => 'profile-comment',
 			'group' => 'interactive',
 			'icon' => 'chat',
