@@ -56,12 +56,10 @@ class NotificationFormatter extends \EchoBasicFormatter {
 			case 'gamepedia-footer':
 				$message->params(wfMessage('emailfooter-gamepedia')->text());
 				break;
-
 			case 'comment-id':
 				$extra = $event->getExtra();
 				$message->params( $extra['comment_id'] ? $extra['comment_id'] : 0 );
 				break;
-
 			default:
 				parent::processParam($event, $param, $message, $user);
 		}
