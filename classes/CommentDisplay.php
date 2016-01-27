@@ -119,6 +119,7 @@ class CommentDisplay {
 
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
+			<a name="comment'.$comment['ub_id'].'"></a>
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>';
 				if (!$mobile) {
