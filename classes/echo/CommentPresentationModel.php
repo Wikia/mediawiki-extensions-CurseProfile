@@ -39,10 +39,14 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
 	public function getPrimaryLink() {
-		return [
-			'url' => $this->event->getUser()->getUserPage()->getLocalURL(),
-			'label' => $this->msg('notification-link-text-view-profile')->text(),
-		];
+		if ($this->event->getTitle() !== null) {
+			return [
+				'url' => $this->event->getTitle()->getLocalURL(),
+				'label' => $this->msg('notification-link-text-view-profile')->text(),
+			];
+		} else {
+			return [];
+		}
 	}
 
 	/**
