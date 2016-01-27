@@ -42,7 +42,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 		if ($this->event->getTitle() !== null) {
 			return [
 				'url' => $this->event->getTitle()->getLocalURL().($this->event->getExtraParam('comment_id') > 0 ? '#comment'.$this->event->getExtraParam('comment_id') : null),
-				'label' => $this->msg('notification-link-text-view-profile')->text(),
+				'label' => $this->msg('notification-link-text-view-comment')->text(),
 			];
 		} else {
 			return [];
