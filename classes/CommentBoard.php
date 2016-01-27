@@ -447,7 +447,7 @@ class CommentBoard {
 					'title' => $toUser->getUserPage(),
 					'extra' => [
 						'target_user_id' => $toUser->getId(),
-						'comment_text' => substr($commentText, 0, NotificationFormatter::MAX_PREVIEW_LEN),
+						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
 						'comment_id' => $newCommentId,
 					]
 				]);
