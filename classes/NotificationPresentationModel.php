@@ -16,7 +16,7 @@ namespace CurseProfile;
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class NotificationPresentationModel extends EchoEventPresentationModel {
+class NotificationPresentationModel extends \EchoEventPresentationModel {
 	/**
 	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
@@ -38,13 +38,13 @@ class NotificationPresentationModel extends EchoEventPresentationModel {
 	 * @return array|bool Array of link data, or false for no link:
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
-	public function getPrimaryLink();
+	public function getPrimaryLink() {
 		return array(
 			'url' => $this->event->getTitle()->getLocalURL( array(
 				'oldid' => 'prev',
 				'diff' => $this->event->getExtraParam( 'revid' )
 			) ),
-			'label' => $this->msg( 'notification-link-text-view-edit' )->text(),
+			'label' => $this->msg( 'notification-link-text-view-message' )->text(),
 		);
 	}
 
