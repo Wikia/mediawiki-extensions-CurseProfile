@@ -18,23 +18,34 @@ namespace CurseProfile\MWEcho;
  */
 class CommentPresentationModel extends \EchoEventPresentationModel {
 	/**
+	 * Return the icon type.
+	 *
+	 * @access	public
 	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
 	public function getIconType() {
 		return 'gratitude';
 	}
 
-	/*public function getHeaderMessage() {
+	/**
+	 * Return a message object with the agent($1) and target($3) user page as pamaraters.
+	 *
+	 * @access	public
+	 * @return	Message
+	 */
+	public function getHeaderMessage() {
 		$msg = parent::getHeaderMessage();
-		$msg->params( $this->event->getTitle()->getPrefixedText() );
+		if ($this->event->getTitle() !== null) {
+			$msg->params($this->event->getTitle()->getFullText());
+		}
 
-		$msg->params( $this->getViewingUserForGender() );
 		return $msg;
-	}*/
+	}
 
 	/**
 	 * Array of primary link details, with possibly-relative URL & label.
 	 *
+	 * @access	public
 	 * @return array|bool Array of link data, or false for no link:
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
@@ -50,9 +61,9 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	}
 
 	/**
-	 * Array of secondary link details, including possibly-relative URLs, label,
-	 * description & icon name.
+	 * Array of secondary link details, including possibly-relative URLs, label, description & icon name.
 	 *
+	 * @access	public
 	 * @return array Array of links in the format of:
 	 *               [['url' => (string) url,
 	 *                 'label' => (string) link text (non-escaped),
