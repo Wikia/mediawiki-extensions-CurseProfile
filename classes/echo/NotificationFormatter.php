@@ -11,7 +11,7 @@
  * @link		http://www.curse.com/
  *
 **/
-namespace CurseProfile;
+namespace CurseProfile\MWEcho;
 
 /**
  * Class that formats notifications for profile comments and friend requests
@@ -56,14 +56,38 @@ class NotificationFormatter extends \EchoBasicFormatter {
 			case 'gamepedia-footer':
 				$message->params(wfMessage('emailfooter-gamepedia')->text());
 				break;
-
 			case 'comment-id':
 				$extra = $event->getExtra();
 				$message->params( $extra['comment_id'] ? $extra['comment_id'] : 0 );
 				break;
-
 			default:
 				parent::processParam($event, $param, $message, $user);
 		}
+	}
+
+	/**
+	 * Helper function for getLink()
+	 *
+	 * @param EchoEvent $event
+	 * @param User $user The user receiving the notification
+	 * @param String $destination The destination type for the link, e.g. 'agent'
+	 * @return Array including target and query parameters. Note that target can
+	 *               be either a Title or a full url
+	 */
+	protected function getLinkParams($event, $user, $destination) {
+		$target = null;
+		$query = [];
+		$title = $event->getTitle();
+
+		switch ($destination) {
+			case "friendship-request":
+				break;
+			case "profile-comment":
+				break;
+			default:
+				return parent::getLinkParams($event, $user, $destination);
+				break;
+		}
+		return [$target, $query];
 	}
 }

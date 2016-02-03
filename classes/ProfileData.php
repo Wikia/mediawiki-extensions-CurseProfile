@@ -227,7 +227,8 @@ class ProfileData {
 			$redis = \RedisCache::getClient('cache');
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
-			$redis->hSet('profilestats:lastpref', $user->curse_id, $preferences['profile-pref']);
+			$curseUser = \CurseAuthUser::getInstance($user);
+			$redis->hSet('profilestats:lastpref', $curseUser->getId(), $preferences['profile-pref']);
 		}
 
 		// don't allow blocked users to change their aboutme text

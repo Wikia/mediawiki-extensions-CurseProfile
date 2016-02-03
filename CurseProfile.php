@@ -24,8 +24,8 @@ $wgExtensionCredits['specialpage'][] = [
 ];
 
 
-define('NS_USER_WIKI', 200 );
-define('NS_USER_PROFILE', 202 );
+define('NS_USER_WIKI', 200);
+define('NS_USER_PROFILE', 202);
 
 $wgAvailableRights[] = 'profile-modcomments';
 $wgAvailableRights[] = 'profile-purgecomments';
@@ -35,30 +35,32 @@ $wgAvailableRights[] = 'profile-purgecomments';
 /******************************************/
 $extDir = __DIR__ . '/';
 
-$wgMessagesDirs['CurseProfile'] = $extDir . 'i18n';
-$wgExtensionMessagesFiles['CurseProfile']			= "{$extDir}/CurseProfile.i18n.php";
+$wgMessagesDirs['CurseProfile'] = $extDir.'i18n';
+$wgExtensionMessagesFiles['CurseProfileAlias']		= "{$extDir}/CurseProfile.alias.php";
 $wgExtensionMessagesFiles['CurseProfileMagic']		= "{$extDir}/CurseProfile.i18n.magic.php";
 $wgExtensionMessagesFiles['CurseProfileNamespaces']	= "{$extDir}/CurseProfile.namespaces.php";
 
-$wgAutoloadClasses['FlagFinder']                  = $extDir . 'classes/FlagFinder.php';
-$wgAutoloadClasses['CurseProfile\Hooks']          = $extDir . 'CurseProfile.hooks.php';
-$wgAutoloadClasses['CurseProfile\CP']             = $extDir . 'classes/CP.php';
-$wgAutoloadClasses['CurseProfile\ProfileApi']     = $extDir . 'classes/ProfileApi.php';
-$wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir . 'classes/ProfilePage.php';
-$wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir . 'classes/ProfileData.php';
-$wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir . 'classes/RecentActivity.php';
-$wgAutoloadClasses['CurseProfile\Friendship']     = $extDir . 'classes/Friendship.php';
-$wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir . 'classes/FriendDisplay.php';
-$wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir . 'classes/FriendApi.php';
-$wgAutoloadClasses['CurseProfile\CommentApi']     = $extDir . 'classes/CommentApi.php';
-$wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir . 'classes/CommentBoard.php';
-$wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir . 'classes/CommentReport.php';
-$wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir . 'classes/CommentDisplay.php';
-$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir . 'classes/jobs/FriendSync.php';
-$wgAutoloadClasses['CurseProfile\ResolveComment'] = $extDir . 'classes/jobs/ResolveComment.php';
-$wgAutoloadClasses['CurseProfile\NotificationFormatter'] = $extDir . 'classes/NotificationFormatter.php';
-$wgAutoloadClasses['CurseProfile\ResourceLoaderModule'] = $extDir . 'classes/ResourceLoaderModule.php';
-$wgAutoloadClasses['CurseProfile\CommentLogFormatter'] = $extDir . 'classes/CommentLogFormatter.php';
+$wgAutoloadClasses['FlagFinder']                  = $extDir.'classes/FlagFinder.php';
+$wgAutoloadClasses['CurseProfile\Hooks']          = $extDir.'CurseProfile.hooks.php';
+$wgAutoloadClasses['CurseProfile\CP']             = $extDir.'classes/CP.php';
+$wgAutoloadClasses['CurseProfile\ProfileApi']     = $extDir.'classes/ProfileApi.php';
+$wgAutoloadClasses['CurseProfile\ProfilePage']    = $extDir.'classes/ProfilePage.php';
+$wgAutoloadClasses['CurseProfile\ProfileData']    = $extDir.'classes/ProfileData.php';
+$wgAutoloadClasses['CurseProfile\RecentActivity'] = $extDir.'classes/RecentActivity.php';
+$wgAutoloadClasses['CurseProfile\Friendship']     = $extDir.'classes/Friendship.php';
+$wgAutoloadClasses['CurseProfile\FriendDisplay']  = $extDir.'classes/FriendDisplay.php';
+$wgAutoloadClasses['CurseProfile\FriendApi']      = $extDir.'classes/FriendApi.php';
+$wgAutoloadClasses['CurseProfile\CommentApi']     = $extDir.'classes/CommentApi.php';
+$wgAutoloadClasses['CurseProfile\CommentBoard']   = $extDir.'classes/CommentBoard.php';
+$wgAutoloadClasses['CurseProfile\CommentReport']  = $extDir.'classes/CommentReport.php';
+$wgAutoloadClasses['CurseProfile\CommentDisplay'] = $extDir.'classes/CommentDisplay.php';
+$wgAutoloadClasses['CurseProfile\FriendSync']     = $extDir.'classes/jobs/FriendSync.php';
+$wgAutoloadClasses['CurseProfile\ResolveComment'] 						= $extDir.'classes/jobs/ResolveComment.php';
+$wgAutoloadClasses['CurseProfile\MWEcho\NotificationFormatter']			= $extDir.'classes/echo/NotificationFormatter.php';
+$wgAutoloadClasses['CurseProfile\MWEcho\CommentPresentationModel']		= $extDir.'classes/echo/CommentPresentationModel.php';
+$wgAutoloadClasses['CurseProfile\MWEcho\FriendshipPresentationModel']	= $extDir.'classes/echo/FriendshipPresentationModel.php';
+$wgAutoloadClasses['CurseProfile\ResourceLoaderModule']					= $extDir.'classes/ResourceLoaderModule.php';
+$wgAutoloadClasses['CurseProfile\CommentLogFormatter']					= $extDir.'classes/CommentLogFormatter.php';
 
 $wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/templates/TemplateCommentBoard.php";
 $wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/templates/TemplateCommentModeration.php";

@@ -62,7 +62,7 @@ class TemplateCommentModeration {
 
 		foreach ($reports as $report) {
 			$rep = $report->data;
-			$author = CurseUser::newFromCurseId($rep['comment']['author']);
+			$author = CurseAuthUser::newUserFromGlobalId($rep['comment']['author']);
 			$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
 
 			$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
@@ -94,7 +94,7 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$user = CurseUser::newFromCurseId($rep->data['action_taken_by']);
+		$user = CurseAuthUser::newUserFromGlobalId($rep->data['action_taken_by']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
 			$action = 'dis';
@@ -129,7 +129,7 @@ class TemplateCommentModeration {
 		$HTML = '';
 		$iter = 0;
 		foreach ($reports as $rep) {
-			$reporter = CurseUser::newFromCurseId($rep['reporter']);
+			$reporter = CurseAuthUser::newUserFromGlobalId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
 			$HTML .= \Html::rawElement(
 				'a', [

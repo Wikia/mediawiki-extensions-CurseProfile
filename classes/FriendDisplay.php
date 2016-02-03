@@ -33,20 +33,21 @@ class FriendDisplay {
 
 		global $wgUser;
 		$wgUser->load();
+		$curseUser = \CurseAuthUser::getInstance($wgUser);
 		if (!$wgUser->isLoggedIn()
 			|| ($wgUser->getID() == $user_id && !$isCurseId)
-			|| ($wgUser->curse_id == $user_id && $isCurseId))
+			|| ($curseUser->GetId() == $user_id && $isCurseId))
 		{
 			return;
 		}
 
-		$curse_id = CP::curseIDfromUserID($wgUser->getID());
-		$friendship = new Friendship($curse_id);
+		$curseId = $curseUser->getId();
+		$friendship = new Friendship($curseId);
 		if ($isCurseId) {
 			$links['curse_id'] = $user_id;
-			$user = \CurseUser::newFromCurseId($user_id);
+			$user = \CurseAuthUser::newUserFromGlobalId($user_id);
 		} else {
-			$links['curse_id'] = CP::curseIDfromUserID($user_id);
+			$links['curse_id'] = \CurseAuthUser::globalIdFromUserId($user_id);
 			$user = \User::newFromId($user_id);
 		}
 		$user->load();
@@ -140,14 +141,14 @@ class FriendDisplay {
 
 	public static function count(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
-		$friendship = new Friendship(CP::curseIDfromUserID($user_id));
+		$friendship = new Friendship(\CurseAuthUser::globalIdFromUserId($user_id));
 		$friends = $friendship->getFriends();
 		return count($friends);
 	}
 
 	public static function friendlist(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
-		$friendship = new Friendship(CP::curseIDfromUserID($user_id));
+		$friendship = new Friendship(\CurseAuthUser::globalIdFromUserId($user_id));
 		$friends = $friendship->getFriends();
 		if (count($friends) == 0) {
 			return '';

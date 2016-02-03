@@ -444,10 +444,10 @@ class CommentBoard {
 				\EchoEvent::create([
 					'type' => 'profile-comment',
 					'agent' => $fromUser,
-					// 'title' => $toUser->getUserPage(),
+					'title' => $toUser->getUserPage(),
 					'extra' => [
 						'target_user_id' => $toUser->getId(),
-						'comment_text' => substr($commentText, 0, NotificationFormatter::MAX_PREVIEW_LEN),
+						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
 						'comment_id' => $newCommentId,
 					]
 				]);
@@ -564,16 +564,17 @@ class CommentBoard {
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	integer	id of a comment to remove
-	 * @param	integer	[Optional] curse ID or User instance of the admin acting, defaults to $wgUser
+	 * @param	integer	[Optional] User object of the admin acting, defaults to $wgUser
 	 * @param	integer	[Optional] unix timestamp to use for deleted time, defaults to now
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function removeComment($commentId, $user = null, $time = null) {
-		if (is_a($user, 'User') && $user->curse_id > 0) {
-			$user = $user->curse_id;
-		} elseif (is_null($user)) {
+		if (is_a($user, 'User')) {
+			$curseUser = \CurseAuthUser::getInstance($user);
+		} else {
 			global $wgUser;
-			$user = $wgUser->curse_id;
+
+			$curseUser = \CurseAuthUser::getInstance($wgUser);
 		}
 		if (!$time) {
 			$time = time();
@@ -584,10 +585,10 @@ class CommentBoard {
 			'user_board',
 			[
 				'ub_type' => self::DELETED_MESSAGE,
-				'ub_admin_acted' => intval($user->curse_id),
+				'ub_admin_acted' => $curseUser->getId(),
 				'ub_admin_acted_at' => $time,
 			],
-			[ 'ub_id ='.intval($commentId) ]
+			['ub_id' => $commentId]
 		);
 	}
 

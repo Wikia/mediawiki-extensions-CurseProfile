@@ -52,7 +52,8 @@ class SpecialManageFriends extends \SpecialPage {
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$f = new Friendship($user->curse_id);
+		$curseUser = \CurseAuthUser::getInstance($user);
+		$f = new Friendship($curseUser->getId());
 
 		$friends = $f->getFriends();
 		$rcvd = $f->getReceivedRequests();

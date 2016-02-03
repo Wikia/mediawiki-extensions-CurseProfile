@@ -78,7 +78,8 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$wgOut->addModules('ext.curseprofile.profilepage');
 		$templateManageFriends = new \TemplateManageFriends;
 
-		$f = new Friendship($user->curse_id);
+		$curseUser = \CurseAuthUser::getInstance($user);
+		$f = new Friendship($curseUser->getId());
 
 		$friends = $f->getFriends();
 

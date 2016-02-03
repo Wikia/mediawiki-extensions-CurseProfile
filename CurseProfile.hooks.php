@@ -299,11 +299,13 @@ class Hooks {
 			'priority' => 3,
 		];
 		$notifications['friendship-request'] = [
+			'primary-link' => array('message' => 'notification-link-text-view-message', 'destination' => 'friendship-request'),
 			'category' => 'friendship',
 			'group' => 'interactive',
 			'icon' => 'gratitude',
-			'formatter-class' => 'CurseProfile\NotificationFormatter',
-			'title-message' => 'notification-friendship-request',
+			'presentation-model' => 'CurseProfile\MWEcho\FriendshipPresentationModel',
+			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
+			'title-message' => 'notification-header-friendship-request',
 			'title-params' => ['agent'],
 			'email-subject-message' => 'notification-friendship-request-email-subj',
 			'email-subject-params' => ['agent'],
@@ -318,11 +320,13 @@ class Hooks {
 			'priority' => 4,
 		];
 		$notifications['profile-comment'] = [
+			'primary-link' => array( 'message' => 'notification-link-text-view-message', 'destination' => 'profile-comment' ),
 			'category' => 'profile-comment',
 			'group' => 'interactive',
 			'icon' => 'chat',
-			'formatter-class' => 'CurseProfile\NotificationFormatter',
-			'title-message' => 'notification-profile-comment',
+			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
+			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
+			'title-message' => 'notification-header-profile-comment',
 			'title-params' => ['agent', 'user'],
 			'payload' => ['comment-text'],
 			'email-subject-message' => 'notification-profile-comment-email-subj',

@@ -119,6 +119,7 @@ class CommentDisplay {
 
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
+			<a name="comment'.$comment['ub_id'].'"></a>
 			<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
 			<div>';
 				if (!$mobile) {
@@ -175,7 +176,7 @@ class CommentDisplay {
 	 * @return	string	html fragment
 	 */
 	private static function adminAction($comment) {
-		$admin = \CurseUser::newFromCurseId($comment['ub_admin_acted']);
+		$admin = \CurseAuthUser::newUserFromGlobalId($comment['ub_admin_acted']);
 		if (!$admin->getName()) {
 			return '';
 		}

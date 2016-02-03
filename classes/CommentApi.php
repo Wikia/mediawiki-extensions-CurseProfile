@@ -204,7 +204,7 @@ class CommentApi extends \CurseApiBase {
 	public function doAddToDefault() {
 		// intentional use of value returned from assignment
 		if (! ($user_id = $this->getMain()->getVal('user_id')) ) {
-			$user_id = CP::userIDfromCurseID($this->getMain()->getVal('curse_id'));
+			$user_id = \CurseAuthUser::userIdFromGlobalId($this->getMain()->getVal('curse_id'));
 			$user = \User::newFromId($user_id);
 			$user->load();
 			if ($user->isAnon()) {
@@ -244,7 +244,7 @@ class CommentApi extends \CurseApiBase {
 	public function doAdd() {
 		$toUser = $this->getMain()->getVal('user_id');
 		if (!$toUser) {
-			$toUser = CP::userIDfromCurseID($this->getMain()->getVal('curse_id'));
+			$toUser = \CurseAuthUser::userIdFromGlobalId($this->getMain()->getVal('curse_id'));
 		}
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');
@@ -325,11 +325,12 @@ class CommentApi extends \CurseApiBase {
 	}
 
 	public function doResolveReport() {
+		$curseUser = \CurseAuthUser::getInstance($this->getUser());
 		$reportKey = $this->getMain()->getVal('reportKey');
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getMain()->getVal('byUser', $this->getUser()->curse_id),
+			'byUser' => $this->getMain()->getVal('byUser', $curseUser->getId()),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki

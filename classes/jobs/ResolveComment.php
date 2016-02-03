@@ -52,7 +52,8 @@ class ResolveComment extends \SyncService\Job {
 		if (!$report) {
 			return 0;
 		}
-		$result = $report->resolve($args['action'], $args['byUser']);
+		$user = CurseAuthUser::newUserFromGlobalId($args['byUser']);
+		$result = $report->resolve($args['action'], $user);
 
 		//Revert back to standard db connections.
 		CP::setDb(null);
