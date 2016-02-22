@@ -170,7 +170,7 @@ class FriendDisplay {
 	public static function listFromArray($curseIDs = [], $manageButtons = false) {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
-			['user_global'],
+			['user_global', 'user'],
 			['user_global.*', 'user.user_touched'],
 			['global_id' => $curseIDs],
 			__METHOD__,
