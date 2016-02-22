@@ -170,9 +170,9 @@ class FriendDisplay {
 	public static function listFromArray($curseIDs = [], $manageButtons = false) {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
-			['user'],
+			['user_global'],
 			['*'],
-			['curse_id' => $curseIDs],
+			['global_id' => $curseIDs],
 			__METHOD__,
 			[
 				'LIMIT'		=> 10,
@@ -193,6 +193,10 @@ class FriendDisplay {
 		<ul class="friends">';
 		foreach ($friendData as $friend) {
 			$fUser = \User::newFromId($friend['user_id']);
+			if (!$fUser->getId()) {
+				//Just silently drop if the user is actually missing.
+				continue;
+			}
 			$HTML .= '<li>';
 			$HTML .= ProfilePage::userAvatar($nothing, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$HTML .= ' '.CP::userLink($friend['user_id']);
