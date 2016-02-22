@@ -171,12 +171,17 @@ class FriendDisplay {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
 			['user_global'],
-			['*'],
+			['user_global.*', 'user.user_touched'],
 			['global_id' => $curseIDs],
 			__METHOD__,
 			[
 				'LIMIT'		=> 10,
 				'ORDER BY'	=> 'user_touched DESC'
+			],
+			[
+				'user' => [
+					'INNER JOIN', 'user.user_id = user_global.user_id'
+				]
 			]
 		);
 
