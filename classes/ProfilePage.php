@@ -516,9 +516,9 @@ class ProfilePage extends \Article {
 
 		global $wgServer;
 
-		if ($curseId > 0 && method_exists('PointsDisplay', 'pointsForCurseId')) {
-			$statsOutput['localrank'] = \PointsDisplay::pointsForCurseId($curseId, \WikiPoints::domainToNamespace($wgServer))['rank'];
-			$statsOutput['globalrank'] = \PointsDisplay::pointsForCurseId($curseId)['rank'];
+		if ($curseId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
+			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($curseId, \WikiPoints::domainToNamespace($wgServer))['rank'];
+			$statsOutput['globalrank'] = \PointsDisplay::pointsForGlobalId($curseId)['rank'];
 
 			if (empty($statsOutput['localrank'])) {
 				unset($statsOutput['localrank']);
@@ -677,12 +677,12 @@ class ProfilePage extends \Article {
 	public function userLevel(&$parser) {
 		$curseUser = \CurseAuthUser::getInstance($this->user);
 		// Check for existance of wikipoints functions
-		if (!$curseUser->getId() || !method_exists('PointsDisplay', 'pointsForCurseId')) {
+		if (!$curseUser->getId() || !method_exists('PointsDisplay', 'pointsForGlobalId')) {
 			return '';
 		}
 
 		$redis = \RedisCache::getClient('cache');
-		$userPoints = \PointsDisplay::pointsForCurseId($curseUser->getId())['score'];
+		$userPoints = \PointsDisplay::pointsForGlobalId($curseUser->getId())['score'];
 		$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
 
 		if (!is_array($levelDefinitions)) {
