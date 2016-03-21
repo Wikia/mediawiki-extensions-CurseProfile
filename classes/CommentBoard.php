@@ -563,9 +563,9 @@ class CommentBoard {
 	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
-	 * @param	integer	id of a comment to remove
-	 * @param	integer	[Optional] User object of the admin acting, defaults to $wgUser
-	 * @param	integer	[Optional] unix timestamp to use for deleted time, defaults to now
+	 * @param	integer	ID of the comment to remove.
+	 * @param	integer	[Optional] User object of the admin acting, defaults to $wgUser.
+	 * @param	string	[Optional] Timestamp in the format of date('Y-m-d H:i:s').
 	 * @return	stuff	whatever DB->update() returns
 	 */
 	public static function removeComment($commentId, $user = null, $time = null) {
@@ -577,7 +577,7 @@ class CommentBoard {
 			$curseUser = \CurseAuthUser::getInstance($wgUser);
 		}
 		if (!$time) {
-			$time = time();
+			$time = date('Y-m-d H:i:s');
 		}
 
 		$db = CP::getDb(DB_MASTER);
