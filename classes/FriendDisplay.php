@@ -179,7 +179,7 @@ class FriendDisplay {
 			[
 				'LIMIT'		=> intval($limit),
 				'OFFSET'	=> intval($offset),
-				'ORDER BY'	=> 'user_touched DESC'
+				'ORDER BY'	=> 'user_name DESC'
 			],
 			[
 				'user' => [
