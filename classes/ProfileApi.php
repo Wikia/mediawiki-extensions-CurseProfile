@@ -99,9 +99,10 @@ class ProfileApi extends \CurseApiBase {
 	public function doEditAboutMe() {
 		global $wgOut, $wgEmailAuthentication;
 
-		if ($wgEmailAuthentication && (!boolval($this->getUser()->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($this->getUser()->getEmail()))) {
+		if ($wgEmailAuthentication && (!boolval($this->getUser()->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($this->getUser()->getEmail()))) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', 'email-auth-required');
+			return;
 		}
 
 		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
@@ -111,6 +112,11 @@ class ProfileApi extends \CurseApiBase {
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
+			return;
+		} else {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', 'no-perm-profile-modcomments');
+			return;
 		}
 	}
 }
