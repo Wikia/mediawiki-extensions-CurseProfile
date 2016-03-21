@@ -20,6 +20,16 @@ class TemplateManageFriends {
 	 */
 	private $HTML;
 
+	/**
+	 * Displays a list of friends.
+	 *
+	 * @access	public
+	 * @param	array	Raw friend IDs.
+	 * @param	string	Pagination HTML
+	 * @param	integer	Items Per Page
+	 * @param	integer	Start Offset
+	 * @return	void
+	 */
 	public function display($friends, $pagination, $itemsPerPage, $start) {
 		$this->HTML = '<h2>'.wfMessage('friends').'</h2>';
 		if (count($friends)) {
