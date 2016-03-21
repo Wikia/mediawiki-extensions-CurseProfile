@@ -163,19 +163,22 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of curse IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param	array	curse IDs
-	 * @param	bool	signature: callback($curse_id, $userObj) returns string
+	 * @param	array	[Optional] Curse IDs
+	 * @param	boolean	[Optional] signature: callback($curse_id, $userObj) returns string
+	 * @param	integer [Optional] Number of results to limit.
+	 * @param	integer [Optional] Offset to start from.
 	 * @return	string	html UL list
 	 */
-	public static function listFromArray($curseIDs = [], $manageButtons = false) {
+	public static function listFromArray($curseIDs = [], $manageButtons = false, $limit = 10, $offset = 0) {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
 			['user_global', 'user'],
 			['user_global.*', 'user.user_touched'],
-			['global_id' => $curseIDs],
+			['global_id' => (array) $curseIDs],
 			__METHOD__,
 			[
-				'LIMIT'		=> 10,
+				'LIMIT'		=> intval($limit),
+				'OFFSET'	=> intval($offset),
 				'ORDER BY'	=> 'user_touched DESC'
 			],
 			[

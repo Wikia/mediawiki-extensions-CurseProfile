@@ -72,8 +72,8 @@ class SpecialFriends extends \UnlistedSpecialPage {
 			return;
 		}
 
-		// $start = $wgRequest->getInt('st');
-		// $itemsPerPage = 50;
+		$start = $wgRequest->getInt('st');
+		$itemsPerPage = 25;
 		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
 		$wgOut->addModules('ext.curseprofile.profilepage');
 		$templateManageFriends = new \TemplateManageFriends;
@@ -82,12 +82,10 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$f = new Friendship($curseUser->getId());
 
 		$friends = $f->getFriends();
+		$wgOut->addModules('ext.curse.pagination');
+		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
 
-		// $comments = $board->getComments(null, $start, $itemsPerPage, -1);
-		// $wgOut->addModules('ext.curse.pagination');
-		// $pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
-
-		$wgOut->addHTML($templateManageFriends->display($friends));
+		$wgOut->addHTML($templateManageFriends->display($friends, $pagination, $itemsPerPage, $start));
 
 		return;
 	}

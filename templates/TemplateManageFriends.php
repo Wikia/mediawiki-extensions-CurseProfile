@@ -20,10 +20,12 @@ class TemplateManageFriends {
 	 */
 	private $HTML;
 
-	public function display($friends) {
+	public function display($friends, $pagination, $itemsPerPage, $start) {
 		$this->HTML = '<h2>'.wfMessage('friends').'</h2>';
 		if (count($friends)) {
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends);
+			$this->HTML .= $pagination;
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, $itemsPerPage, $start);
+			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('nofriends')->plain();
 		}
