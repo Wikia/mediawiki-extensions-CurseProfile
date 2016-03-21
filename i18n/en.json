@@ -24,7 +24,7 @@
 	"friendrequestconfirm-error": "There was an error confirming the request",
 	"friendrequestignore-error": "There was an error ignoring request",
 	"friendrequestremove-error": "There was an error while trying to remove a friend",
-	"friendrequest-direct-success": "Your friend has been sent",
+	"friendrequest-direct-success": "Your friend request has been sent",
 	"friendrequest-direct-notfound": "A user by that name could not be found",
 	"friendrequest-direct-unmerged": "This user cannot be added as a friend because they have not merged their Curse account",
 	"friendrequestsend": "Add Friend",
