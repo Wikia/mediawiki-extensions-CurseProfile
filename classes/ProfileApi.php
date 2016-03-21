@@ -97,7 +97,12 @@ class ProfileApi extends \CurseApiBase {
 	 * @return	void
 	 */
 	public function doEditAboutMe() {
-		global $wgOut;
+		global $wgOut, $wgEmailAuthentication;
+
+		if ($wgEmailAuthentication && (!boolval($user->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($this->getUser()->getEmail()))) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', 'email-auth-required');
+		}
 
 		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
 			$profileData = new ProfileData($this->getRequest()->getInt('userId'));

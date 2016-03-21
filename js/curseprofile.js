@@ -152,6 +152,11 @@ function CurseProfile($) {
 					$block.prepend($editPencil);
 					// end the editing context
 					profile.cancelEdit();
+				} else if (resp.result === 'failure') {
+					alert(mw.msg(resp.errormsg));
+					profile.cancelEdit();
+				} else {
+					profile.cancelEdit();
 				}
 			});
 		}

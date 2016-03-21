@@ -172,5 +172,7 @@
 	"curseprofile_log_description": "This is the log of Curse Profile comments that have been created/edited.",
 	"logentry-curseprofile-comment-created": "$1 left a $4 on $3's profile",
 	"logentry-curseprofile-comment-replied": "$1 replied to a $4 on $3's profile",
-	"logentry-curseprofile-comment-edited": "$1 edited their $4 on $3's profile"
+	"logentry-curseprofile-comment-edited": "$1 edited their $4 on $3's profile",
+	"email-auth-required": "Email verification is required to edit this section.",
+	"no-perm-profile-modcomments": "You lack the necessary permissions to modify this section."
 }

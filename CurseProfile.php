@@ -108,6 +108,8 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 		'purgeaboutme-prompt',
 		'save',
 		'cancel',
+		'email-auth-required',
+		'no-perm-profile-modcomments'
 	]
 ];
 
