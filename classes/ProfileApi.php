@@ -99,7 +99,7 @@ class ProfileApi extends \CurseApiBase {
 	public function doEditAboutMe() {
 		global $wgOut, $wgEmailAuthentication;
 
-		if ($wgEmailAuthentication && (!boolval($user->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($this->getUser()->getEmail()))) {
+		if ($wgEmailAuthentication && (!boolval($this->getUser()->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($this->getUser()->getEmail()))) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', 'email-auth-required');
 		}
