@@ -337,11 +337,15 @@ class ProfileData {
 	/**
 	 * Returns the decoded wiki data available in redis
 	 *
-	 * @param string $siteKey md5 key for wanted site
-	 * @return array of wiki data arrays
+	 * @access	public
+	 * @param	string	$siteKey md5 key for wanted site.
+	 * @return	array	Wiki data arrays.
 	 */
 	public static function getWikiSites($siteKey = null) {
 		$redis = \RedisCache::getClient('cache');
+		if ($redis === false) {
+			return [];
+		}
 		if (is_null($siteKey)) {
 			$sites = $redis->sMembers('dynamicsettings:siteHashes');
 		} else {
