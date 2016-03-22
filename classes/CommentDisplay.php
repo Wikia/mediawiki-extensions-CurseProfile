@@ -155,9 +155,8 @@ class CommentDisplay {
 					// force parsing this message because MW won't replace plurals as expected
 					// due to this all happening inside the wfMessage()->parse() call that
 					// generates the entire profile
-					$viewReplies = $wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped());
-					$HTML .= "
-					<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='$repliesTooltip'>$viewReplies</button>";
+					$viewReplies = \Parser::stripOuterParagraph($wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped()));
+					$HTML .= "<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 				}
 
 				foreach ($comment['replies'] as $reply) {
