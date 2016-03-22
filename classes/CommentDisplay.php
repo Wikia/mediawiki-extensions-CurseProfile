@@ -120,8 +120,9 @@ class CommentDisplay {
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
 			<a name="comment'.$comment['ub_id'].'"></a>
-			<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
-			<div>';
+			<div class="commentblock">
+				<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
+				<div class="commentheader">';
 				if (!$mobile) {
 					$HTML .= '<div class="right">'
 						.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
@@ -140,9 +141,11 @@ class CommentDisplay {
 							.\Html::rawElement('a', ['href' =>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::mobileTimestamp($comment))
 							.'</div>';
 					}
-		$HTML .= '</div>
-			<div class="commentbody">
-				'.$wgOut->parse(htmlentities($comment['ub_message'], ENT_QUOTES)).'
+		$HTML .= '
+				</div>
+				<div class="commentbody">
+					'.$wgOut->parse(htmlentities($comment['ub_message'], ENT_QUOTES)).'
+				</div>
 			</div>';
 			if (isset($comment['replies'])) {
 				$HTML .= '<div class="replyset">';
