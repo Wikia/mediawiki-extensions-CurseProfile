@@ -340,10 +340,12 @@ class ProfilePage extends \Article {
 	public function aboutBlock(&$parser) {
 		global $wgOut, $wgUser;
 		$aboutText = $wgOut->parse($this->profile->getAboutText());
-		if (empty($aboutText)) {
-			$aboutText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
-		}
+
 		if ($wgUser->isAllowed('profile-modcomments') || $this->viewingSelf()) {
+			if (empty($aboutText)) {
+				$aboutText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
+			}
+
 			$aboutText = \Html::rawElement(
 				'a',
 				[
