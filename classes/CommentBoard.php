@@ -363,8 +363,10 @@ class CommentBoard {
 			$fromUser = $wgUser;
 		}
 
-		// user must be logged in, must not be blocked, and target must not be blocked (with exception for admins)
-		return $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
+		$noEmailAuth = ($wgEmailAuthentication && (!boolval($this->getUser()->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($this->getUser()->getEmail())));
+
+		//User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
+		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
 	}
 
 	/**
