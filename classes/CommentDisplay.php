@@ -79,7 +79,7 @@ class CommentDisplay {
 				</div>
 			</div>';
 		} else {
-			return '';
+			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment')->escaped()."</div>";
 		}
 	}
 
