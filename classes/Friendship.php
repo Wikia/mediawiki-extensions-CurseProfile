@@ -203,16 +203,22 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @param	integer	curse ID of a user
-	 * @return	bool	true on success, false on failure
+	 * @param	integer	Curse ID of the user to friend.
+	 * @return	boolean	True on success, False on failure.
 	 */
 	public function sendRequest($toUser) {
+		global $wgUser;
+
+		if ($wgUser->isBlocked()) {
+			return false;
+		}
+
 		$toUser = intval($toUser);
 		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
 			return false;
 		}
 
-		// Queue sync before error check in case redis is not in sync
+		//Queue sync before error check in case redis is not in sync.
 		FriendSync::queue([
 			'task' => 'add',
 			'actor' => $this->curse_id,
@@ -231,7 +237,6 @@ class Friendship {
 			return false;
 		}
 
-		global $wgUser;
 		\EchoEvent::create([
 			'type' => 'friendship-request',
 			'agent' => $wgUser,
