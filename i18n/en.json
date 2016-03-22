@@ -166,6 +166,7 @@
 	"commentmoderation-item": "First reported %1$s by %2$s:",
 	"commentmoderation-item-andothers": "First reported %1$s by %2$s and %3$d others:",
 	"empty_about_text": "Your information about yourself is blank, click to edit.",
+	"empty_about_text_mod": "This user has not filled out their about me section, click to edit.",
 	"cp-mobile-aboutme": "About Me",
 	"cp-mobile-groups": "Groups",
 	"curseprofile_log_name": "Curse Profile Comment Log",
