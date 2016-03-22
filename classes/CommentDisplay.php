@@ -144,7 +144,7 @@ class CommentDisplay {
 		$HTML .= '
 				</div>
 				<div class="commentbody">
-					'.$wgOut->parse(htmlentities($comment['ub_message'], ENT_QUOTES)).'
+					'.self::sanitizeComment($comment['ub_message']).'
 				</div>
 			</div>';
 			if (isset($comment['replies'])) {
@@ -240,5 +240,18 @@ class CommentDisplay {
 		}
 
 		return $HTML;
+	}
+
+	/**
+	 * Sanitizes a comment for display in HTML.
+	 *
+	 * @access	public
+	 * @param	string	Comment as typed by user.
+	 * @return	string	Comment sanitized for usage in HTML.
+	 */
+	static public function sanitizeComment($comment) {
+		global $wgOut;
+
+		return $wgOut->parse(str_replace(['&lt;nowiki&gt;', '&lt;pre&gt;', '&lt;/nowiki&gt;', '&lt;/pre&gt;'], ['<nowiki>', '<pre>', '</nowiki>', '</pre>'], htmlentities($comment, ENT_QUOTES)));
 	}
 }
