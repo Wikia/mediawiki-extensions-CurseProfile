@@ -300,12 +300,15 @@ class ProfileData {
 	 * @return	void
 	 */
 	static public function logProfileChange($section, $comment, $target, $performer) {
+		if (strlen($comment) > 140) {
+			$comment = substr($comment, 0, 140)."...";
+		}
 		//Insert an entry into the Log.
 		$log = new \LogPage('curseprofile');
 		$log->addEntry(
 			'profile-edited',
 			\Title::newFromURL('User:'.$target->getName()),
-			substr($comment, 0, 140)."...",
+			$comment,
 			['section' => $section],
 			$performer
 		);
