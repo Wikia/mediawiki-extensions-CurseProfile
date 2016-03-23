@@ -305,7 +305,7 @@ class ProfileData {
 		$log->addEntry(
 			'profile-edited',
 			\Title::newFromURL('User:'.$target->getName()),
-			substr($comment, 0 140)."...",
+			substr($comment, 0, 140)."...",
 			['section' => $section],
 			$performer
 		);
