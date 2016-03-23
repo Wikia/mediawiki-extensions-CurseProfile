@@ -455,7 +455,7 @@ class CommentBoard {
 				]);
 			}
 
-			// Insert an entry into the Log
+			//Insert an entry into the Log.
 			$log = new \LogPage('curseprofile');
 			$log->addEntry(
 				'comment-'.$action,
@@ -464,7 +464,6 @@ class CommentBoard {
 				$extra,
 				$fromUser
 			);
-
 		}
 
 		return $newCommentId;

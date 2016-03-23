@@ -276,10 +276,39 @@ class ProfileData {
 	 * Set the user's "About Me" text
 	 *
 	 * @param  string  the new text for the user's aboutme
+	 * @param	object	[Optional] User who performed the action.  Null to use the current user.
 	 */
-	public function setAboutText($text) {
+	public function setAboutText($text, $performer = null) {
 		$this->user->setOption('profile-aboutme', $text);
 		$this->user->saveSettings();
+
+		if ($performer === null) {
+			$performer = $this->user;
+		}
+
+		self::logProfileChange('profile-aboutme', $text, $this->user, $performer);
+	}
+
+	/**
+	 * Log a profile change.
+	 *
+	 * @access	public
+	 * @param	string	Section string of the profile.  Example: profile-aboutme
+	 * @param	string	Comment for the log, usually the text of the change.
+	 * @param	object	User targeted for the action.
+	 * @param	object	User who performed the action.  Null to use the current user.
+	 * @return	void
+	 */
+	static public function logProfileChange($section, $comment, $target, $performer) {
+		//Insert an entry into the Log.
+		$log = new \LogPage('curseprofile');
+		$log->addEntry(
+			'profile-edited',
+			\Title::newFromURL('User:'.$target->getName()),
+			$comment,
+			['section' => $section],
+			$performer
+		);
 	}
 
 	/**

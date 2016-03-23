@@ -88,15 +88,16 @@ $wgSpecialPages['CommentModeration']						= 'CurseProfile\SpecialCommentModerati
 $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
 
-// Recent Changes Logs
+//Recent Changes Logs
 $wgLogTypes['curseprofile']								= 'curseprofile';
 $wgLogNames['curseprofile']								= 'curseprofile_log_name';
 $wgLogHeaders['curseprofile']							= 'curseprofile_log_description';
 $wgLogActionsHandlers['curseprofile/comment-created']	= '\CurseProfile\CommentLogFormatter';
 $wgLogActionsHandlers['curseprofile/comment-replied']	= '\CurseProfile\CommentLogFormatter';
 $wgLogActionsHandlers['curseprofile/comment-edited']	= '\CurseProfile\CommentLogFormatter';
+$wgLogActionsHandlers['curseprofile/profile-edited']	= '\CurseProfile\ProfileLogFormatter';
 
-// Resource modules
+//Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
 	'scripts' => ['js/curseprofile.js'],

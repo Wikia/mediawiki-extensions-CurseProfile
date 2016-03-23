@@ -108,7 +108,7 @@ class ProfileApi extends \CurseApiBase {
 		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
 			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
 			$text = $this->getMain()->getVal('text');
-			$profileData->setAboutText($text);
+			$profileData->setAboutText($text, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
