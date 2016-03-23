@@ -155,7 +155,7 @@ class FriendDisplay {
 		}
 
 		return [
-			self::listFromArray($friends),
+			self::listFromArray($friends, false, 10, 0, true),
 			'isHTML' => true,
 		];
 	}
@@ -167,9 +167,10 @@ class FriendDisplay {
 	 * @param	boolean	[Optional] signature: callback($curse_id, $userObj) returns string
 	 * @param	integer [Optional] Number of results to limit.
 	 * @param	integer [Optional] Offset to start from.
-	 * @return	string	html UL list
+	 * @param	boolean [Optional] Sort by user activity instead of name.
+	 * @return	string	HTML UL List
 	 */
-	public static function listFromArray($curseIDs = [], $manageButtons = false, $limit = 10, $offset = 0) {
+	public static function listFromArray($curseIDs = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
 			['user_global', 'user'],
@@ -179,7 +180,7 @@ class FriendDisplay {
 			[
 				'LIMIT'		=> intval($limit),
 				'OFFSET'	=> intval($offset),
-				'ORDER BY'	=> 'user_name ASC'
+				'ORDER BY'	=> ($sortByActivity ? 'user_touched DESC' : 'user_name ASC')
 			],
 			[
 				'user' => [
