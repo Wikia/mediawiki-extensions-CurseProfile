@@ -18,7 +18,7 @@ namespace CurseProfile;
  */
 class CommentLogFormatter extends \LogFormatter {
 	/**
-	 * Handle custom log parameters for SpriteSheet class.
+	 * Handle custom log parameters for comments.
 	 *
 	 * @access	public
 	 * @return	array	Extract and parsed parameters.

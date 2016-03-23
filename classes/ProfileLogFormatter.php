@@ -4,8 +4,8 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Tim Aldridge
- * @copyright	(c) 2015 Curse Inc.
+ * @author		Alexia E. Smith
+ * @copyright	(c) 2016 Curse Inc.
  * @license		All Rights Reserved
  * @package		CurseProfile
  * @link		http://www.curse.com/
@@ -18,7 +18,7 @@ namespace CurseProfile;
  */
 class ProfileLogFormatter extends \LogFormatter {
 	/**
-	 * Handle custom log parameters for SpriteSheet class.
+	 * Handle custom log parameters for profile edits.
 	 *
 	 * @access	public
 	 * @return	array	Extract and parsed parameters.
@@ -26,7 +26,7 @@ class ProfileLogFormatter extends \LogFormatter {
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
-		if (!empty($parameters[3])) {
+		if (!empty($parameters[1])) {
 			$parameters[1] = ['raw' => wfMessage($parameters[1])];
 		}
 
