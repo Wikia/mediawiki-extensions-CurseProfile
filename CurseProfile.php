@@ -61,6 +61,7 @@ $wgAutoloadClasses['CurseProfile\MWEcho\CommentPresentationModel']		= $extDir.'c
 $wgAutoloadClasses['CurseProfile\MWEcho\FriendshipPresentationModel']	= $extDir.'classes/echo/FriendshipPresentationModel.php';
 $wgAutoloadClasses['CurseProfile\ResourceLoaderModule']					= $extDir.'classes/ResourceLoaderModule.php';
 $wgAutoloadClasses['CurseProfile\CommentLogFormatter']					= $extDir.'classes/CommentLogFormatter.php';
+$wgAutoloadClasses['CurseProfile\ProfileLogFormatter']					= $extDir.'classes/ProfileLogFormatter.php';
 
 $wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/templates/TemplateCommentBoard.php";
 $wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/templates/TemplateCommentModeration.php";
