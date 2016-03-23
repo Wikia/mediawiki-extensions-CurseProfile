@@ -27,7 +27,7 @@ class ProfileLogFormatter extends \LogFormatter {
 		$parameters = parent::getMessageParameters();
 
 		if (!empty($parameters[1])) {
-			$parameters[1] = ['raw' => wfMessage($parameters[1])];
+			$parameters[1] = ['raw' => wfMessage('log-'.$parameters[1])];
 		}
 
 		return $parameters;
