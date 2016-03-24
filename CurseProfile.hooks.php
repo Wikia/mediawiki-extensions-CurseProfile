@@ -286,9 +286,10 @@ class Hooks {
 		$canEdit = $profileData->canEdit($user);
 		if ($canEdit !== true) {
 			foreach ($formData as $key => $value) {
-				if (strpos($key, 'profile-') === 0) {
+				if (strpos($key, 'profile-') === 0 && $value != $untouchedUser->getOption($key)) {
 					//Reset profile data to its previous state.
 					$user->setOption($key, $untouchedUser->getOption($key));
+					$result = \Status::newFatal('no-perm-profile-moderate');
 				}
 			}
 		}
