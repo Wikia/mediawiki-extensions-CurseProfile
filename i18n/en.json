@@ -83,8 +83,8 @@
 	"purgeaboutme-prompt": "You are about to empty the 'about me' section of this profile",
 	"purge-prompt": "You are about to permanently destroy the comment by $1",
 	"report-prompt": "You are about to report the comment by $1 for inappropriate content",
-	"profilepref-profile": "Use an enhanced Curse Profile user page",
-	"profilepref-wiki": "Use a standard wiki user page",
+	"profilepref-profile": "Use an enhanced user profile page",
+	"profilepref-wiki": "Use a standard user wiki page",
 	"prefs-public": "Public Profile",
 	"prefs-location": "Location",
 	"prefs-profiles": "Other Profiles",
@@ -177,6 +177,6 @@
 	"logentry-curseprofile-profile-edited": "$1 edited their $4 on their profile.",
 	"log-profile-aboutme": "about me section",
 	"email-auth-required": "Email verification is required to edit this section.",
-	"no-perm-profile-modcomments": "You lack the necessary permissions to modify this section.",
+	"no-perm-profile-moderate": "You lack the necessary permissions to modify this section.",
 	"no-perm-profile-addcomment": "You do not have rights to add comments or reply."
 }

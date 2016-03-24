@@ -179,7 +179,7 @@ class CommentApi extends \CurseApiBase {
 			'resolveReport' => [
 				'tokenRequired' => true,
 				'postRequired' => false,
-				'permissionRequired' => 'profile-modcomments',
+				'permissionRequired' => 'profile-moderate',
 				'params' => [
 					'reportKey' => [
 						\ApiBase::PARAM_TYPE => 'string',

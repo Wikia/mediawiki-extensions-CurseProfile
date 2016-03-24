@@ -27,7 +27,7 @@ $wgExtensionCredits['specialpage'][] = [
 define('NS_USER_WIKI', 200);
 define('NS_USER_PROFILE', 202);
 
-$wgAvailableRights[] = 'profile-modcomments';
+$wgAvailableRights[] = 'profile-moderate';
 $wgAvailableRights[] = 'profile-purgecomments';
 
 /******************************************/
@@ -111,7 +111,7 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 		'save',
 		'cancel',
 		'email-auth-required',
-		'no-perm-profile-modcomments'
+		'no-perm-profile-moderate'
 	]
 ];
 
@@ -191,6 +191,7 @@ $wgHooks['UnitTestsList'][]					= 'CurseProfile\Hooks::onUnitTestsList';
 $wgHooks['SkinTemplateNavigation'][]		= 'CurseProfile\Hooks::onSkinTemplateNavigation';
 $wgHooks['CanonicalNamespaces'][]			= 'CurseProfile\Hooks::onCanonicalNamespaces';
 $wgHooks['GetPreferences'][]				= 'CurseProfile\Hooks::onGetPreferences';
+$wgHooks['PreferencesFormPreSave'][]		= 'CurseProfile\Hooks::onPreferencesFormPreSave';
 $wgHooks['UserGetDefaultOptions'][]			= 'CurseProfile\Hooks::onUserGetDefaultOptions';
 $wgHooks['UserSaveOptions'][]				= 'CurseProfile\Hooks::onUserSaveOptions';
 $wgHooks['BeforeCreateEchoEvent'][]			= 'CurseProfile\Hooks::onBeforeCreateEchoEvent';

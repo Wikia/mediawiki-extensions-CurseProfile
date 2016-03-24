@@ -15,7 +15,7 @@ namespace CurseProfile;
 
 class SpecialCommentModeration extends \SpecialPage {
 	public function __construct() {
-		parent::__construct( 'CommentModeration', 'profile-modcomments' );
+		parent::__construct( 'CommentModeration', 'profile-moderate' );
 	}
 
 	/**

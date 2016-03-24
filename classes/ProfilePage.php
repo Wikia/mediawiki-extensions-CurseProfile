@@ -341,7 +341,7 @@ class ProfilePage extends \Article {
 		global $wgOut, $wgUser;
 		$aboutText = $wgOut->parse($this->profile->getAboutText());
 
-		if ($wgUser->isAllowed('profile-modcomments') || $this->viewingSelf()) {
+		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
 			if (empty($aboutText)) {
 				$aboutText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
 			}

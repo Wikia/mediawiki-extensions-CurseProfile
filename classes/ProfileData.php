@@ -273,6 +273,34 @@ class ProfileData {
 	}
 
 	/**
+	 * Can the given user edit this profile profile?
+	 *
+	 * @access	public
+	 * @param	object	User, the performer that needs to make changes.
+	 * @return	mixed	Boolean true if allowed, otherwise error message string to display.
+	 */
+	public function canEdit($performer) {
+		global $wgEmailAuthentication;
+
+		if ($performer->isAllowed('profile-moderate')) {
+			//Moderators can always edit a profile to remove spam.
+			return true;
+		}
+
+		if ($performer->getId() !== $this->user->getId()) {
+			//Users can only edit their own profiles if they are not a moderator.
+			return 'no-perm-profile-moderate';
+		}
+
+		if ($wgEmailAuthentication && (!boolval($performer->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($performer->getEmail()))) {
+			//If email authentication is turned on and their email address is invalid then prevent editing.
+			return 'email-auth-required';
+		}
+
+		return true;
+	}
+
+	/**
 	 * Set the user's "About Me" text
 	 *
 	 * @param  string  the new text for the user's aboutme

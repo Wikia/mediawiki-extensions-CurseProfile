@@ -256,12 +256,43 @@ class Hooks {
 	 * Add extra preferences
 	 *
 	 * @access	public
-	 * @param	object	user whose preferences are being modified
+	 * @param	object	User whose preferences are being modified
 	 * @param	array	Preferences description object, to be fed to an HTMLForm
 	 * @return	boolean	true
 	 */
 	static public function onGetPreferences($user, &$preferences) {
 		ProfileData::insertProfilePrefs($preferences);
+		return true;
+	}
+
+	/**
+	 * Function Documentation
+	 *
+	 * @access	public
+	 * @param	array	$formData: array of user submitted data
+	 * @param	object	$form: PreferencesForm object, also a ContextSource
+	 * @param	object	$user: User object with preferences to be saved set
+	 * @param	boolean	&$result: boolean indicating success
+	 * @return	boolean	True
+	 */
+	static public function onPreferencesFormPreSave($formData, $form, $user, &$result) {
+		$untouchedUser = \User::newFromId($user->getId());
+
+		if (!$untouchedUser || !$untouchedUser->getId()) {
+			return true;
+		}
+
+		$profileData = new ProfileData($user);
+		$canEdit = $profileData->canEdit($user);
+		if ($canEdit !== true) {
+			foreach ($formData as $key => $value) {
+				if (strpos($key, 'profile-') === 0) {
+					//Reset profile data to its previous state.
+					$user->setOption($key, $untouchedUser->getOption($key));
+				}
+			}
+		}
+
 		return true;
 	}
 

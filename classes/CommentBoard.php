@@ -78,7 +78,7 @@ class CommentBoard {
 			$asUser = \User::newFromId($asUser);
 		}
 
-		if ($asUser->isAllowed('profile-modcomments')) {
+		if ($asUser->isAllowed('profile-moderate')) {
 			// admins see everything
 			return '1=1';
 		} else {
@@ -326,7 +326,7 @@ class CommentBoard {
 			$user = $wgUser;
 		}
 		//Early check for admin status.
-		if ($user->isAllowed('profile-modcomments')) {
+		if ($user->isAllowed('profile-moderate')) {
 			return true;
 		}
 
@@ -616,7 +616,7 @@ class CommentBoard {
 		return $comment['ub_type'] != self::DELETED_MESSAGE && !$user->isBlocked() &&
 			( $comment['ub_user_id'] == $user->getId()
 				|| $comment['ub_user_from_id'] == $user->getId()
-				|| $user->isAllowed('profile-modcomments') );
+				|| $user->isAllowed('profile-moderate') );
 	}
 
 	/**
@@ -661,7 +661,7 @@ class CommentBoard {
 
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $comment['ub_type'] == self::DELETED_MESSAGE &&
-			( $user->isAllowed('profile-modcomments')
+			( $user->isAllowed('profile-moderate')
 				|| $comment['ub_user_id'] == $user->getId() && $comment['ub_admin_acted'] == $user->getId() );
 	}
 
@@ -729,7 +729,7 @@ class CommentBoard {
 		}
 
 		// user must be logged-in to report, comment must be public (not deleted), and no point in reporting if user can remove it themselves
-		return !$user->isAnon() && !$user->isAllowed('profile-modcomments') && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
+		return !$user->isAnon() && !$user->isAllowed('profile-moderate') && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
 	}
 
 	/**

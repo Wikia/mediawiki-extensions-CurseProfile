@@ -84,7 +84,7 @@ class ProfileApi extends \CurseApiBase {
 	 * @return	void
 	 */
 	public function doGetRawAboutMe() {
-		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
+		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-moderate')) {
 			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
 			$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
 		}
@@ -97,26 +97,23 @@ class ProfileApi extends \CurseApiBase {
 	 * @return	void
 	 */
 	public function doEditAboutMe() {
-		global $wgOut, $wgEmailAuthentication;
+		global $wgOut;
 
-		if ($wgEmailAuthentication && (!boolval($this->getUser()->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($this->getUser()->getEmail()))) {
+		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+
+		$canEdit = $profileData->canEdit($this->getUser());
+		if ($canEdit !== true) {
 			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'email-auth-required');
+			$this->getResult()->addValue(null, 'errormsg', $canEdit);
 			return;
 		}
 
-		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-modcomments')) {
-			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
-			$text = $this->getMain()->getVal('text');
-			$profileData->setAboutText($text, $this->getUser());
-			$this->getResult()->addValue(null, 'result', 'success');
-			// add parsed text to result
-			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
-			return;
-		} else {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'no-perm-profile-modcomments');
-			return;
-		}
+		$text = $this->getMain()->getVal('text');
+		$profileData->setAboutText($text, $this->getUser());
+		$this->getResult()->addValue(null, 'result', 'success');
+		//Add parsed text to result.
+		$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
+
+		return;
 	}
 }
