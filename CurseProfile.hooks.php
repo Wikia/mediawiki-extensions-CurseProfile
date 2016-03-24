@@ -289,7 +289,7 @@ class Hooks {
 				if (strpos($key, 'profile-') === 0 && $value != $untouchedUser->getOption($key)) {
 					//Reset profile data to its previous state.
 					$user->setOption($key, $untouchedUser->getOption($key));
-					$result = \Status::newFatal('no-perm-profile-moderate');
+					$result = \Status::newFatal($canEdit);
 				}
 			}
 		}

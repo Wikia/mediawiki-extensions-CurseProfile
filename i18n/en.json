@@ -176,7 +176,7 @@
 	"logentry-curseprofile-comment-edited": "$1 edited their $4 on $3's profile.",
 	"logentry-curseprofile-profile-edited": "$1 edited their $4 on their profile.",
 	"log-profile-aboutme": "about me section",
-	"email-auth-required": "Email verification is required to edit this section.",
-	"no-perm-profile-moderate": "You lack the necessary permissions to modify this user profile.  Either your email address has not been verified or you do not have permission to moderate profiles.",
+	"email-auth-required": "Email verification is required to edit this profile.",
+	"no-perm-profile-moderate": "You lack the necessary permissions to modify this user profile.",
 	"no-perm-profile-addcomment": "You do not have rights to add comments or reply."
 }
