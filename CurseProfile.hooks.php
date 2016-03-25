@@ -285,11 +285,11 @@ class Hooks {
 		$profileData = new ProfileData($user);
 		$canEdit = $profileData->canEdit($user);
 		if ($canEdit !== true) {
+			$result = \Status::newFatal($canEdit);
 			foreach ($formData as $key => $value) {
 				if (strpos($key, 'profile-') === 0 && $value != $untouchedUser->getOption($key)) {
 					//Reset profile data to its previous state.
 					$user->setOption($key, $untouchedUser->getOption($key));
-					$result = \Status::newFatal($canEdit);
 				}
 			}
 		}
