@@ -83,7 +83,7 @@ class ProfileData {
 			'---' => '',
 		];
 		foreach (self::getWikiSites() as $wiki) {
-			if ($wiki['group_domain']) {
+			if (isset($wiki['group_domain'])) {
 				$wiki['wiki_name'] = $wiki['wiki_name']. " ({$wiki['wiki_language']})";
 			}
 			$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
