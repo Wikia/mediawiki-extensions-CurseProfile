@@ -118,7 +118,7 @@ class FriendDisplay {
 
 		$HTML = '';
 
-		if (count($links['views'])) {
+		if (isset($links['views']) && count($links['views'])) {
 			foreach ($links['views'] as $link) {
 				$attribs = [
 					'class' => 'friendship-action',
