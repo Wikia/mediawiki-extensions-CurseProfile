@@ -350,7 +350,7 @@ class CommentBoard {
 	 * @return	bool
 	 */
 	public static function canComment($toUser, $fromUser = null) {
-		global $wgCPEditsToComment;
+		global $wgCPEditsToComment, $wgEmailAuthentication;
 
 		if (is_numeric($toUser)) {
 			$toUser = \User::newFromId($toUser);

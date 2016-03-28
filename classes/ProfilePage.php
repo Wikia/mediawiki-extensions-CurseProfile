@@ -317,6 +317,8 @@ class ProfilePage extends \Article {
 	public function location(&$parser) {
 		$locations = $this->profile->getLocations();
 
+		$HTML = '';
+
 		if (isset($locations['country-flag'])) {
 			$src = \FlagFinder::getFlagPath($locations['country-flag']);
 			$HTML = "<img src='$src' class='countryflag' alt='flag for {$locations['country-flag']}'/> ".$HTML;
