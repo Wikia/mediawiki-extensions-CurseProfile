@@ -752,13 +752,23 @@ class ProfilePage extends \Article {
 
 		$curseUser = \CurseAuthUser::getInstance($this->user);
 
+		$isPremium = false;
+		if (\ExtensionRegistry::getInstance()->isLoaded('Subscription')) {
+			if (!empty($this->user) && $this->user->getId()) {
+				$subscription = \Hydra\Subscription::newFromUser($this->user);
+				if ($subscription !== false && $subscription->hasSubscription()) {
+					$isPremium = true;
+				}
+			}
+		}
+
 		return sprintf('
 <div class="curseprofile" data-userid="%2$s">
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
-				<h1'.($curseUser->isPremium() ? ' class="premium_user"' : '').'>%1$s</h1>
+				<h1'.($isPremium) ? ' class="premium_user"' : '').'>%1$s</h1>
 				{{#groups:}}
 			</div>
 			<div>
