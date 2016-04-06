@@ -768,7 +768,7 @@ class ProfilePage extends \Article {
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
-				<h1'.($isPremium) ? ' class="premium_user"' : '').'>%1$s</h1>
+				<h1'.($isPremium ? ' class="premium_user"' : '').'>%1$s</h1>
 				{{#groups:}}
 			</div>
 			<div>
