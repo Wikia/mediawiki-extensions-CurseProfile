@@ -325,7 +325,7 @@ class ProfilePage extends \Article {
 			unset($locations['country-flag']);
 		}
 
-		$HTML .= implode(', ', $locations);
+		$HTML .= implode(', ', array_map('htmlentities', $locations));
 
 		return [
 			$HTML,
