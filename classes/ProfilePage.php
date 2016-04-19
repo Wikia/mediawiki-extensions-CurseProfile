@@ -752,12 +752,14 @@ class ProfilePage extends \Article {
 
 		$curseUser = \CurseAuthUser::getInstance($this->user);
 
-		$isPremium = false;
-		if (\ExtensionRegistry::getInstance()->isLoaded('Subscription')) {
-			if (!empty($this->user) && $this->user->getId()) {
-				$subscription = \Hydra\Subscription::newFromUser($this->user);
-				if ($subscription !== false && $subscription->hasSubscription()) {
-					$isPremium = true;
+		$classes = false;
+		$user = User::newFromName($target->getText());
+		if (!empty($this->user) && $this->user->getId()) {
+			$subscription = \Hydra\Subscription::newFromUser($this->user);
+			if ($subscription !== false) {
+				$classes = $subscription->getFlairClasses();
+				if (empty($classes)) {
+					$classes = false; //Enforce sanity.
 				}
 			}
 		}
@@ -768,7 +770,7 @@ class ProfilePage extends \Article {
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
 			<div class="headline">
-				<h1'.($isPremium ? ' class="premium_user"' : '').'>%1$s</h1>
+				<h1'.($classes !== false ? ' class="'.implode(' ', $classes).'"' : '').'>%1$s</h1>
 				{{#groups:}}
 			</div>
 			<div>
