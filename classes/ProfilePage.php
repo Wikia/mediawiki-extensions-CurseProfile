@@ -753,7 +753,6 @@ class ProfilePage extends \Article {
 		$curseUser = \CurseAuthUser::getInstance($this->user);
 
 		$classes = false;
-		$user = User::newFromName($target->getText());
 		if (!empty($this->user) && $this->user->getId()) {
 			$subscription = \Hydra\Subscription::newFromUser($this->user);
 			if ($subscription !== false) {
