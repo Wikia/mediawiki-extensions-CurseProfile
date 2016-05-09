@@ -521,7 +521,7 @@ class ProfilePage extends \Article {
 		global $wgServer;
 
 		if ($curseId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
-			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($curseId, \WikiPoints::domainToNamespace($wgServer))['rank'];
+			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($curseId, \WikiPoints::extractDomain($wgServer))['rank'];
 			$statsOutput['globalrank'] = \PointsDisplay::pointsForGlobalId($curseId)['rank'];
 
 			if (empty($statsOutput['localrank'])) {
