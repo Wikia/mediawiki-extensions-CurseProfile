@@ -45,8 +45,8 @@ class SpecialManageFriends extends \SpecialPage {
 			throw new \UserNotLoggedIn('exception-nologinreturn-text', 'exception-nologin', ['Special:ManageFriends']);
 		}
 
-		// $start = $wgRequest->getInt('st');
-		// $itemsPerPage = 50;
+		$start = $wgRequest->getInt('st');
+		$itemsPerPage = 25;
 		$wgOut->addModules('ext.curseprofile.profilepage');
 		$templateManageFriends = new \TemplateManageFriends;
 
