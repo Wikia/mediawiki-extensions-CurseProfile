@@ -384,29 +384,29 @@ class ProfilePage extends \Article {
 			switch ($key) {
 				case 'XBL':
 					$link = urlencode($link);
-					$item .= \Html::element('a', ['href'=>"https://live.xbox.com/en-US/Profile?gamertag=$link", 'target'=>'_blank']);
+					$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
 					break;
 				case 'PSN':
 					$link = urlencode($link);
-					$item .= \Html::element('a', ['href'=>"http://psnprofiles.com/$link", 'target'=>'_blank']);
+					$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
 					break;
 				case 'Twitter':
 					if (!self::validateUrl($key, $link)) {
 						$item = '';
 					} else {
-						$item .= \Html::element('a', ['href'=>"https://twitter.com/$link", 'target'=>'_blank']);
+						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
 					}
 					break;
 				case 'Reddit':
 					if (!self::validateUrl($key, $link)) {
 						$item = '';
 					} else {
-						$item .= \Html::element('a', ['href'=>"https://www.reddit.com/user/$link", 'target'=>'_blank']);
+						$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
 					}
 					break;
 				default:
 					if (self::validateUrl($key, $link)) {
-						$item .= \Html::element('a', ['href'=>$link, 'target'=>'_blank']);
+						$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
 					} else {
 						$item = '';
 					}
