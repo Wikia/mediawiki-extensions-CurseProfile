@@ -401,7 +401,7 @@ class ProfilePage extends \Article {
 					if (!self::validateUrl($key, $link)) {
 						$item = '';
 					} else {
-						$item .= \Html::element('a', ['href'=>"http://www.reddit.com/user/$link", 'target'=>'_blank']);
+						$item .= \Html::element('a', ['href'=>"https://www.reddit.com/user/$link", 'target'=>'_blank']);
 					}
 					break;
 				default:
@@ -468,7 +468,7 @@ class ProfilePage extends \Article {
 		} else {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
-		$HTML = "<a target='_blank' href='http://{$wiki['wiki_domain']}/'>".$HTML."</a>";
+		$HTML = "<a target='_blank' href='https://{$wiki['wiki_domain']}/'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
 		return [

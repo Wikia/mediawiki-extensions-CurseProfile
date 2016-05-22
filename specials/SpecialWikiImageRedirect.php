@@ -33,6 +33,7 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 			$result = \Http::post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5));
 			$json = json_decode($result, true);
 			if ($json && isset($json['AvatarUrl'])) {
+				$json['AvatarUrl'] = str_replace('http://', 'https://', $json['AvatarUrl']); //Not a clean fix for this, but it works.
 				// cache to redis
 				$redis->set('wikiavatar:' . $md5, $json['AvatarUrl']);
 				$redis->expire('wikiavatar:' . $md5, 86400); // discard after 24 hrs
