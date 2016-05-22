@@ -74,13 +74,13 @@ class CP {
 	 */
 	public static function userLink($user) {
 		if ($user instanceof \User) {
-			$user_id = $user->getId();
+			$userId = $user->getId();
 		} else {
-			$user_id = $user;
+			$userId = $user;
 			$user = \User::newFromId($user);
 		}
 		return \Linker::linkKnown($user->getUserPage(), $user->getName()); //htmlspecialchars($user->getName())
-		// return \Linker::userLink($user_id, $user->getName());
+		// return \Linker::userLink($userId, $user->getName());
 	}
 
 	/**

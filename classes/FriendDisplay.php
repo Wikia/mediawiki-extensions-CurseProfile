@@ -161,21 +161,21 @@ class FriendDisplay {
 	}
 
 	/**
-	 * Creates a UL html list from an array of curse IDs. The callback function can insert extra html in the LI tags.
+	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param	array	[Optional] Curse IDs
+	 * @param	array	[Optional] Global IDs
 	 * @param	boolean	[Optional] signature: callback($curse_id, $userObj) returns string
 	 * @param	integer [Optional] Number of results to limit.
 	 * @param	integer [Optional] Offset to start from.
 	 * @param	boolean [Optional] Sort by user activity instead of name.
 	 * @return	string	HTML UL List
 	 */
-	public static function listFromArray($curseIDs = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
+	public static function listFromArray($globalIds = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$db = CP::getDb(DB_MASTER);
 		$results = $db->select(
 			['user_global', 'user'],
 			['user_global.*', 'user.user_touched'],
-			['global_id' => (array) $curseIDs],
+			['global_id' => (array) $globalIds],
 			__METHOD__,
 			[
 				'LIMIT'		=> intval($limit),
