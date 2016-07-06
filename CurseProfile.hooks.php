@@ -60,6 +60,9 @@ class Hooks {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
+		/* We need too decide if they should be redirected or not here */
+
+		/*
 		if (self::$profilePage->isSpoofedWikiPage()) {
 			// overwrite the assignable argument
 			$title = self::$profilePage->getUserWikiArticle()->getTitle();
@@ -68,6 +71,7 @@ class Hooks {
 		} elseif ($request->getVal('redirectToUserwiki')) {
 			$output->redirect(self::$profilePage->getCustomUserWikiTitle()->getFullURL());
 		}
+		*/
 
 		return true;
 	}
