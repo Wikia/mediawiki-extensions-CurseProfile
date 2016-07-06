@@ -133,10 +133,18 @@ class Hooks {
 
 		// handle rendering duties for any of our namespaces
 		if (self::$profilePage instanceOf \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
-			// Add our CSS and JS
-			$article = self::$profilePage;
-			$wgOut->addModules('ext.curseprofile.profilepage');
-			return true;
+				if ($title->getNamespace() == NS_USER_PROFILE) {
+					// we are on our UserProfile namespace. Render.
+					$article = self::$profilePage;
+					$wgOut->addModules('ext.curseprofile.profilepage');
+					return true;
+				} else {
+					// we are on the User namespace with our enhanced profile object enabled.
+					if ($wgRequest->getVal('profile') !== "no") {
+						// only redirect if we dont have "?profile=no"
+						$wgOut->redirect( self::$profilePage->getCustomUserProfileTitle()->getFullURL() );
+					}
+				}
 		}
 
 		return true;

@@ -187,6 +187,14 @@ class ProfilePage extends \Article {
 	}
 
 	/**
+	 * Returns the title object for the user's page in the UserProfile namespace
+	 * @return	\Title instance
+	 */
+	public function getCustomUserProfileTitle() {
+		return \Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
+	}
+
+	/**
 	 * Adjusts the links in the primary action bar on profile pages and user wiki pages
 	 * @param	array	structured info on what links will appear on the rendered page
 	 */
