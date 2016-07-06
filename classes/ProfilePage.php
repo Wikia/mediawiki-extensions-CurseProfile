@@ -140,6 +140,15 @@ class ProfilePage extends \Article {
 	}
 
 	/**
+	 * True if we are viewing a user_talk namespace page.
+	 *
+	 * @return	bool
+	 */
+	public function isTalkPage() {
+		return $this->getTitle()->getNamespace() == NS_USER_TALK;
+	}
+
+	/**
 	 * True if we need to render the user's profile page on either namespace
 	 *
 	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
@@ -242,7 +251,7 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		if($this->isDefaultPage()) {
+		if($this->isDefaultPage() || $this->isTalkPage()) {
 			// add user profile link to user page
 			$links['namespaces']['userprofile'] = [
 				'href' => $this->profile->getProfilePath(),
