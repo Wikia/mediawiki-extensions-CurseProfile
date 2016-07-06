@@ -147,7 +147,9 @@ class ProfilePage extends \Article {
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
-				($this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+				(	$this->profile->getTypePref() &&
+					$this->getTitle()->getNamespace() == NS_USER &&
+					$this->getContext()->getRequest()->getVal('profile') !== "no" ) ||
 				($this->getTitle()->getNamespace() == NS_USER_PROFILE)
 			) && (
 				$this->getContext()->getRequest()->getInt('diff') == 0 &&
@@ -202,7 +204,9 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		// links specific to the profile page
+
 		if ($this->isProfilePage()) {
+
 			$oldLinks = $links;
 			// let's start with a fresh array
 			$links = [
@@ -212,31 +216,44 @@ class ProfilePage extends \Article {
 				'variants' => [],
 			];
 
-			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
-			$links['namespaces']['user']['href'] = $this->getTitle()->getLinkURL();
-			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->text(); // rename from "User page"
-			$links['namespaces']['user']['class'] = 'selected';
+			$links['namespaces']['userprofile'] = [
+				'href' => $this->profile->getProfilePath(),
+				'text' => wfMessage('userprofiletab')->text(),
+				'class' => 'selected'
+			];
+
 			// add link to user wiki
-			$links['namespaces']['user_wiki'] = [
+			$links['namespaces']['user'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userwikitab')->text(),
 				'href'		=> $this->profile->getUserWikiPath(),
 			];
 
-			// show link to usertalk page if on non-default profile
-			if (!$this->profile->getTypePref()) {
-				$links['namespaces']['user_talk'] = [
-					'class'		=> false,
-					'text'		=> wfMessage('talk')->text(),
-					'href'		=> $this->user->getTalkPage()->getLinkURL(),
-				];
-			}
+			$links['namespaces']['user_talk'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('talk')->text(),
+				'href'		=> $this->user->getTalkPage()->getLinkURL(),
+			];
 
 			$links['views']['contribs'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('contributions')->text(),
 				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
 			];
+		}
+
+		if($this->isDefaultPage()) {
+			// add user profile link to user page
+			$links['namespaces']['userprofile'] = [
+				'href' => $this->profile->getProfilePath(),
+				'text' => wfMessage('userprofiletab')->text(),
+				'class' => false
+			];
+			/*$links['views']['contribs'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('contributions')->text(),
+				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
+			];*/
 		}
 
 		// links specific to a user wiki page
@@ -252,6 +269,7 @@ class ProfilePage extends \Article {
 			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->text();
 			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
 		}
+
 	}
 
 	/**
