@@ -127,7 +127,7 @@ class ProfilePage extends \Article {
 	public function isUserPage($onlyView = true) {
 		return $this->user_id && !$this->getTitle()->isSubpage()
 			&& (!$onlyView || $this->actionIsView)
-			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
+			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE]);
 	}
 
 	/**
@@ -167,23 +167,13 @@ class ProfilePage extends \Article {
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {
 			return $this->isUserPage($onlyView) && (
-					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
-					($this->getTitle()->getNamespace() == NS_USER_WIKI)
+					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER)
 				);
 		} else {
 			return $this->isUserWikiPage(true) || (
 				$this->isUserPage(false) && ($this->getTitle()->getNamespace() == NS_USER && !$this->actionIsView)
 			);
 		}
-	}
-
-	/**
-	 * True if we are on the custom UserWiki namespace
-	 * @return	bool
-	 */
-	public function isSpoofedWikiPage() {
-
-		return $this->getTitle()->getNamespace() == NS_USER_WIKI && $this->actionIsView;
 	}
 
 	/**
@@ -194,14 +184,6 @@ class ProfilePage extends \Article {
 		$article = new \Article($this->user->getUserPage());
 		$article->setContext($this->getContext());
 		return $article;
-	}
-
-	/**
-	 * Returns the title object for the user's page in the UserWiki namespace
-	 * @return	\Title instance
-	 */
-	public function getCustomUserWikiTitle() {
-		return \Title::makeTitle(NS_USER_WIKI, $this->user->getName());
 	}
 
 	/**

@@ -84,7 +84,7 @@ class Hooks {
 	 */
 	public static function onLinkBegin( $dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret ) {
 		// only process user namespace links
-		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI])) {
+		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE])) {
 			return true;
 		}
 		// setup a temp context with the query string serving as the request info
@@ -105,37 +105,6 @@ class Hooks {
 		return true;
 	}
 
-	/**
-	 * Replaces User:Xxx with UserWiki:Xxx in emails when applicable
-	 *
-	 * @param	editor	User whose edit is triggering this email
-	 * @param	title	Title object of the page in question that was updated
-	 * @param	rc		RecentChange instance (new param in 1.24, backported by curse)
-	 * @return	bool
-	 */
-	public static function onAbortEmailNotification($editor, $title, $rc = null) {
-		if ( $rc !== null && $title->getNamespace() == NS_USER && !$title->isSubpage() ) {
-			// look up user by name
-			$user = \User::newFromName($title->getText());
-			$profile = new ProfileData($user);
-			if ($profile->getTypePref()) { // need to replace User:Xxx with UserWiki:Xxx
-				$userWikiTitle = \Title::makeTitle(NS_USER_WIKI, $title->getDBkey(), $title->getFragment());
-
-				// send the email with the new title
-				$enotif = new \EmailNotification();
-				$enotif->notifyOnPageChange( $editor, $userWikiTitle,
-					$rc->mAttribs['rc_timestamp'],
-					$rc->mAttribs['rc_comment'],
-					$rc->mAttribs['rc_minor'],
-					$rc->mAttribs['rc_last_oldid'],
-					$rc->mExtra['pageStatus'] );
-
-				// abort the original email because we have already sent one here
-				return false;
-			}
-		}
-		return true;
-	}
 
 	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
@@ -247,7 +216,6 @@ class Hooks {
 	 * @return	boolean	true
 	 */
 	static public function onCanonicalNamespaces(&$list) {
-		$list[NS_USER_WIKI]    = 'UserWiki';
 		$list[NS_USER_PROFILE] = 'UserProfile';
 		return true;
 	}
