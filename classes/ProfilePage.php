@@ -267,7 +267,7 @@ class ProfilePage extends \Article {
 
 		// links specific to a user wiki page
 		if ($this->isUserWikiPage(false)) {
-			$links['namespaces']['user_profile'] = [
+			$links['namespaces']['userprofile'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userprofiletab')->text(),
 				'href'		=> $this->profile->getProfilePath(),
