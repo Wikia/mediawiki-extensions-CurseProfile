@@ -79,7 +79,9 @@ class CommentDisplay {
 				</div>
 			</div>';
 		} else {
-			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment')->escaped()."</div>";
+			$mc = new \MessageCache(CACHE_NONE,false,1);
+			$out = trim($mc->parse("You do not have permission to add comments or reply. Please make sure you are logged in and have [[Special:ConfirmEmail|validated your e-mail address]].")->getText());
+			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment')->parse()."</div>";
 		}
 	}
 
