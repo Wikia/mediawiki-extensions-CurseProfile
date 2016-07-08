@@ -127,7 +127,7 @@ class ProfilePage extends \Article {
 	public function isUserPage($onlyView = true) {
 		return $this->user_id && !$this->getTitle()->isSubpage()
 			&& (!$onlyView || $this->actionIsView)
-			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE, NS_USER_WIKI]);
+			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE]);
 	}
 
 	/**
@@ -140,6 +140,15 @@ class ProfilePage extends \Article {
 	}
 
 	/**
+	 * True if we are viewing a user_talk namespace page.
+	 *
+	 * @return	bool
+	 */
+	public function isTalkPage() {
+		return $this->getTitle()->getNamespace() == NS_USER_TALK;
+	}
+
+	/**
 	 * True if we need to render the user's profile page on either namespace
 	 *
 	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
@@ -147,7 +156,9 @@ class ProfilePage extends \Article {
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
-				($this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
+				(	$this->profile->getTypePref() &&
+					$this->getTitle()->getNamespace() == NS_USER &&
+					$this->getContext()->getRequest()->getVal('profile') !== "no" ) ||
 				($this->getTitle()->getNamespace() == NS_USER_PROFILE)
 			) && (
 				$this->getContext()->getRequest()->getInt('diff') == 0 &&
@@ -167,23 +178,13 @@ class ProfilePage extends \Article {
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {
 			return $this->isUserPage($onlyView) && (
-					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER) ||
-					($this->getTitle()->getNamespace() == NS_USER_WIKI)
+					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER)
 				);
 		} else {
 			return $this->isUserWikiPage(true) || (
 				$this->isUserPage(false) && ($this->getTitle()->getNamespace() == NS_USER && !$this->actionIsView)
 			);
 		}
-	}
-
-	/**
-	 * True if we are on the custom UserWiki namespace
-	 * @return	bool
-	 */
-	public function isSpoofedWikiPage() {
-
-		return $this->getTitle()->getNamespace() == NS_USER_WIKI && $this->actionIsView;
 	}
 
 	/**
@@ -197,11 +198,11 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Returns the title object for the user's page in the UserWiki namespace
+	 * Returns the title object for the user's page in the UserProfile namespace
 	 * @return	\Title instance
 	 */
-	public function getCustomUserWikiTitle() {
-		return \Title::makeTitle(NS_USER_WIKI, $this->user->getName());
+	public function getCustomUserProfileTitle() {
+		return \Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
 	}
 
 	/**
@@ -212,7 +213,9 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		// links specific to the profile page
+
 		if ($this->isProfilePage()) {
+
 			$oldLinks = $links;
 			// let's start with a fresh array
 			$links = [
@@ -222,25 +225,24 @@ class ProfilePage extends \Article {
 				'variants' => [],
 			];
 
-			$links['namespaces']['user'] = $oldLinks['namespaces']['user'];
-			$links['namespaces']['user']['href'] = $this->getTitle()->getLinkURL();
-			$links['namespaces']['user']['text'] = wfMessage('userprofiletab')->text(); // rename from "User page"
-			$links['namespaces']['user']['class'] = 'selected';
+			$links['namespaces']['userprofile'] = [
+				'href' => $this->profile->getProfilePath(),
+				'text' => wfMessage('userprofiletab')->text(),
+				'class' => 'selected'
+			];
+
 			// add link to user wiki
-			$links['namespaces']['user_wiki'] = [
+			$links['namespaces']['user'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userwikitab')->text(),
 				'href'		=> $this->profile->getUserWikiPath(),
 			];
 
-			// show link to usertalk page if on non-default profile
-			if (!$this->profile->getTypePref()) {
-				$links['namespaces']['user_talk'] = [
-					'class'		=> false,
-					'text'		=> wfMessage('talk')->text(),
-					'href'		=> $this->user->getTalkPage()->getLinkURL(),
-				];
-			}
+			$links['namespaces']['user_talk'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('talk')->text(),
+				'href'		=> $this->user->getTalkPage()->getLinkURL(),
+			];
 
 			$links['views']['contribs'] = [
 				'class'		=> false,
@@ -249,9 +251,23 @@ class ProfilePage extends \Article {
 			];
 		}
 
+		if($this->isDefaultPage() || $this->isTalkPage()) {
+			// add user profile link to user page
+			$links['namespaces']['userprofile'] = [
+				'href' => $this->profile->getProfilePath(),
+				'text' => wfMessage('userprofiletab')->text(),
+				'class' => false
+			];
+			/*$links['views']['contribs'] = [
+				'class'		=> false,
+				'text'		=> wfMessage('contributions')->text(),
+				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
+			];*/
+		}
+
 		// links specific to a user wiki page
 		if ($this->isUserWikiPage(false)) {
-			$links['namespaces']['user_profile'] = [
+			$links['namespaces']['userprofile'] = [
 				'class'		=> false,
 				'text'		=> wfMessage('userprofiletab')->text(),
 				'href'		=> $this->profile->getProfilePath(),
@@ -262,6 +278,7 @@ class ProfilePage extends \Article {
 			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->text();
 			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
 		}
+
 	}
 
 	/**

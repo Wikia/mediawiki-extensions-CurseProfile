@@ -52,11 +52,7 @@ class ProfileData {
 	 */
 	public function getProfilePath() {
 		global $wgScriptPath;
-		if (!$this->getTypePref()) {
-			$path = "/UserProfile:".$this->user->getTitleKey();
-		} else {
-			$path = "/User:".$this->user->getTitleKey();
-		}
+		$path = "/UserProfile:" . $this->user->getTitleKey();
 		return wfExpandUrl($wgScriptPath.$path);
 	}
 
@@ -66,11 +62,12 @@ class ProfileData {
 	 */
 	public function getUserWikiPath() {
 		global $wgScriptPath;
-		if ($this->getTypePref()) {
-			$path = "/UserWiki:".$this->user->getTitleKey();
-		} else {
-			$path = "/User:".$this->user->getTitleKey();
+		$path = "/User:" . $this->user->getTitleKey();
+
+		if ( $this->getTypePref() ) {
+			$path .= "?profile=no";
 		}
+
 		return wfExpandUrl($wgScriptPath.$path);
 	}
 

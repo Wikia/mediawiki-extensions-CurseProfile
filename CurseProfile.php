@@ -23,8 +23,6 @@ $wgExtensionCredits['specialpage'][] = [
 	'version'			=> '1.5' //Must be a string or Mediawiki will turn it into an integer.
 ];
 
-
-define('NS_USER_WIKI', 200);
 define('NS_USER_PROFILE', 202);
 
 $wgAvailableRights[] = 'profile-moderate';
@@ -182,7 +180,6 @@ $wgResourceModules['ext.curseprofile.customskin'] = [
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['LinkBegin'][]						= 'CurseProfile\Hooks::onLinkBegin';
-$wgHooks['AbortEmailNotification'][]		= 'CurseProfile\Hooks::onAbortEmailNotification';
 $wgHooks['ArticleFromTitle'][]				= 'CurseProfile\Hooks::onArticleFromTitle';
 $wgHooks['ArticleUpdateBeforeRedirect'][]	= 'CurseProfile\Hooks::onArticleUpdateBeforeRedirect';
 $wgHooks['ParserFirstCallInit'][]			= 'CurseProfile\Hooks::onParserFirstCall';
