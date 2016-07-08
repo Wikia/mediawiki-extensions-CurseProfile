@@ -754,6 +754,7 @@ class ProfilePage extends \Article {
 
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {
+			$_cacheSetting = \Hydra\Subscription::skipCache(true);
 			$subscription = \Hydra\Subscription::newFromUser($this->user);
 			if ($subscription !== false) {
 				$classes = $subscription->getFlairClasses();
@@ -761,6 +762,7 @@ class ProfilePage extends \Article {
 					$classes = false; //Enforce sanity.
 				}
 			}
+			\Hydra\Subscription::skipCache($_cacheSetting);
 		}
 
 		return sprintf('
