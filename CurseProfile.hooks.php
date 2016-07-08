@@ -60,18 +60,12 @@ class Hooks {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
-		/* We need too decide if they should be redirected or not here */
-
-		/*
-		if (self::$profilePage->isSpoofedWikiPage()) {
-			// overwrite the assignable argument
-			$title = self::$profilePage->getUserWikiArticle()->getTitle();
-			// TODO investigate using a derivitave context here instead of overwriting the original one?
-			\RequestContext::getMain()->setTitle($title);
-		} elseif ($request->getVal('redirectToUserwiki')) {
-			$output->redirect(self::$profilePage->getCustomUserWikiTitle()->getFullURL());
+		// Force temporary hard redirect from UserWiki: to User:
+		if ($title->getNamespace() == NS_USER_WIKI) {
+			$link = $title->getLinkURL();
+			$link = str_replace("UserWiki:", "User:", $link);
+			$output->redirect($link, 301);
 		}
-		*/
 
 		return true;
 	}

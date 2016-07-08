@@ -23,6 +23,7 @@ $wgExtensionCredits['specialpage'][] = [
 	'version'			=> '1.5' //Must be a string or Mediawiki will turn it into an integer.
 ];
 
+define('NS_USER_WIKI', 201);
 define('NS_USER_PROFILE', 202);
 
 $wgAvailableRights[] = 'profile-moderate';
