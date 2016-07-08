@@ -61,7 +61,7 @@ class Hooks {
 		self::$profilePage = new ProfilePage($title);
 
 		// Force temporary hard redirect from UserWiki: to User:
-		if($title->getNamespace() == NS_USER_WIKI) {
+		if ($title->getNamespace() == NS_USER_WIKI) {
 			$link = $title->getLinkURL();
 			$link = str_replace("UserWiki:", "User:", $link);
 			$output->redirect($link, 301);
