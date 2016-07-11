@@ -79,10 +79,7 @@ class CommentDisplay {
 				</div>
 			</div>';
 		} else {
-			// Dumb that this is even here, but wfMessage WONT work here.
-			$mc = new \MessageCache(CACHE_NONE,false,1);
-			$out = trim($mc->parse(wfMessage('no-perm-profile-addcomment')->parse())->getText());
-			return "<div class='errorbox'>".$out."</div>";
+			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment', \Linker::linkKnown(\Title::newFromText('Special:ConfirmEmail'), wfMessage('no-perm-validate-email')->text()))->text()."</div>";
 		}
 	}
 
