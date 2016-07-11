@@ -822,13 +822,16 @@ class ProfilePage extends \Article {
 			<USERSTATS>
 		</div>
 		<div class="section friends">
-			<h3>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h3>
-			{{#friendlist: %2$s}}
+			<h3>'.wfMessage('cp-friendssection')->plain().'</h3>
+			{{#friendlist: %2$s}}<br />
+			<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		</div>
 		{{#if: %5$s | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
+			<div style="clear: both;"></div>
+			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all')->plain().'</div>
 		</div> }}
 	</div>
 	{{#if: %6$s | <div class="blocked"></div> }}
@@ -869,13 +872,17 @@ __NOTOC__
 		{{#groups:}}
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
 		<USERSTATS>
-		<h1>'.wfMessage('cp-friendssection', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</h1>
+		<h1>'.wfMessage('cp-friendssection')->plain().'</h1>
 		{{#friendlist: %2$s}}
+		<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
+			<div style="clear: both;"></div>
+			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all')->plain().'</div>
 		</div>
+
 		}}
 		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
 		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
