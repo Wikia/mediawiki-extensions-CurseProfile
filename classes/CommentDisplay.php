@@ -79,7 +79,7 @@ class CommentDisplay {
 				</div>
 			</div>';
 		} else {
-			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment')->escaped()."</div>";
+			return "<div class='errorbox'>".wfMessage('no-perm-profile-addcomment', \Linker::linkKnown(\Title::newFromText('Special:ConfirmEmail'), wfMessage('no-perm-validate-email')->text()))->text()."</div>";
 		}
 	}
 

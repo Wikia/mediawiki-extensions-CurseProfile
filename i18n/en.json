@@ -125,8 +125,10 @@
 	"cp-recentcommentssection": "Recent Comments",
 	"commentarchivelink": "Comment Archive",
 	"cp-statisticssection": "Total Statistics",
-	"cp-friendssection": "Friends ([[Special:Friends/$1/$3|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])",
-	"cp-achievementssection": "Achievements ([[Special:Achievements|View All]])",
+	"cp-friendssection": "Friends",
+	"cp-friendssection-all": "([[Special:Friends/$1/$3|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])",
+	"cp-achievementssection": "Achievements",
+	"cp-achievementssection-all": "([[Special:Achievements|View All]])",
 	"profileactivity-created": "Created",
 	"profileactivity-edited": "Edited",
 	"echo-category-title-profile-comment": "Profile Comment",
@@ -178,5 +180,6 @@
 	"log-profile-aboutme": "about me section",
 	"email-auth-required": "Email verification is required to edit this profile.",
 	"no-perm-profile-moderate": "You lack the necessary permissions to modify this user profile.",
-	"no-perm-profile-addcomment": "You do not have rights to add comments or reply."
+	"no-perm-profile-addcomment": "You do not have permission to add comments or reply. Please make sure you are logged in and have $1.",
+	"no-perm-validate-email": "validated your e-mail address"
 }
