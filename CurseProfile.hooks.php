@@ -64,6 +64,7 @@ class Hooks {
 		if ($title->getNamespace() == NS_USER_WIKI) {
 			$link = $title->getLinkURL();
 			$link = str_replace("UserWiki:", "User:", $link);
+			$link = $link . "?profile=no";
 			$output->redirect($link, 301);
 		}
 
