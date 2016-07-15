@@ -180,6 +180,7 @@ $wgResourceModules['ext.curseprofile.customskin'] = [
 ]; //Allows sites to customize by editing MediaWiki:CurseProfile.css
 
 //Hooks
+$wgHooks['PageContentSaveComplete'][]		= 'CurseProfile\Hooks::onPageContentSaveComplete';
 $wgHooks['BeforeInitialize'][]				= 'CurseProfile\Hooks::onBeforeInitialize';
 $wgHooks['TestCanonicalRedirect'][]			= 'CurseProfile\Hooks::onTestCanonicalRedirect';
 $wgHooks['LinkBegin'][]						= 'CurseProfile\Hooks::onLinkBegin';

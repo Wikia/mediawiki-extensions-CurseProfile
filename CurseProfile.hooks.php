@@ -29,6 +29,13 @@ class Hooks {
 	 */
 	private static $title;
 
+	public static function onPageContentSaveComplete( $article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId ) {
+		echo "<pre>";
+		var_dump($article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId);
+		die();
+
+	}
+
 	public static function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
