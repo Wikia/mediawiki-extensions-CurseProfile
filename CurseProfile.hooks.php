@@ -29,13 +29,6 @@ class Hooks {
 	 */
 	private static $title;
 
-	public static function onPageContentSaveComplete( $article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId ) {
-		echo "<pre>";
-		var_dump($article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId);
-		die();
-
-	}
-
 	public static function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
@@ -66,6 +59,28 @@ class Hooks {
 	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
+
+		// Handle edits to User:X, making sure we dont redirec to UserProfile:X on save.
+		if ($title->getNamespace() == NS_USER_PROFILE) {
+			// on user profile, lets check if we were just editing a User: page.
+			$from = $request->getHeader('REFERER');
+			$parsed = parse_url($from);
+			if ($parsed) {
+				$query = isset($parsed['query']) ? $parsed['query'] : false;
+				if ($query) {
+					$qv = []; // query vars
+					parse_str($query,$qv);
+					if (isset($qv['action'])
+						&& $qv['action'] == 'edit'
+						&& isset($qv['title'])
+						&& substr($qv['title'], 0, 5) == "User:"){
+						// We were just editing a user page. Lets redirect back too it!
+						$link = "/".$qv['title']."?profile=no";
+						$output->redirect($link);
+					}
+				}
+			}
+		}
 
 		// Force temporary hard redirect from UserWiki: to User:
 		if ($title->getNamespace() == NS_USER_WIKI) {
