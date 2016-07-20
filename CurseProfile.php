@@ -102,7 +102,7 @@ $wgLogActionsHandlers['curseprofile/profile-edited']	= '\CurseProfile\ProfileLog
 //Resource modules
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
-	'scripts' => ['js/curseprofile.js','js/modifysidebar.js'],
+	'scripts' => ['js/curseprofile.js', 'js/modifysidebar.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
