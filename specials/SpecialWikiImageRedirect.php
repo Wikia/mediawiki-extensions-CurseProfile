@@ -41,8 +41,8 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 			} else {
 				$this->getOutput()->showFileNotFoundError($md5);
 			}
+		} else {
+			$this->getOutput()->showUnexpectedValueError('Wiki Key', $md5);
 		}
-
-		$this->getOutput()->showUnexpectedValueError('Wiki Key', $md5);
 	}
 }
