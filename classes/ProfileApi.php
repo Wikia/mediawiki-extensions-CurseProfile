@@ -59,6 +59,24 @@ class ProfileApi extends \CurseApiBase {
 					],
 				],
 			],
+			'getWikisByString' => [
+				'params' => [
+					'search' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_MIN => 1,
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
+			'getWiki' => [
+				'params' => [
+					'hash' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_MIN => 1,
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+				],
+			],
 			'editAboutMe' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
@@ -88,6 +106,39 @@ class ProfileApi extends \CurseApiBase {
 			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
 			$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
 		}
+	}
+
+	/**
+	 * Return a list of wikis (and data about them) from a search string.
+	 * @return void
+	 */
+	public function doGetWikisByString() {
+		$search = $this->getMain()->getVal('search');
+		$return = ProfileData::getWikiSitesSearch($search);
+
+		$this->getResult()->addValue(null, 'result', 'success');
+		$this->getResult()->addValue(null, 'data', $return);
+	}
+
+	/**
+	 * Return wiki data
+	 * @return void
+	 */
+	public function doGetWiki() {
+		$hash = $this->getMain()->getVal('hash');
+		$return = ProfileData::getWikiSites($hash);
+
+		if (isset($return[$hash])) {
+			$return = $return[$hash];
+			$this->getResult()->addValue(null, 'result', 'success');
+			$this->getResult()->addValue(null, 'data', $return);
+		} else {
+			$this->getResult()->addValue(null, 'result', 'error');
+			$this->getResult()->addValue(null, 'message', 'no result found for hash '.$hash);
+			$this->getResult()->addValue(null, 'data', []);
+		}
+
+
 	}
 
 	/**

@@ -122,6 +122,14 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 	]
 ];
 
+$wgResourceModules['ext.curseprofile.preferences'] = [
+	'scripts' => ['js/preferences.js'],
+	'localBasePath' => $extDir,
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['mediawiki.user', 'mediawiki.api', 'jquery.ui.autocomplete'],
+	'position' => 'top'
+];
+
 $wgResourceModules['ext.curseprofile.comments'] = [
 	'styles' => ['css/comments.css'],
 	'scripts' => ['js/comments.js'],

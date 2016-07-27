@@ -76,9 +76,10 @@ class ProfileData {
 	 * @param array of data for HTMLForm to generate the Special:Preferences form
 	 */
 	public static function insertProfilePrefs(&$preferences) {
-		$wikiOptions = [
+		/*$wikiOptions = [
 			'---' => '',
 		];
+
 		foreach (self::getWikiSites() as $wiki) {
 			if (isset($wiki['group_domain'])) {
 				$wiki['wiki_name'] = $wiki['wiki_name']. " ({$wiki['wiki_language']})";
@@ -86,6 +87,7 @@ class ProfileData {
 			$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
 		}
 		ksort($wikiOptions);
+		*/
 
 		$preferences['profile-pref'] = [
 			'type' => 'select',
@@ -96,11 +98,14 @@ class ProfileData {
 				wfMessage('profilepref-wiki')->plain() => 0,
 			],
 		];
-		$preferences['profile-favwiki'] = [
-			'type' => 'select',
+		$preferences['profile-favwiki-display'] = [
+			'type' => 'text',
 			'label-message' => 'favoritewiki',
 			'section' => 'personal/info/public',
-			'options' => $wikiOptions,
+		];
+		$preferences['profile-favwiki'] = [
+			'type' => 'hidden',
+			'section' => 'personal/info/public',
 		];
 		$preferences['profile-aboutme'] = [
 			'type' => 'textarea',
@@ -392,10 +397,35 @@ class ProfileData {
 	}
 
 	/**
+	 * [getWikiSitesSearch description]
+	 * @param  [type] $search [description]
+	 * @return [type]         [description]
+	 */
+	public static function getWikiSitesSearch($search) {
+		$redis = \RedisCache::getClient('cache');
+		if ($redis === false) {
+			return [];
+		}
+
+		$search = is_string($search) ? "*".$search."*" : null;
+
+		$siteKeys = [];
+
+		$it = NULL;
+		while($arr_keys = $redis->hScan('dynamicsettings:siteNameKeys',$it,$search)) {
+		    foreach($arr_keys as $str_field => $str_value) {
+		        $siteKeys[] = $str_value;
+		    }
+		}
+
+		return self::getWikiSites($siteKeys);
+	}
+
+	/**
 	 * Returns the decoded wiki data available in redis
 	 *
 	 * @access	public
-	 * @param	string	$siteKey md5 key for wanted site.
+	 * @param	string / array	$siteKey md5 key for wanted site, or array of keys.
 	 * @return	array	Wiki data arrays.
 	 */
 	public static function getWikiSites($siteKey = null) {
@@ -406,7 +436,11 @@ class ProfileData {
 		if (is_null($siteKey)) {
 			$sites = $redis->sMembers('dynamicsettings:siteHashes');
 		} else {
-			$sites = [$siteKey];
+			if (!is_array($siteKey)) {
+				$sites = [$siteKey];
+			} else {
+				$sites = $siteKey;
+			}
 		}
 		$ret = [];
 		if (!empty($sites)) {

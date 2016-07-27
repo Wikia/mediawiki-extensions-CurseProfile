@@ -60,6 +60,11 @@ class Hooks {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
+		// inject
+		if ($title->getNamespace() == "-1" && $title->getText() == "Preferences") {
+			$output->addModules('ext.curseprofile.preferences');
+		}
+
 		// Force temporary hard redirect from UserWiki: to User:
 		if ($title->getNamespace() == NS_USER_WIKI) {
 			$link = $title->getLinkURL();
