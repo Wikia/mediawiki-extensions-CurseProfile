@@ -76,19 +76,6 @@ class ProfileData {
 	 * @param array of data for HTMLForm to generate the Special:Preferences form
 	 */
 	public static function insertProfilePrefs(&$preferences) {
-		/*$wikiOptions = [
-			'---' => '',
-		];
-
-		foreach (self::getWikiSites() as $wiki) {
-			if (isset($wiki['group_domain'])) {
-				$wiki['wiki_name'] = $wiki['wiki_name']. " ({$wiki['wiki_language']})";
-			}
-			$wikiOptions[$wiki['wiki_name']] = $wiki['md5_key'];
-		}
-		ksort($wikiOptions);
-		*/
-
 		$preferences['profile-pref'] = [
 			'type' => 'select',
 			'label-message' => 'profileprefselect',
