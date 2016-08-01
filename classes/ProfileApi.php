@@ -137,8 +137,6 @@ class ProfileApi extends \CurseApiBase {
 			$this->getResult()->addValue(null, 'message', 'no result found for hash '.$hash);
 			$this->getResult()->addValue(null, 'data', []);
 		}
-
-
 	}
 
 	/**
