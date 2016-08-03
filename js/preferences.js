@@ -44,7 +44,7 @@ $(function(){
             },
             close: function( event, ui ) {
                 var selected = $(event.target).val();
-                if (typeof wikiresponse[selected] !== 'undefined') {
+                if (typeof wikiresponse[selected] !== 'undefined' && wikiresponse[selected] !== "") {
                     favwiki.val(wikiresponse[selected]);
                 }
             }
