@@ -32,7 +32,11 @@ $(function(){
                             fill.push({ label: res.wiki_name  });
                             wikiresponse[res.wiki_name] = hash; // push into the store object
                         }
-                        response(fill);
+                        if (fill.length) {
+                            response(fill);
+                        } else {
+                            response([{label:'No results match "'+req.term+'"', value: ''}]);
+                        }
                     } else {
                         response([]);
                     }
