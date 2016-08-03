@@ -1,7 +1,10 @@
 $(function(){
     var api = new mw.Api();
     var favwiki = $("#mw-input-wpprofile-favwiki");
-    var favwikiDisplay = $("#mw-input-wpprofile-favwiki-display");
+    var favwikiDisplayOrig = $("#mw-input-wpprofile-favwiki-display");
+        favwikiDisplayOrig.after('<input id="fakewikiDisplay" size="45" class="ui-autocomplete-input">');
+        favwikiDisplayOrig.hide();
+    var favwikiDisplay = $("#fakewikiDisplay");
     var wikiresponse = {};
     if (favwikiDisplay.length) {
         // Auto Fill "Favorite Wiki" with name from the actual stored value.
@@ -11,7 +14,7 @@ $(function(){
             hash: favwiki.val()
         }).done(function(data) {
             if (data.result == "success") {
-                favwikiDisplay.val(data.data.wiki_name);
+                favwikiDisplay.change().val(data.data.wiki_name);
             }
         });
         favwikiDisplay.autocomplete({
