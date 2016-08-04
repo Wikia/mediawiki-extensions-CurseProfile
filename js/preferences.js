@@ -29,8 +29,8 @@ $(function(){
                         var results = data.data;
                         for (hash in results) {
                             var res = results[hash];
-                            fill.push({ label: res.wiki_name  });
-                            wikiresponse[res.wiki_name] = hash; // push into the store object
+                            fill.push({ label: res.wiki_name_display  });
+                            wikiresponse[res.wiki_name_display] = hash; // push into the store object
                         }
                         if (fill.length) {
                             response(fill);
