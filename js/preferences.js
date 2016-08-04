@@ -14,7 +14,9 @@ $(function(){
             hash: favwiki.val()
         }).done(function(data) {
             if (data.result == "success") {
-                favwikiDisplay.change().val(data.data.wiki_name);
+                console.log(data);
+                var label = (typeof data.data.wiki_name_display !== 'undefined') ? data.data.wiki_name_display : data.data.wiki_name;
+                favwikiDisplay.change().val(label);
             }
         });
         favwikiDisplay.autocomplete({
@@ -29,8 +31,9 @@ $(function(){
                         var results = data.data;
                         for (hash in results) {
                             var res = results[hash];
-                            fill.push({ label: res.wiki_name_display  });
-                            wikiresponse[res.wiki_name_display] = hash; // push into the store object
+                            var label = (typeof res.wiki_name_display !== 'undefined') ? res.wiki_name_display : res.wiki_name;
+                            fill.push({ label: label });
+                            wikiresponse[label] = hash; // push into the store object
                         }
                         if (fill.length) {
                             response(fill);
