@@ -30,6 +30,9 @@ class Hooks {
 	private static $title;
 
 	public static function onRegistration() {
+		define('NS_USER_WIKI', 200);
+		define('NS_USER_PROFILE', 202);
+
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Generic.png"
 		]; // We were using that, man.
@@ -78,8 +81,9 @@ class Hooks {
 			$output->addModules('ext.curseprofile.preferences');
 		}
 
+
 		// Force temporary hard redirect from UserWiki: to User:
-		if ($title->getNamespace() == NS_USER_WIKI) {
+		if (defined('NS_USER_WIKI') && $title->getNamespace() == NS_USER_WIKI) {
 			$link = $title->getLinkURL();
 			$link = str_replace("UserWiki:", "User:", $link);
 			$link = $link . "?profile=no";
