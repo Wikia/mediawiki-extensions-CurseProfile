@@ -36,7 +36,7 @@ class WriteFriendsToRedis extends \Maintenance implements \SyncService\ILogger {
 	 * @return	void
 	 */
 	public function execute() {
-		if (!defined('CURSEPROFILE_MASTER')) {
+		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
 			$this->error('Must only be run in the context of the master wiki');
 		}
 

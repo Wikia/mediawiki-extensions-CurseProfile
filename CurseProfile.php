@@ -11,6 +11,16 @@
  * @link		http://www.curse.com/
  *
 **/
+if (function_exists('wfLoadExtension')) {
+	wfLoadExtension('CurseProfile');
+	// Keep i18n globals so mergeMessageFileList.php doesn't break
+	$wgMessagesDirs['CurseProfile'] = __DIR__.'/i18n';
+	$wgExtensionMessagesFiles['CurseProfileAlias'] = __DIR__ . '/CurseProfile.alias.php';
+	return;
+} else {
+	die('This version of the CurseProfile extension requires MediaWiki 1.27+');
+}
+
 
 /******************************************/
 /* Credits                                */
@@ -31,6 +41,7 @@ $wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
 $wgAvailableRights[] = 'profile-moderate';
 $wgAvailableRights[] = 'profile-purgecomments';
+$wgAvailableRights[] = 'profile-stats';
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
@@ -64,6 +75,9 @@ $wgAutoloadClasses['CurseProfile\ResourceLoaderModule']					= $extDir.'classes/R
 $wgAutoloadClasses['CurseProfile\CommentLogFormatter']					= $extDir.'classes/CommentLogFormatter.php';
 $wgAutoloadClasses['CurseProfile\ProfileLogFormatter']					= $extDir.'classes/ProfileLogFormatter.php';
 
+$wgAutoloadClasses['CurseProfile\StatsRecache'] = __DIR__.'/classes/jobs/StatsRecache.php';
+$wgAutoloadClasses['CurseProfile\SpecialProfileStats']		= __DIR__."/specials/SpecialProfileStats.php";
+
 $wgAutoloadClasses['TemplateCommentBoard']			= "{$extDir}/templates/TemplateCommentBoard.php";
 $wgAutoloadClasses['TemplateCommentModeration']		= "{$extDir}/templates/TemplateCommentModeration.php";
 $wgAutoloadClasses['TemplateManageFriends']			= "{$extDir}/templates/TemplateManageFriends.php";
@@ -90,6 +104,11 @@ $wgSpecialPages['CommentModeration']						= 'CurseProfile\SpecialCommentModerati
 $wgAutoloadClasses['CurseProfile\SpecialWikiImageRedirect']	= "{$extDir}/specials/SpecialWikiImageRedirect.php";
 $wgSpecialPages['WikiImageRedirect']						= 'CurseProfile\SpecialWikiImageRedirect';
 
+$extSyncServices[] = 'CurseProfile\FriendSync';
+$extSyncServices[] = 'CurseProfile\StatsRecache';
+$extSyncServices[] = 'CurseProfile\ResolveComment';
+
+$wgSpecialPages['ProfileStats']								= 'CurseProfile\SpecialProfileStats';
 //Recent Changes Logs
 $wgLogTypes['curseprofile']								= 'curseprofile';
 $wgLogNames['curseprofile']								= 'curseprofile_log_name';
@@ -100,6 +119,14 @@ $wgLogActionsHandlers['curseprofile/comment-edited']	= '\CurseProfile\CommentLog
 $wgLogActionsHandlers['curseprofile/profile-edited']	= '\CurseProfile\ProfileLogFormatter';
 
 //Resource modules
+$wgResourceModules['ext.curseprofile.profilestats'] = [
+	'styles' => ['css/profilestats.css'],
+	'scripts' => ['js/profilestats.js'],
+	'localBasePath' => __DIR__.'/',
+	'remoteExtPath' => 'CurseProfile',
+	'dependencies' => ['jquery.timeago', 'highcharts'],
+];
+
 $wgResourceModules['ext.curseprofile.profilepage'] = [
 	'styles' => ['css/curseprofile.css'],
 	'scripts' => ['js/curseprofile.js', 'js/modifysidebar.js'],

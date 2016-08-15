@@ -91,7 +91,7 @@ class CommentReport {
 	 * @return	array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
-		if (defined('CURSEPROFILE_MASTER')) {
+		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			return self::getReportsRedis($sortStyle, $limit, $offset);
 		} else {
 			return self::getReportsDb($sortStyle, $limit, $offset);

@@ -1,0 +1,249 @@
+{
+	"name": "Curse Profile",
+	"version": "1.5",
+	"author": "Noah Manneschmidt, Curse Inc&copy;",
+	"descriptionmsg": "curseprofile_description",
+	"type": "specialpage",
+	"AvailableRights": [
+		"profile-moderate",
+		"profile-purgecomments",
+		"profile-stats"
+	],
+	"SpecialPages": {
+		"ManageFriends": "CurseProfile\\SpecialManageFriends",
+		"Friends": "CurseProfile\\SpecialFriends",
+		"AddComment": "CurseProfile\\SpecialAddComment",
+		"CommentBoard": "CurseProfile\\SpecialCommentBoard",
+		"CommentPermalink": "CurseProfile\\SpecialCommentPermalink",
+		"CommentModeration": "CurseProfile\\SpecialCommentModeration",
+		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect",
+		"ProfileStats": "CurseProfile\\SpecialProfileStats"
+	},
+	"LogTypes": {
+		"curseprofile": "curseprofile"
+	},
+	"LogNames": {
+		"curseprofile": "curseprofile_log_name"
+	},
+	"LogHeaders": {
+		"curseprofile": "curseprofile_log_description"
+	},
+	"LogActionsHandlers": {
+		"curseprofile/comment-created": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/comment-replied": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/comment-edited": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/profile-edited": "\\CurseProfile\\ProfileLogFormatter"
+	},
+	"MessagesDirs": {
+		"CurseProfile": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"CurseProfileAlias": "/CurseProfile.alias.php",
+		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
+	},
+	"AutoloadClasses": {
+		"FlagFinder": "classes/FlagFinder.php",
+		"CurseProfile\\Hooks": "CurseProfile.hooks.php",
+		"CurseProfile\\CP": "classes/CP.php",
+		"CurseProfile\\ProfileApi": "classes/ProfileApi.php",
+		"CurseProfile\\ProfilePage": "classes/ProfilePage.php",
+		"CurseProfile\\ProfileData": "classes/ProfileData.php",
+		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
+		"CurseProfile\\Friendship": "classes/Friendship.php",
+		"CurseProfile\\FriendDisplay": "classes/FriendDisplay.php",
+		"CurseProfile\\FriendApi": "classes/FriendApi.php",
+		"CurseProfile\\CommentApi": "classes/CommentApi.php",
+		"CurseProfile\\CommentBoard": "classes/CommentBoard.php",
+		"CurseProfile\\CommentReport": "classes/CommentReport.php",
+		"CurseProfile\\CommentDisplay": "classes/CommentDisplay.php",
+		"CurseProfile\\FriendSync": "classes/jobs/FriendSync.php",
+		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
+		"CurseProfile\\MWEcho\\NotificationFormatter": "classes/echo/NotificationFormatter.php",
+		"CurseProfile\\MWEcho\\CommentPresentationModel": "classes/echo/CommentPresentationModel.php",
+		"CurseProfile\\MWEcho\\FriendshipPresentationModel": "classes/echo/FriendshipPresentationModel.php",
+		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
+		"CurseProfile\\CommentLogFormatter": "classes/CommentLogFormatter.php",
+		"CurseProfile\\ProfileLogFormatter": "classes/ProfileLogFormatter.php",
+		"CurseProfile\\StatsRecache": "classes/jobs/StatsRecache.php",
+		"CurseProfile\\SpecialProfileStats": "specials/SpecialProfileStats.php",
+		"TemplateCommentBoard": "/templates/TemplateCommentBoard.php",
+		"TemplateCommentModeration": "/templates/TemplateCommentModeration.php",
+		"TemplateManageFriends": "/templates/TemplateManageFriends.php",
+		"CurseProfile\\SpecialManageFriends": "/specials/friends/SpecialManageFriends.php",
+		"CurseProfile\\SpecialFriends": "/specials/friends/SpecialFriends.php",
+		"CurseProfile\\SpecialAddComment": "/specials/comments/SpecialAddComment.php",
+		"CurseProfile\\SpecialCommentBoard": "/specials/comments/SpecialCommentBoard.php",
+		"CurseProfile\\SpecialCommentPermalink": "/specials/comments/SpecialCommentPermalink.php",
+		"CurseProfile\\SpecialCommentModeration": "/specials/comments/SpecialCommentModeration.php",
+		"CurseProfile\\SpecialWikiImageRedirect": "/specials/SpecialWikiImageRedirect.php"
+	},
+	"ResourceModules": {
+		"ext.curseprofile.profilestats": {
+			"styles": [
+				"css/profilestats.css"
+			],
+			"scripts": [
+				"js/profilestats.js"
+			],
+			"dependencies": [
+				"jquery.timeago",
+				"highcharts"
+			]
+		},
+		"ext.curseprofile.profilepage": {
+			"styles": [
+				"css/curseprofile.css"
+			],
+			"scripts": [
+				"js/curseprofile.js",
+				"js/modifysidebar.js"
+			],
+			"dependencies": [
+				"ext.curseprofile.customskin",
+				"ext.curseprofile.comments",
+				"jquery.autosize",
+				"mediawiki.user",
+				"mediawiki.api"
+			],
+			"position": "top",
+			"messages": [
+				"purgeaboutme-prompt",
+				"save",
+				"cancel",
+				"email-auth-required",
+				"no-perm-profile-moderate",
+				"log",
+				"block",
+				"emailuser",
+				"tooltip-t-contributions",
+				"contributions-title",
+				"userrights"
+			]
+		},
+		"ext.curseprofile.preferences": {
+			"scripts": [
+				"js/preferences.js"
+			],
+			"dependencies": [
+				"mediawiki.user",
+				"mediawiki.api",
+				"jquery.ui.autocomplete"
+			],
+			"position": "top"
+		},
+		"ext.curseprofile.comments": {
+			"styles": [
+				"css/comments.css"
+			],
+			"scripts": [
+				"js/comments.js"
+			],
+			"dependencies": [
+				"jquery.timeago",
+				"jquery.autosize",
+				"mediawiki.user",
+				"mediawiki.api",
+				"ext.curse.font-awesome"
+			],
+			"position": "top",
+			"messages": [
+				"save",
+				"cancel",
+				"remove-prompt",
+				"purge-prompt",
+				"report-prompt",
+				"report-thanks"
+			]
+		},
+		"ext.curseprofile.commentmoderation": {
+			"styles": [
+				"css/commentmoderation.less"
+			],
+			"scripts": [
+				"js/commentmoderation.js"
+			],
+			"dependencies": [
+				"ext.curseprofile.comments"
+			],
+			"position": "top",
+			"messages": [
+				"report-confirmdismiss",
+				"report-confirmdelete"
+			]
+		},
+		"a.ext.curseprofile.profilepage.mobile": {
+			"targets": [
+				"mobile"
+			],
+			"group": "site",
+			"styles": [
+				"css/curseprofile.mobile.css",
+				"css/comments.mobile.css"
+			],
+			"scripts": [
+				"js/comments.js"
+			],
+			"dependencies": [
+				"jquery.timeago",
+				"jquery.autosize"
+			],
+			"remoteBasePath": "CurseProfile",
+			"position": "top"
+		},
+		"jquery.timeago": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"scripts": [
+				"js/jquery.timeago.js"
+			]
+		},
+		"jquery.autosize": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"scripts": [
+				"js/jquery.autosize.min.js"
+			]
+		},
+		"ext.curseprofile.customskin": {
+			"class": "CurseProfile\\ResourceLoaderModule"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": false,
+		"remoteExtPath": "CurseProfile"
+	},
+	"Hooks": {
+		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
+		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
+		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
+		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
+		"ArticleUpdateBeforeRedirect": "CurseProfile\\Hooks::onArticleUpdateBeforeRedirect",
+		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
+		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
+		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
+		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
+		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
+		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
+		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
+		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
+		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
+		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
+		"EchoGetDefaultNotifiedUsers": "CurseProfile\\Hooks::onEchoGetDefaultNotifiedUsers",
+		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules"
+	},
+	"callback": "CurseProfile\\Hooks::onRegistration",
+	"config": {
+		"ExtraNamespaces": {
+			"200": "UserWiki",
+			"202": "UserProfile"
+		},
+		"CPEditsToComment": 1
+	},
+	"manifest_version": 1
+}

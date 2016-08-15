@@ -361,7 +361,7 @@ class Friendship {
 	 * @return	null
 	 */
 	public function syncToRedis(\SyncService\ILogger $logger = null) {
-		if (!defined('CURSEPROFILE_MASTER')) {
+		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
 			return;
 		}
 		if (is_null($logger)) {
@@ -424,7 +424,7 @@ class Friendship {
 	 * @return	integer	exit code: 0 for success, 1 for failure
 	 */
 	public function saveToDB($args) {
-		if (!defined('CURSEPROFILE_MASTER')) {
+		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
 			return 1; // the appropriate tables don't exist here
 		}
 		$args['target'] = intval($args['target']);

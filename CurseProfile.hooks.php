@@ -29,6 +29,18 @@ class Hooks {
 	 */
 	private static $title;
 
+	public static function onRegistration() {
+		$wgEchoNotificationIcons['gratitude'] = [
+			'path' => "CurseProfile/img/notifications/Generic.png"
+		]; // We were using that, man.
+
+		if(defined('MASTER_WIKI') && MASTER_WIKI === true) {
+			$extSyncServices[] = 'CurseProfile\FriendSync';
+			$extSyncServices[] = 'CurseProfile\StatsRecache';
+			$extSyncServices[] = 'CurseProfile\ResolveComment';
+		}
+	}
+
 	public static function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
@@ -200,7 +212,7 @@ class Hooks {
 		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);
 		$updater->addExtensionField('user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/add_user_board_admin_action_log.sql", true);
 
-		if (defined('CURSEPROFILE_MASTER')) {
+		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/create_user_relationship.sql", true));
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/create_user_relationship_request.sql", true));
 		}

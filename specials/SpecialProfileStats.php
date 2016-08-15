@@ -21,7 +21,7 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 	 * @return	void
 	 */
 	public function __construct() {
-		parent::__construct('ProfileStats', 'profilestats');
+		parent::__construct('ProfileStats', 'profile-stats');
 	}
 
 	/**
@@ -31,6 +31,9 @@ class SpecialProfileStats extends \Curse\SpecialPage {
 	 * @return	void	[Outputs to screen]
 	 */
 	public function execute( $path ) {
+		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
+			throw new PermissionsError('cp-master-only');
+		}
 		$this->setHeaders();
 		$this->checkPermissions();
 

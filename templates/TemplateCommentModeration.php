@@ -134,7 +134,7 @@ class TemplateCommentModeration {
 			$HTML .= \Html::rawElement(
 				'a', [
 					'href' => $reporter->getUserPage()->getLinkURL()
-				], 
+				],
 				ProfilePage::userAvatar($nothing, 24, $reporter->getEmail(), $reporter->getName(), "title='$title'")[0]
 			);
 			$iter += 1;
@@ -151,7 +151,7 @@ class TemplateCommentModeration {
 	 * @return string HTML fragment
 	 */
 	private function permalink($rep) {
-		if (defined('CURSEPROFILE_MASTER')) {
+		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			if ($rep['comment']['origin_wiki'] == 'master') {
 				$domain = $GLOBALS['wgServer'];
 				$wikiName = $GLOBALS['wgSitename'];
