@@ -329,7 +329,7 @@ class Hooks {
 	 * Setup echo notifications
 	 */
 	public static function onBeforeCreateEchoEvent( &$notifications, &$notificationCategories /* , &$icons */ ) {
-		self::injectNotificationIcons(); // just make sure...
+		//self::injectNotificationIcons(); // just make sure...
 
 		$notificationCategories['friendship'] = [
 			'tooltip' => 'echo-pref-tooltip-friendship',
