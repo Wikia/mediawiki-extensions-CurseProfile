@@ -36,7 +36,7 @@ class Hooks {
 		define('NS_USER_PROFILE', 202);
 
 		$wgEchoNotificationIcons['gratitude'] = [
-			'path' => "CurseProfile/img/notifications/Generic.png"
+			'path' => "CurseProfile/img/notifications/Gratitude.png"
 		]; // We were using that, man.
 
 		if(defined('MASTER_WIKI') && MASTER_WIKI === true) {
