@@ -29,19 +29,15 @@ class Hooks {
 	 */
 	private static $title;
 
-	public static function injectNotificationIcons() {
+	public static function onRegistration() {
 		global $wgEchoNotificationIcons;
+
+		define('NS_USER_WIKI', 200);
+		define('NS_USER_PROFILE', 202);
 
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Gratitude.png"
 		];
-	}
-
-	public static function onRegistration() {
-		define('NS_USER_WIKI', 200);
-		define('NS_USER_PROFILE', 202);
-
-		self::injectNotificationIcons();
 
 		if(defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			$extSyncServices[] = 'CurseProfile\FriendSync';
@@ -329,8 +325,6 @@ class Hooks {
 	 * Setup echo notifications
 	 */
 	public static function onBeforeCreateEchoEvent( &$notifications, &$notificationCategories /* , &$icons */ ) {
-		//self::injectNotificationIcons(); // just make sure...
-
 		$notificationCategories['friendship'] = [
 			'tooltip' => 'echo-pref-tooltip-friendship',
 			'priority' => 3,
