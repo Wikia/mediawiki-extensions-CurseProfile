@@ -30,6 +30,8 @@ class Hooks {
 	private static $title;
 
 	public static function onRegistration() {
+		global $wgEchoNotificationIcons;
+
 		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
 
