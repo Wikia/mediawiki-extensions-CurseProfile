@@ -239,10 +239,6 @@
 	},
 	"callback": "CurseProfile\\Hooks::onRegistration",
 	"config": {
-		"ExtraNamespaces": {
-			"200": "UserWiki",
-			"202": "UserProfile"
-		},
 		"CPEditsToComment": 1
 	},
 	"manifest_version": 1

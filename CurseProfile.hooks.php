@@ -30,10 +30,13 @@ class Hooks {
 	private static $title;
 
 	public static function onRegistration() {
-		global $wgEchoNotificationIcons;
+		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
 		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
+
+		$wgExtraNamespaces[NS_USER_WIKI] = 'UserWiki';
+		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Gratitude.png"
