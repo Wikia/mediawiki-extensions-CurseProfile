@@ -782,13 +782,13 @@ class ProfilePage extends \Article {
 			\Hydra\Subscription::skipCache($_cacheSetting);
 		}
 
-		return sprintf('
-<div class="curseprofile" data-userid="%2$s">
+		return  '
+<div class="curseprofile" data-userid="'.$this->user->getID().'">
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
-			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
+			<div class="mainavatar">{{#avatar: 96 | '.$this->user-> getEmail().' | '.$this->user->getName().'}}</div>
 			<div class="headline">
-				<h1'.($classes !== false ? ' class="'.implode(' ', $classes).'"' : '').'>%1$s</h1>
+				<h1'.($classes !== false ? ' class="'.implode(' ', $classes).'"' : '').'>'.$this->user->getName().'</h1>
 				{{#groups:}}
 			</div>
 			<div>
@@ -800,20 +800,20 @@ class ProfilePage extends \Article {
 			</div>
 		</div>
 		<div class="activity section">
-			<p class="rightfloat">[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
+			<p class="rightfloat">[[Special:Contributions/'.$this->user->getName().'|'.wfMessage('contributions')->text().']]</p>
 			<h3>'.wfMessage('cp-recentactivitysection').'</h3>
-			{{#recentactivity: %2$s}}
+			{{#recentactivity: '.$this->user->getID().'}}
 		</div>
 		<div class="comments section">
-			<p class="rightfloat">[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink')->plain().']]</p>
+			<p class="rightfloat">[[Special:CommentBoard/'.$this->user->getID().'/'.$this->user->getTitleKey().'|'.wfMessage('commentarchivelink')->plain().']]</p>
 			<h3>'.wfMessage('cp-recentcommentssection').'</h3>
-			{{#comments: %2$s}}
+			{{#comments: '.$this->user->getID().'}}
 		</div>
 	</div>
 	<div class="rightcolumn">
 		<div class="borderless section">
 			<div class="rightfloat">
-				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
+				<div class="score">{{#Points: User:'.$this->user->getName().' | all | badged}}</div>
 				<div class="level">{{#userlevel:}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>
@@ -825,10 +825,10 @@ class ProfilePage extends \Article {
 		</div>
 		<div class="section friends">
 			<h3>'.wfMessage('cp-friendssection')->plain().'</h3>
-			{{#friendlist: %2$s}}<br />
+			{{#friendlist: '.$this->user->getID().'}}<br />
 			<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		</div>
-		{{#if: %5$s | <div class="section achievements">
+		{{#if: '.( $curseUser->getId() ? 'true' : '' ).' | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
@@ -836,17 +836,10 @@ class ProfilePage extends \Article {
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all')->plain().'</div>
 		</div> }}
 	</div>
-	{{#if: %6$s | <div class="blocked"></div> }}
+	{{#if: '.( $this->user->isBlocked() ? 'true' : '' ).' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
-',
-			$this->user_name,
-			$this->user->getID(),
-			$this->user->getEmail(),
-			$this->user->getTitleKey(),
-			( $curseUser->getId() ? 'true' : '' ),
-			( $this->user->isBlocked() ? 'true' : '' )
-		);
+';
 	}
 
 	/**
@@ -859,12 +852,12 @@ __NOTOC__
 
 		$curseUser = \CurseAuthUser::getInstance($this->user);
 
-		return sprintf('
-<div class="curseprofile" id="mf-curseprofile" data-userid="%2$s">
+		return '
+<div class="curseprofile" id="mf-curseprofile" data-userid="'.$this->user->getID().'">
 		<div class="userinfo section">
-			<div class="mainavatar">{{#avatar: 96 | %3$s | %1$s}}</div>
+			<div class="mainavatar">{{#avatar: 96 | '.$this->user-> getEmail().' | '.$this->user->getName().'}}</div>
 			<div class="usericons rightfloat">
-				<div class="score">{{#Points: User:%1$s | all | badged}}</div>
+				<div class="score">{{#Points: User:'.$this->user->getName().' | all | badged}}</div>
 				{{#profilelinks:}}
 			</div>
 		</div>
@@ -875,9 +868,9 @@ __NOTOC__
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
 		<USERSTATS>
 		<h1>'.wfMessage('cp-friendssection')->plain().'</h1>
-		{{#friendlist: %2$s}}
+		{{#friendlist: '.$this->user->getID().'}}
 		<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
-		{{#if: %5$s | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
+		{{#if: '.( $curseUser->getId() ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
@@ -887,21 +880,14 @@ __NOTOC__
 
 		}}
 		<h1>'.wfMessage('cp-recentactivitysection').'</h1>
-		<p>[[Special:Contributions/%1$s|'.wfMessage('contributions')->text().']]</p>
-		{{#recentactivity: %2$s}}
+		<p>[[Special:Contributions/'.$this->user->getName().'|'.wfMessage('contributions')->text().']]</p>
+		{{#recentactivity: '.$this->user->getID().'}}
 		<h1>'.wfMessage('cp-recentcommentssection').'</h1>
-		<p>[[Special:CommentBoard/%2$s/%4$s|'.wfMessage('commentarchivelink').']]</p>
-		{{#comments: %2$s}}
-	{{#if: %6$s | <div class="blocked"></div> }}
+		<p>[[Special:CommentBoard/'.$this->user->getID().'/'.$this->user->getTitleKey().'|'.wfMessage('commentarchivelink').']]</p>
+		{{#comments: '.$this->user->getID().'}}
+	{{#if: '.( $this->user->isBlocked() ? 'true' : '' ).' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
-',
-			$this->user_name,
-			$this->user->getId(),
-			$this->user->getEmail(),
-			$this->user->getTitleKey(),
-			( $curseUser->getId() ? 'true' : '' ),
-			( $this->user->isBlocked() ? 'true' : '' )
-		);
+';
 	}
 }
