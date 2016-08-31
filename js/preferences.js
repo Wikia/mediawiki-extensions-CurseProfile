@@ -4,8 +4,16 @@ $(function(){
     var favwikiDisplayOrig = $("#mw-input-wpprofile-favwiki-display");
         favwikiDisplayOrig.after('<input id="fakewikiDisplay" size="45" class="ui-autocomplete-input">');
         favwikiDisplayOrig.hide();
+    var prefForm = $("#mw-prefs-form");
     var favwikiDisplay = $("#fakewikiDisplay");
     var wikiresponse = {};
+
+    prefForm.submit(function(e){
+        if (favwikiDisplay.val().length == 0 || favwikiDisplay.val() == "") {
+            favwiki.val(''); // unset this on submit if no wiki is chosen.
+        }
+    });
+
     if (favwikiDisplay.length) {
         // Auto Fill "Favorite Wiki" with name from the actual stored value.
         api.get({
@@ -31,6 +39,7 @@ $(function(){
                         var results = data.data;
                         for (hash in results) {
                             var res = results[hash];
+                            console.log(res);
                             var label = (typeof res.wiki_name_display !== 'undefined') ? res.wiki_name_display : res.wiki_name;
                             fill.push({ label: label });
                             wikiresponse[label] = hash; // push into the store object

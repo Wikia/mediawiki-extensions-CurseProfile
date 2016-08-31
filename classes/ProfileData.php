@@ -432,7 +432,7 @@ class ProfileData {
 		$ret = [];
 		if (!empty($sites)) {
 			foreach ($sites as $md5) {
-				$data = $wikiData = $redis->hGetAll('dynamicsettings:siteInfo:'.$md5);
+				$data = $redis->hGetAll('dynamicsettings:siteInfo:'.$md5);
 				if (empty($data)) {
 					continue;
 				}
