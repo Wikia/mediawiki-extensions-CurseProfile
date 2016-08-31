@@ -237,6 +237,11 @@
 		"EchoGetDefaultNotifiedUsers": "CurseProfile\\Hooks::onEchoGetDefaultNotifiedUsers",
 		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules"
 	},
+	"APIModules": {
+		"profile": "CurseProfile\\ProfileApi",
+ 		"friend": "CurseProfile\\FriendApi",
+ 		"comment": "CurseProfile\\CommentApi"
+	},
 	"callback": "CurseProfile\\Hooks::onRegistration",
 	"config": {
 		"CPEditsToComment": 1
