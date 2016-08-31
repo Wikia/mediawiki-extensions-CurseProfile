@@ -27,6 +27,7 @@ $(function(){
             }
         });
     }
+
     favwikiDisplay.autocomplete({
         source: function(req, response) {
             api.get({
