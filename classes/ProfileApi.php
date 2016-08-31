@@ -114,8 +114,15 @@ class ProfileApi extends \CurseApiBase {
 	 */
 	public function doGetWikisByString() {
 		$search = $this->getMain()->getVal('search');
-		$return = ProfileData::getWikiSitesSearch($search);
-
+		$returnGet = ProfileData::getWikiSitesSearch($search);
+		$return = [];
+		foreach ($returnGet as $hash => $r) {
+			$return[$hash] = [
+				'wiki_name' => $r['wiki_name'],
+				'wiki_name_display' => $r['wiki_name_display'],
+				'md5_key' => $r['md5_key']
+			]; // curated data return.
+		}
 		$this->getResult()->addValue(null, 'result', 'success');
 		$this->getResult()->addValue(null, 'data', $return);
 	}
@@ -129,7 +136,12 @@ class ProfileApi extends \CurseApiBase {
 		$return = ProfileData::getWikiSites($hash);
 
 		if (isset($return[$hash])) {
-			$return = $return[$hash];
+			$r = $return[$hash];
+			$return = [
+				'wiki_name' => $r['wiki_name'],
+				'wiki_name_display' => $r['wiki_name_display'],
+				'md5_key' => $r['md5_key']
+			]; // curated data return.
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'data', $return);
 		} else {
