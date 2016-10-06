@@ -406,7 +406,7 @@ class ProfileData {
 			foreach ($arr_keys as $str_field => $str_value) {
 				$siteKeys[] = $str_value;
 			}
-			if (count($siteKeys) >= 10) {
+			if (count($siteKeys) >= 15) {
 				break;
 			}
 		}
