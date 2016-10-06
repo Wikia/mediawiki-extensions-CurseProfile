@@ -384,9 +384,11 @@ class ProfileData {
 	}
 
 	/**
-	 * [getWikiSitesSearch description]
-	 * @param  [type] $search [description]
-	 * @return [type]         [description]
+	 * Get information about wiki sites from Redis for searching.
+	 *
+	 * @access	public
+	 * @param 	string	Search Term
+	 * @return	array	Search Results
 	 */
 	public static function getWikiSitesSearch($search) {
 		$redis = \RedisCache::getClient('cache');
@@ -394,15 +396,16 @@ class ProfileData {
 			return [];
 		}
 
-		$search = is_string($search) ? "*".$search."*" : null;
+		$search = is_string($search) ? "*".mb_strtolower($search, "UTF-8")."*" : null;
 
 		$siteKeys = [];
 
-		$it = NULL;
-		while($arr_keys = $redis->hScan('dynamicsettings:siteNameKeys',$it,$search)) {
-		    foreach($arr_keys as $str_field => $str_value) {
-		        $siteKeys[] = $str_value;
-		    }
+		$it = null;
+		$redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
+		while (($arr_keys = $redis->hScan('dynamicsettings:siteNameKeys', $it, $search)) !== false) {
+			foreach ($arr_keys as $str_field => $str_value) {
+				$siteKeys[] = $str_value;
+			}
 		}
 
 		return self::getWikiSites($siteKeys);
