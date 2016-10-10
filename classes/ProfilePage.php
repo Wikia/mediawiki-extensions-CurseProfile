@@ -558,11 +558,11 @@ class ProfilePage extends \Article {
 		if ($curseId > 0 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
 			$earned = 0;
 
-			$progress = \Achievements\Progress::newFromCurseId($curseId);
+			$progress = \Achievements\Progress::newFromGlobalId($curseId);
 			if ($progress !== false) {
 				$earned += $progress->getTotalEarned();
 			}
-			$megaProgress = \Achievements\MegaProgress::newFromCurseId($curseId);
+			$megaProgress = \Achievements\MegaProgress::newFromGlobalId($curseId);
 			if ($megaProgress !== false) {
 				$earned += $megaProgress->getTotalEarned();
 			}
@@ -642,7 +642,7 @@ class ProfilePage extends \Article {
 		} else {
 			$earned = false;
 			if ($type === 'local') {
-				$progress = \Achievements\Progress::newFromCurseId($curseUser->getId());
+				$progress = \Achievements\Progress::newFromGlobalId($curseUser->getId());
 				if ($progress !== false) {
 					$earned = $progress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
@@ -650,7 +650,7 @@ class ProfilePage extends \Article {
 			}
 
 			if ($type === 'global') {
-				$megaProgress = \Achievements\MegaProgress::newFromCurseId($curseUser->getId());
+				$megaProgress = \Achievements\MegaProgress::newFromGlobalId($curseUser->getId());
 				if ($megaProgress !== false) {
 					$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
