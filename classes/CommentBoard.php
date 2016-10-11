@@ -573,7 +573,7 @@ class CommentBoard {
 		if (!is_a($user, 'User')) {
 			global $wgUser;
 
-			$user = $wgUser
+			$user = $wgUser;
 		}
 
 		$lookup = \CentralIdLookup::factory();

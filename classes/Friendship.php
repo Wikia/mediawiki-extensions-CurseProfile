@@ -245,7 +245,7 @@ class Friendship {
 			'agent' => $wgUser,
 			'title' => $wgUser->getUserPage(),
 			'extra' => [
-				'target_user_id' => $toLocalUser->getId();
+				'target_user_id' => $toLocalUser->getId()
 			]
 		]);
 
