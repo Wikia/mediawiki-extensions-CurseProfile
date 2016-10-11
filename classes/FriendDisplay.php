@@ -33,8 +33,8 @@ class FriendDisplay {
 			return;
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($wgUser, \CentralIdLookup::AUDIENCE_RAW);
 
 		if (!$wgUser->isLoggedIn()
 			|| ($wgUser->getID() == $user_id && !$isGlobalId)

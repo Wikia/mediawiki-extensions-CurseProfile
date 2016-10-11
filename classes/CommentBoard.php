@@ -576,8 +576,8 @@ class CommentBoard {
 			$user = $wgUser
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
 
 		if (!$globalId) {
 			return false;

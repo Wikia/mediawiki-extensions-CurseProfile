@@ -466,8 +466,8 @@ class CommentReport {
 	 * @return	void
 	 */
 	private function addReportFrom($user) {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
 
 		if (!isset($this->id) || !$globalId) {
 			return false; // can't add to a comment that hasn't been archived yet
@@ -521,8 +521,8 @@ class CommentReport {
 		if (is_null($byUser)) {
 			$byUser = $wgUser;
 		}
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($byUser, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($byUser, \CentralIdLookup::AUDIENCE_RAW);
 
 		//Need a Curse ID to continue;
 		if (!$globalId) {

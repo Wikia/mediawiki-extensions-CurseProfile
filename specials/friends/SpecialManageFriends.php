@@ -52,8 +52,8 @@ class SpecialManageFriends extends \SpecialPage {
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
 
 		$f = new Friendship($globalId);
 

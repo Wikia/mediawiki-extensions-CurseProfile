@@ -501,8 +501,8 @@ class ProfilePage extends \Article {
 	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		if ($globalId > 0) {
 			$stats = \dataMiner::getUserGlobalStats([$globalId]);
@@ -635,8 +635,8 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		$achievementCache = $type.'AchievementProgress';
 		if (property_exists($this, $achievementCache) && is_array($this->$achievementCache)) {
@@ -698,8 +698,8 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel(&$parser) {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		// Check for existance of wikipoints functions
 		if (!$globalId || !method_exists('PointsDisplay', 'pointsForGlobalId')) {
@@ -771,8 +771,8 @@ class ProfilePage extends \Article {
 	protected function profileLayout() {
 		global $wgUser;
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {
@@ -855,8 +855,8 @@ __NOTOC__
 	protected function mobileProfileLayout() {
 		global $wgUser;
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-userid="'.$this->user->getID().'">

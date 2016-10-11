@@ -331,8 +331,8 @@ class CommentApi extends \CurseApiBase {
 	 * @return	boolean	Success
 	 */
 	public function doResolveReport() {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), CentralIdLookup::AUDIENCE_RAW);
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), \CentralIdLookup::AUDIENCE_RAW);
 		if (!$globalId) {
 			return false;
 		}
