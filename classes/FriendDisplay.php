@@ -148,7 +148,7 @@ class FriendDisplay {
 	 * @return	integer	Number of friends.
 	 */
 	public static function count(&$parser, $userId) {
-		$targetUser = User::newFromId($userId);
+		$targetUser = \User::newFromId($userId);
 
 		$lookup = \CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($targetUser);
@@ -171,8 +171,8 @@ class FriendDisplay {
 	 * @param	integer	Local User ID
 	 * @return	array	Parser compatible HTML array.
 	 */
-	public static function friendlist(&$parser, $userId) {
-		$targetUser = User::newFromId($userId);
+	public static function friendList(&$parser, $userId) {
+		$targetUser = \User::newFromId($userId);
 
 		$lookup = \CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($targetUser);

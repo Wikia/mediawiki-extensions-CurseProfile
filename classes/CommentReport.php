@@ -300,7 +300,7 @@ class CommentReport {
 		global $wgUser, $dsSiteKey;
 
 		$lookup = \CentralIdLookup::factory();
-		$userFrom = User::newFromId($comment['ub_user_id_from']);
+		$userFrom = \User::newFromId($comment['ub_user_id_from']);
 		if (!$userFrom) {
 			return false;
 		}
