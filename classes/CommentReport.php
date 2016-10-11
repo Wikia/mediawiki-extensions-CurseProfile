@@ -462,17 +462,19 @@ class CommentReport {
 	 * Add a new report to comment that has already been archived
 	 *
 	 * @access	private
-	 * @param	User	the user reporting this comment
+	 * @param	object	The User reporting this comment
 	 * @return	void
 	 */
 	private function addReportFrom($user) {
-		$curseUser = \CurseAuthUser::getInstance($user);
-		if (!isset($this->id) || !$curseUser->getId()) {
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+
+		if (!isset($this->id) || !$globalId) {
 			return false; // can't add to a comment that hasn't been archived yet
 		}
 
 		$newReport = [
-			'reporter' => $curseUser->getId(),
+			'reporter' => $globalId,
 			'timestamp' => time(),
 		];
 
@@ -481,7 +483,7 @@ class CommentReport {
 		$db->insert('user_board_reports', [
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
-			'ubr_reporter_curse_id' => $curseUser->getId(),
+			'ubr_reporter_curse_id' => $globalId,
 			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
 		], __METHOD__);
 
@@ -507,26 +509,30 @@ class CommentReport {
 	 * @return	boolean	true if successful
 	 */
 	public function resolve($action, $byUser = null) {
+		global $wgUser;
+
 		if (!$this->isLocal()) {
 			return false;
 		}
 		if ($this->data['action_taken']) {
 			return false;
 		}
+
 		if (is_null($byUser)) {
-			$curseUser = \CurseAuthUser::getInstance($GLOBALS['wgUser']);
-		} elseif ($byUser instanceof User) {
-			$curseUser = \CurseAuthUser::getInstance($byUser);
+			$byUser = $wgUser;
 		}
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($byUser, CentralIdLookup::AUDIENCE_RAW);
+
 		//Need a Curse ID to continue;
-		if (!$curseUser->getId()) {
+		if (!$globalId) {
 			return false;
 		}
 
 		// update internal data
-		$this->data['action_taken'] = $action=='delete' ? self::ACTION_DELETE : self::ACTION_DISMISS;
-		$this->data['action_taken_by'] = $curseUser->getId();
-		$this->data['action_taken_at'] = time();
+		$this->data['action_taken']		= ($action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS);
+		$this->data['action_taken_by']	= $globalId;
+		$this->data['action_taken_at']	= time();
 
 		// update data stores
 		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $byUser) )

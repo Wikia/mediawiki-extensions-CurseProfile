@@ -65,9 +65,10 @@ class FriendApi extends \CurseApiBase {
 	public function execute() {
 		global $wgUser;
 
-		$wgUser->load();
-		$curseUser = \CurseAuthUser::getInstance($wgUser);
-		$this->f = new Friendship($curseUser->getId());
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
+
+		$this->f = new Friendship($globalId);
 		parent::execute();
 	}
 

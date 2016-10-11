@@ -324,23 +324,35 @@ class CommentApi extends \CurseApiBase {
 		}
 	}
 
+	/**
+	 * Resolve Report API End Point
+	 *
+	 * @access	public
+	 * @return	boolean	Success
+	 */
 	public function doResolveReport() {
-		$curseUser = \CurseAuthUser::getInstance($this->getUser());
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), CentralIdLookup::AUDIENCE_RAW);
+		if (!$globalId) {
+			return false;
+		}
+
 		$reportKey = $this->getMain()->getVal('reportKey');
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getMain()->getVal('byUser', $curseUser->getId()),
+			'byUser' => $this->getMain()->getVal('byUser', $globalId),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki
 		if (CommentReport::keyIsLocal($reportKey)) {
 			$output = ResolveComment::run($jobArgs, true, $result);
-			$this->getResult()->addValue(null, 'result', $result==0 ? 'success' : 'error');
-			$this->getResult()->addValue(null, 'output', explode("\n",trim($output)));
+			$this->getResult()->addValue(null, 'result', ($result == 0 ? 'success' : 'error'));
+			$this->getResult()->addValue(null, 'output', explode("\n", trim($output)));
 		} else {
 			ResolveComment::queue($jobArgs);
 			$this->getResult()->addValue(null, 'result', 'queued');
 		}
+		return true;
 	}
 }

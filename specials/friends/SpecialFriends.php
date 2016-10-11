@@ -78,8 +78,10 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$wgOut->addModules('ext.curseprofile.profilepage');
 		$templateManageFriends = new \TemplateManageFriends;
 
-		$curseUser = \CurseAuthUser::getInstance($user);
-		$f = new Friendship($curseUser->getId());
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+
+		$f = new Friendship($globalId);
 
 		$friends = $f->getFriends();
 		$wgOut->addModules('ext.curse.pagination');

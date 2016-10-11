@@ -501,19 +501,19 @@ class ProfilePage extends \Article {
 	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
-		$curseUser = \CurseAuthUser::getInstance($this->user);
-		$curseId = $curseUser->getId();
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
-		if ($curseId > 0) {
-			$stats = \dataMiner::getUserGlobalStats([$curseId]);
+		if ($globalId > 0) {
+			$stats = \dataMiner::getUserGlobalStats([$globalId]);
 		}
 
 		//Leys are message keys fed to wfMessage().
 		//Values are numbers or an array of sub-stats with a number at key 0.
 		if (is_array($stats)) {
-			$totalStats = $stats[$curseId]['global']['total'];
+			$totalStats = $stats[$globalId]['global']['total'];
 			$statsOutput = [
-				'wikisedited' => $stats[$curseId]['other']['wikis_contributed'],
+				'wikisedited' => $stats[$globalId]['other']['wikis_contributed'],
 				'totalcontribs' => [ $totalStats['actions'],
 					'totaledits'   => $totalStats['edits'],
 					'totaldeletes' => $totalStats['deletes'],
@@ -537,9 +537,9 @@ class ProfilePage extends \Article {
 
 		global $wgServer;
 
-		if ($curseId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
-			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($curseId, \WikiPoints::extractDomain($wgServer))['rank'];
-			$statsOutput['globalrank'] = \PointsDisplay::pointsForGlobalId($curseId)['rank'];
+		if ($globalId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
+			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($globalId, \WikiPoints::extractDomain($wgServer))['rank'];
+			$statsOutput['globalrank'] = \PointsDisplay::pointsForGlobalId($globalId)['rank'];
 
 			if (empty($statsOutput['localrank'])) {
 				unset($statsOutput['localrank']);
@@ -555,14 +555,14 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		if ($curseId > 0 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
+		if ($globalId > 0 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
 			$earned = 0;
 
-			$progress = \Achievements\Progress::newFromGlobalId($curseId);
+			$progress = \Achievements\Progress::newFromGlobalId($globalId);
 			if ($progress !== false) {
 				$earned += $progress->getTotalEarned();
 			}
-			$megaProgress = \Achievements\MegaProgress::newFromGlobalId($curseId);
+			$megaProgress = \Achievements\MegaProgress::newFromGlobalId($globalId);
 			if ($megaProgress !== false) {
 				$earned += $megaProgress->getTotalEarned();
 			}
@@ -635,14 +635,16 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		$curseUser = \CurseAuthUser::getInstance($this->user);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+
 		$achievementCache = $type.'AchievementProgress';
 		if (property_exists($this, $achievementCache) && is_array($this->$achievementCache)) {
 			$earned = $this->$achievementCache;
 		} else {
 			$earned = false;
 			if ($type === 'local') {
-				$progress = \Achievements\Progress::newFromGlobalId($curseUser->getId());
+				$progress = \Achievements\Progress::newFromGlobalId($globalId);
 				if ($progress !== false) {
 					$earned = $progress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
@@ -650,7 +652,7 @@ class ProfilePage extends \Article {
 			}
 
 			if ($type === 'global') {
-				$megaProgress = \Achievements\MegaProgress::newFromGlobalId($curseUser->getId());
+				$megaProgress = \Achievements\MegaProgress::newFromGlobalId($globalId);
 				if ($megaProgress !== false) {
 					$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
 					$this->$achievementCache = $earned;
@@ -696,14 +698,16 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel(&$parser) {
-		$curseUser = \CurseAuthUser::getInstance($this->user);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+
 		// Check for existance of wikipoints functions
-		if (!$curseUser->getId() || !method_exists('PointsDisplay', 'pointsForGlobalId')) {
+		if (!$globalId || !method_exists('PointsDisplay', 'pointsForGlobalId')) {
 			return '';
 		}
 
 		$redis = \RedisCache::getClient('cache');
-		$userPoints = \PointsDisplay::pointsForGlobalId($curseUser->getId())['score'];
+		$userPoints = \PointsDisplay::pointsForGlobalId($globalId)['score'];
 		$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
 
 		if (!is_array($levelDefinitions)) {
@@ -767,7 +771,8 @@ class ProfilePage extends \Article {
 	protected function profileLayout() {
 		global $wgUser;
 
-		$curseUser = \CurseAuthUser::getInstance($this->user);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {
@@ -828,7 +833,7 @@ class ProfilePage extends \Article {
 			{{#friendlist: '.$this->user->getID().'}}<br />
 			<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		</div>
-		{{#if: '.( $curseUser->getId() ? 'true' : '' ).' | <div class="section achievements">
+		{{#if: '.( $globalId ? 'true' : '' ).' | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
@@ -850,7 +855,8 @@ __NOTOC__
 	protected function mobileProfileLayout() {
 		global $wgUser;
 
-		$curseUser = \CurseAuthUser::getInstance($this->user);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-userid="'.$this->user->getID().'">
@@ -870,7 +876,7 @@ __NOTOC__
 		<h1>'.wfMessage('cp-friendssection')->plain().'</h1>
 		{{#friendlist: '.$this->user->getID().'}}
 		<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
-		{{#if: '.( $curseUser->getId() ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
+		{{#if: '.( $globalId ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}

@@ -567,16 +567,22 @@ class CommentBoard {
 	 * @param	integer	ID of the comment to remove.
 	 * @param	integer	[Optional] User object of the admin acting, defaults to $wgUser.
 	 * @param	string	[Optional] Timestamp in the format of date('Y-m-d H:i:s').
-	 * @return	stuff	whatever DB->update() returns
+	 * @return	mixed	$db->update() return or false on error.
 	 */
 	public static function removeComment($commentId, $user = null, $time = null) {
-		if (is_a($user, 'User')) {
-			$curseUser = \CurseAuthUser::getInstance($user);
-		} else {
+		if (!is_a($user, 'User')) {
 			global $wgUser;
 
-			$curseUser = \CurseAuthUser::getInstance($wgUser);
+			$user = $wgUser
 		}
+
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+
+		if (!$globalId) {
+			return false;
+		}
+
 		if (!$time) {
 			$time = date('Y-m-d H:i:s');
 		}
@@ -585,9 +591,9 @@ class CommentBoard {
 		return $db->update(
 			'user_board',
 			[
-				'ub_type' => self::DELETED_MESSAGE,
-				'ub_admin_acted' => $curseUser->getId(),
-				'ub_admin_acted_at' => $time,
+				'ub_type'			=> self::DELETED_MESSAGE,
+				'ub_admin_acted'	=> $globalId,
+				'ub_admin_acted_at'	=> $time
 			],
 			['ub_id' => $commentId]
 		);

@@ -25,25 +25,26 @@ class FriendDisplay {
 	 * @param	boolean	determines the function of the first arg
 	 * @return	void
 	 */
-	public static function addFriendLink($user_id = '', &$links, $isCurseId = false) {
+	public static function addFriendLink($user_id = '', &$links, $isGlobalId = false) {
+		global $wgUser;
+
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
 			return;
 		}
 
-		global $wgUser;
-		$wgUser->load();
-		$curseUser = \CurseAuthUser::getInstance($wgUser);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
+
 		if (!$wgUser->isLoggedIn()
-			|| ($wgUser->getID() == $user_id && !$isCurseId)
-			|| ($curseUser->GetId() == $user_id && $isCurseId))
+			|| ($wgUser->getID() == $user_id && !$isGlobalId)
+			|| ($globalId == $user_id && $isGlobalId))
 		{
 			return;
 		}
 
-		$curseId = $curseUser->getId();
-		$friendship = new Friendship($curseId);
-		if ($isCurseId) {
+		$friendship = new Friendship($globalId);
+		if ($isGlobalId) {
 			$links['curse_id'] = $user_id;
 			$user = \CurseAuthUser::newUserFromGlobalId($user_id);
 		} else {
@@ -107,10 +108,10 @@ class FriendDisplay {
 	 * @param	boolean	determines the function of the previous arg
 	 * @return	string	html button stuff
 	 */
-	public static function friendButtons($user_id = '', $isCurseId = false) {
+	public static function friendButtons($user_id = '', $isGlobalId = false) {
 		// reuse logic from the other function
 		$links = [];
-		self::addFriendLink($user_id, $links, $isCurseId);
+		self::addFriendLink($user_id, $links, $isGlobalId);
 
 		if (isset($links['actions'])) {
 			$links['views'] = $links['actions'];
@@ -135,8 +136,8 @@ class FriendDisplay {
 		return $HTML;
 	}
 
-	public static function addFriendButton($user_id = '', $isCurseId = false) {
-		return '<div class="friendship-container">'.self::friendButtons($user_id, $isCurseId).'</div>';
+	public static function addFriendButton($user_id = '', $isGlobalId = false) {
+		return '<div class="friendship-container">'.self::friendButtons($user_id, $isGlobalId).'</div>';
 	}
 
 	public static function count(&$parser, $user_id = '') {
