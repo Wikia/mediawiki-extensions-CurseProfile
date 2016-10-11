@@ -347,7 +347,7 @@ class CommentReport {
 				'cid' => $report['ra_comment_id'],
 				'origin_wiki' => $dsSiteKey,
 				'last_touched' => strtotime($report['ra_last_edited']),
-				'author' => $report['ra_curse_id_from'],
+				'author' => $report['ra_global_id_from'],
 			],
 			'reports' => self::getReportsForId($report['ra_id']),
 			'action_taken' => $report['ra_action_taken'],
@@ -364,13 +364,13 @@ class CommentReport {
 	 * Loads individual user reports for a given comment report
 	 *
 	 * @param   int     the ra_comment_id from the user_board_report_archives table
-	 * @return  array   with sub arrays for each report having keys reporter => curse_id, timestamp
+	 * @return  array   with sub arrays for each report having keys reporter => global_id, timestamp
 	 */
 	private static function getReportsForId($id) {
 		$db = CP::getDb(DB_SLAVE);
 		$res = $db->select(
 			['user_board_reports'],
-			['ubr_reporter_curse_id as reporter', 'ubr_reported as timestamp'],
+			['ubr_reporter_global_id as reporter', 'ubr_reported as timestamp'],
 			['ubr_report_archive_id = '.intval($id)],
 			__METHOD__,
 			[ 'ORDER BY' => 'ubr_reported ASC' ]
@@ -413,7 +413,7 @@ class CommentReport {
 		$db->insert('user_board_report_archives', [
 			'ra_comment_id' => $this->data['comment']['cid'],
 			'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
-			'ra_curse_id_from' => $this->data['comment']['author'],
+			'ra_global_id_from' => $this->data['comment']['author'],
 			'ra_comment_text' => $this->data['comment']['text'],
 			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
 			'ra_action_taken' => $this->data['action_taken'],
@@ -489,7 +489,7 @@ class CommentReport {
 		$db->insert('user_board_reports', [
 			'ubr_report_archive_id' => $this->id,
 			'ubr_reporter_id' => $user->getId(),
-			'ubr_reporter_curse_id' => $globalId,
+			'ubr_reporter_global_id' => $globalId,
 			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
 		], __METHOD__);
 
