@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX /*i*/ra_comment_report ON /*_*/user_board_report_archives (ra_comment_id,ra_last_edited);

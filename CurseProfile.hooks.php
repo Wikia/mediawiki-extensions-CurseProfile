@@ -210,16 +210,13 @@ class Hooks {
 		$updater->addExtensionUpdate(array('addTable', 'user_board_report_archives', "{$extDir}/install/sql/curseprofile_table_user_board_report_archives.sql", true));
 		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/curseprofile_table_user_board_reports.sql", true));
 
-		//Repair tables that might be missing indexes.
-		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_comment_report', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_comment_report.sql", true]);
-		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_curse_id_from', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_curse_id_from.sql", true]);
-		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_first_reported', "{$extDir}/install/sql/curseprofile_repair_ubra_index_ra_first_reported.sql", true]);
-
 		// Update tables with extra fields for our use
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
 		$updater->addExtensionField('user_board', 'ub_edited', "{$extDir}/upgrade/sql/add_user_board_edit_and_reply_date.sql", true);
 		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);
 		$updater->addExtensionField('user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/add_user_board_admin_action_log.sql", true);
+
+		$updater->addExtensionUpdate(['modifyField', 'user_board_reports', 'ubr_reporter_curse_id', "{$extDir}/upgrade/sql/rename_curse_to_global.sql", true]);
 
 		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/create_user_relationship.sql", true));

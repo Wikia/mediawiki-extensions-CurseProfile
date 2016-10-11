@@ -1,1 +1,0 @@
-CREATE INDEX /*i*/ra_first_reported ON /*_*/user_board_report_archives (ra_first_reported);
