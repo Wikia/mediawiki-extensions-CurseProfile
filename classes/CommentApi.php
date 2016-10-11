@@ -32,8 +32,8 @@ class CommentApi extends \CurseApiBase {
 			'withAction' => 'One of "delete" or "dismiss".',
 
 			// add
-			'curse_id' => 'The id for a user on whose board a comment will be added',
-			'user_id' => 'The optional id for a user on whose board a comment will be added. curse_id is ignored when this is present.',
+			'global_id' => 'The id for a user on whose board a comment will be added',
+			'user_id' => 'The optional id for a user on whose board a comment will be added.  global_id is ignored when this is present.',
 			'text' => 'The content of the comment to be added',
 			'inReplyTo' => 'An OPTIONAL id of a comment that the new comment will reply to',
 
@@ -82,7 +82,7 @@ class CommentApi extends \CurseApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'curse_id' => [
+					'global_id' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 						\ApiBase::PARAM_REQUIRED => true,
 					],
@@ -142,7 +142,7 @@ class CommentApi extends \CurseApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'curse_id' => [
+					'global_id' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 						\ApiBase::PARAM_REQUIRED => true,
 					],
@@ -204,9 +204,8 @@ class CommentApi extends \CurseApiBase {
 	public function doAddToDefault() {
 		// intentional use of value returned from assignment
 		if (! ($user_id = $this->getMain()->getVal('user_id')) ) {
-			$user_id = \CurseAuthUser::userIdFromGlobalId($this->getMain()->getVal('curse_id'));
-			$user = \User::newFromId($user_id);
-			$user->load();
+			$lookup = \CentralIdLookup::factory();
+			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
 			if ($user->isAnon()) {
 				return $this->dieUsageMsg(['comment-invaliduser']);
 			}
@@ -244,7 +243,13 @@ class CommentApi extends \CurseApiBase {
 	public function doAdd() {
 		$toUser = $this->getMain()->getVal('user_id');
 		if (!$toUser) {
-			$toUser = \CurseAuthUser::userIdFromGlobalId($this->getMain()->getVal('curse_id'));
+			$lookup = \CentralIdLookup::factory();
+			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
+			if (!$user) {
+				$this->getResult()->addValue(null, 'result', 'failure');
+				return;
+			}
+			$toUser = $user->getId();
 		}
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');

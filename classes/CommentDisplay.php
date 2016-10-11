@@ -178,7 +178,8 @@ class CommentDisplay {
 	 * @return	string	html fragment
 	 */
 	private static function adminAction($comment) {
-		$admin = \CurseAuthUser::newUserFromGlobalId($comment['ub_admin_acted']);
+		$lookup = \CentralIdLookup::factory();
+		$admin = $lookup->localUserFromCentralId($comment['ub_admin_acted']);
 		if (!$admin->getName()) {
 			return '';
 		}

@@ -18,7 +18,7 @@ namespace CurseProfile;
  * All relationships statuses are then described from the perspective of that user.
  */
 class Friendship {
-	private $curse_id;
+	private $globalId;
 
 	/**
 	 * Relationship status constants
@@ -34,8 +34,8 @@ class Friendship {
 	 *
 	 * @param	integer	curse ID of a user
 	 */
-	public function __construct($curse_id) {
-		$this->curse_id = intval($curse_id);
+	public function __construct($globalId) {
+		$this->globalId = intval($globalId);
 	}
 
 	/**
@@ -46,7 +46,7 @@ class Friendship {
 	 */
 	public function getRelationship($toUser) {
 		$toUser = intval($toUser);
-		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
+		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
 			return -1;
 		}
 
@@ -65,7 +65,7 @@ class Friendship {
 			if ($redis->hExists($this->requestsRedisKey(), $toUser)) {
 				return self::REQUEST_RECEIVED;
 			}
-			if ($redis->hExists($this->requestsRedisKey($toUser), $this->curse_id)) {
+			if ($redis->hExists($this->requestsRedisKey($toUser), $this->globalId)) {
 				return self::REQUEST_SENT;
 			}
 		} catch (RedisException $e) {
@@ -79,16 +79,16 @@ class Friendship {
 	/**
 	 * Returns the array of curse IDs for this or another user's friends
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->globalId)
 	 * @return	array	curse IDs of friends
 	 */
 	public function getFriends($user = null) {
-		if ($this->curse_id < 1) {
+		if ($this->globalId < 1) {
 			return [];
 		}
 
 		if ($user == null) {
-			$user = $this->curse_id;
+			$user = $this->globalId;
 		}
 		$redis = \RedisCache::getClient('cache');
 		try {
@@ -102,16 +102,16 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->globalId)
 	 * @return	integer	a number of friends
 	 */
 	public function getFriendCount($user = null) {
-		if ($this->curse_id < 1) {
+		if ($this->globalId < 1) {
 			return [];
 		}
 
 		if ($user == null) {
-			$user = $this->curse_id;
+			$user = $this->globalId;
 		}
 		$redis = \RedisCache::getClient('cache');
 		try {
@@ -129,7 +129,7 @@ class Friendship {
 	 *     values are json strings with additional data (currently empty)
 	 */
 	public function getReceivedRequests() {
-		if ($this->curse_id < 1) {
+		if ($this->globalId < 1) {
 			return [];
 		}
 
@@ -148,7 +148,7 @@ class Friendship {
 	 * @return	array	values are curse IDs
 	 */
 	public function getSentRequests() {
-		if ($this->curse_id < 1) {
+		if ($this->globalId < 1) {
 			return [];
 		}
 
@@ -164,12 +164,12 @@ class Friendship {
 	/**
 	 * Generates a redis key for the hash of pending requests received
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->globalId)
 	 * @return	string	redis key to be used
 	 */
 	private function requestsRedisKey($user = null) {
 		if ($user == null) {
-			$user = $this->curse_id;
+			$user = $this->globalId;
 		}
 		return 'friendrequests:'.$user;
 	}
@@ -177,12 +177,12 @@ class Friendship {
 	/**
 	 * Generates a redis key for the set of pending requests sent
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->globalId)
 	 * @return	string	redis key to be used
 	 */
 	private function sentRequestsRedisKey($user = null) {
 		if ($user == null) {
-			$user = $this->curse_id;
+			$user = $this->globalId;
 		}
 		return 'friendrequests:'.$user.':sent';
 	}
@@ -190,12 +190,12 @@ class Friendship {
 	/**
 	 * Generates a redis key for a set of friends
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->curse_id)
+	 * @param	integer	optional curse ID of a user (default $this->globalId)
 	 * @return	string	redis key to be used
 	 */
 	private function friendListRedisKey($user = null) {
 		if ($user == null) {
-			$user = $this->curse_id;
+			$user = $this->globalId;
 		}
 		return 'friendlist:'.$user;
 	}
@@ -203,35 +203,38 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @param	integer	Curse ID of the user to friend.
+	 * @access	public
+	 * @param	integer	Global ID of the user to friend.
 	 * @return	boolean	True on success, False on failure.
 	 */
-	public function sendRequest($toUser) {
+	public function sendRequest($toGlobalId) {
 		global $wgUser;
 
 		if ($wgUser->isBlocked()) {
 			return false;
 		}
 
-		$toUser = intval($toUser);
-		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
+		$toGlobalId = intval($toGlobalId);
+		$lookup = \CentralIdLookup::factory();
+		$toLocalUser = $lookup->localUserFromCentralId($toGlobalId);
+		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
 			return false;
 		}
 
 		//Queue sync before error check in case redis is not in sync.
 		FriendSync::queue([
 			'task' => 'add',
-			'actor' => $this->curse_id,
-			'target' => $toUser,
+			'actor' => $this->globalId,
+			'target' => $toGlobalId,
 		]);
-		if ($this->getRelationship($toUser) != self::STRANGERS) {
+		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
 			return false;
 		}
 
 		$redis = \RedisCache::getClient('cache');
 		try {
-			$redis->hSet($this->requestsRedisKey($toUser), $this->curse_id, '{}');
-			$redis->sAdd($this->sentRequestsRedisKey(), $toUser);
+			$redis->hSet($this->requestsRedisKey($toGlobalId), $this->globalId, '{}');
+			$redis->sAdd($this->sentRequestsRedisKey(), $toGlobalId);
 		} catch (RedisException $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
@@ -242,11 +245,11 @@ class Friendship {
 			'agent' => $wgUser,
 			'title' => $wgUser->getUserPage(),
 			'extra' => [
-				'target_user_id' => \CurseAuthUser::userIdFromGlobalId($toUser)
+				'target_user_id' => $toLocalUser->getId();
 			]
 		]);
 
-		wfRunHooks('CurseProfileAddFriend', [$this->curse_id, $toUser]);
+		wfRunHooks('CurseProfileAddFriend', [$this->globalId, $toGlobalId]);
 
 		return true;
 	}
@@ -254,21 +257,23 @@ class Friendship {
 	/**
 	 * Accepts a pending request
 	 *
+	 * @access	public
 	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
-	public function acceptRequest($toUser) {
-		return $this->respondToRequest($toUser, 'accept');
+	public function acceptRequest($toGlobalId) {
+		return $this->respondToRequest($toGlobalId, 'accept');
 	}
 
 	/**
 	 * Ignores and dismisses a pending request
 	 *
+	 * @access	public
 	 * @param	integer	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
-	public function ignoreRequest($toUser) {
-		return $this->respondToRequest($toUser, 'ignore');
+	public function ignoreRequest($toGlobalId) {
+		return $this->respondToRequest($toGlobalId, 'ignore');
 	}
 
 	/**
@@ -280,13 +285,13 @@ class Friendship {
 	 */
 	private function respondToRequest($toUser, $response) {
 		$toUser = intval($toUser);
-		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
+		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
 			return -1;
 		}
 
 		FriendSync::queue([
 			'task' => ($response == 'accept' ? 'confirm' : 'ignore'),
-			'actor' => $this->curse_id,
+			'actor' => $this->globalId,
 			'target' => $toUser
 		]);
 		if ($this->getRelationship($toUser) != self::REQUEST_RECEIVED) {
@@ -297,12 +302,12 @@ class Friendship {
 		try {
 			// delete pending request
 			$redis->hDel($this->requestsRedisKey(), $toUser);
-			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->globalId);
 
 			if ($response == 'accept') {
 				// add reciprocal friendship
 				$redis->sAdd($this->friendListRedisKey(), $toUser);
-				$redis->sAdd($this->friendListRedisKey($toUser), $this->curse_id);
+				$redis->sAdd($this->friendListRedisKey($toUser), $this->globalId);
 			}
 		} catch (RedisException $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
@@ -320,35 +325,35 @@ class Friendship {
 	 */
 	public function removeFriend($toUser) {
 		$toUser = intval($toUser);
-		if ($this->curse_id < 1 || $this->curse_id == $toUser || $toUser < 1) {
+		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
 			return false;
 		}
 
 		FriendSync::queue([
 			'task' => 'remove',
-			'actor' => $this->curse_id,
+			'actor' => $this->globalId,
 			'target' => $toUser
 		]);
 
 		$redis = \RedisCache::getClient('cache');
 		try {
 			// remove pending incoming requests
-			$redis->hDel($this->requestsRedisKey($toUser), $this->curse_id);
+			$redis->hDel($this->requestsRedisKey($toUser), $this->globalId);
 			$redis->hDel($this->requestsRedisKey(), $toUser);
 
 			// remove sent request references
-			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->curse_id);
+			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->globalId);
 			$redis->sRem($this->sentRequestsRedisKey(), $toUser);
 
 			// remove existing friendship
-			$redis->sRem($this->friendListRedisKey($toUser), $this->curse_id);
+			$redis->sRem($this->friendListRedisKey($toUser), $this->globalId);
 			$redis->sRem($this->friendListRedisKey(), $toUser);
 		} catch (RedisException $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}
 
-		wfRunHooks('CurseProfileRemoveFriend', [$this->curse_id, $toUser]);
+		wfRunHooks('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
 
 		return true;
 	}
@@ -375,8 +380,8 @@ class Friendship {
 		$db = CP::getDb(DB_MASTER);
 
 		$where = ['r_type' => 1];
-		if ($this->curse_id > 0) {
-			$where[] = "(r_user_id = ".$db->addQuotes($this->curse_id)." OR r_user_id_relation = ".$db->addQuotes($this->curse_id);
+		if ($this->globalId > 0) {
+			$where[] = "(r_user_id = ".$db->addQuotes($this->globalId)." OR r_user_id_relation = ".$db->addQuotes($this->globalId);
 		}
 		$results = $db->select(
 			['user_relationship'],
@@ -396,8 +401,8 @@ class Friendship {
 		}
 
 		$where = ['ur_type' => 1];
-		if ($this->curse_id > 0) {
-			$where[] = "(ur_user_id_from = ".$db->addQuotes($this->curse_id)." OR ur_user_id_to = ".$db->addQuotes($this->curse_id);
+		if ($this->globalId > 0) {
+			$where[] = "(ur_user_id_from = ".$db->addQuotes($this->globalId)." OR ur_user_id_to = ".$db->addQuotes($this->globalId);
 		}
 		$results = $db->select(
 			['user_relationship_request'],
@@ -438,7 +443,7 @@ class Friendship {
 				$db->insert(
 					'user_relationship_request',
 					[
-						'ur_user_id_from' => $this->curse_id,
+						'ur_user_id_from' => $this->globalId,
 						'ur_user_id_to'   => $args['target'],
 						'ur_type'         => 1,
 						'ur_date'         => date('Y-m-d H:i:s'),
@@ -450,7 +455,7 @@ class Friendship {
 				$db->insert(
 					'user_relationship',
 					[
-						'r_user_id'          => $this->curse_id,
+						'r_user_id'          => $this->globalId,
 						'r_user_id_relation' => $args['target'],
 						'r_type'             => 1,
 						'r_date'             => date('Y-m-d H:i:s'),
@@ -461,7 +466,7 @@ class Friendship {
 					'user_relationship',
 					[
 						'r_user_id'          => $args['target'],
-						'r_user_id_relation' => $this->curse_id,
+						'r_user_id_relation' => $this->globalId,
 						'r_type'             => 1,
 						'r_date'             => date('Y-m-d H:i:s'),
 					],
@@ -473,7 +478,7 @@ class Friendship {
 					'user_relationship_request',
 					[
 						'ur_user_id_from'	=> $args['target'],
-						'ur_user_id_to'		=> $this->curse_id
+						'ur_user_id_to'		=> $this->globalId
 					],
 					__METHOD__
 				);
@@ -483,14 +488,14 @@ class Friendship {
 					'user_relationship',
 					[
 						'r_user_id'				=> $args['target'],
-						'r_user_id_relation'	=> $this->curse_id
+						'r_user_id_relation'	=> $this->globalId
 					],
 					__METHOD__
 				);
 				$db->delete(
 					'user_relationship',
 					[
-						'r_user_id'				=> $this->curse_id,
+						'r_user_id'				=> $this->globalId,
 						'r_user_id_relation'	=> $args['target']
 					],
 					__METHOD__
@@ -498,7 +503,7 @@ class Friendship {
 				$db->delete(
 					'user_relationship_request',
 					[
-						'ur_user_id_from'	=> $this->curse_id,
+						'ur_user_id_from'	=> $this->globalId,
 						'ur_user_id_to'		=> $args['target']
 					],
 					__METHOD__

@@ -60,9 +60,11 @@ class TemplateCommentModeration {
 	public function renderComments($reports) {
 		$HTML = '<div id="commentmoderation" class="comments">';
 
+		$lookup = \CentralIdLookup::factory();
+
 		foreach ($reports as $report) {
 			$rep = $report->data;
-			$author = CurseAuthUser::newUserFromGlobalId($rep['comment']['author']);
+			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
 			$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
 
 			$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
@@ -94,7 +96,8 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$user = CurseAuthUser::newUserFromGlobalId($rep->data['action_taken_by']);
+		$lookup = \CentralIdLookup::factory();
+		$user = $lookup->localUserFromCentralId($rep->data['action_taken_by']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
 			$action = 'dis';
@@ -128,8 +131,9 @@ class TemplateCommentModeration {
 	private function reporterIcons($reports) {
 		$HTML = '';
 		$iter = 0;
+		$lookup = \CentralIdLookup::factory();
 		foreach ($reports as $rep) {
-			$reporter = CurseAuthUser::newUserFromGlobalId($rep['reporter']);
+			$reporter = $lookup->localUserFromCentralId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
 			$HTML .= \Html::rawElement(
 				'a', [

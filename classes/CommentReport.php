@@ -298,7 +298,13 @@ class CommentReport {
 	 */
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
-		$authorCurseId = \CurseAuthUser::globalIdFromUserId($comment['ub_user_id_from']);
+
+		$lookup = \CentralIdLookup::factory();
+		$userFrom = User::newFromId($comment['ub_user_id_from']);
+		if (!$userFrom) {
+			return false;
+		}
+		$authorGlobalId = $lookup->centralIdFromLocalUser($userFrom);
 
 		// insert data into redis and update indexes
 		$data = [
@@ -307,7 +313,7 @@ class CommentReport {
 				'cid' => $comment['ub_id'],
 				'origin_wiki' => $dsSiteKey,
 				'last_touched' => strtotime($comment['last_touched']),
-				'author' => $authorCurseId,
+				'author' => $authorGlobalId,
 			],
 			'reports' => [],
 			'action_taken' => 0,

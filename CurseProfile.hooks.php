@@ -70,7 +70,7 @@ class Hooks {
 			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');
-			$parser->setFunctionHook('friendlist',			'CurseProfile\FriendDisplay::friendlist');
+			$parser->setFunctionHook('friendlist',			'CurseProfile\FriendDisplay::friendList');
 			$parser->setFunctionHook('comments',			'CurseProfile\CommentDisplay::comments');
 		}
 		return true;

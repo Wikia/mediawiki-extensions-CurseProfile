@@ -37,7 +37,7 @@ function CurseProfile($) {
 			(new mw.Api()).post({
 				action: 'friend',
 				do: $this.data('action'),
-				curse_id: $this.data('id'),
+				global_id: $this.data('id'),
 				token: mw.user.tokens.get('editToken')
 			}).done(function(resp) {
 				$buttons.attr('disabled', false);

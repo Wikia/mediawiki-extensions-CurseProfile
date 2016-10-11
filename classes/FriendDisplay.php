@@ -45,14 +45,13 @@ class FriendDisplay {
 
 		$friendship = new Friendship($globalId);
 		if ($isGlobalId) {
-			$links['curse_id'] = $user_id;
-			$user = \CurseAuthUser::newUserFromGlobalId($user_id);
+			$links['global_id'] = $user_id;
+			$user = $lookup->localUserFromCentralId($user_id);
 		} else {
-			$links['curse_id'] = \CurseAuthUser::globalIdFromUserId($user_id);
 			$user = \User::newFromId($user_id);
+			$links['global_id'] = $lookup->centralIdFromLocalUser($user);
 		}
-		$user->load();
-		$relationship = $friendship->getRelationship($links['curse_id']);
+		$relationship = $friendship->getRelationship($links['global_id']);
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
@@ -124,7 +123,7 @@ class FriendDisplay {
 				$attribs = [
 					'class' => 'friendship-action',
 					'data-action' => $link['action'],
-					'data-id' => $links['curse_id'],
+					'data-id' => $links['global_id'],
 				];
 				if (isset($link['confirm'])) {
 					$attribs['data-confirm'] = $link['confirm'];
@@ -140,16 +139,52 @@ class FriendDisplay {
 		return '<div class="friendship-container">'.self::friendButtons($user_id, $isGlobalId).'</div>';
 	}
 
-	public static function count(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		$friendship = new Friendship(\CurseAuthUser::globalIdFromUserId($user_id));
+	/**
+	 * Get the user's friend count based on their local user ID.
+	 *
+	 * @access	public
+	 * @param	object	Parser - Not used, but the parser will pass it regardless.
+	 * @param	integer	Local User ID
+	 * @return	integer	Number of friends.
+	 */
+	public static function count(&$parser, $userId) {
+		$targetUser = User::newFromId($userId);
+
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($targetUser);
+
+		if (!$globalId) {
+			return 0;
+		}
+
+		$friendship = new Friendship($globalId);
 		$friends = $friendship->getFriends();
+
 		return count($friends);
 	}
 
-	public static function friendlist(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		$friendship = new Friendship(\CurseAuthUser::globalIdFromUserId($user_id));
+	/**
+	 * Get the user's friends based on their local user ID.
+	 *
+	 * @access	public
+	 * @param	object	Parser - Not used, but the parser will pass it regardless.
+	 * @param	integer	Local User ID
+	 * @return	array	Parser compatible HTML array.
+	 */
+	public static function friendlist(&$parser, $userId) {
+		$targetUser = User::newFromId($userId);
+
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($targetUser);
+
+		if (!$globalId) {
+			return [
+				'',
+				'isHTML' => true,
+			];
+		}
+
+		$friendship = new Friendship($globalId);
 		$friends = $friendship->getFriends();
 		if (count($friends) == 0) {
 			return '';
@@ -165,7 +200,7 @@ class FriendDisplay {
 	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
 	 *
 	 * @param	array	[Optional] Global IDs
-	 * @param	boolean	[Optional] signature: callback($curse_id, $userObj) returns string
+	 * @param	boolean	[Optional] signature: callback($global_id, $userObj) returns string
 	 * @param	integer [Optional] Number of results to limit.
 	 * @param	integer [Optional] Offset to start from.
 	 * @param	boolean [Optional] Sort by user activity instead of name.
@@ -211,7 +246,7 @@ class FriendDisplay {
 			$HTML .= ProfilePage::userAvatar($nothing, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$HTML .= ' '.CP::userLink($friend['user_id']);
 			if ($manageButtons) {
-				$HTML .= ' '.self::addFriendButton($friend['curse_id'], true);
+				$HTML .= ' '.self::addFriendButton($friend['global_id'], true);
 			}
 			$HTML .= '</li>';
 		}

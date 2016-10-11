@@ -25,7 +25,7 @@ class FriendApi extends \CurseApiBase {
 	public function getParamDescription() {
 		return [
 			'do' => 'The friending action to be taken (send, confirm, ignore, remove)',
-			'curse_id' => 'The user upon which the action should be taken',
+			'global_id' => 'The user upon which the action should be taken',
 			'name' => 'The username to be added as a friend',
 			'token' => 'The edit token for the requesting user',
 		];
@@ -36,7 +36,7 @@ class FriendApi extends \CurseApiBase {
 			'tokenRequired' => true,
 			'postRequired' => true,
 			'params' => [
-				'curse_id' => [
+				'global_id' => [
 					\ApiBase::PARAM_TYPE => 'string',
 					\ApiBase::PARAM_REQUIRED => true,
 				],
@@ -82,12 +82,13 @@ class FriendApi extends \CurseApiBase {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 
-		$curseTargetUser = \CurseAuthUser::getInstance($targetUser);
-		if (!$curseTargetUser->getId()) {
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($targetUser);
+		if (!$globalId) {
 			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->text(), 'friendrequest-direct-unmerged');
 		}
 
-		$result = $this->f->sendRequest($curseTargetUser->getId());
+		$result = $this->f->sendRequest($globalId);
 		if (!$result) {
 			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}
@@ -97,25 +98,25 @@ class FriendApi extends \CurseApiBase {
 	}
 
 	protected function doSend() {
-		$this->curse_id = $this->getMain()->getVal('curse_id');
-		$result = $this->f->sendRequest($this->curse_id);
-		$html = FriendDisplay::friendButtons($this->curse_id, true);
+		$this->globalId = $this->getMain()->getVal('global_id');
+		$result = $this->f->sendRequest($this->globalId);
+		$html = FriendDisplay::friendButtons($this->globalId, true);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
 
 	protected function doConfirm() {
-		$this->curse_id = $this->getMain()->getVal('curse_id');
-		$result = $this->f->acceptRequest($this->curse_id);
+		$this->globalId = $this->getMain()->getVal('global_id');
+		$result = $this->f->acceptRequest($this->globalId);
 		$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
 
 	protected function doIgnore() {
-		$this->curse_id = $this->getMain()->getVal('curse_id');
-		$rel = $this->f->getRelationship($this->curse_id);
-		$result = $this->f->ignoreRequest($this->curse_id);
+		$this->globalId = $this->getMain()->getVal('global_id');
+		$rel = $this->f->getRelationship($this->globalId);
+		$result = $this->f->ignoreRequest($this->globalId);
 		if ($rel == Friendship::REQUEST_RECEIVED) {
 			$this->getResult()->addValue(null, 'remove', true);
 		}
@@ -123,9 +124,9 @@ class FriendApi extends \CurseApiBase {
 	}
 
 	protected function doRemove() {
-		$this->curse_id = $this->getMain()->getVal('curse_id');
-		$result = $this->f->removeFriend($this->curse_id);
-		$html = FriendDisplay::friendButtons($this->curse_id, true);
+		$this->globalId = $this->getMain()->getVal('global_id');
+		$result = $this->f->removeFriend($this->globalId);
+		$html = FriendDisplay::friendButtons($this->globalId, true);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}

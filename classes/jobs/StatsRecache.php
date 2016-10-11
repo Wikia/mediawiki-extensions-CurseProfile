@@ -42,23 +42,23 @@ class StatsRecache extends \SyncService\Job {
 			}
 
 			$results = $db->select(
-				['user_properties', 'user'],
-				['up_value', 'curse_id'],
+				['user_properties', 'user_global'],
+				['up_value', 'global_id'],
 				[
 					'up_property' => 'profile-pref',
-					'curse_id > 0'
+					'global_id > 0'
 				],
 				__METHOD__,
 				[],
 				[
-					'user' => [
-						'LEFT JOIN', 'up_user = user_id'
+					'user_global' => [
+						'INNER JOIN', 'user_global.user_id = user_properties.up_user'
 					]
 				]
 			);
 
 			while ($row = $results->fetchRow()) {
-				$redis->hSet('profilestats:lastpref', $row['curse_id'], $row['up_value']);
+				$redis->hSet('profilestats:lastpref', $row['global_id'], $row['up_value']);
 			}
 
 			$db->close();
@@ -91,16 +91,16 @@ class StatsRecache extends \SyncService\Job {
 	public function execute($args = []) {
 		$db = wfGetDB(DB_SLAVE);
 		$this->outputLine('Querying users from database', time());
-		$res = $db->select('user',
-			['curse_id'],
-			['curse_id > 0'],
+		$res = $db->select('user_global',
+			['global_id'],
+			['global_id > 0'],
 			__METHOD__
 		);
 
 		while ($row = $res->fetchRow()) {
 			// get primary adoption stats
 			try {
-				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['curse_id']);
+				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
 			} catch (RedisException $e) {
 				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return;
@@ -112,7 +112,7 @@ class StatsRecache extends \SyncService\Job {
 			}
 
 			// get friending stats
-			$f = new Friendship($row['curse_id']);
+			$f = new Friendship($row['global_id']);
 			if ($f->getFriendCount()) {
 				$this->friends['more'] += 1;
 				$this->avgFriends[] = $f->getFriendCount();
@@ -121,7 +121,7 @@ class StatsRecache extends \SyncService\Job {
 			}
 
 			// get customization stats
-			$profileFields = $this->redis->hMGet('useroptions:'.$row['curse_id'], ProfileData::$editProfileFields);
+			$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
 			if (is_array($profileFields) && array_filter($profileFields)) {
 				$this->profileContent['filled'] += 1;
 			} else {
@@ -129,7 +129,7 @@ class StatsRecache extends \SyncService\Job {
 			}
 
 			try {
-				$favWiki = $this->redis->hGet('useroptions:'.$row['curse_id'], 'profile-favwiki');
+				$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
 			} catch (RedisException $e) {
 				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return;
@@ -137,7 +137,7 @@ class StatsRecache extends \SyncService\Job {
 			if ($favWiki) {
 				$this->favoriteWikis[$favWiki] += 1;
 			}
-			$this->outputLine('Compiled stats for curse_id '.$row['curse_id'], time());
+			$this->outputLine('Compiled stats for global_id '.$row['global_id'], time());
 		}
 
 		// compute the average
