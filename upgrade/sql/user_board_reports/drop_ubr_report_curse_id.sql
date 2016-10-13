@@ -1,0 +1,1 @@
+DROP INDEX /*i*/ubr_report_curse_id ON /*_*/user_board_reports;
