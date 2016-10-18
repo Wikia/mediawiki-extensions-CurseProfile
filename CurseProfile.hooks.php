@@ -205,12 +205,12 @@ class Hooks {
 	static public function onLoadExtensionSchemaUpdates($updater) {
 		$extDir = __DIR__;
 
-		// Add tables that may exist for previous users of SocialProfile
-		$updater->addExtensionUpdate(array('addTable', 'user_board', "{$extDir}/install/sql/create_user_board.sql", true));
-		$updater->addExtensionUpdate(array('addTable', 'user_board_report_archives', "{$extDir}/install/sql/curseprofile_table_user_board_report_archives.sql", true));
-		$updater->addExtensionUpdate(array('addTable', 'user_board_reports', "{$extDir}/install/sql/curseprofile_table_user_board_reports.sql", true));
+		//Add tables that may exist for previous users of SocialProfile.
+		$updater->addExtensionUpdate(['addTable', 'user_board', "{$extDir}/install/sql/table_user_board.sql", true]);
+		$updater->addExtensionUpdate(['addTable', 'user_board_report_archives', "{$extDir}/install/sql/table_user_board_report_archives.sql", true]);
+		$updater->addExtensionUpdate(['addTable', 'user_board_reports', "{$extDir}/install/sql/table_user_board_reports.sql", true]);
 
-		// Update tables with extra fields for our use
+		//Update tables with extra fields for our use.
 		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
 		$updater->addExtensionField('user_board', 'ub_edited', "{$extDir}/upgrade/sql/add_user_board_edit_and_reply_date.sql", true);
 		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);

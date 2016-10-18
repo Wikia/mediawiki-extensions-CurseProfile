@@ -10,9 +10,10 @@ CREATE TABLE /*_*/user_board (
   `ub_date` datetime default NULL,
   `ub_last_reply` datetime default NULL,
   `ub_edited` datetime default NULL,
-  `ub_admin_acted` int(11) DEFAULT NULL COMMENT 'Curse ID of admin who moderated',
+  `ub_admin_acted` int(11) DEFAULT NULL COMMENT 'Global ID of admin who moderated',
   `ub_admin_acted_at` datetime DEFAULT NULL
 ) /*$wgDBTableOptions*/;
+
 CREATE INDEX /*i*/ub_user_id ON      /*_*/user_board (ub_user_id);
 CREATE INDEX /*i*/ub_user_id_from ON /*_*/user_board (ub_user_id_from);
 CREATE INDEX /*i*/ub_type ON         /*_*/user_board (ub_type);
