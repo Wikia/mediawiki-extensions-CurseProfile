@@ -120,21 +120,21 @@ $wgLogActionsHandlers['curseprofile/profile-edited']	= '\CurseProfile\ProfileLog
 
 //Resource modules
 $wgResourceModules['ext.curseprofile.profilestats'] = [
-	'styles' => ['css/profilestats.css'],
-	'scripts' => ['js/profilestats.js'],
-	'localBasePath' => __DIR__.'/',
-	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['jquery.timeago', 'highcharts'],
+	'styles'		=> ['css/profilestats.css'],
+	'scripts'		=> ['js/profilestats.js'],
+	'localBasePath'	=> $extDir,
+	'remoteExtPath'	=> 'CurseProfile',
+	'dependencies'	=> ['jquery.timeago', 'highcharts'],
 ];
 
 $wgResourceModules['ext.curseprofile.profilepage'] = [
-	'styles' => ['css/curseprofile.css'],
-	'scripts' => ['js/curseprofile.js', 'js/modifysidebar.js'],
-	'localBasePath' => $extDir,
-	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
-	'position' => 'top',
-	'messages' => [
+	'styles'		=> ['css/curseprofile.css'],
+	'scripts'		=> ['js/curseprofile.js', 'js/modifysidebar.js'],
+	'localBasePath'	=> $extDir,
+	'remoteExtPath'	=> 'CurseProfile',
+	'dependencies'	=> ['ext.curseprofile.customskin', 'ext.curseprofile.comments', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api'],
+	'position'		=> 'top',
+	'messages'		=> [
 		'purgeaboutme-prompt',
 		'save',
 		'cancel',
@@ -150,21 +150,21 @@ $wgResourceModules['ext.curseprofile.profilepage'] = [
 ];
 
 $wgResourceModules['ext.curseprofile.preferences'] = [
-	'scripts' => ['js/preferences.js'],
-	'localBasePath' => $extDir,
-	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['mediawiki.user', 'mediawiki.api', 'jquery.ui.autocomplete'],
-	'position' => 'top'
+	'scripts'		=> ['js/preferences.js'],
+	'localBasePath'	=> $extDir,
+	'remoteExtPath'	=> 'CurseProfile',
+	'dependencies'	=> ['mediawiki.user', 'mediawiki.api', 'jquery.ui.autocomplete'],
+	'position'		=> 'top'
 ];
 
 $wgResourceModules['ext.curseprofile.comments'] = [
-	'styles' => ['css/comments.css'],
-	'scripts' => ['js/comments.js'],
-	'localBasePath' => $extDir,
-	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api', 'ext.curse.font-awesome'],
-	'position' => 'top',
-	'messages' => [
+	'styles'		=> ['css/comments.css'],
+	'scripts'		=> ['js/comments.js'],
+	'localBasePath'	=> $extDir,
+	'remoteExtPath'	=> 'CurseProfile',
+	'dependencies'	=> ['jquery.timeago', 'jquery.autosize', 'mediawiki.user', 'mediawiki.api', 'ext.curse.font-awesome'],
+	'position'		=> 'top',
+	'messages'		=> [
 		'save',
 		'cancel',
 		'remove-prompt',
@@ -175,13 +175,13 @@ $wgResourceModules['ext.curseprofile.comments'] = [
 ];
 
 $wgResourceModules['ext.curseprofile.commentmoderation'] = [
-	'styles' => ['css/commentmoderation.less'],
-	'scripts' => ['js/commentmoderation.js'],
-	'localBasePath' => $extDir,
-	'remoteExtPath' => 'CurseProfile',
-	'dependencies' => ['ext.curseprofile.comments'],
-	'position' => 'top',
-	'messages' => [
+	'styles'		=> ['css/commentmoderation.less'],
+	'scripts'		=> ['js/commentmoderation.js'],
+	'localBasePath'	=> $extDir,
+	'remoteExtPath'	=> 'CurseProfile',
+	'dependencies'	=> ['ext.curseprofile.comments'],
+	'position'		=> 'top',
+	'messages'		=> [
 		'report-confirmdismiss',
 		'report-confirmdelete',
 	],
@@ -189,13 +189,13 @@ $wgResourceModules['ext.curseprofile.commentmoderation'] = [
 
 //Needs to load early, so it has an 'a' prefix.
 $wgResourceModules['a.ext.curseprofile.profilepage.mobile'] = [
-	'targets' => ['mobile'],
-	'group' => 'site',
+	'targets'			=> ['mobile'],
+	'group'				=> 'site',
 	'styles'			=> [
 		'css/curseprofile.mobile.css',
 		'css/comments.mobile.css',
 	],
-	'scripts' => ['js/comments.js'],
+	'scripts'			=> ['js/comments.js'],
 	'dependencies'		=> ['jquery.timeago', 'jquery.autosize'],
 	'remoteBasePath'	=> 'CurseProfile',
 	'localBasePath'		=> $extDir,
@@ -203,15 +203,15 @@ $wgResourceModules['a.ext.curseprofile.profilepage.mobile'] = [
 ];
 
 $wgResourceModules['jquery.timeago'] = [
-	'targets'	=> ['desktop', 'mobile'],
-	'scripts' => ['js/jquery.timeago.js'],
+	'targets'		=> ['desktop', 'mobile'],
+	'scripts'		=> ['js/jquery.timeago.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];
 
 $wgResourceModules['jquery.autosize'] = [
-	'targets'	=> ['desktop', 'mobile'],
-	'scripts' => ['js/jquery.autosize.min.js'],
+	'targets'		=> ['desktop', 'mobile'],
+	'scripts'		=> ['js/jquery.autosize.min.js'],
 	'localBasePath' => $extDir,
 	'remoteExtPath' => 'CurseProfile',
 ];

@@ -97,7 +97,7 @@ function CurseProfile($) {
 				profile.editForm.append('<form><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
 				profile.editForm.find('button.cancel').text(mw.message('cancel').text());
 				profile.editForm.find('button.save').text(mw.message('save').text());
-				profile.editForm.find('textarea').autosize();
+				autosize(profile.editForm.find('textarea'));
 			}
 
 			// use API to download raw comment text
@@ -111,7 +111,7 @@ function CurseProfile($) {
 					$block.hide().after(profile.editForm);
 
 					// insert raw comment text in to edit form
-					profile.editForm.find('textarea').val(resp.text).trigger('autosize.resize');
+					profile.editForm.find('textarea').val(resp.text).trigger('autosize:update');
 				} else {
 					profile.cancelEdit();
 				}
