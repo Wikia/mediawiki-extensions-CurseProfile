@@ -42,6 +42,8 @@ $wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 $wgAvailableRights[] = 'profile-moderate';
 $wgAvailableRights[] = 'profile-purgecomments';
 $wgAvailableRights[] = 'profile-stats';
+$wgGroupPermissions['sysop']['profile-moderate']	= true;
+$wgGroupPermissions['sysop']['profile-purgecomments']	= true;
 
 /******************************************/
 /* Language Strings, Page Aliases, Hooks  */
