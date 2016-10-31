@@ -13,7 +13,7 @@
 **/
 namespace CurseProfile;
 
-class SpecialProfileStats extends \Curse\SpecialPage {
+class SpecialProfileStats extends \HydraCore\SpecialPage {
 	/**
 	 * Main Constructor
 	 *

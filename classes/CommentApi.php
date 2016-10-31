@@ -16,7 +16,7 @@ namespace CurseProfile;
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
  */
-class CommentApi extends \CurseApiBase {
+class CommentApi extends \HydraApiBase {
 	public function getDescription() {
 		return 'Allows commenting actions to be taken.';
 	}

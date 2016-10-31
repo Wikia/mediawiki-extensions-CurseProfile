@@ -145,7 +145,7 @@
 				"jquery.autosize",
 				"mediawiki.user",
 				"mediawiki.api",
-				"ext.curse.font-awesome"
+				"ext.hydraCore.font-awesome"
 			],
 			"position": "top",
 			"messages": [

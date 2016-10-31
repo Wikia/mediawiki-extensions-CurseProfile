@@ -77,7 +77,7 @@ class ProfilePage extends \Article {
 			$this->user_id = 0;
 		}
 
-		$this->mobile = \CurseExtension::isMobileSkin($this->getContext()->getSkin());
+		$this->mobile = \HydraCore::isMobileSkin($this->getContext()->getSkin());
 		$this->profile = new ProfileData($this->user_id);
 	}
 
@@ -372,7 +372,7 @@ class ProfilePage extends \Article {
 					'href'	=> '#',
 					'title' =>	wfMessage('editaboutme-tooltip')->plain()
 				],
-				\Curse::awesomeIcon('pencil')
+				\HydraCore::awesomeIcon('pencil')
 			).$aboutText;
 		}
 		return [

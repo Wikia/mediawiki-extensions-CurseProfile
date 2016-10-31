@@ -41,7 +41,7 @@ class SpecialCommentModeration extends \SpecialPage {
 		$wgOut = $this->getOutput();
 		$wgOut->setPageTitle(wfMessage('commentmoderation-title')->plain());
 		$wgOut->addModules('ext.curseprofile.commentmoderation');
-		$wgOut->addModules('ext.curse.pagination');
+		$wgOut->addModules('ext.hydraCore.pagination');
 		$templateCommentModeration = new \TemplateCommentModeration;
 		$this->setHeaders();
 
@@ -62,7 +62,7 @@ class SpecialCommentModeration extends \SpecialPage {
 			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
-		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
 		$wgOut->addHTML($pagination);

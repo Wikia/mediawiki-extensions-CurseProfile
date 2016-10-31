@@ -16,7 +16,7 @@ namespace CurseProfile;
 /**
  * Class that allows manipulation of basic profile data
  */
-class ProfileApi extends \CurseApiBase {
+class ProfileApi extends \HydraApiBase {
 	/**
 	 * Return description of this API module.
 	 *

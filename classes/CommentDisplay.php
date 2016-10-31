@@ -31,7 +31,7 @@ class CommentDisplay {
 			return 'Invalid user ID given';
 		}
 
-		if (\CurseExtension::isMobileSkin(\RequestContext::getMain()->getSkin())) {
+		if (\HydraCore::isMobileSkin(\RequestContext::getMain()->getSkin())) {
 			$mobile = true;
 		}
 
@@ -127,12 +127,12 @@ class CommentDisplay {
 					$HTML .= '<div class="right">'
 						.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
 						.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
-						.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \Curse::awesomeIcon('reply')) . ' ' : '')
-						.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \Curse::awesomeIcon('pencil')) . ' ' : '')
-						.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \Curse::awesomeIcon('trash')) : '')
-						.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \Curse::awesomeIcon('undo')) : '')
-						.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \Curse::awesomeIcon('eraser')) : '')
-						.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \Curse::awesomeIcon('flag')) : '')
+						.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \HydraCore::awesomeIcon('reply')) . ' ' : '')
+						.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \HydraCore::awesomeIcon('pencil')) . ' ' : '')
+						.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \HydraCore::awesomeIcon('trash')) : '')
+						.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \HydraCore::awesomeIcon('undo')) : '')
+						.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \HydraCore::awesomeIcon('eraser')) : '')
+						.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \HydraCore::awesomeIcon('flag')) : '')
 						.'</div>'
 						.CP::userLink($comment['ub_user_id_from']);
 					} else {

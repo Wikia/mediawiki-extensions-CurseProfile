@@ -33,7 +33,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 			return;
 		}
 
-		$mobile = \CurseExtension::isMobileSkin($wgOut->getSkin());
+		$mobile = \HydraCore::isMobileSkin($wgOut->getSkin());
 
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
@@ -62,7 +62,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		if (!$mobile) {
 			$wgOut->addModules('ext.curseprofile.comments');
 		}
-		$wgOut->addModules('ext.curse.pagination');
+		$wgOut->addModules('ext.hydraCore.pagination');
 		$templateCommentBoard = new \TemplateCommentBoard;
 
 		$wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
@@ -76,7 +76,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		}
 
 		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
-		$pagination = \Curse::generatePaginationHtml($total, $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml($total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateCommentBoard->comments($comments, $user_id, $pagination, $mobile));
 

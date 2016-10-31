@@ -16,7 +16,7 @@ namespace CurseProfile;
 /**
  * Class that allows friendship actions to be performed by AJAX calls.
  */
-class FriendApi extends \CurseApiBase {
+class FriendApi extends \HydraApiBase {
 
 	public function getDescription() {
 		return 'Allows friending actions to be taken.';
