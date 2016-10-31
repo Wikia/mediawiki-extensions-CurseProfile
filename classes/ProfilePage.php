@@ -49,7 +49,7 @@ class ProfilePage extends \Article {
 	 * An array of groups to be excluded from display on profiles
 	 * @var array
 	 */
-	private $restrictedGroups = ['Curse_Admin', 'Curse_Community', '*', 'autoconfirmed', 'checkuser', 'Ads_Manager', 'widget_editor', 'Wiki_Manager'];
+	private $hiddenGroups = ['hydra_admin', '*', 'autoconfirmed', 'checkuser', 'ads_manager', 'widget_editor', 'wiki_manager'];
 
 	/**
 	 * Whether or not we're on a mobile view.
@@ -314,10 +314,15 @@ class ProfilePage extends \Article {
 
 		$HTML = '<ul class="grouptags">';
 		foreach ($groups as $group) {
-			if (in_array($group, $this->restrictedGroups)) {
+			if (in_array($group, $this->hiddenGroups)) {
 				continue;
 			}
-			$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
+			$title = \User::getGroupPage($group);
+			if ($title !== false) {
+				$HTML .= '<li>'.\Linker::link($title, wfMessage('group-'.$group)->escaped()).'</li>';
+			} else {
+				$HTML .= '<li>'.wfMessage('group-'.$group)->escaped().'</li>';
+			}
 
 		}
 		$HTML .= '</ul>';
