@@ -9,6 +9,12 @@
 		"profile-purgecomments",
 		"profile-stats"
 	],
+	"GroupPermissions": {
+		"sysop": {
+			"profile-moderate": true,
+			"profile-purgecomments": true
+		}
+	},
 	"SpecialPages": {
 		"ManageFriends": "CurseProfile\\SpecialManageFriends",
 		"Friends": "CurseProfile\\SpecialFriends",
@@ -215,7 +221,7 @@
 		}
 	},
 	"ResourceFileModulePaths": {
-		"localBasePath": false,
+		"localBasePath": "",
 		"remoteExtPath": "CurseProfile"
 	},
 	"Hooks": {
