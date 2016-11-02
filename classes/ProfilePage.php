@@ -312,6 +312,7 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
+		$specialListUsersTitle = \SpecialPage::getTitleFor('ListUsers');
 		$HTML = '<ul class="grouptags">';
 		foreach ($groups as $group) {
 			if (in_array($group, $this->hiddenGroups)) {
@@ -319,12 +320,7 @@ class ProfilePage extends \Article {
 			}
 			$groupMessage = new \Message('group-'.$group);
 			if ($groupMessage->exists()) {
-				$title = \Title::newFromText($parser->recursiveTagParse(wfMessage('grouppage-'.$group)->plain()));
-				if ($title !== false) {
-					$HTML .= '<li>'.\Linker::linkKnown($title, $groupMessage->escaped()).'</li>';
-				} else {
-					$HTML .= '<li>'.wfMessage('group-'.$group)->escaped().'</li>';
-				}
+				$HTML .= '<li>'.\Linker::linkKnown($specialListUsersTitle, $groupMessage->text(), [], ['group' => $group]).'</li>';
 			} else {
 				//Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
 				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
