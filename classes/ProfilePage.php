@@ -317,17 +317,25 @@ class ProfilePage extends \Article {
 			if (in_array($group, $this->hiddenGroups)) {
 				continue;
 			}
-			$title = \User::getGroupPage($group);
-			if ($title !== false) {
-				$HTML .= '<li>'.\Linker::link($title, wfMessage('group-'.$group)->escaped()).'</li>';
+			$groupMessage = new \Message('group-'.$group);
+			if ($groupMessage->exists()) {
+				$title = \Title::newFromText($parser->recursiveTagParse(wfMessage('grouppage-'.$group)->plain()));
+				if ($title !== false) {
+					$HTML .= '<li>'.\Linker::linkKnown($title, $groupMessage->escaped()).'</li>';
+				} else {
+					$HTML .= '<li>'.wfMessage('group-'.$group)->escaped().'</li>';
+				}
 			} else {
-				$HTML .= '<li>'.wfMessage('group-'.$group)->escaped().'</li>';
+				//Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
+				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
-
 		}
 		$HTML .= '</ul>';
 
-		return [$HTML, 'isHTML' => true];
+		return [
+			$HTML,
+			'isHTML' => true
+		];
 	}
 
 	/**
