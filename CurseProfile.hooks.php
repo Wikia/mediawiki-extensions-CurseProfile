@@ -330,14 +330,20 @@ class Hooks {
 	}
 
 	/**
-	 * Setup echo notifications
+	 * Add this extensions Echo notifications.
+	 *
+	 * @access	public
+	 * @param	array	See $wgEchoNotifications in Extension:Echo.
+	 * @param	array	See $wgEchoNotificationCategories in Extension:Echo.
+	 * @param	array	See $wgEchoNotificationIcons in Extension:Echo.
+	 * @return	boolean	True
 	 */
-	public static function onBeforeCreateEchoEvent( &$notifications, &$notificationCategories /* , &$icons */ ) {
-		$notificationCategories['friendship'] = [
+	public static function onBeforeCreateEchoEvent( &$wgEchoNotifications, &$wgEchoNotificationCategories, &$wgEchoNotificationIcons ) {
+		$wgEchoNotificationCategories['friendship'] = [
 			'tooltip' => 'echo-pref-tooltip-friendship',
 			'priority' => 3,
 		];
-		$notifications['friendship-request'] = [
+		$wgEchoNotifications['friendship-request'] = [
 			'primary-link' => array('message' => 'notification-link-text-view-message', 'destination' => 'friendship-request'),
 			'category' => 'friendship',
 			'group' => 'interactive',
@@ -354,11 +360,11 @@ class Hooks {
 			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
 		];
 
-		$notificationCategories['profile-comment'] = [
+		$wgEchoNotificationCategories['profile-comment'] = [
 			'tooltip' => 'echo-pref-tooltip-profile-comment',
 			'priority' => 4,
 		];
-		$notifications['profile-comment'] = [
+		$wgEchoNotifications['profile-comment'] = [
 			'primary-link' => array( 'message' => 'notification-link-text-view-message', 'destination' => 'profile-comment' ),
 			'category' => 'profile-comment',
 			'group' => 'interactive',
