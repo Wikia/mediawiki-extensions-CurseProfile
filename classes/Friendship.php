@@ -68,7 +68,7 @@ class Friendship {
 			if ($redis->hExists($this->requestsRedisKey($toUser), $this->globalId)) {
 				return self::REQUEST_SENT;
 			}
-		} catch (RedisException $e) {
+		} catch (\Exception $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return -1;
 		}
@@ -93,10 +93,10 @@ class Friendship {
 		$redis = \RedisCache::getClient('cache');
 		try {
 			return $redis->sMembers($this->friendListRedisKey($user));
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return [];
 		}
+		return [];
 	}
 
 	/**
@@ -116,10 +116,10 @@ class Friendship {
 		$redis = \RedisCache::getClient('cache');
 		try {
 			return $redis->sCard($this->friendListRedisKey($user));
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return 0;
 		}
+		return 0;
 	}
 
 	/**
@@ -136,10 +136,10 @@ class Friendship {
 		$redis = \RedisCache::getClient('cache');
 		try {
 			return $redis->hGetAll($this->requestsRedisKey());
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return [];
 		}
+		return [];
 	}
 
 	/**
@@ -155,10 +155,10 @@ class Friendship {
 		$redis = \RedisCache::getClient('cache');
 		try {
 			return $redis->sMembers($this->sentRequestsRedisKey());
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return [];
 		}
+		return [];
 	}
 
 	/**
@@ -235,7 +235,7 @@ class Friendship {
 		try {
 			$redis->hSet($this->requestsRedisKey($toGlobalId), $this->globalId, '{}');
 			$redis->sAdd($this->sentRequestsRedisKey(), $toGlobalId);
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}
@@ -309,7 +309,7 @@ class Friendship {
 				$redis->sAdd($this->friendListRedisKey(), $toUser);
 				$redis->sAdd($this->friendListRedisKey($toUser), $this->globalId);
 			}
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}
@@ -348,7 +348,7 @@ class Friendship {
 			// remove existing friendship
 			$redis->sRem($this->friendListRedisKey($toUser), $this->globalId);
 			$redis->sRem($this->friendListRedisKey(), $toUser);
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}
@@ -396,7 +396,7 @@ class Friendship {
 				$redis->sAdd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
 				$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
 			}
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
 
@@ -417,7 +417,7 @@ class Friendship {
 				$redis->sAdd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
 				$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
 			}
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
 	}

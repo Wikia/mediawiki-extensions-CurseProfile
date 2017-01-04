@@ -76,7 +76,7 @@ class CommentReport {
 				default: // date and volume keys should always be the same
 					return $redis->zCard(self::REDIS_KEY_VOLUME_INDEX);
 			}
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
 		return 0;
@@ -115,7 +115,7 @@ class CommentReport {
 			try {
 				$redis = \RedisCache::getClient('cache');
 				$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
-			} catch (RedisException $e) {
+			} catch (\Throwable $e) {
 				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return null;
 			}
@@ -170,7 +170,7 @@ class CommentReport {
 				$reports = $redis->hMGet(self::REDIS_KEY_REPORTS, $keys);
 				$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
 			}
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
 
@@ -443,7 +443,7 @@ class CommentReport {
 			$redis->zAdd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
 			$redis->zAdd(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $date, $commentKey);
 			$redis->zAdd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}
@@ -502,7 +502,7 @@ class CommentReport {
 			// update serialized redis data
 			$this->data['reports'][] = $newReport;
 			$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
 	}
@@ -590,7 +590,7 @@ class CommentReport {
 			$redis->zRem(self::REDIS_KEY_DATE_INDEX, $this->reportKey());
 			$redis->zRem(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $this->reportKey());
 			$redis->zRem(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $this->reportKey());
-		} catch (RedisException $e) {
+		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 			return false;
 		}

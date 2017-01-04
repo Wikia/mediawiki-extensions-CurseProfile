@@ -101,7 +101,7 @@ class StatsRecache extends \SyncService\Job {
 			// get primary adoption stats
 			try {
 				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
-			} catch (RedisException $e) {
+			} catch (\Throwable $e) {
 				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return;
 			}
@@ -130,7 +130,7 @@ class StatsRecache extends \SyncService\Job {
 
 			try {
 				$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
-			} catch (RedisException $e) {
+			} catch (\Throwable $e) {
 				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return;
 			}
@@ -152,7 +152,7 @@ class StatsRecache extends \SyncService\Job {
 		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
 			try {
 				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
-			} catch (RedisException $e) {
+			} catch (\Throwable $e) {
 				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
 				return;
 			}

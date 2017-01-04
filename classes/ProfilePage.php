@@ -717,7 +717,12 @@ class ProfilePage extends \Article {
 
 		$redis = \RedisCache::getClient('cache');
 		$userPoints = \PointsDisplay::pointsForGlobalId($globalId)['score'];
-		$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
+		try {
+			$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
+		} catch (\Throwable $e) {
+			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			return '';
+		}
 
 		if (!is_array($levelDefinitions)) {
 			return '';
