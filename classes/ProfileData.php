@@ -204,6 +204,8 @@ class ProfileData {
 	 * @param $preferences
 	 */
 	public static function processPreferenceSave($user, &$preferences) {
+		global $wgUser;
+
 		// Try to determine what flag to display based on what they have entered as their country
 		if (!empty($preferences['profile-country'])) {
 			$preferences['profile-country-flag'] = \FlagFinder::getCode($preferences['profile-country']);
@@ -222,7 +224,8 @@ class ProfileData {
 		}
 
 		// don't allow blocked users to change their aboutme text
-		if ($user->isSafeToLoad() && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
+		//Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
+		if ($user->isSafeToLoad() && $wgUser !== null && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
 			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
 		}
 
