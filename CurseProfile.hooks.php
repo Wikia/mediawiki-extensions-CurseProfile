@@ -325,7 +325,9 @@ class Hooks {
 	 * @return	boolean	true
 	 */
 	static public function onUserSaveOptions(\User $user, array &$options) {
-		ProfileData::processPreferenceSave($user, $options);
+		if ($user && $user->getId()) {
+			ProfileData::processPreferenceSave($user, $options);
+		}
 		return true;
 	}
 
