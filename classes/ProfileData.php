@@ -222,7 +222,7 @@ class ProfileData {
 		}
 
 		// don't allow blocked users to change their aboutme text
-		if ($user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
+		if ($user->isSafeToLoad() && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
 			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
 		}
 
