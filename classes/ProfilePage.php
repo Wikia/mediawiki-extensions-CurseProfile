@@ -514,7 +514,7 @@ class ProfilePage extends \Article {
 		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		if ($globalId > 0) {
-			$stats = \dataMiner::getUserGlobalStats([$globalId]);
+			$stats = \Cheevos\DataMiner::getUserGlobalStats([$globalId]);
 		}
 
 		//Leys are message keys fed to wfMessage().
