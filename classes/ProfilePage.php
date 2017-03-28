@@ -666,9 +666,9 @@ class ProfilePage extends \Article {
 			}
 
 			if ($type === 'global') {
-				global $wgDefaultMegaAchievementId;
+				global $wgCheevosMegaAchievementId;
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgDefaultMegaAchievementId]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgCheevosMegaAchievementId]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
 							$earned[$_progress->getAchievement_Id()] = $_progress;
