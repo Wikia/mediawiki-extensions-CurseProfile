@@ -106,6 +106,7 @@
 	"localrank": "{{SITENAME}} Rank<br>([[Special:WikiPoints|Leaderboard]])",
 	"globalrank": "Gamepedia Rank",
 	"totalcontribs": "Contributions",
+	"totalcreations": "Creations",
 	"totaledits": "Edits",
 	"totaldeletes": "Deletes",
 	"totalpatrols": "Patrols",
