@@ -564,7 +564,7 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		if ($globalId > 0 && class_exists("\AchievementsHooks") && !\AchievementsHooks::inMaintenance()) {
+		if ($globalId > 0 && class_exists("\CheevosHooks")) {
 			$earned = 0;
 
 			$progress = \Achievements\Progress::newFromGlobalId($globalId);
