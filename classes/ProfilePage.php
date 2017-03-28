@@ -695,7 +695,6 @@ class ProfilePage extends \Article {
 				continue;
 			}
 			$ach = $achievements[$progress->getAchievement_Id()];
-			var_dump($ach);
 			$output .= \Html::rawElement(
 				'div',
 				[
