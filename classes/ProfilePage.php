@@ -510,23 +510,36 @@ class ProfilePage extends \Article {
 	 * @return	string	generated HTML fragment
 	 */
 	public function userStats() {
+		global $wgServer, $dsSiteKey;
+
 		$lookup = \CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
+		$stats = [];
 		if ($globalId > 0) {
-			$stats = \Cheevos\DataMiner::getUserGlobalStats([$globalId]);
+			try {
+				$stats = \Cheevos\Cheevos::getStatProgress(
+					[
+						'user_id'	=> $globalId,
+						'global'	=> true
+					]
+				);
+				$stats = \Cheevos\CheevosHelper::makeNiceStatProgressArray($stats);
+			} catch (\Cheevos\CheevosException $e) {
+				wfDebug("Encountered Cheevos API error getting Stat Progress");
+			}
 		}
 
-		//Leys are message keys fed to wfMessage().
+		//Keys are message keys fed to wfMessage().
 		//Values are numbers or an array of sub-stats with a number at key 0.
-		if (is_array($stats)) {
-			$totalStats = $stats[$globalId]['global']['total'];
+		if (!empty($stats)) {
 			$statsOutput = [
 				'wikisedited' => $stats[$globalId]['other']['wikis_contributed'],
-				'totalcontribs' => [ $totalStats['actions'],
-					'totaledits'   => $totalStats['edits'],
-					'totaldeletes' => $totalStats['deletes'],
-					'totalpatrols' => $totalStats['patrols'],
+				'totalcontribs' => [
+					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create'] : 0),
+					'totaledits'   => (isset($stats[$globalId]['article_edits']) ? $stats[$globalId]['article_edits'] : 0),
+					'totaldeletes' => (isset($stats[$globalId]['article_delete']) ? $stats[$globalId]['article_delete'] : 0),
+					'totalpatrols' => (isset($stats[$globalId]['admin_patrol']) ? $stats[$globalId]['admin_patrol'] : 0),
 				],
 				'localrank' => '',
 				'globalrank' => '', // data for these fills in below
@@ -536,15 +549,14 @@ class ProfilePage extends \Article {
 			$statsOutput = [
 				'achievementsearned' => 0,
 				'wikisedited' => 0,
-				'totalcontribs' => [ 0,
+				'totalcontribs' => [
+					'totalcreations' => 0,
 					'totaledits' => 0,
 					'totaldeletes' => 0,
 					'totalpatrols' => 0,
 				],
 			];
 		}
-
-		global $wgServer;
 
 		if ($globalId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
 			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($globalId, \WikiPoints::extractDomain($wgServer))['rank'];
@@ -562,20 +574,6 @@ class ProfilePage extends \Article {
 			// No curse id or WikiPoints plugin available
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
-		}
-
-		if ($globalId > 0 && class_exists("\CheevosHooks")) {
-			$earned = 0;
-
-			$progress = \Achievements\Progress::newFromGlobalId($globalId);
-			if ($progress !== false) {
-				$earned += $progress->getTotalEarned();
-			}
-			$megaProgress = \Achievements\MegaProgress::newFromGlobalId($globalId);
-			if ($megaProgress !== false) {
-				$earned += $megaProgress->getTotalEarned();
-			}
-			$statsOutput['achievementsearned'] = $earned;
 		}
 
 		$HTML = $this->generateStatsDL($statsOutput);
@@ -637,7 +635,7 @@ class ProfilePage extends \Article {
 	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
 		$output = '';
 
-		if (!class_exists("\AchievementsHooks") || \AchievementsHooks::inMaintenance()) {
+		if (!class_exists("\CheevosHooks")) {
 			return [
 				$output,
 				'isHTML'	=> true
@@ -647,29 +645,42 @@ class ProfilePage extends \Article {
 		$lookup = \CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
-		$achievementCache = $type.'AchievementProgress';
-		if (property_exists($this, $achievementCache) && is_array($this->$achievementCache)) {
-			$earned = $this->$achievementCache;
-		} else {
-			$earned = false;
+		$earned = [];
+		if ($globalId > 0 && class_exists("\CheevosHooks")) {
 			if ($type === 'local') {
-				$progress = \Achievements\Progress::newFromGlobalId($globalId);
-				if ($progress !== false) {
-					$earned = $progress->getRecentlyEarnedAchievements($limit);
-					$this->$achievementCache = $earned;
+				try {
+					$achievements = \Cheevos\Cheevos::getAchievements($dsSiteKey);
+				} catch (\Cheevos\CheevosException $e) {
+					wfDebug("Encountered Cheevos API error getting all achievements.");
+				}
+				try {
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true]);
+					if (!empty($_progresses)) {
+						foreach ($_progresses as $_progress) {
+							$earned[$_progress->getAchievement_Id()] = $_progress;
+						}
+					}
+				} catch (\Cheevos\CheevosException $e) {
+					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
 			}
 
 			if ($type === 'global') {
-				$megaProgress = \Achievements\MegaProgress::newFromGlobalId($globalId);
-				if ($megaProgress !== false) {
-					$earned = $megaProgress->getRecentlyEarnedAchievements($limit);
-					$this->$achievementCache = $earned;
+				global $wgCheevosMegaAchievementId;
+				try {
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgCheevosMegaAchievementId]);
+					if (!empty($_progresses)) {
+						foreach ($_progresses as $_progress) {
+							$earned[$_progress->getAchievement_Id()] = $_progress;
+						}
+					}
+				} catch (\Cheevos\CheevosException $e) {
+					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
 			}
 		}
 
-		if ($earned === false) {
+		if (empty($earned)) {
 			return [
 				$output,
 				'isHTML'	=> true
@@ -679,7 +690,12 @@ class ProfilePage extends \Article {
 		if (count($earned)) {
 			$output .= '<h4>'.$parser->recursiveTagParse(wfMessage('achievements-'.$type)->text()).'</h4>';
 		}
-		foreach ($earned as $ach) {
+		foreach ($earned as $progress) {
+			if (!isset($achievements[$progress->getAchievement_Id()])) {
+				continue;
+			}
+			$ach = $achievements[$progress->getAchievement_Id()];
+			var_dump($ach);
 			$output .= \Html::rawElement(
 				'div',
 				[
