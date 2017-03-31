@@ -183,5 +183,8 @@
 	"no-perm-profile-moderate": "You lack the necessary permissions to modify this user profile.",
 	"no-perm-profile-addcomment": "You do not have permission to add comments or reply. Please make sure you are logged in and have $1.",
 	"no-perm-validate-email": "validated your e-mail address",
-	"cp-master-only": "This special page is only available on the master wiki."
+	"cp-master-only": "This special page is only available on the master wiki.",
+	"stat_id": "Stat ID",
+	"count": "Count",
+	"last_incremented": "Last Incremented"
 }
