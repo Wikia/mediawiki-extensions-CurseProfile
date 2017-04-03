@@ -654,7 +654,7 @@ class ProfilePage extends \Article {
 			}
 			if ($type === 'general') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'limit' => intval($limit)]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
 							$earned[$_progress->getAchievement_Id()] = $_progress;
