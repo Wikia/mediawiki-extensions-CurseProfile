@@ -632,7 +632,7 @@ class ProfilePage extends \Article {
 	 * @param	integer	maximum number to display
 	 * @return	array
 	 */
-	public function recentAchievements(&$parser, $type = 'master', $limit = 10) {
+	public function recentAchievements(&$parser, $type = 'special', $limit = 10) {
 		$output = '';
 
 		if (!class_exists("\CheevosHooks")) {
@@ -652,9 +652,9 @@ class ProfilePage extends \Article {
 			} catch (\Cheevos\CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting all achievements.");
 			}
-			if ($type === 'local') {
+			if ($type === 'general') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'limit' => intval($limit)]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'limit' => intval($limit)]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
 							$earned[$_progress->getAchievement_Id()] = $_progress;
@@ -665,10 +665,10 @@ class ProfilePage extends \Article {
 				}
 			}
 
-			if ($type === 'master') {
-				global $wgCheevosMasterAchievementId;
+			if ($type === 'special') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgCheevosMasterAchievementId, 'limit' => intval($limit)]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					var_dump($_progresses);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
 							$earned[$_progress->getAchievement_Id()] = $_progress;
@@ -706,7 +706,7 @@ class ProfilePage extends \Article {
 						'src'	=> $ach->getImageUrl(),
 						'title'	=> $ach->getName()."\n".$ach->getDescription()
 					]
-				).($type == 'master' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
+				).($type == 'special' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
 			);
 		}
 		return [
@@ -866,8 +866,8 @@ class ProfilePage extends \Article {
 		</div>
 		{{#if: '.( $globalId ? 'true' : '' ).' | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
-			{{#achievements:local|20}}
-			{{#achievements:master|20}}
+			{{#achievements:general|20}}
+			{{#achievements:special|20}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div> }}
@@ -909,8 +909,8 @@ __NOTOC__
 		<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		{{#if: '.( $globalId ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
-			{{#achievements:local|20}}
-			{{#achievements:master|20}}
+			{{#achievements:general|20}}
+			{{#achievements:special|20}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div>
