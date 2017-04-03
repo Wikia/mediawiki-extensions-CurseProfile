@@ -647,12 +647,12 @@ class ProfilePage extends \Article {
 
 		$earned = [];
 		if ($globalId > 0 && class_exists("\CheevosHooks")) {
+			try {
+				$achievements = \Cheevos\Cheevos::getAchievements($dsSiteKey);
+			} catch (\Cheevos\CheevosException $e) {
+				wfDebug("Encountered Cheevos API error getting all achievements.");
+			}
 			if ($type === 'local') {
-				try {
-					$achievements = \Cheevos\Cheevos::getAchievements($dsSiteKey);
-				} catch (\Cheevos\CheevosException $e) {
-					wfDebug("Encountered Cheevos API error getting all achievements.");
-				}
 				try {
 					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true]);
 					if (!empty($_progresses)) {
