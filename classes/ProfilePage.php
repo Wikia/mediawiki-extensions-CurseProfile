@@ -633,6 +633,8 @@ class ProfilePage extends \Article {
 	 * @return	array
 	 */
 	public function recentAchievements(&$parser, $type = 'special', $limit = 10) {
+		global $dsSiteKey;
+
 		$output = '';
 
 		if (!class_exists("\CheevosHooks")) {
