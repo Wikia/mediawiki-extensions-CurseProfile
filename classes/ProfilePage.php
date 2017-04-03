@@ -869,7 +869,7 @@ class ProfilePage extends \Article {
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
 			<div style="clear: both;"></div>
-			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $globalId)->plain().'</div>
+			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div> }}
 	</div>
 	{{#if: '.( $this->user->isBlocked() ? 'true' : '' ).' | <div class="blocked"></div> }}
@@ -912,7 +912,7 @@ __NOTOC__
 			{{#achievements:local|20}}
 			{{#achievements:global|20}}
 			<div style="clear: both;"></div>
-			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $globalId)->plain().'</div>
+			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div>
 
 		}}
