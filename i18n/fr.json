@@ -106,7 +106,7 @@
 	"cp-friendssection": "Amis",
 	"cp-achievementssection": "Achievements",
 	"cp-friendssection-all": "([[Special:Friends/$1|{{#ifeq: $1 | $2 | Gérer les amis | Les voir tous }}]])",
-	"cp-achievementssection-all": "([[Special:Achievements|Les voir tous]])",
+	"cp-achievementssection-all": "([[Special:Achievements/$1|Les voir tous]])",
 	"profileactivity-created": "Créé le",
 	"profileactivity-edited": "Modifié le",
 	"echo-category-title-profile-comment": "Commentaire sur mon profil",

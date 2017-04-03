@@ -129,7 +129,7 @@
 	"cp-friendssection": "Friends",
 	"cp-friendssection-all": "([[Special:Friends/$1/$3|{{#ifeq: $1 | $2 | Manage Friends | View All }}]])",
 	"cp-achievementssection": "Achievements",
-	"cp-achievementssection-all": "([[Special:Achievements|View All]])",
+	"cp-achievementssection-all": "([[Special:Achievements/$1|View All]])",
 	"profileactivity-created": "Created",
 	"profileactivity-edited": "Edited",
 	"echo-category-title-profile-comment": "Profile Comment",
