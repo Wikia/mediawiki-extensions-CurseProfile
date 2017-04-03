@@ -628,11 +628,11 @@ class ProfilePage extends \Article {
 	 * Display the icons of the recent achievements the user has earned, for the sidebar
 	 *
 	 * @param	object	parser reference
-	 * @param	string	type of query. one of: local, global (default)
+	 * @param	string	type of query. one of: local, master (default)
 	 * @param	integer	maximum number to display
 	 * @return	array
 	 */
-	public function recentAchievements(&$parser, $type = 'global', $limit = 10) {
+	public function recentAchievements(&$parser, $type = 'master', $limit = 10) {
 		$output = '';
 
 		if (!class_exists("\CheevosHooks")) {
@@ -665,10 +665,10 @@ class ProfilePage extends \Article {
 				}
 			}
 
-			if ($type === 'global') {
-				global $wgCheevosMegaAchievementId;
+			if ($type === 'master') {
+				global $wgCheevosMasterAchievementId;
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgCheevosMegaAchievementId]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'achievement_id' => $wgCheevosMasterAchievementId]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
 							$earned[$_progress->getAchievement_Id()] = $_progress;
@@ -706,7 +706,7 @@ class ProfilePage extends \Article {
 						'src'	=> $ach->getImageUrl(),
 						'title'	=> $ach->getName()."\n".$ach->getDescription()
 					]
-				).($type == 'global' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
+				).($type == 'master' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
 			);
 		}
 		return [
@@ -867,7 +867,7 @@ class ProfilePage extends \Article {
 		{{#if: '.( $globalId ? 'true' : '' ).' | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
 			{{#achievements:local|20}}
-			{{#achievements:global|20}}
+			{{#achievements:master|20}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div> }}
@@ -910,7 +910,7 @@ __NOTOC__
 		{{#if: '.( $globalId ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
 			{{#achievements:local|20}}
-			{{#achievements:global|20}}
+			{{#achievements:master|20}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div>
