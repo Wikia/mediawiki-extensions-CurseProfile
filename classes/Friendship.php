@@ -262,6 +262,7 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
+		wfRunHooks('CurseProfileAcceptFriend', [$this->globalId, $toGlobalId]);
 		return $this->respondToRequest($toGlobalId, 'accept');
 	}
 
