@@ -867,8 +867,8 @@ class ProfilePage extends \Article {
 		</div>
 		{{#if: '.( $globalId ? 'true' : '' ).' | <div class="section achievements">
 			<h3>'.wfMessage('cp-achievementssection')->plain().'</h3>
-			{{#achievements:general|20}}
-			{{#achievements:special|20}}
+			{{#achievements:general}}
+			{{#achievements:special}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div> }}
@@ -910,8 +910,8 @@ __NOTOC__
 		<div style="float: right;">'.wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain().'</div>
 		{{#if: '.( $globalId ? 'true' : '' ).' | <h1>'.wfMessage('cp-achievementssection')->plain().'</h1>
 		<div class="section achievements">
-			{{#achievements:general|20}}
-			{{#achievements:special|20}}
+			{{#achievements:general}}
+			{{#achievements:special}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">'.wfMessage('cp-achievementssection-all', $this->user->getName())->plain().'</div>
 		</div>
