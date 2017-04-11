@@ -632,7 +632,7 @@ class ProfilePage extends \Article {
 	 * @param	integer	maximum number to display
 	 * @return	array
 	 */
-	public function recentAchievements(&$parser, $type = 'special', $limit = 10) {
+	public function recentAchievements(&$parser, $type = 'special', $limit = 0) {
 		global $dsSiteKey;
 
 		$output = '';
