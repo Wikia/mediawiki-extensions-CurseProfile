@@ -536,10 +536,10 @@ class ProfilePage extends \Article {
 			$statsOutput = [
 				'wikisedited' => $stats[$globalId]['other']['wikis_contributed'],
 				'totalcontribs' => [
-					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create'] : 0),
-					'totaledits'   => (isset($stats[$globalId]['article_edits']) ? $stats[$globalId]['article_edits'] : 0),
-					'totaldeletes' => (isset($stats[$globalId]['article_delete']) ? $stats[$globalId]['article_delete'] : 0),
-					'totalpatrols' => (isset($stats[$globalId]['admin_patrol']) ? $stats[$globalId]['admin_patrol'] : 0),
+					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create']['count'] : 0),
+					'totaledits'   => (isset($stats[$globalId]['article_edits']) ? $stats[$globalId]['article_edits']['count'] : 0),
+					'totaldeletes' => (isset($stats[$globalId]['article_delete']) ? $stats[$globalId]['article_delete']['count'] : 0),
+					'totalpatrols' => (isset($stats[$globalId]['admin_patrol']) ? $stats[$globalId]['admin_patrol']['count'] : 0),
 				],
 				'localrank' => '',
 				'globalrank' => '', // data for these fills in below
