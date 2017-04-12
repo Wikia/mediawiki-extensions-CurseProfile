@@ -537,7 +537,7 @@ class ProfilePage extends \Article {
 				'wikisedited' => $stats[$globalId]['other']['wikis_contributed'],
 				'totalcontribs' => [
 					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create']['count'] : 0),
-					'totaledits'   => (isset($stats[$globalId]['article_edits']) ? $stats[$globalId]['article_edits']['count'] : 0),
+					'totaledits'   => (isset($stats[$globalId]['article_edit']) ? $stats[$globalId]['article_edit']['count'] : 0),
 					'totaldeletes' => (isset($stats[$globalId]['article_delete']) ? $stats[$globalId]['article_delete']['count'] : 0),
 					'totalpatrols' => (isset($stats[$globalId]['admin_patrol']) ? $stats[$globalId]['admin_patrol']['count'] : 0),
 				],
