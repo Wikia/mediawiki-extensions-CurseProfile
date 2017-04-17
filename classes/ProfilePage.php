@@ -659,7 +659,7 @@ class ProfilePage extends \Article {
 					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
-							$earned[$_progress->getAchievement_Id()] = $_progress;
+							$earned[] = $_progress;
 						}
 					}
 				} catch (\Cheevos\CheevosException $e) {
@@ -669,10 +669,10 @@ class ProfilePage extends \Article {
 
 			if ($type === 'special') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
 					if (!empty($_progresses)) {
 						foreach ($_progresses as $_progress) {
-							$earned[$_progress->getAchievement_Id()] = $_progress;
+							$earned[] = $_progress;
 						}
 					}
 				} catch (\Cheevos\CheevosException $e) {
