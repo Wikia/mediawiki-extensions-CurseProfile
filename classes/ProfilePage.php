@@ -707,7 +707,7 @@ class ProfilePage extends \Article {
 						'src'	=> $ach->getImageUrl(),
 						'title'	=> $ach->getName()."\n".$ach->getDescription()
 					]
-				).($type == 'special' ? \Html::rawElement('span', ['title' => $ach->getName()."\n".$ach->getDescription()], $ach->getName()) : null)
+				).($type == 'special' ? \Html::rawElement('span', ['title' => $ach->getName($progress->getSite_Key())."\n".$ach->getDescription()], $ach->getName($progress->getSite_Key())) : null)
 			);
 		}
 		return [
