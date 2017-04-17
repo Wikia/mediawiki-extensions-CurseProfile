@@ -505,7 +505,7 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Performs the work for the parser tag that displays user statistics.
-	 * The numbers themselves are pulled from the dataminer api
+	 * The numbers themselves are pulled from the Cheevos API.
 	 *
 	 * @return	string	generated HTML fragment
 	 */
