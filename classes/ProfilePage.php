@@ -516,6 +516,7 @@ class ProfilePage extends \Article {
 		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		$stats = [];
+		$wikisEdited = 0;
 		if ($globalId > 0) {
 			try {
 				$stats = \Cheevos\Cheevos::getStatProgress(
@@ -526,7 +527,12 @@ class ProfilePage extends \Article {
 				);
 				$stats = \Cheevos\CheevosHelper::makeNiceStatProgressArray($stats);
 			} catch (\Cheevos\CheevosException $e) {
-				wfDebug("Encountered Cheevos API error getting Stat Progress");
+				wfDebug("Encountered Cheevos API error getting Stat Progress.");
+			}
+			try {
+				$wikisEdited = intval(\Cheevos\Cheevos::getUserSitesCountByStat($globalId, 'article_edit'));
+			} catch (\Cheevos\CheevosException $e) {
+				wfDebug("Encountered Cheevos API error getting getUserSitesCountByStat.");
 			}
 		}
 
@@ -534,7 +540,7 @@ class ProfilePage extends \Article {
 		//Values are numbers or an array of sub-stats with a number at key 0.
 		if (!empty($stats)) {
 			$statsOutput = [
-				'wikisedited' => $stats[$globalId]['other']['wikis_contributed'],
+				'wikisedited' => $wikisEdited,
 				'totalcontribs' => [
 					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create']['count'] : 0),
 					'totaledits'   => (isset($stats[$globalId]['article_edit']) ? $stats[$globalId]['article_edit']['count'] : 0),
