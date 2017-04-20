@@ -661,6 +661,7 @@ class ProfilePage extends \Article {
 			} catch (\Cheevos\CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting all achievements.");
 			}
+			$achievements = \Cheevos\CheevosAchievement::correctCriteriaChildAchievements($achievements);
 			if ($type === 'general') {
 				try {
 					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
@@ -669,6 +670,7 @@ class ProfilePage extends \Article {
 							$earned[] = $_progress;
 						}
 					}
+					$achievements = \Cheevos\CheevosAchievement::pruneAchievements($achievements, true, true, $_progresses, $dsSiteKey);
 				} catch (\Cheevos\CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
@@ -682,12 +684,11 @@ class ProfilePage extends \Article {
 							$earned[] = $_progress;
 						}
 					}
+					$achievements = \Cheevos\CheevosAchievement::pruneAchievements($achievements, true, true, $_progresses);
 				} catch (\Cheevos\CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
 			}
-			$achievements = \Cheevos\CheevosAchievement::correctCriteriaChildAchievements($achievements);
-			$achievements = \Cheevos\CheevosAchievement::pruneAchievements($achievements, true, true, $_progresses);
 		}
 
 		if (empty($earned)) {
