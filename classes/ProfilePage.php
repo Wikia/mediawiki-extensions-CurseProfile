@@ -655,6 +655,7 @@ class ProfilePage extends \Article {
 
 		$earned = [];
 		if ($globalId > 0 && class_exists("\CheevosHooks")) {
+			$achievements = [];
 			try {
 				$achievements = \Cheevos\Cheevos::getAchievements($dsSiteKey);
 			} catch (\Cheevos\CheevosException $e) {
@@ -685,6 +686,8 @@ class ProfilePage extends \Article {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
 			}
+			$achievements = \Cheevos\CheevosAchievement::correctCriteriaChildAchievements($achievements);
+			$achievements = \Cheevos\CheevosAchievement::pruneAchievements($achievements, true, true, $_progresses);
 		}
 
 		if (empty($earned)) {
