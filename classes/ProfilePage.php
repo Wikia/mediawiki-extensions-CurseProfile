@@ -664,8 +664,8 @@ class ProfilePage extends \Article {
 			$achievements = \Cheevos\CheevosAchievement::correctCriteriaChildAchievements($achievements);
 			if ($type === 'general') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
-					list($achievements, $earned) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $_progresses], true, true, $dsSiteKey);
+					$progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					list($achievements, $_progresses) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $progresses], true, true, $dsSiteKey);
 				} catch (\Cheevos\CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
@@ -673,25 +673,25 @@ class ProfilePage extends \Article {
 
 			if ($type === 'special') {
 				try {
-					$_progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
-					list($achievements, $earned) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $_progresses], true, true);
+					$progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					list($achievements, $_progresses) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $progresses], true, true);
 				} catch (\Cheevos\CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress");
 				}
 			}
 		}
 
-		if (empty($earned)) {
+		if (empty($progresses)) {
 			return [
 				$output,
 				'isHTML'	=> true
 			];
 		}
 
-		if (count($earned)) {
+		if (count($progresses)) {
 			$output .= '<h4>'.$parser->recursiveTagParse(wfMessage('achievements-'.$type)->text()).'</h4>';
 		}
-		foreach ($earned as $progress) {
+		foreach ($progresses as $progress) {
 			if (!isset($achievements[$progress->getAchievement_Id()])) {
 				continue;
 			}
