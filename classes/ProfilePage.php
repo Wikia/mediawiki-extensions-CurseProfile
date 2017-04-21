@@ -656,27 +656,37 @@ class ProfilePage extends \Article {
 		$earned = [];
 		if ($globalId > 0 && class_exists("\CheevosHooks")) {
 			$achievements = [];
+			$progresses = [];
 			try {
 				$achievements = \Cheevos\Cheevos::getAchievements($dsSiteKey);
 			} catch (\Cheevos\CheevosException $e) {
-				wfDebug("Encountered Cheevos API error getting all achievements.");
+				wfDebug("Encountered Cheevos API error getting site achievements.");
+			}
+			if ($type === 'special') {
+				try {
+					foreach (\Cheevos\Cheevos::getAchievements() as $achievement) {
+						$achievements[$achievement->getId()] = $achievement;
+					}
+				} catch (\Cheevos\CheevosException $e) {
+					wfDebug("Encountered Cheevos API error getting all achievements.");
+				}
 			}
 			$achievements = \Cheevos\CheevosAchievement::correctCriteriaChildAchievements($achievements);
-			$progresses = [];
+
 			if ($type === 'general') {
 				try {
 					$progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
 				} catch (\Cheevos\CheevosException $e) {
-					wfDebug("Encountered Cheevos API error getting Achievement Progress");
+					wfDebug("Encountered Cheevos API error getting Achievement Progress.");
 				}
 			}
 
 			if ($type === 'special') {
 				try {
 					$progresses = \Cheevos\Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
-					list($achievements, $progresses) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $progresses], true, true);
+					//list($achievements, $progresses) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $progresses], true, true);
 				} catch (\Cheevos\CheevosException $e) {
-					wfDebug("Encountered Cheevos API error getting Achievement Progress");
+					wfDebug("Encountered Cheevos API error getting Achievement Progress.");
 				}
 			}
 			list($achievements, $progresses) = \Cheevos\CheevosAchievement::pruneAchievements([$achievements, $progresses], true, true);
