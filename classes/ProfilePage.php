@@ -564,9 +564,9 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		if ($globalId > 0 && method_exists('PointsDisplay', 'pointsForGlobalId')) {
-			$statsOutput['localrank'] = \PointsDisplay::pointsForGlobalId($globalId, \WikiPoints::extractDomain($wgServer))['rank'];
-			$statsOutput['globalrank'] = \PointsDisplay::pointsForGlobalId($globalId)['rank'];
+		if ($globalId > 0 && method_exists('\Cheevos\Points\PointsDisplay', 'pointsForGlobalId')) {
+			$statsOutput['localrank'] = \Cheevos\Points\PointsDisplay::pointsForGlobalId($globalId, \Cheevos\Points\PointsDisplay::extractDomain($wgServer))['rank'];
+			$statsOutput['globalrank'] = \Cheevos\Points\PointsDisplay::pointsForGlobalId($globalId)['rank'];
 
 			if (empty($statsOutput['localrank'])) {
 				unset($statsOutput['localrank']);
@@ -738,20 +738,13 @@ class ProfilePage extends \Article {
 		$globalId = $lookup->centralIdFromLocalUser($this->user, \CentralIdLookup::AUDIENCE_RAW);
 
 		// Check for existance of wikipoints functions
-		if (!$globalId || !method_exists('PointsDisplay', 'pointsForGlobalId')) {
+		if (!$globalId || !method_exists('\Cheevos\Points\PointsDisplay', 'getWikiPointsForRange')) {
 			return '';
 		}
 
 		$redis = \RedisCache::getClient('cache');
-		$userPoints = \PointsDisplay::pointsForGlobalId($globalId)['score'];
-		try {
-			if ($redis !== false) {
-				$levelDefinitions = unserialize($redis->get('wikipoints::levels'));
-			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return '';
-		}
+		$userPoints = \Cheevos\Points\PointsDisplay::getWikiPointsForRange($globalId);
+		$levelDefinitions = \Cheevos\Points\PointLevels::getLevels();
 
 		if (!is_array($levelDefinitions)) {
 			return '';
@@ -861,7 +854,7 @@ class ProfilePage extends \Article {
 	<div class="rightcolumn">
 		<div class="borderless section">
 			<div class="rightfloat">
-				<div class="score">{{#Points: User:'.$this->user->getName().' | all | badged}}</div>
+				<div class="score">{{#Points:'.$this->user->getName().'|1|global|badged}}</div>
 				<div class="level">{{#userlevel:}}</div>
 				<div>{{#editorfriends:}}</div>
 			</div>
@@ -906,7 +899,7 @@ __NOTOC__
 		<div class="userinfo section">
 			<div class="mainavatar">{{#avatar: 96 | '.$this->user-> getEmail().' | '.$this->user->getName().'}}</div>
 			<div class="usericons rightfloat">
-				<div class="score">{{#Points: User:'.$this->user->getName().' | all | badged}}</div>
+				<div class="score">{{#Points:'.$this->user->getName().'|1|global|badged}}</div>
 				{{#profilelinks:}}
 			</div>
 		</div>
