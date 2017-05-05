@@ -104,7 +104,7 @@
 	"psnlinkplaceholder": "Share your PSN ID",
 	"wikisedited": "Wikis Edited",
 	"localrank": "{{SITENAME}} Rank<br>([[Special:WikiPoints|Leaderboard]])",
-	"globalrank": "Gamepedia Rank",
+	"globalrank": "Gamepedia Rank<br>([[Special:WikiPoints/global|Leaderboard]])",
 	"totalcontribs": "Contributions",
 	"totalcreations": "Creations",
 	"totaledits": "Edits",

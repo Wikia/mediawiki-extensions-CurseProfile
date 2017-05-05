@@ -564,9 +564,9 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		if ($globalId > 0 && method_exists('\Cheevos\Points\PointsDisplay', 'pointsForGlobalId')) {
-			$statsOutput['localrank'] = \Cheevos\Points\PointsDisplay::pointsForGlobalId($globalId, \Cheevos\Points\PointsDisplay::extractDomain($wgServer))['rank'];
-			$statsOutput['globalrank'] = \Cheevos\Points\PointsDisplay::pointsForGlobalId($globalId)['rank'];
+		if ($globalId > 0 && method_exists('\Cheevos\Cheevos', 'getUserPointRank')) {
+			$statsOutput['localrank'] = \Cheevos\Cheevos::getUserPointRank($globalId, $dsSiteKey);
+			$statsOutput['globalrank'] = \Cheevos\Cheevos::getUserPointRank($globalId);
 
 			if (empty($statsOutput['localrank'])) {
 				unset($statsOutput['localrank']);
@@ -577,7 +577,7 @@ class ProfilePage extends \Article {
 
 			$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
 		} else {
-			// No curse id or WikiPoints plugin available
+			//No global ID or Cheevos extension available.
 			unset($statsOutput['localrank']);
 			unset($statsOutput['globalrank']);
 		}
