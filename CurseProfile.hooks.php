@@ -30,7 +30,7 @@ class Hooks {
 	private static $title;
 
 	public static function onRegistration() {
-		global $wgEchoNotificationIcons, $wgExtraNamespaces, $extSyncServices;
+		global $wgEchoNotificationIcons, $wgExtraNamespaces, $wgSyncServices;
 
 		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
@@ -43,9 +43,9 @@ class Hooks {
 		];
 
 		if(defined('MASTER_WIKI') && MASTER_WIKI === true) {
-			$extSyncServices[] = 'CurseProfile\FriendSync';
-			$extSyncServices[] = 'CurseProfile\StatsRecache';
-			$extSyncServices[] = 'CurseProfile\ResolveComment';
+			$wgSyncServices[] = 'CurseProfile\FriendSync';
+			$wgSyncServices[] = 'CurseProfile\StatsRecache';
+			$wgSyncServices[] = 'CurseProfile\ResolveComment';
 		}
 	}
 
