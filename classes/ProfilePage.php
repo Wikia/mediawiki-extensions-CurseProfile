@@ -67,8 +67,12 @@ class ProfilePage extends \Article {
 			$this->setContext($context);
 		}
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
-		$this->user_name = $title->getText();
-		$this->user = \User::newFromName($title->getText());
+		$userName = $title->getText();
+		if (strpos($userName, '/') > 0) {
+			$userName = array_shift(explode('/', $title->getText()));
+		}
+		$this->user_name = $userName;
+		$this->user = \User::newFromName($userName);
 		if ($this->user) {
 			$this->user->load();
 			$this->user_id = $this->user->getID();
@@ -251,7 +255,7 @@ class ProfilePage extends \Article {
 			];
 		}
 
-		if($this->isDefaultPage() || $this->isTalkPage()) {
+		if ($this->isDefaultPage() || $this->isTalkPage()) {
 			// add user profile link to user page
 			$links['namespaces']['userprofile'] = [
 				'href' => $this->profile->getProfilePath(),
