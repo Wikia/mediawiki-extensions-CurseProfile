@@ -91,7 +91,8 @@ class StatsRecache extends \SyncService\Job {
 	public function execute($args = []) {
 		$db = wfGetDB(DB_SLAVE);
 		$this->outputLine('Querying users from database', time());
-		$res = $db->select('user_global',
+		$res = $db->select(
+			'user_global',
 			['global_id'],
 			['global_id > 0'],
 			__METHOD__

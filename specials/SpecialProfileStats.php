@@ -78,8 +78,8 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 			.$this->buildTable($this->profileStats['friends'], ['key' => 'Number of Friends', 'value' => 'Users'])
 			."<p>".wfMessage('profilestats-avgFriends', $this->profileStats['avgFriends'])->escaped()."</p>"
 		."</div>"
-		."<div id='profile-creation'><h3>Profile Creation</h3>".$this->buildTable($this->profileContent, ['key'=>'Content in Profile','value'=>'Users'])."</div>"
-		."<div id='favorite-wikis'><h3>Favorite Wikis</h3>".$this->buildTable($this->favoriteWikis, ['key'=>'Wiki','value'=>'Favorites'], [$this, 'wikiNameFromHash'], true)."</div>";
+		."<div id='profile-creation'><h3>Profile Creation</h3>".$this->buildTable($this->profileStats['profileContent'], ['key' => 'Content in Profile', 'value' => 'Users'])."</div>"
+		."<div id='favorite-wikis'><h3>Favorite Wikis</h3>".$this->buildTable($this->profileStats['favoriteWikis'], ['key' => 'Wiki', 'value' => 'Favorites'], [$this, 'wikiNameFromHash'], true)."</div>";
 
 		return $HTML;
 	}
@@ -89,16 +89,17 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 	 * @param	string	md5 key for a wiki
 	 * @param	string	human-readable name and language of the wiki
 	 */
-	private function wikiNameFromHash($md5_key) {
-		$wiki = \DynamicSettings\Wiki::loadFromHash($md5_key);
-		return $wiki->getName().' ('.$wiki->getLanguage().')';
+	private function wikiNameFromHash($siteKey) {
+		var_dump($siteKey);
+		$wiki = \DynamicSettings\Wiki::loadFromHash($siteKey);
+		return (!$wiki ? $siteKey : $wiki->getNameForDisplay());
 	}
 
 	/**
 	 * Builds a HTML table for display
 	 *
 	 * @param	array		data in { key: value } format
-	 * @param	array		text to use for column headers e.g. [ 'key'=>'Key Header', 'label'=>'Label Header']
+	 * @param	array		text to use for column headers e.g. [ 'key' => 'Key Header', 'label' => 'Label Header']
 	 * @param	callable	[optional] callback to use for converting the data keys to strings for display. default uses wfMessage('profilestats-'.$key)
 	 * @param	boolean		[optional] when true adds a left-most rank column counting up from 1
 	 * @return	string		HTML table
