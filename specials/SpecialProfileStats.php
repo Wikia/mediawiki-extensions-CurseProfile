@@ -90,7 +90,6 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 	 * @param	string	human-readable name and language of the wiki
 	 */
 	private function wikiNameFromHash($siteKey) {
-		var_dump($siteKey);
 		$wiki = \DynamicSettings\Wiki::loadFromHash($siteKey);
 		return (!$wiki ? $siteKey : $wiki->getNameForDisplay());
 	}
