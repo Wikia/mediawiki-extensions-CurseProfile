@@ -117,9 +117,10 @@ for index, count in ipairs(stats) do
 	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
 end
 ";
+		$scriptSha = $this->redis->script('LOAD', $script);
 		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
 			if (!empty($keys)) {
-				$this->redis->eval($script, $keys);
+				$this->redis->evalSha($scriptSha, $keys);
 			}
 		}
 		$end = microtime(true);
