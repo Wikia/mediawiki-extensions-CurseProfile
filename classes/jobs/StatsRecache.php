@@ -118,6 +118,7 @@ class StatsRecache extends \SyncService\Job {
 		$this->outputLine("Gathering statistics for {$total} users...", time());
 
 		for ($i = 0; $i <= $total; $i = $i + 1000) {
+			$start = microtime(true);
 			$this->outputLine("Iteration start {$i}", time());
 
 			$result = $db->select(
@@ -177,6 +178,8 @@ class StatsRecache extends \SyncService\Job {
 					}
 				}
 			}
+			$end = microtime(true);
+			$this->outputLine($end - $start);
 		}
 
 		// compute the average
