@@ -97,14 +97,22 @@ class StatsRecache extends \SyncService\Job {
 		$this->redis->del('profilestats');
 $script = "local optionsKeys = redis.call('keys', '{$redisPrefix}useroptions:*')
 local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
+local stats = {}
+for index, field in ipairs(fields) do
+	stats[index] = 0
+end
 for i, k in ipairs(optionsKeys) do
 	local prefs = redis.call('hmget', k, '".implode("', '", ProfileData::$editProfileFields)."')
 	for index, content in ipairs(prefs) do
 		if (type(content) == 'string' and string.len(content) > 0) then
-			redis.call('HINCRBY', '{$redisPrefix}profilestats', fields[index], 1)
+			stats[index] = stats[index] + 1
 		end
 	end
-end";
+end
+for index, count in ipairs(stats) do
+	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
+end
+";
 		$redisSha = $this->redis->script('LOAD', $script);
 		$this->redis->evalSha($redisSha);
 
