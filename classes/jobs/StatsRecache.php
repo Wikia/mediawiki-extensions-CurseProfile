@@ -20,22 +20,22 @@ class StatsRecache extends \SyncService\Job {
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
-	public static function populateLastPref() {
+	private function populateLastPref() {
 		$redis = \RedisCache::getClient('cache');
 		$sites = \DynamicSettings\Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
-			$this->dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
+			$dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
 			$wikiKeys[] = $wiki->getSiteKey();
 		}
 		//Add the master into the lists so it gets processed over.
-		$this->dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
+		$dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
 		$wikis['master'] = 'Master Wiki';
 
 		unset($sites);
 
 		foreach ($wikiKeys as $dbKey) {
 			try {
-				$db = $this->dbs[$dbKey]->getConnection(DB_MASTER);
+				$db = $dbs[$dbKey]->getConnection(DB_MASTER);
 			} catch (\Exception $e) {
 				$this->outputLine(__METHOD__." - Unable to connect to database.", time());
 				continue;
@@ -91,10 +91,16 @@ class StatsRecache extends \SyncService\Job {
 	 * }
 	 */
 	public function execute($args = []) {
+		//self::populateLastPref();
+
 		foreach (ProfileData::$editProfileFields as $field) {
 			$this->profileContent[$field]['filled'] = 0;
 			$this->profileContent[$field]['empty'] = 0;
 		}
+		$this->users = [
+			'profile' => 0,
+			'wiki' => 0
+		];
 
 		$db = wfGetDB(DB_MASTER);
 
@@ -127,7 +133,6 @@ class StatsRecache extends \SyncService\Job {
 			);
 
 			while ($row = $result->fetchRow()) {
-				$start = microtime(true);
 				// get primary adoption stats
 				try {
 					$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
@@ -171,9 +176,6 @@ class StatsRecache extends \SyncService\Job {
 						$this->profileContent[$field]['empty']++;
 					}
 				}
-
-				$end = microtime(true);
-				$this->outputLine($end - $start);
 			}
 		}
 
