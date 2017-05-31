@@ -104,6 +104,7 @@ class StatsRecache extends \SyncService\Job {
 		$script = "local optionsKeys = ARGV
 local fields = {'".implode("', '", $profileFields)."'}
 local stats = {}
+local favoriteWikis = {}
 for index, field in ipairs(fields) do
 	stats[index] = 0
 end
@@ -112,6 +113,11 @@ for i, k in ipairs(optionsKeys) do
 	for index, content in ipairs(prefs) do
 		if (fields[index] == 'profile-pref') then
 			if (content == nil or content == false or content == 1) then
+				stats[index] = stats[index] + 1
+			end
+		elseif (fields[index] == 'profile-favwiki') then
+			if (type(content) == 'string' and string.len(content) > 0) then
+				favoriteWikis[content] = favoriteWikis[content] + 1
 				stats[index] = stats[index] + 1
 			end
 		else
@@ -123,6 +129,9 @@ for i, k in ipairs(optionsKeys) do
 end
 for index, count in ipairs(stats) do
 	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
+end
+for wiki, count in ipairs(favoriteWikis) do
+	redis.call('hincrby', '{$redisPrefix}profilestats:favoritewikis', wiki, count)
 end
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
@@ -160,17 +169,6 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 			}
 		}
 
-		$this->outputLine('Saving results into redis', time());
-		// save results into redis for display on the stats page
-		foreach (['favoriteWikis'] as $prop) {
-			try {
-				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
-			}
-		}
 		$this->redis->hSet('profilestats', 'lastRunTime', serialize(time()));
-		$this->outputLine('Done.', time());
 	}
 }
