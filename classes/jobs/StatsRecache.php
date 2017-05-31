@@ -94,7 +94,34 @@ class StatsRecache extends \SyncService\Job {
 		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
 		//self::populateLastPref();
 
+		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
+
+		$position = null;
+		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
+			if (!empty($keys)) {
+				$script = "local optionsKeys = {'".implode("', '", $keys)."'}
+local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
+local stats = {}
+for index, field in ipairs(fields) do
+	stats[index] = 0
+end
+for i, k in ipairs(optionsKeys) do
+	local prefs = redis.call('hmget', k, '".implode("', '", ProfileData::$editProfileFields)."')
+	for index, content in ipairs(prefs) do
+		if (type(content) == 'string' and string.len(content) > 0) then
+			stats[index] = stats[index] + 1
+		end
+	end
+end
+for index, count in ipairs(stats) do
+	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
+end
+";
+				$this->redis->eval($script);
+			}
+		}
+		exit;
 $script = "local optionsKeys = redis.call('keys', '{$redisPrefix}useroptions:*')
 local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
 local stats = {}
