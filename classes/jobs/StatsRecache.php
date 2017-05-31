@@ -152,8 +152,19 @@ class StatsRecache extends \SyncService\Job {
 				}
 
 				// get customization stats
-				$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
+				try {
+					$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
+				} catch (\Throwable $e) {
+					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+					return;
+				}
 				foreach (ProfileData::$editProfileFields as $field) {
+					if ($field === 'profile-favwiki' && isset($profileFields[$field]) && !empty($profileFields[$field])) {
+						if ($favWiki) {
+							$this->favoriteWikis[$favWiki] += 1;
+						}
+						continue;
+					}
 					if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
 						$this->profileContent[$field]['filled']++;
 					} else {
@@ -161,15 +172,6 @@ class StatsRecache extends \SyncService\Job {
 					}
 				}
 
-				try {
-					$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
-				} catch (\Throwable $e) {
-					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-					return;
-				}
-				if ($favWiki) {
-					$this->favoriteWikis[$favWiki] += 1;
-				}
 				$end = microtime(true);
 				$this->outputLine($end - $start);
 			}
