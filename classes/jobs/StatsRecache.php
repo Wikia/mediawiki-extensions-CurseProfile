@@ -145,7 +145,13 @@ for i, k in ipairs(friendships) do
 	end
 end
 redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend', hasFriend)
-redis.call('hincrby', '{$redisPrefix}profilestats', 'average-friends', friends / hasFriend)
+local average = redis.call('hget', '{$redisPrefix}profilestats', 'average-friends')
+if (average ~= false) then
+	average = ((friends / hasFriend) + average) / 2
+else
+	average = friends / hasFriend
+end
+redis.call('hincrby', '{$redisPrefix}profilestats', 'average-friends', average)
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
 		while ($keys = $this->redis->scan($position, $redisPrefix.'friendlist:*', 1000)) {
