@@ -114,19 +114,20 @@ class StatsRecache extends \SyncService\Job {
 
 			// get friending stats
 			$f = new Friendship($row['global_id']);
-			if ($f->getFriendCount()) {
+			$friendCount = $f->getFriendCount();
+			if ($friendCount) {
 				$this->friends['more'] += 1;
-				$this->avgFriends[] = $f->getFriendCount();
+				$this->avgFriends[] = $friendCount;
 			} else {
 				$this->friends['none'] += 1;
 			}
 
 			// get customization stats
 			$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
-			if (is_array($profileFields) && array_filter($profileFields)) {
-				$this->profileContent['filled'] += 1;
-			} else {
-				$this->profileContent['empty'] += 1;
+			foreach (ProfileData::$editProfileFields as $field) {
+				if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
+					$this->profileContent[$field]++;
+				}
 			}
 
 			try {

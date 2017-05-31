@@ -107,7 +107,7 @@ class Friendship {
 	 */
 	public function getFriendCount($user = null) {
 		if ($this->globalId < 1) {
-			return [];
+			return 0;
 		}
 
 		if ($user == null) {
@@ -115,7 +115,7 @@ class Friendship {
 		}
 		$redis = \RedisCache::getClient('cache');
 		try {
-			return $redis->sCard($this->friendListRedisKey($user));
+			return intval($redis->sCard($this->friendListRedisKey($user)));
 		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
 		}
