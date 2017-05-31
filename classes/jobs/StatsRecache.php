@@ -134,7 +134,7 @@ end
 			}
 		}
 		foreach ($allKeys as $key) {
-			list(, ,$global) = explode(':', $key);
+			list(, ,$globalId) = explode(':', $key);
 			$friendCount = intval($this->redis->sCard('friendlist:'.$globalId));
 			if ($friendCount) {
 				$this->friends['more'] += 1;
