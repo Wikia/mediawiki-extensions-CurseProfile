@@ -151,7 +151,7 @@ if (average ~= false) then
 else
 	average = friends / hasFriend
 end
-redis.call('hincrby', '{$redisPrefix}profilestats', 'average-friends', average)
+redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
 		while ($keys = $this->redis->scan($position, $redisPrefix.'friendlist:*', 1000)) {
