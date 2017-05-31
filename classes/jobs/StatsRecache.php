@@ -69,23 +69,25 @@ class StatsRecache extends \SyncService\Job {
 	 * Refreshes profile stats data. Should be run regularly (via the StatsRecacheCron.php wrapper script)
 	 * Puts a serialized PHP object into redis in the following format:
 	 * {
-	 *   users: {
-	 *     profile: int,
-	 *     wiki: int
-	 *   },
-	 *   friends: {
-	 *     none: int,
-	 *     more: int
-	 *   },
-	 *   avgFriends: decimal,
-	 *   profileContent: {
-	 *     filled: int,
-	 *     empty: int
-	 *   },
-	 *   favoriteWikis: {
-	 *     md5_key: int,
-	 *     md5_key: int
-	 *   }
+	 *     users: {
+	 *         profile: integer,
+	 *         wiki: integer
+	 *     },
+	 *     friends: {
+	 *         none: integer,
+	 *         more: integer
+	 *     },
+	 *     avgFriends: double,
+	 *     profileContent: {
+	 *         profile-field: {
+	 *             filled: integer,
+	 *             empty: integer
+	 *         }
+	 *     },
+	 *     favoriteWikis: {
+	 *         md5_key: integer,
+	 *         md5_key: integer
+	 *     }
 	 * }
 	 */
 	public function execute($args = []) {
@@ -125,6 +127,7 @@ class StatsRecache extends \SyncService\Job {
 			);
 
 			while ($row = $result->fetchRow()) {
+				$start = microtime(true);
 				// get primary adoption stats
 				try {
 					$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
@@ -167,6 +170,8 @@ class StatsRecache extends \SyncService\Job {
 				if ($favWiki) {
 					$this->favoriteWikis[$favWiki] += 1;
 				}
+				$end = microtime(true);
+				$this->outputLine($end - $start);
 			}
 		}
 
