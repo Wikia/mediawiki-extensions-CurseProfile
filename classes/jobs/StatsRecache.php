@@ -94,22 +94,30 @@ class StatsRecache extends \SyncService\Job {
 		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
 		//self::populateLastPref();
 
+		$profileFields = ProfileData::$editProfileFields;
+		$profileFields[] = 'profile-pref';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
 
 		$position = null;
 		$start = microtime(true);
 		$script = "local optionsKeys = ARGV
-local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
+local fields = {'".implode("', '", $profileFields)."'}
 local stats = {}
 for index, field in ipairs(fields) do
 	stats[index] = 0
 end
 for i, k in ipairs(optionsKeys) do
-	local prefs = redis.call('hmget', k, '".implode("', '", ProfileData::$editProfileFields)."')
+	local prefs = redis.call('hmget', k, '".implode("', '", $profileFields)."')
 	for index, content in ipairs(prefs) do
-		if (type(content) == 'string' and string.len(content) > 0) then
-			stats[index] = stats[index] + 1
+		if (fields[index] == 'profile-pref') then
+			if (content == nil or content == false or content == 1) then
+				stats[index] = stats[index] + 1
+			end
+		else
+			if (type(content) == 'string' and string.len(content) > 0) then
+				stats[index] = stats[index] + 1
+			end
 		end
 	end
 end
@@ -118,102 +126,22 @@ for index, count in ipairs(stats) do
 end
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
-		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
+		$allKeys = [];
+		while ($keys = $this->redis->scan($position, $redisPrefix.'useroptions:*', 1000)) {
 			if (!empty($keys)) {
+				$allKeys += $keys;
 				$this->redis->evalSha($scriptSha, $keys);
 			}
 		}
-		$end = microtime(true);
-		var_dump($end - $start);
-		exit;
-
-		foreach (ProfileData::$editProfileFields as $field) {
-			$this->profileContent[$field]['filled'] = 0;
-			$this->profileContent[$field]['empty'] = 0;
-		}
-		$this->users = [
-			'profile' => 0,
-			'wiki' => 0
-		];
-
-		$db = wfGetDB(DB_MASTER);
-
-		$where = [
-			'global_id > 0'
-		];
-
-		$result = $db->select(
-			['user_global'],
-			['count(*) AS total'],
-			$where,
-			__METHOD__
-		);
-		$total = intval($result->fetchRow()['total']);
-		$this->outputLine("Gathering statistics for {$total} users...", time());
-
-		for ($i = 0; $i <= $total; $i = $i + 1000) {
-			$start = microtime(true);
-			$this->outputLine("Iteration start {$i}", time());
-
-			$result = $db->select(
-				['user_global'],
-				['global_id'],
-				$where,
-				__METHOD__,
-				[
-					'OFFSET'	=> $i,
-					'LIMIT'		=> 1000,
-					'ORDER BY'	=> 'global_id ASC'
-				]
-			);
-
-			while ($row = $result->fetchRow()) {
-				// get primary adoption stats
-				try {
-					$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
-				} catch (\Throwable $e) {
-					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-					return;
-				}
-				if ($lastPref || $lastPref == NULL) {
-					$this->users['profile'] += 1;
-				} else {
-					$this->users['wiki'] += 1;
-				}
-
-				// get friending stats
-				$f = new Friendship($row['global_id']);
-				$friendCount = $f->getFriendCount();
-				if ($friendCount) {
-					$this->friends['more'] += 1;
-					$this->avgFriends[] = $friendCount;
-				} else {
-					$this->friends['none'] += 1;
-				}
-
-				// get customization stats
-				/*try {
-					$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
-				} catch (\Throwable $e) {
-					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-					return;
-				}
-				foreach (ProfileData::$editProfileFields as $field) {
-					if ($field === 'profile-favwiki' && isset($profileFields[$field]) && !empty($profileFields[$field])) {
-						if ($favWiki) {
-							$this->favoriteWikis[$favWiki] += 1;
-						}
-						continue;
-					}
-					if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
-						$this->profileContent[$field]['filled']++;
-					} else {
-						$this->profileContent[$field]['empty']++;
-					}
-				}*/
+		foreach ($allKeys as $key) {
+			list(, ,$global) = explode(':', $key);
+			$friendCount = intval($this->redis->sCard('friendlist:'.$globalId));
+			if ($friendCount) {
+				$this->friends['more'] += 1;
+				$this->avgFriends[] = $friendCount;
+			} else {
+				$this->friends['none'] += 1;
 			}
-			$end = microtime(true);
-			$this->outputLine($end - $start);
 		}
 
 		// compute the average
@@ -225,7 +153,7 @@ end
 
 		$this->outputLine('Saving results into redis', time());
 		// save results into redis for display on the stats page
-		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
+		foreach (['friends', 'avgFriends', 'favoriteWikis'] as $prop) {
 			try {
 				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
 			} catch (\Throwable $e) {
