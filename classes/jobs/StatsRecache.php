@@ -91,7 +91,22 @@ class StatsRecache extends \SyncService\Job {
 	 * }
 	 */
 	public function execute($args = []) {
+		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
 		//self::populateLastPref();
+
+		$this->redis->del('profilestats');
+$script = "local optionsKeys = redis.call('keys', '{$redisPrefix}useroptions:*')
+local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
+for i, k in ipairs(optionsKeys) do
+	local prefs = redis.call('hmget', k, '".implode("', '", ProfileData::$editProfileFields)."')
+	for index, content in ipairs(prefs) do
+		if (type(content) == 'string' and string.len(content) > 0) then
+			redis.call('HINCRBY', '{$redisPrefix}profilestats', fields[index], 1)
+		end
+	end
+end";
+		$redisSha = $this->redis->script('LOAD', $script);
+		$this->redis->evalSha($redisSha, 0);
 
 		foreach (ProfileData::$editProfileFields as $field) {
 			$this->profileContent[$field]['filled'] = 0;
@@ -158,7 +173,7 @@ class StatsRecache extends \SyncService\Job {
 				}
 
 				// get customization stats
-				try {
+				/*try {
 					$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
 				} catch (\Throwable $e) {
 					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
@@ -176,7 +191,7 @@ class StatsRecache extends \SyncService\Job {
 					} else {
 						$this->profileContent[$field]['empty']++;
 					}
-				}
+				}*/
 			}
 			$end = microtime(true);
 			$this->outputLine($end - $start);
