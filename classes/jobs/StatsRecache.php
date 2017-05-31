@@ -98,6 +98,10 @@ class StatsRecache extends \SyncService\Job {
 			__METHOD__
 		);
 
+		foreach (ProfileData::$editProfileFields as $field) {
+			$this->profileContent[$field]['filled'] = 0;
+			$this->profileContent[$field]['empty'] = 0;
+		}
 		while ($row = $res->fetchRow()) {
 			// get primary adoption stats
 			try {
@@ -126,7 +130,9 @@ class StatsRecache extends \SyncService\Job {
 			$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
 			foreach (ProfileData::$editProfileFields as $field) {
 				if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
-					$this->profileContent[$field]++;
+					$this->profileContent[$field]['filled']++;
+				} else {
+					$this->profileContent[$field]['empty']++;
 				}
 			}
 
