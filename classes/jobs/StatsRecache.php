@@ -14,7 +14,7 @@
 namespace CurseProfile;
 
 class StatsRecache extends \SyncService\Job {
-	public static $forceSingleInstance = true;
+	public static $forceSingleInstance = false;
 
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
