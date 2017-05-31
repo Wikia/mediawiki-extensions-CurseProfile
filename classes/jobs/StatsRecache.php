@@ -99,8 +99,8 @@ class StatsRecache extends \SyncService\Job {
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
 
+		//General profile statistics.
 		$position = null;
-		$start = microtime(true);
 		$script = "local optionsKeys = ARGV
 local fields = {'".implode("', '", $profileFields)."'}
 local stats = {}
@@ -126,34 +126,37 @@ for index, count in ipairs(stats) do
 end
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
-		$allKeys = [];
 		while ($keys = $this->redis->scan($position, $redisPrefix.'useroptions:*', 1000)) {
 			if (!empty($keys)) {
-				$allKeys += $keys;
 				$this->redis->evalSha($scriptSha, $keys);
 			}
 		}
-		foreach ($allKeys as $key) {
-			list(, ,$globalId) = explode(':', $key);
-			$friendCount = intval($this->redis->sCard('friendlist:'.$globalId));
-			if ($friendCount) {
-				$this->friends['more'] += 1;
-				$this->avgFriends[] = $friendCount;
-			} else {
-				$this->friends['none'] += 1;
-			}
-		}
 
-		// compute the average
-		if (count($this->avgFriends)) {
-			$this->avgFriends = number_format(array_sum($this->avgFriends) / count($this->avgFriends), 2);
-		} else {
-			$this->avgFriends = 'NaN';
+		//Friendship.
+		$position = null;
+		$script = "local friendships = ARGV
+local hasFriend = 0
+local friends = 0;
+for i, k in ipairs(friendships) do
+	local count = redis.call('scard', k)
+	friends = friends + count
+	if (count > 0) then
+		hasFriend = hasFriend + 1;
+	end
+end
+redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend', hasFriend)
+redis.call('hincrby', '{$redisPrefix}profilestats', 'average-friends', friends / hasFriend)
+";
+		$scriptSha = $this->redis->script('LOAD', $script);
+		while ($keys = $this->redis->scan($position, $redisPrefix.'friendlist:*', 1000)) {
+			if (!empty($keys)) {
+				$this->redis->evalSha($scriptSha, $keys);
+			}
 		}
 
 		$this->outputLine('Saving results into redis', time());
 		// save results into redis for display on the stats page
-		foreach (['friends', 'avgFriends', 'favoriteWikis'] as $prop) {
+		foreach (['favoriteWikis'] as $prop) {
 			try {
 				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
 			} catch (\Throwable $e) {
