@@ -99,9 +99,7 @@ class StatsRecache extends \SyncService\Job {
 
 		$position = null;
 		$start = microtime(true);
-		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
-			if (!empty($keys)) {
-				$script = "local optionsKeys = {'".implode("', '", $keys)."'}
+		$script = "local optionsKeys = ARGV
 local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
 local stats = {}
 for index, field in ipairs(fields) do
@@ -119,32 +117,14 @@ for index, count in ipairs(stats) do
 	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
 end
 ";
-				$this->redis->eval($script);
+		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
+			if (!empty($keys)) {
+				$this->redis->eval($script, $keys);
 			}
 		}
 		$end = microtime(true);
 		var_dump($end - $start);
 		exit;
-$script = "local optionsKeys = redis.call('keys', '{$redisPrefix}useroptions:*')
-local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
-local stats = {}
-for index, field in ipairs(fields) do
-	stats[index] = 0
-end
-for i, k in ipairs(optionsKeys) do
-	local prefs = redis.call('hmget', k, '".implode("', '", ProfileData::$editProfileFields)."')
-	for index, content in ipairs(prefs) do
-		if (type(content) == 'string' and string.len(content) > 0) then
-			stats[index] = stats[index] + 1
-		end
-	end
-end
-for index, count in ipairs(stats) do
-	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
-end
-";
-		$redisSha = $this->redis->script('LOAD', $script);
-		$this->redis->evalSha($redisSha);
 
 		foreach (ProfileData::$editProfileFields as $field) {
 			$this->profileContent[$field]['filled'] = 0;
