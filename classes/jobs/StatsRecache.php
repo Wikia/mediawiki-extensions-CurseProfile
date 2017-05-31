@@ -89,63 +89,85 @@ class StatsRecache extends \SyncService\Job {
 	 * }
 	 */
 	public function execute($args = []) {
-		$db = wfGetDB(DB_SLAVE);
-		$this->outputLine('Querying users from database', time());
-		$res = $db->select(
-			'user_global',
-			['global_id'],
-			['global_id > 0'],
-			__METHOD__
-		);
-
 		foreach (ProfileData::$editProfileFields as $field) {
 			$this->profileContent[$field]['filled'] = 0;
 			$this->profileContent[$field]['empty'] = 0;
 		}
-		while ($row = $res->fetchRow()) {
-			// get primary adoption stats
-			try {
-				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
-			}
-			if ($lastPref || $lastPref == NULL) {
-				$this->users['profile'] += 1;
-			} else {
-				$this->users['wiki'] += 1;
-			}
 
-			// get friending stats
-			$f = new Friendship($row['global_id']);
-			$friendCount = $f->getFriendCount();
-			if ($friendCount) {
-				$this->friends['more'] += 1;
-				$this->avgFriends[] = $friendCount;
-			} else {
-				$this->friends['none'] += 1;
-			}
+		$db = wfGetDB(DB_MASTER);
 
-			// get customization stats
-			$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
-			foreach (ProfileData::$editProfileFields as $field) {
-				if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
-					$this->profileContent[$field]['filled']++;
+		$where = [
+			'global_id > 0'
+		];
+
+		$result = $db->select(
+			['user_global'],
+			['count(*) AS total'],
+			$where,
+			__METHOD__
+		);
+		$total = intval($result->fetchRow()['total']);
+		$this->outputLine("Gathering statistics for {$total} users...", time());
+
+		for ($i = 0; $i <= $total; $i = $i + 1000) {
+			$this->outputLine("Iteration start {$i}", time());
+
+			$result = $db->select(
+				['user_global'],
+				['global_id'],
+				$where,
+				__METHOD__,
+				[
+					'OFFSET'	=> $i,
+					'LIMIT'		=> 1000,
+					'ORDER BY'	=> 'global_id ASC'
+				]
+			);
+
+			while ($row = $result->fetchRow()) {
+				// get primary adoption stats
+				try {
+					$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
+				} catch (\Throwable $e) {
+					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+					return;
+				}
+				if ($lastPref || $lastPref == NULL) {
+					$this->users['profile'] += 1;
 				} else {
-					$this->profileContent[$field]['empty']++;
+					$this->users['wiki'] += 1;
+				}
+
+				// get friending stats
+				$f = new Friendship($row['global_id']);
+				$friendCount = $f->getFriendCount();
+				if ($friendCount) {
+					$this->friends['more'] += 1;
+					$this->avgFriends[] = $friendCount;
+				} else {
+					$this->friends['none'] += 1;
+				}
+
+				// get customization stats
+				$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
+				foreach (ProfileData::$editProfileFields as $field) {
+					if (isset($profileFields[$field]) && !empty($profileFields[$field])) {
+						$this->profileContent[$field]['filled']++;
+					} else {
+						$this->profileContent[$field]['empty']++;
+					}
+				}
+
+				try {
+					$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
+				} catch (\Throwable $e) {
+					$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
+					return;
+				}
+				if ($favWiki) {
+					$this->favoriteWikis[$favWiki] += 1;
 				}
 			}
-
-			try {
-				$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
-			}
-			if ($favWiki) {
-				$this->favoriteWikis[$favWiki] += 1;
-			}
-			$this->outputLine('Compiled stats for global_id '.$row['global_id'], time());
 		}
 
 		// compute the average
