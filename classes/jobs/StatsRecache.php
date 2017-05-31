@@ -98,6 +98,7 @@ class StatsRecache extends \SyncService\Job {
 		$this->redis->del('profilestats');
 
 		$position = null;
+		$start = microtime(true);
 		while ($keys = $this->redis->scan($position, 'Hydra:useroptions:*', 1000)) {
 			if (!empty($keys)) {
 				$script = "local optionsKeys = {'".implode("', '", $keys)."'}
@@ -121,6 +122,8 @@ end
 				$this->redis->eval($script);
 			}
 		}
+		$end = microtime(true);
+		var_dump($end - $start);
 		exit;
 $script = "local optionsKeys = redis.call('keys', '{$redisPrefix}useroptions:*')
 local fields = {'".implode("', '", ProfileData::$editProfileFields)."'}
