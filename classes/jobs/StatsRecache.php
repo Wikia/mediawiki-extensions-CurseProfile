@@ -106,7 +106,7 @@ for i, k in ipairs(optionsKeys) do
 	end
 end";
 		$redisSha = $this->redis->script('LOAD', $script);
-		$this->redis->evalSha($redisSha, 0);
+		$this->redis->evalSha($redisSha);
 
 		foreach (ProfileData::$editProfileFields as $field) {
 			$this->profileContent[$field]['filled'] = 0;
