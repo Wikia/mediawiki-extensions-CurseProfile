@@ -51,7 +51,7 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 		} catch (RedisException $e) {
 			$favoriteWikis = [];
 		}
-		var_dump($favoriteWikis);
+
 		$this->output->addModules('ext.curseprofile.profilestats');
 		$this->output->addHTML(\TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
 	}
