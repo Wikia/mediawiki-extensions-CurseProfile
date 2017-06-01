@@ -195,7 +195,7 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 				//Deltas of zero mess up Grafana.
 				continue;
 			}
-			$statsd->updateCount('userprofiles.'.$field, $count);
+			$statsd->gauge('userprofiles.'.$field, $count);
 		}
 	}
 }
