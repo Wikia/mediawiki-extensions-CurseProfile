@@ -184,6 +184,10 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 		$profileStats = $this->redis->hGetAll('profilestats');
 		$statsd = \MediaWiki\MediaWikiServices::getInstance()->getStatsdDataFactory();
 		foreach ($profileStats as $field => $count) {
+			if ($field == 'last_run_time') {
+				continue;
+			}
+
 			if (isset($existProfileStats[$field])) {
 				$count = $count - $existProfileStats[$field];
 			}
@@ -191,7 +195,7 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 				//Deltas of zero mess up Grafana.
 				continue;
 			}
-			$statsd->updateCount('profiles.'.$field, $count);
+			$statsd->updateCount('userprofiles.'.$field, $count);
 		}
 	}
 }
