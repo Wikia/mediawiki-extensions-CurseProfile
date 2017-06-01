@@ -14,7 +14,7 @@
 namespace CurseProfile;
 
 class StatsRecache extends \SyncService\Job {
-	public static $forceSingleInstance = false;
+	static public $forceSingleInstance = false;
 
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
@@ -98,6 +98,9 @@ class StatsRecache extends \SyncService\Job {
 		$profileFields[] = 'profile-pref';
 		$profileFields[] = 'users-tallied';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
+
+		$existProfileStats = $this->redis->hGetAll('profilestats');
+
 		$this->redis->del('profilestats');
 		$this->redis->del('profilestats:favoritewikis');
 
@@ -177,5 +180,14 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 		}
 
 		$this->redis->hSet('profilestats', 'last_run_time', time());
+
+		$profileStats = $this->redis->hGetAll('profilestats');
+		$statsd = \MediaWiki\MediaWikiServices::getInstance()->getStatsdDataFactory();
+		foreach ($profileStats as $field => $count) {
+			if (isset($existProfileStats[$field])) {
+				$count = $count - $existProfileStats[$field];
+			}
+			$statsd->increment('profiles.'.$field, $count);
+		}
 	}
 }
