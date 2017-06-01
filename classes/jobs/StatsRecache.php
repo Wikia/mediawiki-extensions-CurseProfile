@@ -154,7 +154,7 @@ end
 local hasFriend = 0
 local hasFriendTen = 0
 local friendMax = 0
-local friends = 0;
+local friends = 0
 for i, k in ipairs(friendships) do
 	local count = redis.call('scard', k)
 	friends = friends + count
@@ -168,7 +168,8 @@ for i, k in ipairs(friendships) do
 end
 redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend', hasFriend)
 redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend-ten', hasFriendTen)
-redis.call('hincrby', '{$redisPrefix}profilestats', 'friend-max', friendMax)
+friendMax = math.max(friendMax, redis.call('hget', '{$redisPrefix}profilestats', 'friend-max'))
+redis.call('hset', '{$redisPrefix}profilestats', 'friend-max', friendMax)
 local average = redis.call('hget', '{$redisPrefix}profilestats', 'average-friends')
 if (average ~= false) then
 	average = ((friends / hasFriend) + average) / 2
