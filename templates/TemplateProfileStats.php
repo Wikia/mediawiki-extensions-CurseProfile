@@ -31,6 +31,7 @@ class TemplateProfileStats {
 				<tr>
 					<th>".wfMessage('stat_stat')->escaped()."</th>
 					<th>".wfMessage('stat_count')->escaped()."</th>
+					<th>&nbsp;</th>
 				</tr>
 			</thead>
 			<tbody>";
@@ -42,6 +43,7 @@ class TemplateProfileStats {
 				<tr>
 					<td>".wfMessage($field)->escaped()."</td>
 					<td>{$count}</td>
+					<td>".number_format($count / $statistics['users-tallied'] * 100, 2)."%</td>
 				</tr>";
 		}
 		$html .= "
@@ -54,6 +56,7 @@ class TemplateProfileStats {
 				<tr>
 					<th>".wfMessage('stat_count')->escaped()."</th>
 					<th>".wfMessage('wiki')->escaped()."</th>
+					<th>&nbsp;</th>
 				</tr>
 			</thead>
 			<tbody>";
@@ -62,6 +65,7 @@ class TemplateProfileStats {
 				<tr>
 					<td>{$count}</td>
 					<td>".self::wikiNameFromHash($siteKey)."</td>
+					<td>".number_format($count / $statistics['profile-favwiki'] * 100, 2)."%</td>
 				</tr>";
 		}
 		$html .= "
