@@ -153,7 +153,7 @@ end
 		$script = "local friendships = ARGV
 local hasFriend = 0
 local hasFriendTen = 0
-local friendMax = 0
+local friendMax = redis.call('hget', '{$redisPrefix}profilestats', 'friend-max') or 0
 local friends = 0
 for i, k in ipairs(friendships) do
 	local count = redis.call('scard', k)
@@ -168,7 +168,6 @@ for i, k in ipairs(friendships) do
 end
 redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend', hasFriend)
 redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend-ten', hasFriendTen)
-friendMax = math.max(friendMax, redis.call('hget', '{$redisPrefix}profilestats', 'friend-max'))
 redis.call('hset', '{$redisPrefix}profilestats', 'friend-max', friendMax)
 local average = redis.call('hget', '{$redisPrefix}profilestats', 'average-friends')
 if (average ~= false) then
