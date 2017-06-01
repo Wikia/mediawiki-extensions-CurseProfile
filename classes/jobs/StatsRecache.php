@@ -98,9 +98,6 @@ class StatsRecache extends \SyncService\Job {
 		$profileFields[] = 'profile-pref';
 		$profileFields[] = 'users-tallied';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
-
-		$existProfileStats = $this->redis->hGetAll('profilestats');
-
 		$this->redis->del('profilestats');
 		$this->redis->del('profilestats:favoritewikis');
 
@@ -188,13 +185,6 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 				continue;
 			}
 
-			if (isset($existProfileStats[$field])) {
-				$count = $count - $existProfileStats[$field];
-			}
-			if ($count == 0) {
-				//Deltas of zero mess up Grafana.
-				continue;
-			}
 			$statsd->gauge('userprofiles.'.$field, $count);
 		}
 	}
