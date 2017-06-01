@@ -187,6 +187,10 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 			if (isset($existProfileStats[$field])) {
 				$count = $count - $existProfileStats[$field];
 			}
+			if ($count == 0) {
+				//Deltas of zero mess up Grafana.
+				continue;
+			}
 			$statsd->increment('profiles.'.$field, $count);
 		}
 	}
