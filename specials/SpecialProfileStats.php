@@ -40,16 +40,19 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 		$redis = \RedisCache::getClient('cache');
 
 		//Data built by StatsRecache job, refer to its contents for data format.
-		$profileStats = $redis->hGetAll('profilestats');
-		if (is_array($profileStats) && count($profileStats)) {
-			foreach ($profileStats as $key => $value) {
-				$profileStats[$key] = unserialize($value);
-			}
-		} else {
+		try {
+			$profileStats = $redis->hGetAll('profilestats');
+		} catch (RedisException $e) {
 			$profileStats = [];
 		}
 
+		try {
+			$favoriteWikis = $redis->zRevRangeByScore('profilestats:favoritewikis', '+inf', '-inf', ['withscores' => true, 'limit' => [0, 100]]);
+		} catch (RedisException $e) {
+			$favoriteWikis = [];
+		}
+		var_dump($favoriteWikis);
 		$this->output->addModules('ext.curseprofile.profilestats');
-		$this->output->addHTML(\TemplateProfileStats::statisticsPage($profileStats));
+		$this->output->addHTML(\TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
 	}
 }

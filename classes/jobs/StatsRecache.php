@@ -98,6 +98,7 @@ class StatsRecache extends \SyncService\Job {
 		$profileFields[] = 'profile-pref';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
+		$this->redis->del('profilestats:favoritewikis');
 
 		//General profile statistics.
 		$position = null;
@@ -111,13 +112,14 @@ end
 for i, k in ipairs(optionsKeys) do
 	local prefs = redis.call('hmget', k, '".implode("', '", $profileFields)."')
 	for index, content in ipairs(prefs) do
+		if (fields[index] == 'profile-favwiki') then
+			if (type(content) == 'string' and string.len(content) > 0) then
+				table.insert(favoriteWikis, content)
+			end
+		end
+
 		if (fields[index] == 'profile-pref') then
 			if (content == nil or content == false or content == 1) then
-				stats[index] = stats[index] + 1
-			end
-		elseif (fields[index] == 'profile-favwiki') then
-			if (type(content) == 'string' and string.len(content) > 0) then
-				favoriteWikis[content] = favoriteWikis[content] + 1
 				stats[index] = stats[index] + 1
 			end
 		else
@@ -130,8 +132,8 @@ end
 for index, count in ipairs(stats) do
 	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
 end
-for wiki, count in ipairs(favoriteWikis) do
-	redis.call('hincrby', '{$redisPrefix}profilestats:favoritewikis', wiki, count)
+for index, wiki in ipairs(favoriteWikis) do
+	redis.call('zincrby', '{$redisPrefix}profilestats:favoritewikis', 1, wiki)
 end
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
@@ -169,6 +171,6 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 			}
 		}
 
-		$this->redis->hSet('profilestats', 'lastRunTime', serialize(time()));
+		$this->redis->hSet('profilestats', 'last_run_time', time());
 	}
 }
