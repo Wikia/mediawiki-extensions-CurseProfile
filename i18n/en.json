@@ -177,6 +177,7 @@
 	"friend-max": "Highest friends for any user",
 	"average-friends": "Average friend(s) per user",
 	"users-tallied": "Users Tallied",
+	"users-commented": "Users that have commented",
 	"last_run_time": "Last Run Time",
 	"last_run_never": "Never",
 	"stat_stat": "Statistic",
