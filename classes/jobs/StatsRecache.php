@@ -96,6 +96,7 @@ class StatsRecache extends \SyncService\Job {
 
 		$profileFields = ProfileData::$editProfileFields;
 		$profileFields[] = 'profile-pref';
+		$profileFields[] = 'users-tallied';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
 		$this->redis->del('profilestats:favoritewikis');
@@ -112,19 +113,23 @@ end
 for i, k in ipairs(optionsKeys) do
 	local prefs = redis.call('hmget', k, '".implode("', '", $profileFields)."')
 	for index, content in ipairs(prefs) do
-		if (fields[index] == 'profile-favwiki') then
-			if (type(content) == 'string' and string.len(content) > 0) then
-				table.insert(favoriteWikis, content)
-			end
-		end
-
-		if (fields[index] == 'profile-pref') then
-			if (content == nil or content == false or content == 1) then
-				stats[index] = stats[index] + 1
-			end
+		if (fields[index] == 'users-tallied') then
+			stats[index] = stats[index] + 1
 		else
-			if (type(content) == 'string' and string.len(content) > 0) then
-				stats[index] = stats[index] + 1
+			if (fields[index] == 'profile-favwiki') then
+				if (type(content) == 'string' and string.len(content) > 0) then
+					table.insert(favoriteWikis, content)
+				end
+			end
+
+			if (fields[index] == 'profile-pref') then
+				if (content == nil or content == false or content == 1) then
+					stats[index] = stats[index] + 1
+				end
+			else
+				if (type(content) == 'string' and string.len(content) > 0) then
+					stats[index] = stats[index] + 1
+				end
 			end
 		end
 	end
