@@ -184,24 +184,6 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 			}
 		}
 
-		$db = wfGetDB(DB_MASTER);
-		$results = $db->select(
-			['user_board'],
-			['count(ub_user_id) as total'],
-			[],
-			__METHOD__,
-			[
-				'GROUP BY'	=> 'ub_user_id',
-				'SQL_CALC_FOUND_ROWS'
-			]
-		);
-
-		$calcRowsResult = $db->query('SELECT FOUND_ROWS() AS rowcount');
-		$total = $db->fetchRow($calcRowsResult);
-		$usersCommented = intval($total['rowcount']);
-
-		$this->redis->hSet('profilestats', 'users-commented', $usersCommented);
-
 		$this->redis->hSet('profilestats', 'last_run_time', time());
 
 		$profileStats = $this->redis->hGetAll('profilestats');
