@@ -173,6 +173,8 @@
 	"profile-favwiki": "Wiki Favorited",
 	"profile-pref": "Enhanced Profile",
 	"has-friend": "Has one or more friend",
+	"has-friend-ten": "Has ten or more friends",
+	"friend-max": "Highest friends for any user",
 	"average-friends": "Average friend(s) per user",
 	"users-tallied": "Users Tallied",
 	"last_run_time": "Last Run Time",
