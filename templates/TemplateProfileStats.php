@@ -43,7 +43,7 @@ class TemplateProfileStats {
 				<tr>
 					<td>".wfMessage($field)->escaped()."</td>
 					<td>{$count}</td>
-					<td>".bcdiv(($count / $statistics['users-tallied'] * 100), 1, 2)."%</td>
+					<td>".number_format(floor($count / $statistics['users-tallied'] * 10000) / 100, 2)."%</td>
 				</tr>";
 		}
 		$html .= "
@@ -65,7 +65,7 @@ class TemplateProfileStats {
 				<tr>
 					<td>".self::wikiNameFromHash($siteKey)."</td>
 					<td>{$count}</td>
-					<td>".bcdiv(($count / $statistics['profile-favwiki'] * 100), 1, 2)."%</td>
+					<td>".number_format(floor($count / $statistics['profile-favwiki'] * 10000) / 100, 2)."%</td>
 				</tr>";
 		}
 		$html .= "
