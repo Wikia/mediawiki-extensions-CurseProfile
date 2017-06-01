@@ -43,7 +43,7 @@ class TemplateProfileStats {
 				<tr>
 					<td>".wfMessage($field)->escaped()."</td>
 					<td>{$count}</td>
-					<td>".number_format($count / $statistics['users-tallied'] * 100, 2)."%</td>
+					<td>".sprintf('%1.2f', ($count / $statistics['users-tallied'] * 100))."%</td>
 				</tr>";
 		}
 		$html .= "
@@ -54,8 +54,8 @@ class TemplateProfileStats {
 		<table class='wikitable'>
 			<thead>
 				<tr>
-					<th>".wfMessage('stat_count')->escaped()."</th>
 					<th>".wfMessage('wiki')->escaped()."</th>
+					<th>".wfMessage('stat_count')->escaped()."</th>
 					<th>&nbsp;</th>
 				</tr>
 			</thead>
@@ -63,9 +63,9 @@ class TemplateProfileStats {
 		foreach ($favoriteWikis as $siteKey => $count) {
 			$html .= "
 				<tr>
-					<td>{$count}</td>
 					<td>".self::wikiNameFromHash($siteKey)."</td>
-					<td>".number_format($count / $statistics['profile-favwiki'] * 100, 2)."%</td>
+					<td>{$count}</td>
+					<td>".sprintf('%1.2f', ($count / $statistics['profile-favwiki'] * 100))."%</td>
 				</tr>";
 		}
 		$html .= "
