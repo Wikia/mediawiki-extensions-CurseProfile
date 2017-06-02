@@ -30,7 +30,7 @@ class Hooks {
 	private static $title;
 
 	public static function onRegistration() {
-		global $wgEchoNotificationIcons, $wgExtraNamespaces, $wgSyncServices;
+		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
 		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
@@ -41,12 +41,6 @@ class Hooks {
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Gratitude.png"
 		];
-
-		if(defined('MASTER_WIKI') && MASTER_WIKI === true) {
-			$wgSyncServices[] = 'CurseProfile\FriendSync';
-			$wgSyncServices[] = 'CurseProfile\StatsRecache';
-			$wgSyncServices[] = 'CurseProfile\ResolveComment';
-		}
 	}
 
 	public static function onParserFirstCall(&$parser) {

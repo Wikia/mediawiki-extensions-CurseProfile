@@ -250,7 +250,13 @@
 	},
 	"callback": "CurseProfile\\Hooks::onRegistration",
 	"config": {
-		"CPEditsToComment": 1
+		"CPEditsToComment": 1,
+		"SyncServices": {
+			"FriendSync": "CurseProfile\\FriendSync",
+			"ResolveComment": "CurseProfile\\ResolveComment",
+			"StatsRecache": "CurseProfile\\StatsRecache",
+			"_merge_strategy": "array_plus"
+		}
 	},
 	"manifest_version": 1
 }
