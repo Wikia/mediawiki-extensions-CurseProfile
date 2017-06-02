@@ -245,18 +245,28 @@
 	},
 	"APIModules": {
 		"profile": "CurseProfile\\ProfileApi",
- 		"friend": "CurseProfile\\FriendApi",
- 		"comment": "CurseProfile\\CommentApi"
+		"friend": "CurseProfile\\FriendApi",
+		"comment": "CurseProfile\\CommentApi"
 	},
 	"callback": "CurseProfile\\Hooks::onRegistration",
 	"config": {
-		"CPEditsToComment": 1,
+		"CPEditsToComment": {
+			"value": 1,
+			"path": false,
+			"descriptionmsg": "curseprofile-config-cpeditstocomment",
+			"public": false
+		},
 		"SyncServices": {
-			"FriendSync": "CurseProfile\\FriendSync",
-			"ResolveComment": "CurseProfile\\ResolveComment",
-			"StatsRecache": "CurseProfile\\StatsRecache",
-			"_merge_strategy": "array_merge"
+			"value": {
+				"FriendSync": "CurseProfile\\FriendSync",
+				"ResolveComment": "CurseProfile\\ResolveComment",
+				"StatsRecache": "CurseProfile\\StatsRecache"
+			},
+			"path": false,
+			"descriptionmsg": "curseprofile-config-syncservices",
+			"public": false,
+			"merge_strategy": "array_merge"
 		}
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }
