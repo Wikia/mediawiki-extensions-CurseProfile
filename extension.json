@@ -255,7 +255,7 @@
 			"FriendSync": "CurseProfile\\FriendSync",
 			"ResolveComment": "CurseProfile\\ResolveComment",
 			"StatsRecache": "CurseProfile\\StatsRecache",
-			"_merge_strategy": "array_plus"
+			"_merge_strategy": "array_merge"
 		}
 	},
 	"manifest_version": 1
