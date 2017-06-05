@@ -74,16 +74,17 @@
 		"CurseProfile\\ProfileLogFormatter": "classes/ProfileLogFormatter.php",
 		"CurseProfile\\StatsRecache": "classes/jobs/StatsRecache.php",
 		"CurseProfile\\SpecialProfileStats": "specials/SpecialProfileStats.php",
-		"TemplateCommentBoard": "/templates/TemplateCommentBoard.php",
-		"TemplateCommentModeration": "/templates/TemplateCommentModeration.php",
-		"TemplateManageFriends": "/templates/TemplateManageFriends.php",
-		"CurseProfile\\SpecialManageFriends": "/specials/friends/SpecialManageFriends.php",
-		"CurseProfile\\SpecialFriends": "/specials/friends/SpecialFriends.php",
-		"CurseProfile\\SpecialAddComment": "/specials/comments/SpecialAddComment.php",
-		"CurseProfile\\SpecialCommentBoard": "/specials/comments/SpecialCommentBoard.php",
-		"CurseProfile\\SpecialCommentPermalink": "/specials/comments/SpecialCommentPermalink.php",
-		"CurseProfile\\SpecialCommentModeration": "/specials/comments/SpecialCommentModeration.php",
-		"CurseProfile\\SpecialWikiImageRedirect": "/specials/SpecialWikiImageRedirect.php"
+		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
+		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
+		"TemplateManageFriends": "templates/TemplateManageFriends.php",
+		"TemplateProfileStats": "templates/TemplateProfileStats.php",
+		"CurseProfile\\SpecialManageFriends": "specials/friends/SpecialManageFriends.php",
+		"CurseProfile\\SpecialFriends": "specials/friends/SpecialFriends.php",
+		"CurseProfile\\SpecialAddComment": "specials/comments/SpecialAddComment.php",
+		"CurseProfile\\SpecialCommentBoard": "specials/comments/SpecialCommentBoard.php",
+		"CurseProfile\\SpecialCommentPermalink": "specials/comments/SpecialCommentPermalink.php",
+		"CurseProfile\\SpecialCommentModeration": "specials/comments/SpecialCommentModeration.php",
+		"CurseProfile\\SpecialWikiImageRedirect": "specials/SpecialWikiImageRedirect.php"
 	},
 	"ResourceModules": {
 		"ext.curseprofile.profilestats": {

@@ -14,28 +14,28 @@
 namespace CurseProfile;
 
 class StatsRecache extends \SyncService\Job {
-	public static $forceSingleInstance = true;
+	static public $forceSingleInstance = false;
 
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
-	public static function populateLastPref() {
+	private function populateLastPref() {
 		$redis = \RedisCache::getClient('cache');
 		$sites = \DynamicSettings\Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
-			$this->dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
+			$dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
 			$wikiKeys[] = $wiki->getSiteKey();
 		}
 		//Add the master into the lists so it gets processed over.
-		$this->dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
+		$dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
 		$wikis['master'] = 'Master Wiki';
 
 		unset($sites);
 
 		foreach ($wikiKeys as $dbKey) {
 			try {
-				$db = $this->dbs[$dbKey]->getConnection(DB_MASTER);
+				$db = $dbs[$dbKey]->getConnection(DB_MASTER);
 			} catch (\Exception $e) {
 				$this->outputLine(__METHOD__." - Unable to connect to database.", time());
 				continue;
@@ -69,96 +69,131 @@ class StatsRecache extends \SyncService\Job {
 	 * Refreshes profile stats data. Should be run regularly (via the StatsRecacheCron.php wrapper script)
 	 * Puts a serialized PHP object into redis in the following format:
 	 * {
-	 *   users: {
-	 *     profile: int,
-	 *     wiki: int
-	 *   },
-	 *   friends: {
-	 *     none: int,
-	 *     more: int
-	 *   },
-	 *   avgFriends: decimal,
-	 *   profileContent: {
-	 *     filled: int,
-	 *     empty: int
-	 *   },
-	 *   favoriteWikis: {
-	 *     md5_key: int,
-	 *     md5_key: int
-	 *   }
+	 *     users: {
+	 *         profile: integer,
+	 *         wiki: integer
+	 *     },
+	 *     friends: {
+	 *         none: integer,
+	 *         more: integer
+	 *     },
+	 *     avgFriends: double,
+	 *     profileContent: {
+	 *         profile-field: {
+	 *             filled: integer,
+	 *             empty: integer
+	 *         }
+	 *     },
+	 *     favoriteWikis: {
+	 *         md5_key: integer,
+	 *         md5_key: integer
+	 *     }
 	 * }
 	 */
 	public function execute($args = []) {
-		$db = wfGetDB(DB_SLAVE);
-		$this->outputLine('Querying users from database', time());
-		$res = $db->select(
-			'user_global',
-			['global_id'],
-			['global_id > 0'],
-			__METHOD__
-		);
+		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
+		//self::populateLastPref();
 
-		while ($row = $res->fetchRow()) {
-			// get primary adoption stats
-			try {
-				$lastPref = $this->redis->hGet('profilestats:lastpref', $row['global_id']);
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
-			}
-			if ($lastPref || $lastPref == NULL) {
-				$this->users['profile'] += 1;
-			} else {
-				$this->users['wiki'] += 1;
-			}
+		$profileFields = ProfileData::$editProfileFields;
+		$profileFields[] = 'profile-pref';
+		$profileFields[] = 'users-tallied';
+		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
+		$this->redis->del('profilestats');
+		$this->redis->del('profilestats:favoritewikis');
 
-			// get friending stats
-			$f = new Friendship($row['global_id']);
-			if ($f->getFriendCount()) {
-				$this->friends['more'] += 1;
-				$this->avgFriends[] = $f->getFriendCount();
-			} else {
-				$this->friends['none'] += 1;
-			}
+		//General profile statistics.
+		$position = null;
+		$script = "local optionsKeys = ARGV
+local fields = {'".implode("', '", $profileFields)."'}
+local stats = {}
+local favoriteWikis = {}
+for index, field in ipairs(fields) do
+	stats[index] = 0
+end
+for i, k in ipairs(optionsKeys) do
+	local prefs = redis.call('hmget', k, '".implode("', '", $profileFields)."')
+	for index, content in ipairs(prefs) do
+		if (fields[index] == 'users-tallied') then
+			stats[index] = stats[index] + 1
+		else
+			if (fields[index] == 'profile-favwiki') then
+				if (type(content) == 'string' and string.len(content) > 0) then
+					table.insert(favoriteWikis, content)
+				end
+			end
 
-			// get customization stats
-			$profileFields = $this->redis->hMGet('useroptions:'.$row['global_id'], ProfileData::$editProfileFields);
-			if (is_array($profileFields) && array_filter($profileFields)) {
-				$this->profileContent['filled'] += 1;
-			} else {
-				$this->profileContent['empty'] += 1;
+			if (fields[index] == 'profile-pref') then
+				if (content == nil or content == false or content == 1) then
+					stats[index] = stats[index] + 1
+				end
+			else
+				if (type(content) == 'string' and string.len(content) > 0) then
+					stats[index] = stats[index] + 1
+				end
+			end
+		end
+	end
+end
+for index, count in ipairs(stats) do
+	redis.call('hincrby', '{$redisPrefix}profilestats', fields[index], count)
+end
+for index, wiki in ipairs(favoriteWikis) do
+	redis.call('zincrby', '{$redisPrefix}profilestats:favoritewikis', 1, wiki)
+end
+";
+		$scriptSha = $this->redis->script('LOAD', $script);
+		while ($keys = $this->redis->scan($position, $redisPrefix.'useroptions:*', 1000)) {
+			if (!empty($keys)) {
+				$this->redis->evalSha($scriptSha, $keys);
 			}
-
-			try {
-				$favWiki = $this->redis->hGet('useroptions:'.$row['global_id'], 'profile-favwiki');
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
-			}
-			if ($favWiki) {
-				$this->favoriteWikis[$favWiki] += 1;
-			}
-			$this->outputLine('Compiled stats for global_id '.$row['global_id'], time());
 		}
 
-		// compute the average
-		if (count($this->avgFriends)) {
-			$this->avgFriends = number_format(array_sum($this->avgFriends) / count($this->avgFriends), 2);
-		} else {
-			$this->avgFriends = 'NaN';
-		}
-
-		$this->outputLine('Saving results into redis', time());
-		// save results into redis for display on the stats page
-		foreach (['users', 'friends', 'avgFriends', 'profileContent', 'favoriteWikis'] as $prop) {
-			try {
-				$this->redis->hSet('profilestats', $prop, serialize($this->$prop));
-			} catch (\Throwable $e) {
-				$this->error(__METHOD__.": Caught RedisException - ".$e->getMessage());
-				return;
+		//Friendship.
+		$position = null;
+		$script = "local friendships = ARGV
+local hasFriend = 0
+local hasFriendTen = 0
+local friendMax = redis.call('hget', '{$redisPrefix}profilestats', 'friend-max') or 0
+local friends = 0
+for i, k in ipairs(friendships) do
+	local count = redis.call('scard', k)
+	friends = friends + count
+	if (count > 0) then
+		hasFriend = hasFriend + 1;
+	end
+	if (count > 9) then
+		hasFriendTen = hasFriendTen + 1;
+	end
+	friendMax = math.max(friendMax, count)
+end
+redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend', hasFriend)
+redis.call('hincrby', '{$redisPrefix}profilestats', 'has-friend-ten', hasFriendTen)
+redis.call('hset', '{$redisPrefix}profilestats', 'friend-max', friendMax)
+local average = redis.call('hget', '{$redisPrefix}profilestats', 'average-friends')
+if (average ~= false) then
+	average = ((friends / hasFriend) + average) / 2
+else
+	average = friends / hasFriend
+end
+redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
+";
+		$scriptSha = $this->redis->script('LOAD', $script);
+		while ($keys = $this->redis->scan($position, $redisPrefix.'friendlist:*', 1000)) {
+			if (!empty($keys)) {
+				$this->redis->evalSha($scriptSha, $keys);
 			}
 		}
-		$this->redis->hSet('profilestats', 'lastRunTime', serialize(time()));
-		$this->outputLine('Done.', time());
+
+		$this->redis->hSet('profilestats', 'last_run_time', time());
+
+		$profileStats = $this->redis->hGetAll('profilestats');
+		$statsd = \MediaWiki\MediaWikiServices::getInstance()->getStatsdDataFactory();
+		foreach ($profileStats as $field => $count) {
+			if ($field == 'last_run_time') {
+				continue;
+			}
+
+			$statsd->gauge('userprofiles.'.$field, $count);
+		}
 	}
 }
