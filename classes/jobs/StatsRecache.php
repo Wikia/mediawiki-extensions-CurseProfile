@@ -29,11 +29,13 @@ class StatsRecache extends \SyncService\Job {
 	 * @var		array
 	 */
 	static public $schedule = [
-		'minutes' => 0,
-		'hours' => 8,
-		'days' => '*',
-		'months' => '*',
-		'weekdays' => '*'
+		[
+			'minutes' => 0,
+			'hours' => 8,
+			'days' => '*',
+			'months' => '*',
+			'weekdays' => '*'
+		]
 	];
 
 	/**
