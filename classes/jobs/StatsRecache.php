@@ -23,7 +23,7 @@ class StatsRecache extends \SyncService\Job {
 	 *		'hours' => '*',
 	 *		'days' => '*',
 	 *		'months' => '*',
-	 *		'days' => '*'
+	 *		'weekdays' => '*'
 	 * ]
 	 *
 	 * @var		array
@@ -33,7 +33,7 @@ class StatsRecache extends \SyncService\Job {
 		'hours' => 8,
 		'days' => '*',
 		'months' => '*',
-		'days' => '*'
+		'weekdays' => '*'
 	];
 
 	/**
