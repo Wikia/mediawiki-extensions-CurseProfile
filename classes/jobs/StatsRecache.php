@@ -14,7 +14,27 @@
 namespace CurseProfile;
 
 class StatsRecache extends \SyncService\Job {
-	static public $forceSingleInstance = false;
+	static public $forceSingleInstance = true;
+
+	/**
+	 * Periodic schedule to run like a cron job.  Leave as false to not have a schedule.
+	 * [
+	 *		'minutes' => '*',
+	 *		'hours' => '*',
+	 *		'days' => '*',
+	 *		'months' => '*',
+	 *		'days' => '*'
+	 * ]
+	 *
+	 * @var		array
+	 */
+	static public $schedule = [
+		'minutes' => 0,
+		'hours' => 8,
+		'days' => '*',
+		'months' => '*',
+		'days' => '*'
+	];
 
 	/**
 	 * Migration utility function that only needs to be run once (and when redis has been emptied)
