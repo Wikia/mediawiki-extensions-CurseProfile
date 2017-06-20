@@ -249,7 +249,7 @@ class Friendship {
 			]
 		]);
 
-		wfRunHooks('CurseProfileAddFriend', [$this->globalId, $toGlobalId]);
+		wfRunHooks('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
 
 		return true;
 	}
