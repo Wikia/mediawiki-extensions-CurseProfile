@@ -262,7 +262,6 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
-		wfRunHooks('CurseProfileAcceptFriend', [$this->globalId, $toGlobalId]);
 		return $this->respondToRequest($toGlobalId, 'accept');
 	}
 
@@ -284,31 +283,37 @@ class Friendship {
 	 * @param	string	responce being sent. one of 'accept' or 'ignore'
 	 * @return	bool	true on success
 	 */
-	private function respondToRequest($toUser, $response) {
-		$toUser = intval($toUser);
-		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
+	private function respondToRequest($toUserId, $response) {
+		global $wgUser;
+
+		$toUserId = intval($toUserId);
+		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
 			return -1;
 		}
 
 		FriendSync::queue([
 			'task' => ($response == 'accept' ? 'confirm' : 'ignore'),
 			'actor' => $this->globalId,
-			'target' => $toUser
+			'target' => $toUserId
 		]);
-		if ($this->getRelationship($toUser) != self::REQUEST_RECEIVED) {
+		if ($this->getRelationship($toUserId) != self::REQUEST_RECEIVED) {
 			return false;
 		}
 
 		$redis = \RedisCache::getClient('cache');
 		try {
 			// delete pending request
-			$redis->hDel($this->requestsRedisKey(), $toUser);
-			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->globalId);
+			$redis->hDel($this->requestsRedisKey(), $toUserId);
+			$redis->sRem($this->sentRequestsRedisKey($toUserId), $this->globalId);
 
 			if ($response == 'accept') {
 				// add reciprocal friendship
-				$redis->sAdd($this->friendListRedisKey(), $toUser);
-				$redis->sAdd($this->friendListRedisKey($toUser), $this->globalId);
+				$redis->sAdd($this->friendListRedisKey(), $toUserId);
+				$redis->sAdd($this->friendListRedisKey($toUserId), $this->globalId);
+				$toUser = \User::newFromId($toUserId);
+				if ($toUser) {
+					wfRunHooks('CurseProfileAcceptFriend', [$wgUser, $toUser]);
+				}
 			}
 		} catch (\Throwable $e) {
 			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
