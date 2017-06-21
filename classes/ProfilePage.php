@@ -69,7 +69,8 @@ class ProfilePage extends \Article {
 		$this->actionIsView = \Action::getActionName($this->getContext()) == 'view';
 		$userName = $title->getText();
 		if (strpos($userName, '/') > 0) {
-			$userName = array_shift(explode('/', $title->getText()));
+			$_userNames = explode('/', $title->getText());
+			$userName = array_shift($_userNames);
 		}
 		$this->user_name = $userName;
 		$this->user = \User::newFromName($userName);
