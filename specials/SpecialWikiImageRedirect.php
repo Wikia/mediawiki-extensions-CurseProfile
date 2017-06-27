@@ -19,30 +19,19 @@ class SpecialWikiImageRedirect extends \UnlistedSpecialPage {
 	}
 
 	public function execute( $path ) {
-		$md5 = $this->getRequest()->getVal('md5');
+		$siteKey = $this->getRequest()->getVal('md5');
 		$redis = \RedisCache::getClient('cache');
 
-		if (!empty($md5) && $redis !== false) {
-			// Try to use a cached value from redis
-			if ($redis->exists('wikiavatar:' . $md5)) {
-				$this->getOutput()->redirect($redis->get('wikiavatar:' . $md5));
-				return;
-			}
+		$url = \HydraCore::getWikiImageUrlFromMercury($siteKey);
 
-			// fallback to direct lookup from the gamepedia.com api
-			$result = \Http::post('http://www.gamepedia.com/api/get-avatar?apikey=***REMOVED***&wikiMd5='.urlencode($md5));
-			$json = json_decode($result, true);
-			if ($json && isset($json['AvatarUrl'])) {
-				$json['AvatarUrl'] = str_replace('http://', 'https://', $json['AvatarUrl']); //Not a clean fix for this, but it works.
-				// cache to redis
-				$redis->set('wikiavatar:' . $md5, $json['AvatarUrl']);
-				$redis->expire('wikiavatar:' . $md5, 86400); // discard after 24 hrs
-				$this->getOutput()->redirect($json['AvatarUrl']);
+		if (!empty($siteKey)) {
+			if (!empty($url)) {
+				$this->getOutput()->redirect($url);
 			} else {
-				$this->getOutput()->showFileNotFoundError($md5);
+				$this->getOutput()->showFileNotFoundError($siteKey);
 			}
 		} else {
-			$this->getOutput()->showUnexpectedValueError('Wiki Key', $md5);
+			$this->getOutput()->showUnexpectedValueError('Site Key', $siteKey);
 		}
 	}
 }
