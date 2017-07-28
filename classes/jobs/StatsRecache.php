@@ -50,7 +50,7 @@ class StatsRecache extends \SyncService\Job {
 			$wikiKeys[] = $wiki->getSiteKey();
 		}
 		//Add the master into the lists so it gets processed over.
-		$dbs['master'] = \LBFactory::singleton()->getExternalLB('master');
+		$dbs['master'] = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB('master');
 		$wikis['master'] = 'Master Wiki';
 
 		unset($sites);
