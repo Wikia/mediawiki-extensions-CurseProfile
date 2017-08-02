@@ -444,7 +444,7 @@ class CommentBoard {
 
 			if ($toUser->getId() != $fromUser->getId()) {
 				\EchoEvent::create([
-					'type' => 'profile-comment',
+					'type' => 'comment',
 					'agent' => $fromUser,
 					'title' => $toUser->getUserPage(),
 					'extra' => [
@@ -621,7 +621,7 @@ class CommentBoard {
 		// user must not be blocked, comment must either be authored by current user or on user's profile
 		return $comment['ub_type'] != self::DELETED_MESSAGE && !$user->isBlocked() &&
 			( $comment['ub_user_id'] == $user->getId()
-				|| $comment['ub_user_from_id'] == $user->getId()
+				|| (isset($comment['ub_user_from_id']) && intval($comment['ub_user_from_id']) === $user->getId())
 				|| $user->isAllowed('profile-moderate') );
 	}
 

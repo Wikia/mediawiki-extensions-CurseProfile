@@ -18,30 +18,41 @@ namespace CurseProfile\MWEcho;
  */
 class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	/**
-	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
+	 * Get a message object and add the performer's name as
+	 * a parameter. It is expected that subclasses will override
+	 * this.
+	 *
+	 * @access	public
+	 * @return Message
+	 */
+	public function getHeaderMessage() {
+		$extra = $this->event->getExtra();
+		$message = $this->getMessageWithAgent( $this->getHeaderMessageKey() );
+		//$message->params([$extra['task'], $extra['timestamp'], $extra['misc']['display_name']]);
+		return $message;
+	}
+
+	/**
+	 * Return the icon used for this notification.
+	 *
+	 * @access	public
+	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
 	public function getIconType() {
 		return 'gratitude';
 	}
 
-	/*public function getHeaderMessage() {
-		$msg = parent::getHeaderMessage();
-		$msg->params( $this->event->getTitle()->getPrefixedText() );
-
-		$msg->params( $this->getViewingUserForGender() );
-		return $msg;
-	}*/
-
 	/**
 	 * Array of primary link details, with possibly-relative URL & label.
 	 *
+	 * @access	public
 	 * @return array|bool Array of link data, or false for no link:
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
 	public function getPrimaryLink() {
 		return [
-			'url' => $this->event->getAgent()->getUserPage()->getLocalURL(),
-			'label' => $this->msg('notification-link-text-view-profile')->text(),
+			'url' => \SpecialPage::getTitleFor('ManageFriends')->getFullUrl(),
+			'label' => $this->msg('notification-link-text-view-friendship-request')->text(),
 		];
 	}
 
@@ -49,6 +60,7 @@ class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	 * Array of secondary link details, including possibly-relative URLs, label,
 	 * description & icon name.
 	 *
+	 * @access	public
 	 * @return array Array of links in the format of:
 	 *               [['url' => (string) url,
 	 *                 'label' => (string) link text (non-escaped),

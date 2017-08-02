@@ -241,7 +241,7 @@ class Friendship {
 		}
 
 		\EchoEvent::create([
-			'type' => 'friendship-request',
+			'type' => 'friendship',
 			'agent' => $wgUser,
 			'title' => $wgUser->getUserPage(),
 			'extra' => [

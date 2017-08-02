@@ -18,28 +18,30 @@ namespace CurseProfile\MWEcho;
  */
 class CommentPresentationModel extends \EchoEventPresentationModel {
 	/**
-	 * Return the icon type.
+	 * Get a message object and add the performer's name as
+	 * a parameter. It is expected that subclasses will override
+	 * this.
 	 *
 	 * @access	public
-	 * @return string The symbolic icon name as defined in $wgEchoNotificationIcons
+	 * @return Message
 	 */
-	public function getIconType() {
-		return 'gratitude';
+	public function getHeaderMessage() {
+		$message = $this->getMessageWithAgent( $this->getHeaderMessageKey() );
+		if ($this->event->getTitle() !== null) {
+			$message->params($this->event->getTitle()->getFullText());
+		}
+
+		return $message;
 	}
 
 	/**
-	 * Return a message object with the agent($1) and target($3) user page as pamaraters.
+	 * Return the icon used for this notification.
 	 *
 	 * @access	public
-	 * @return	Message
+	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
-	public function getHeaderMessage() {
-		$msg = parent::getHeaderMessage();
-		if ($this->event->getTitle() !== null) {
-			$msg->params($this->event->getTitle()->getFullText());
-		}
-
-		return $msg;
+	public function getIconType() {
+		return 'userSpeechBubble';
 	}
 
 	/**
@@ -61,7 +63,8 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	}
 
 	/**
-	 * Array of secondary link details, including possibly-relative URLs, label, description & icon name.
+	 * Array of secondary link details, including possibly-relative URLs, label,
+	 * description & icon name.
 	 *
 	 * @access	public
 	 * @return array Array of links in the format of:
@@ -77,7 +80,6 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	 *               result of this function (FIXME).
 	 */
 	public function getSecondaryLinks() {
-		return [$this->getAgentLink()];
+		return [];
 	}
 }
-

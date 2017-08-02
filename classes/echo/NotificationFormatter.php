@@ -16,7 +16,7 @@ namespace CurseProfile\MWEcho;
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class NotificationFormatter extends \EchoBasicFormatter {
+class NotificationFormatter extends \EchoModelFormatter {
 	const MAX_PREVIEW_LEN = 80; // only preview first 80 characters of message (is clipped by substr in CommentBoard)
 
 	/**
@@ -45,11 +45,12 @@ class NotificationFormatter extends \EchoBasicFormatter {
 	/**
 	 * Processes parameter keywords into data for a message before rendering a notification
 	 *
+	 * @access	protected
 	 * @param	object	EchoEvent object
-	 * @param	string	param keyword to be given a value
-	 * @param	object	the mediawiki message object in need of this param
-	 * @param	object	the user to whom this notification will be delivered
-	 * @return	void	deliver the appropriate value to the message via ->params() instead of returning a value
+	 * @param	string	Parameter keyword to be given a value
+	 * @param	object	The mediawiki message object in need of this parameter.
+	 * @param	object	The user to whom this notification will be delivered.
+	 * @return	void	Deliver the appropriate value to the message via ->params() instead of returning a value.
 	 */
 	protected function processParam($event, $param, $message, $user) {
 		switch ($param) {
@@ -66,13 +67,13 @@ class NotificationFormatter extends \EchoBasicFormatter {
 	}
 
 	/**
-	 * Helper function for getLink()
+	 * Helper function for getLink().
 	 *
-	 * @param EchoEvent $event
-	 * @param User $user The user receiving the notification
-	 * @param String $destination The destination type for the link, e.g. 'agent'
-	 * @return Array including target and query parameters. Note that target can
-	 *               be either a Title or a full url
+	 * @access	public
+	 * @param	object	EchoEvent $event
+	 * @param	object	User $user The user receiving the notification
+	 * @param	string	$destination The destination type for the link, e.g. 'agent'
+	 * @return	array	Including target and query parameters. Note that target can be either a Title or a full url.
 	 */
 	protected function getLinkParams($event, $user, $destination) {
 		$target = null;

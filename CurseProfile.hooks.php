@@ -326,7 +326,7 @@ class Hooks {
 	}
 
 	/**
-	 * Add this extensions Echo notifications.
+	 * Add this extension's Echo notifications.
 	 *
 	 * @access	public
 	 * @param	array	See $wgEchoNotifications in Extension:Echo.
@@ -334,49 +334,57 @@ class Hooks {
 	 * @param	array	See $wgEchoNotificationIcons in Extension:Echo.
 	 * @return	boolean	True
 	 */
-	public static function onBeforeCreateEchoEvent( &$wgEchoNotifications, &$wgEchoNotificationCategories, &$wgEchoNotificationIcons ) {
-		$wgEchoNotificationCategories['friendship'] = [
-			'tooltip' => 'echo-pref-tooltip-friendship',
+	static public function onBeforeCreateEchoEvent(&$wgEchoNotifications, &$wgEchoNotificationCategories, &$wgEchoNotificationIcons) {
+		$wgEchoNotificationCategories['profile-friendship'] = [
+			'tooltip' => 'echo-pref-tooltip-profile-friendship',
 			'priority' => 3,
 		];
-		$wgEchoNotifications['friendship-request'] = [
-			'primary-link' => array('message' => 'notification-link-text-view-message', 'destination' => 'friendship-request'),
-			'category' => 'friendship',
-			'group' => 'interactive',
-			'icon' => 'gratitude',
-			'presentation-model' => 'CurseProfile\MWEcho\FriendshipPresentationModel',
-			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-friendship-request',
-			'title-params' => ['agent'],
-			'email-subject-message' => 'notification-friendship-request-email-subj',
-			'email-subject-params' => ['agent'],
-			'email-body-batch-message' => 'notification-friendship-request-email-body',
-			'email-body-batch-params' => ['agent'],
-			'email-body-batch-bundle-message' => 'notification-friendship-request-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
-		];
-
 		$wgEchoNotificationCategories['profile-comment'] = [
 			'tooltip' => 'echo-pref-tooltip-profile-comment',
 			'priority' => 4,
 		];
-		$wgEchoNotifications['profile-comment'] = [
-			'primary-link' => array( 'message' => 'notification-link-text-view-message', 'destination' => 'profile-comment' ),
+
+		$wgEchoNotifications['friendship'] = [
+			'primary-link' => [
+				'message' => 'notification-link-text-view-friendship-request',
+				'destination' => 'managefriends'
+			],
+			'category' => 'profile-friendship',
+			'group' => 'interactive',
+			'icon' => 'gratitude',
+			'presentation-model' => 'CurseProfile\MWEcho\FriendshipPresentationModel',
+			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
+			'title-message' => 'notification-header-profile-friendship',
+			'title-params' => ['agent'],
+			'email-subject-message' => 'notification-profile-friendship-email-subject',
+			'email-subject-params' => ['agent'],
+			'email-body-batch-message' => 'notification-profile-friendship-email-body',
+			'email-body-batch-params' => ['agent'],
+			'email-body-batch-bundle-message' => 'notification-profile-friendship-email-batch-body',
+			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
+			//\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getFriender']
+		];
+		$wgEchoNotifications['comment'] = [
+			'primary-link' => [
+				'message' => 'notification-link-text-view-profile-comment',
+				'destination' => 'profile'
+			],
 			'category' => 'profile-comment',
 			'group' => 'interactive',
-			'icon' => 'chat',
+			'icon' => 'userSpeechBubble',
 			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
 			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
 			'title-message' => 'notification-header-profile-comment',
 			'title-params' => ['agent', 'user'],
-			'payload' => ['comment-text'],
-			'email-subject-message' => 'notification-profile-comment-email-subj',
+			'email-subject-message' => 'notification-profile-comment-email-subject',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-batch-message' => 'notification-profile-comment-email-body',
 			'email-body-batch-params' => ['agent', 'user', 'comment-id'],
-			'email-body-batch-bundle-message' => 'notification-profile-comment-email-bundle-body',
+			'email-body-batch-bundle-message' => 'notification-profile-comment-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
+			//\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getCommenter']
 		];
+
 		return true;
 	}
 
