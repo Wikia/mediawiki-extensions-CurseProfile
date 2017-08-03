@@ -81,9 +81,9 @@ class NotificationFormatter extends \EchoModelFormatter {
 		$title = $event->getTitle();
 
 		switch ($destination) {
-			case "friendship-request":
+			case "friendship":
 				break;
-			case "profile-comment":
+			case "comment":
 				break;
 			default:
 				return parent::getLinkParams($event, $user, $destination);

@@ -38,7 +38,9 @@ function CurseProfile($) {
 				action: 'friend',
 				do: $this.data('action'),
 				global_id: $this.data('id'),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				$buttons.attr('disabled', false);
 				if (resp.remove) {
@@ -69,7 +71,9 @@ function CurseProfile($) {
 				action: 'friend',
 				do: 'directreq',
 				name: $('#directfriendreq').val(),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				$('<div/>').addClass('successbox').addClass('directreqresult').text(resp.html).hide().insertAfter('#senddirectreq').slideDown();
 				$this.attr('disabled', false);
@@ -104,7 +108,10 @@ function CurseProfile($) {
 			(new mw.Api()).post({
 				action: 'profile',
 				do: 'getRawAboutMe',
-				userId: $profile.data('userid')
+				userId: $profile.data('userid'),
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.text !== null) {
 					// insert edit form into DOM to replace throbber
@@ -143,7 +150,9 @@ function CurseProfile($) {
 				do: 'editAboutMe',
 				userId: $profile.data('userid'),
 				text: profile.editForm.find('textarea').val(),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.result === 'success') {
 					// replace the text of the old comment object

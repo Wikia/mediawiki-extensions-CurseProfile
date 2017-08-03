@@ -41,7 +41,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
 	public function getIconType() {
-		return 'userSpeechBubble';
+		return 'mention';
 	}
 
 	/**

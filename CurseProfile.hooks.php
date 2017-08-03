@@ -346,7 +346,7 @@ class Hooks {
 
 		$wgEchoNotifications['friendship'] = [
 			'primary-link' => [
-				'message' => 'notification-link-text-view-friendship-request',
+				'message' => 'notification-link-text-view-friendship',
 				'destination' => 'managefriends'
 			],
 			'category' => 'profile-friendship',
@@ -354,35 +354,39 @@ class Hooks {
 			'icon' => 'gratitude',
 			'presentation-model' => 'CurseProfile\MWEcho\FriendshipPresentationModel',
 			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-profile-friendship',
-			'title-params' => ['agent'],
-			'email-subject-message' => 'notification-profile-friendship-email-subject',
-			'email-subject-params' => ['agent'],
-			'email-body-batch-message' => 'notification-profile-friendship-email-body',
+			'title-message' => 'notification-header-friendship',
+			'title-params' => ['agent', 'user'],
+			'email-subject-message' => 'notification-friendship-email-subject',
+			'email-subject-params' => ['agent', 'user'],
+			'email-body-batch-message' => 'notification-friendship-email-body',
 			'email-body-batch-params' => ['agent'],
-			'email-body-batch-bundle-message' => 'notification-profile-friendship-email-batch-body',
+			'email-body-batch-bundle-message' => 'notification-friendship-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
-			//\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getFriender']
+			'user-locators' => [
+				['EchoUserLocator::locateFromEventExtra', ['user']]
+			],
 		];
 		$wgEchoNotifications['comment'] = [
 			'primary-link' => [
-				'message' => 'notification-link-text-view-profile-comment',
+				'message' => 'notification-link-text-view-comment',
 				'destination' => 'profile'
 			],
 			'category' => 'profile-comment',
 			'group' => 'interactive',
-			'icon' => 'userSpeechBubble',
+			'icon' => 'mention',
 			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
 			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-profile-comment',
+			'title-message' => 'notification-header-comment',
 			'title-params' => ['agent', 'user'],
-			'email-subject-message' => 'notification-profile-comment-email-subject',
+			'email-subject-message' => 'notification-comment-email-subject',
 			'email-subject-params' => ['agent', 'user'],
-			'email-body-batch-message' => 'notification-profile-comment-email-body',
-			'email-body-batch-params' => ['agent', 'user', 'comment-id'],
-			'email-body-batch-bundle-message' => 'notification-profile-comment-email-batch-body',
+			'email-body-batch-message' => 'notification-comment-email-body',
+			'email-body-batch-params' => ['agent', 'user', 'comment-id', 'comment'],
+			'email-body-batch-bundle-message' => 'notification-comment-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			//\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getCommenter']
+			'user-locators' => [
+				['EchoUserLocator::locateFromEventExtra', ['user']]
+			],
 		];
 
 		return true;
