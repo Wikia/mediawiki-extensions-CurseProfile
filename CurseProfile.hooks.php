@@ -363,7 +363,7 @@ class Hooks {
 			'email-body-batch-bundle-message' => 'notification-friendship-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['user']]
+				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
 			]
 		];
 		$wgEchoNotifications['comment'] = [
@@ -385,26 +385,10 @@ class Hooks {
 			'email-body-batch-bundle-message' => 'notification-comment-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['user']]
+				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
 			]
 		];
 
-		return true;
-	}
-
-	public static function onEchoGetDefaultNotifiedUsers($event, &$users) {
-		switch ($event->getType()) {
-			case 'friendship-request':
-			case 'profile-comment':
-				$extra = $event->getExtra();
-				if (!$extra || !isset($extra['target_user_id'])) {
-					break;
-				}
-				$targetId = $extra['target_user_id'];
-				$user = \User::newFromId($targetId);
-				$users[$targetId] = $user;
-				break;
-		}
 		return true;
 	}
 

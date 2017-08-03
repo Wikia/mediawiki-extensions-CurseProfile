@@ -226,23 +226,22 @@
 		"remoteExtPath": "CurseProfile"
 	},
 	"Hooks": {
-		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
-		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
-		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
 		"ArticleUpdateBeforeRedirect": "CurseProfile\\Hooks::onArticleUpdateBeforeRedirect",
-		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
-		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
-		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
-		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
+		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
+		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
+		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
+		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
+		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
 		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
+		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
+		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
+		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
+		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
-		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
-		"EchoGetDefaultNotifiedUsers": "CurseProfile\\Hooks::onEchoGetDefaultNotifiedUsers",
-		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules"
+		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions"
 	},
 	"APIModules": {
 		"profile": "CurseProfile\\ProfileApi",

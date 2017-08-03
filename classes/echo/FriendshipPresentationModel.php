@@ -52,7 +52,7 @@ class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	public function getPrimaryLink() {
 		return [
 			'url' => \SpecialPage::getTitleFor('ManageFriends')->getFullUrl(),
-			'label' => $this->msg('notification-link-text-view-friendship-request')->text(),
+			'label' => $this->msg('notification-link-text-view-friendship')->text(),
 		];
 	}
 

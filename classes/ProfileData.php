@@ -187,8 +187,8 @@ class ProfileData {
 	 * @param array of default values
 	 */
 	public static function insertProfilePrefsDefaults(&$defaultOptions) {
-		$defaultOptions['echo-subscriptions-web-friendship'] = 1;
-		$defaultOptions['echo-subscriptions-email-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
 		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
 
