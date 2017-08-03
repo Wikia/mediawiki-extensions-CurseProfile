@@ -45,7 +45,10 @@
 				action: 'comment',
 				do: 'getReplies',
 				user_id: $('.curseprofile').data('userid'),
-				comment_id: $this.data('id')
+				comment_id: $this.data('id'),
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.html) {
 					var $replies = $(resp.html);
@@ -147,7 +150,10 @@
 			(new mw.Api()).post({
 				action: 'comment',
 				do: 'getRaw',
-				comment_id: $comment.data('id')
+				comment_id: $comment.data('id'),
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.text) {
 					// insert edit form into DOM to replace throbber
@@ -194,7 +200,9 @@
 				do: 'edit',
 				comment_id: $comment.data('id'),
 				text: commentBoard.editForm.find('textarea').val(),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.result === 'success') {
 					// replace the text of the old comment object
@@ -216,7 +224,9 @@
 				action: 'comment',
 				do: 'remove',
 				comment_id: $comment.data('id'),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.html) {
 					$comment.addClass('deleted').find('.icon').hide();
@@ -237,7 +247,9 @@
 				action: 'comment',
 				do: 'restore',
 				comment_id: $comment.data('id'),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.result) {
 					$comment.removeClass('deleted');
@@ -261,7 +273,9 @@
 				action: 'comment',
 				do: 'purge',
 				comment_id: $comment.data('id'),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				if (resp.result === 'success') {
 					$comment.slideUp();
@@ -286,7 +300,9 @@
 				action: 'comment',
 				do: 'report',
 				comment_id: $comment.data('id'),
-				token: mw.user.tokens.get('editToken')
+				format: 'json',
+				formatversion: 2,
+				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
 				// TODO what happens after a comment is reported?
 				window.alert( mw.message('report-thanks').text() );

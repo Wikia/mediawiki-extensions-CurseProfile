@@ -359,12 +359,12 @@ class Hooks {
 			'email-subject-message' => 'notification-friendship-email-subject',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-batch-message' => 'notification-friendship-email-body',
-			'email-body-batch-params' => ['agent'],
+			'email-body-batch-params' => ['agent', 'user'],
 			'email-body-batch-bundle-message' => 'notification-friendship-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'agent-other-display', 'agent-other-count'],
+			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 			'user-locators' => [
 				['EchoUserLocator::locateFromEventExtra', ['user']]
-			],
+			]
 		];
 		$wgEchoNotifications['comment'] = [
 			'primary-link' => [
@@ -386,7 +386,7 @@ class Hooks {
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
 			'user-locators' => [
 				['EchoUserLocator::locateFromEventExtra', ['user']]
-			],
+			]
 		];
 
 		return true;
