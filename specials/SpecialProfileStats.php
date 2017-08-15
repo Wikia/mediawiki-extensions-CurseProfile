@@ -32,7 +32,7 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 	 */
 	public function execute( $path ) {
 		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
-			throw new PermissionsError('cp-master-only');
+			throw new \PermissionsError('cp-master-only');
 		}
 		$this->setHeaders();
 		$this->checkPermissions();
