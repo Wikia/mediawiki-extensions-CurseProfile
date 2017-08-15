@@ -284,7 +284,7 @@ class CommentReport {
 			return self::newFromRow($reportRow);
 		} else {
 			// add report to existing archive
-			$report = self::addReportTo($reportRow['ra_id']);
+			//$report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
 		}
 
 		return $report;
