@@ -570,14 +570,18 @@ class ProfilePage extends \Article {
 		}
 
 		if ($globalId > 0 && method_exists('\Cheevos\Cheevos', 'getUserPointRank')) {
-			$statsOutput['localrank'] = \Cheevos\Cheevos::getUserPointRank($globalId, $dsSiteKey);
-			$statsOutput['globalrank'] = \Cheevos\Cheevos::getUserPointRank($globalId);
+			try {
+				$statsOutput['localrank'] = \Cheevos\Cheevos::getUserPointRank($globalId, $dsSiteKey);
+				$statsOutput['globalrank'] = \Cheevos\Cheevos::getUserPointRank($globalId);
 
-			if (empty($statsOutput['localrank'])) {
-				unset($statsOutput['localrank']);
-			}
-			if (empty($statsOutput['globalrank'])) {
-				unset($statsOutput['globalrank']);
+				if (empty($statsOutput['localrank'])) {
+					unset($statsOutput['localrank']);
+				}
+				if (empty($statsOutput['globalrank'])) {
+					unset($statsOutput['globalrank']);
+				}
+			} catch (\Cheevos\CheevosException $e) {
+				wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 			}
 
 			$statsOutput['totalfriends'] = FriendDisplay::count($nothing, $this->user->getId());
