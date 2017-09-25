@@ -331,7 +331,13 @@ class ProfilePage extends \Article {
 				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
 		}
+		if ($this->user->isAllowed('userrights')) {
+			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
+
+		}
 		$HTML .= '</ul>';
+
+
 
 		return [
 			$HTML,

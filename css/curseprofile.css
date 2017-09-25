@@ -147,6 +147,11 @@ div.mainavatar {
 		background-color: rgba(128, 128, 128, 0.5);
 	}
 
+	.grouptags li.edit {
+		background-color: #EEE;
+	}
+
+
 	/* Styles for the individual service icons */
 	.profilelinks li {
 		background-repeat: no-repeat;
