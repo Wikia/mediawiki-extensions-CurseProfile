@@ -51,8 +51,9 @@ class TemplateManageFriends {
 	 * @param	array	array of curse ids to whom friend requests are pending
 	 * @return	string	Built HTML
 	 */
-	public function manage($friends, $received, $sent) {
+	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
 		$this->HTML = '';
+		$pagination = \HydraCore::generatePaginationHtml(count($friends), $itemsPerPage, $start);
 
 		if (count($received)) {
 			$this->HTML .= '<h2>'.wfMessage('pendingrequests').'</h2>';
@@ -61,7 +62,9 @@ class TemplateManageFriends {
 
 		$this->HTML .= '<h2>'.wfMessage('friends').'</h2>';
 		if (count($friends)) {
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, true);
+			$this->HTML .= $pagination;
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, true, $itemsPerPage, $start);
+			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('soronery')->plain();
 		}
