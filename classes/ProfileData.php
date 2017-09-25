@@ -162,7 +162,7 @@ class ProfileData {
 		];
 		$preferences['profile-link-reddit'] = [
 			'type' => 'text',
-			'pattern' => '\\w{3,20}',
+			'pattern' => '^[\w\-_]{3,20}$',
 			'maxlength' => 20,
 			'label-message' => 'redditlink',
 			'section' => 'personal/info/profiles',

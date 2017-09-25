@@ -465,7 +465,7 @@ class ProfilePage extends \Article {
 		$patterns = [
 			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
 			'Twitter'	=> '|^@?(\\w{1,15})$|',
-			'Reddit'	=> '|^\\w{3,20}$|',
+			'Reddit'	=> '#^[\w\-_]{3,20}$#',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
 			'Google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
 		];
