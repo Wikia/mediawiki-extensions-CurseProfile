@@ -365,6 +365,25 @@ class CommentBoard {
 
 		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($fromUser->getEmail())));
 
+		$lookup = \CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($fromUser, \CentralIdLookup::AUDIENCE_RAW);
+
+		if ($globalId > 0) {
+			try {
+				$stats = \Cheevos\Cheevos::getStatProgress(
+					[
+						'user_id'	=> $globalId,
+						'global'	=> true,
+						'stat'		=> 'article_edit'
+					]
+				);
+				$stats = \Cheevos\CheevosHelper::makeNiceStatProgressArray($stats);
+				$wgCPEditsToComment = (isset($stats[$globalId]['article_edit']['count']) && $stats[$globalId]['article_edit']['count'] > $wgCPEditsToComment ? $stats[$globalId]['article_edit']['count'] : $wgCPEditsToComment);
+			} catch (\Cheevos\CheevosException $e) {
+				wfDebug("Encountered Cheevos API error getting article_edit count.");
+			}
+		}
+
 		//User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
 		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
 	}
