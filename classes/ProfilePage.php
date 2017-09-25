@@ -421,18 +421,22 @@ class ProfilePage extends \Article {
 					$link = urlencode($link);
 					$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
 					break;
-				case 'Twitter':
-					if (!self::validateUrl($key, $link)) {
-						$item = '';
-					} else {
-						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
-					}
-					break;
 				case 'Reddit':
 					if (!self::validateUrl($key, $link)) {
 						$item = '';
 					} else {
 						$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
+					}
+					break;
+				case 'Twitch':
+					$link = urlencode($link);
+					$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
+					break;
+				case 'Twitter':
+					if (!self::validateUrl($key, $link)) {
+						$item = '';
+					} else {
+						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
 					}
 					break;
 				default:
@@ -463,11 +467,12 @@ class ProfilePage extends \Article {
 	 */
 	private static function validateUrl($service, &$url) {
 		$patterns = [
-			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
-			'Twitter'	=> '|^@?(\\w{1,15})$|',
-			'Reddit'	=> '#^[\w\-_]{3,20}$#',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
 			'Google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
+			'Reddit'	=> '#^[\w\-_]{3,20}$#',
+			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
+			'Twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
+			'Twitter'	=> '|^@?(\\w{1,15})$|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
