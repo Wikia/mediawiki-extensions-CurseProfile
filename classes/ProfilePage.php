@@ -510,7 +510,10 @@ class ProfilePage extends \Article {
 		} else {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
-		$HTML = "<a target='_blank' href='https://{$wiki['wiki_domain']}/'>".$HTML."</a>";
+
+		$link = "https://".$wiki['wiki_domain'].$this->profile->getProfilePath(false);
+
+		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
 		return [
