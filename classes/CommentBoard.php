@@ -163,10 +163,11 @@ class CommentBoard {
 	}
 
 	/**
-	 * Function Documentation
+	 * Get a raw comment from the database by ID.
 	 *
 	 * @access	private
-	 * @return	void
+	 * @param	integer	Comment ID
+	 * @return	mixed	Database result or false.
 	 */
 	static private function queryCommentById($commentId) {
 		$DB = CP::getDb(DB_MASTER);
@@ -401,6 +402,10 @@ class CommentBoard {
 			$inReplyTo = 0;
 		} else {
 			$inReplyTo = intval($inReplyTo);
+			$parentComment = self::queryCommentById($inReplyTo);
+			if (isset($parentComment['ub_user_id_from'])) {
+				$parentCommenter = \User::newFromId($parentComment['ub_user_id_from']);
+			}
 		}
 
 		$success = $dbw->insert(
@@ -450,6 +455,19 @@ class CommentBoard {
 					'extra' => [
 						'user' => $toUser,
 						'target_user_id' => $toUser->getId(),
+						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
+						'comment_id' => $newCommentId,
+					]
+				]);
+			}
+			if ($inReplyTo > 0 && $parentCommenter->getId()) {
+				\EchoEvent::create([
+					'type' => 'comment-reply',
+					'agent' => $fromUser,
+					'title' => $toUser->getUserPage(),
+					'extra' => [
+						'user' => $parentCommenter,
+						'target_user_id' => $parentCommenter->getId(),
 						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
 						'comment_id' => $newCommentId,
 					]
