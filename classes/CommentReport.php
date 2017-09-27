@@ -287,6 +287,18 @@ class CommentReport {
 			//$report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
 		}
 
+		\EchoEvent::create([
+			'type' => 'comment-report',
+			'agent' => $fromUser,
+			'title' => $toUser->getUserPage(),
+			'extra' => [
+				'user' => $parentCommenter,
+				'target_user_id' => $parentCommenter->getId(),
+				'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
+				'comment_id' => $newCommentId,
+			]
+		]);
+
 		return $report;
 	}
 

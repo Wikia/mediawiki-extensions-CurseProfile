@@ -410,6 +410,28 @@ class Hooks {
 				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
 			]
 		];
+		$wgEchoNotifications['comment-report'] = [
+			'primary-link' => [
+				'message' => 'notification-link-text-view-comment',
+				'destination' => 'profile'
+			],
+			'category' => 'profile-comment',
+			'group' => 'interactive',
+			'icon' => 'mention',
+			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
+			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
+			'title-message' => 'notification-header-comment-report',
+			'title-params' => ['agent', 'user'],
+			'email-subject-message' => 'notification-comment-report-email-subject',
+			'email-subject-params' => ['agent', 'user'],
+			'email-body-batch-message' => 'notification-comment-report-email-body',
+			'email-body-batch-params' => ['agent', 'user', 'comment_id', 'comment'],
+			'email-body-batch-bundle-message' => 'notification-comment-report-email-batch-body',
+			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
+			'user-locators' => [
+				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
+			]
+		];
 
 		return true;
 	}
