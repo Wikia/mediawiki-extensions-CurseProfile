@@ -50,10 +50,14 @@ class ProfileData {
 	 * Returns the canonical URL path to a user's profile based on their profile preference
 	 * @return string
 	 */
-	public function getProfilePath() {
+	public function getProfilePath($expand = true) {
 		global $wgScriptPath;
 		$path = "/UserProfile:" . $this->user->getTitleKey();
-		return wfExpandUrl($wgScriptPath.$path);
+		if ($expand) {
+			return wfExpandUrl($wgScriptPath.$path);
+		} else {
+			return $path;
+		}
 	}
 
 	/**

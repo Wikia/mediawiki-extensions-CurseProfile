@@ -218,9 +218,7 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		// links specific to the profile page
-
 		if ($this->isProfilePage()) {
-
 			$oldLinks = $links;
 			// let's start with a fresh array
 			$links = [
@@ -330,6 +328,9 @@ class ProfilePage extends \Article {
 				//Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
 				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
+		}
+		if ($this->user->isAllowed('userrights')) {
+			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
 		}
 		$HTML .= '</ul>';
 
@@ -504,7 +505,10 @@ class ProfilePage extends \Article {
 		} else {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
-		$HTML = "<a target='_blank' href='https://{$wiki['wiki_domain']}/'>".$HTML."</a>";
+
+		$link = "https://".$wiki['wiki_domain'].$this->profile->getProfilePath(false);
+
+		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
 		return [
