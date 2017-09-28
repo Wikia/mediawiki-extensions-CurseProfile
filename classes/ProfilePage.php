@@ -218,9 +218,7 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		// links specific to the profile page
-
 		if ($this->isProfilePage()) {
-
 			$oldLinks = $links;
 			// let's start with a fresh array
 			$links = [
@@ -333,11 +331,8 @@ class ProfilePage extends \Article {
 		}
 		if ($this->user->isAllowed('userrights')) {
 			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
-
 		}
 		$HTML .= '</ul>';
-
-
 
 		return [
 			$HTML,
