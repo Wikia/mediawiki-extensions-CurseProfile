@@ -62,9 +62,8 @@ class SpecialManageFriends extends \SpecialPage {
 		$sent = $f->getSentRequests();
 
 		$wgOut->addModules('ext.hydraCore.pagination');
-		$pagination = \HydraCore::generatePaginationHtml(count($friends), $itemsPerPage, $start);
 
-		$wgOut->addHTML($templateManageFriends->manage($friends, $rcvd, $sent));
+		$wgOut->addHTML($templateManageFriends->manage($friends, $rcvd, $sent, $itemsPerPage, $start));
 
 		return;
 	}

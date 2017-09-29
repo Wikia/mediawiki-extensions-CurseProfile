@@ -65,29 +65,31 @@ class TemplateCommentModeration {
 		foreach ($reports as $report) {
 			$rep = $report->data;
 			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
-			$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
+			if ($author) { // handle failures where central ID doesn't exist on local wiki
+				$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
 
-			$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
-			$HTML .= '<div class="reported-comment">';
+				$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
+				$HTML .= '<div class="reported-comment">';
 
-			$HTML .= '<div class="commentdisplay">'.
-						'<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $author->getEmail(), $author->getName())[0].'</div>'.
-						'<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>'.
-						'<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>';
-			$HTML .= '</div>';
-
-			if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
-				$HTML .= '<div class="moderation-actions">';
-					$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
-					$HTML .= '<div class="confirm"><a></a></div>';
+				$HTML .= '<div class="commentdisplay">'.
+							'<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $author->getEmail(), $author->getName())[0].'</div>'.
+							'<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>'.
+							'<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>';
 				$HTML .= '</div>';
-			} else {
-				$HTML .= '<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
+
+				if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
+					$HTML .= '<div class="moderation-actions">';
+						$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
+						$HTML .= '<div class="confirm"><a></a></div>';
+					$HTML .= '</div>';
+				} else {
+					$HTML .= '<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
+				}
+
+				$HTML .= '</div>';
+
+				$HTML .= '</div>';
 			}
-
-			$HTML .= '</div>';
-
-			$HTML .= '</div>';
 		}
 
 		$HTML .= '</div>';

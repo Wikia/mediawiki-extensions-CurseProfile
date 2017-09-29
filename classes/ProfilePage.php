@@ -218,9 +218,7 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		// links specific to the profile page
-
 		if ($this->isProfilePage()) {
-
 			$oldLinks = $links;
 			// let's start with a fresh array
 			$links = [
@@ -331,6 +329,9 @@ class ProfilePage extends \Article {
 				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
 		}
+		if ($this->user->isAllowed('userrights')) {
+			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
+		}
 		$HTML .= '</ul>';
 
 		return [
@@ -421,18 +422,22 @@ class ProfilePage extends \Article {
 					$link = urlencode($link);
 					$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
 					break;
-				case 'Twitter':
-					if (!self::validateUrl($key, $link)) {
-						$item = '';
-					} else {
-						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
-					}
-					break;
 				case 'Reddit':
 					if (!self::validateUrl($key, $link)) {
 						$item = '';
 					} else {
 						$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
+					}
+					break;
+				case 'Twitch':
+					$link = urlencode($link);
+					$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
+					break;
+				case 'Twitter':
+					if (!self::validateUrl($key, $link)) {
+						$item = '';
+					} else {
+						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
 					}
 					break;
 				default:
@@ -463,11 +468,12 @@ class ProfilePage extends \Article {
 	 */
 	private static function validateUrl($service, &$url) {
 		$patterns = [
-			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
-			'Twitter'	=> '|^@?(\\w{1,15})$|',
-			'Reddit'	=> '|^\\w{3,20}$|',
 			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
 			'Google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
+			'Reddit'	=> '#^[\w\-_]{3,20}$#',
+			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
+			'Twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
+			'Twitter'	=> '|^@?(\\w{1,15})$|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
@@ -499,7 +505,10 @@ class ProfilePage extends \Article {
 		} else {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
-		$HTML = "<a target='_blank' href='https://{$wiki['wiki_domain']}/'>".$HTML."</a>";
+
+		$link = "https://".$wiki['wiki_domain'].$this->profile->getProfilePath(false);
+
+		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
 
 		return [

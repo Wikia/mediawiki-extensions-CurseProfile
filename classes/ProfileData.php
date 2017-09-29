@@ -50,10 +50,14 @@ class ProfileData {
 	 * Returns the canonical URL path to a user's profile based on their profile preference
 	 * @return string
 	 */
-	public function getProfilePath() {
+	public function getProfilePath($expand = true) {
 		global $wgScriptPath;
 		$path = "/UserProfile:" . $this->user->getTitleKey();
-		return wfExpandUrl($wgScriptPath.$path);
+		if ($expand) {
+			return wfExpandUrl($wgScriptPath.$path);
+		} else {
+			return $path;
+		}
 	}
 
 	/**
@@ -144,6 +148,14 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
+		$preferences['profile-link-reddit'] = [
+			'type' => 'text',
+			'pattern' => '^[\w\-_]{3,20}$',
+			'maxlength' => 20,
+			'label-message' => 'redditlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
+		];
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
 			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
@@ -152,6 +164,14 @@ class ProfileData {
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
 			'help-message' => 'profilelink-help',
 		];
+		$preferences['profile-link-twitch'] = [
+			'type' => 'text',
+			'pattern' => '^[a-zA-Z0-9\w_]{3,24}$',
+			'maxlength' => 24,
+			'label-message' => 'twitchlink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('twitchlinkplaceholder')->plain(),
+		];
 		$preferences['profile-link-twitter'] = [
 			'type' => 'text',
 			'pattern' => '@?(\\w{1,15})',
@@ -159,14 +179,6 @@ class ProfileData {
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
-		];
-		$preferences['profile-link-reddit'] = [
-			'type' => 'text',
-			'pattern' => '\\w{3,20}',
-			'maxlength' => 20,
-			'label-message' => 'redditlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
@@ -344,7 +356,9 @@ class ProfileData {
 
 	/**
 	 * Returns all the user's location profile data
-	 * @return array possibly including keys: city, state, country, country-flag
+	 *
+	 * @access	public
+	 * @return	array	Possibly including keys: city, state, country, country-flag
 	 */
 	public function getLocations() {
 		$profile = [
@@ -358,17 +372,20 @@ class ProfileData {
 
 	/**
 	 * Returns all the user's social profile links
-	 * @return array possibly including keys: Twitter, Facebook, Google, Reddit, Steam, XBL, PSN
+	 *
+	 * @access	public
+	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, XBL, PSN
 	 */
 	public function getProfileLinks() {
 		$profile = [
-			'Twitter' => $this->user->getOption('profile-link-twitter'),
 			'Facebook' => $this->user->getOption('profile-link-facebook'),
 			'Google' => $this->user->getOption('profile-link-google'),
+			'PSN' => $this->user->getOption('profile-link-psn'),
 			'Reddit' => $this->user->getOption('profile-link-reddit'),
 			'Steam' => $this->user->getOption('profile-link-steam'),
-			'XBL' => $this->user->getOption('profile-link-xbl'),
-			'PSN' => $this->user->getOption('profile-link-psn'),
+			'Twitch' => $this->user->getOption('profile-link-twitch'),
+			'Twitter' => $this->user->getOption('profile-link-twitter'),
+			'XBL' => $this->user->getOption('profile-link-xbl')
 		];
 		return array_filter($profile);
 	}
