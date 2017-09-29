@@ -126,12 +126,15 @@ class CommentReport {
 			}
 		} else {
 			// report is local
-			list($md5key, $comment_id, $timestamp) = explode(':', $key);
+			list($md5key, $commentId, $timestamp) = explode(':', $key);
 			$db = CP::getDb(DB_SLAVE);
 			$row = $db->selectRow(
 				'user_board_report_archives',
 				['*'],
-				['ra_comment_id='.intval($comment_id), 'ra_last_edited="'.date('Y-m-d H:i:s', $timestamp).'"'],
+				[
+					'ra_comment_id' => intval($commentId),
+					'ra_last_edited' => date('Y-m-d H:i:s', $timestamp)
+				],
 				__METHOD__
 			);
 			if ($row) {
@@ -213,7 +216,7 @@ class CommentReport {
 						$subTable,
 					],
 					['ra.*', 'report_count'],
-					['ra_action_taken = 0'],
+					['ra_action_taken0' => 0],
 					__METHOD__,
 					[
 						'ORDER BY' => 'report_count DESC',
@@ -222,7 +225,8 @@ class CommentReport {
 					],
 					[
 						$subTable => [
-							'LEFT JOIN',['ra_id=ubr_report_archive_id']
+							'LEFT JOIN',
+							['ra_id = ubr_report_archive_id']
 						]
 					]
 				);
@@ -240,13 +244,14 @@ class CommentReport {
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
-	 * @param	integer	id of a local comment
-	 * @return	mixed	CommentReport instance that is already saved or null on failure
+	 * @access	public
+	 * @param	integer	Comment ID of a local comment.
+	 * @return	mixed	CommentReport instance that is already saved or null on failure.
 	 */
-	public static function newUserReport($comment_id) {
+	static public function newUserReport($commentId) {
 		$db = CP::getDb(DB_SLAVE);
-		$comment_id = intval($comment_id);
-		if ($comment_id < 1) {
+		$commentId = intval($commentId);
+		if ($commentId < 1) {
 			return null;
 		}
 
@@ -254,7 +259,10 @@ class CommentReport {
 		$res = $db->select(
 			['user_board'],
 			['ub_id', 'ub_user_id_from', 'ub_date', 'ub_edited', 'ub_message'],
-			["ub_id = $comment_id", "ub_type = ".CommentBoard::PUBLIC_MESSAGE],
+			[
+				"ub_id" => $commentId,
+				"ub_type" => CommentBoard::PUBLIC_MESSAGE
+			],
 			__METHOD__
 		);
 		$comment = $res->fetchRow();
@@ -270,7 +278,10 @@ class CommentReport {
 		$res = $db->select(
 			['user_board_report_archives'],
 			['ra_id', 'ra_comment_id', 'ra_last_edited', 'ra_action_taken'],
-			["ra_comment_id = $comment_id", "ra_last_edited = '{$comment['last_touched']}'"],
+			[
+				"ra_comment_id" => $commentId,
+				"ra_last_edited" => $comment['last_touched']
+			],
 			__METHOD__
 		);
 		$reportRow = $res->fetchRow();

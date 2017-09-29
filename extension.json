@@ -66,9 +66,10 @@
 		"CurseProfile\\CommentDisplay": "classes/CommentDisplay.php",
 		"CurseProfile\\FriendSync": "classes/jobs/FriendSync.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
-		"CurseProfile\\MWEcho\\NotificationFormatter": "classes/echo/NotificationFormatter.php",
 		"CurseProfile\\MWEcho\\CommentPresentationModel": "classes/echo/CommentPresentationModel.php",
+		"CurseProfile\\MWEcho\\EchoUserLocator": "classes/echo/EchoUserLocator.php",
 		"CurseProfile\\MWEcho\\FriendshipPresentationModel": "classes/echo/FriendshipPresentationModel.php",
+		"CurseProfile\\MWEcho\\NotificationFormatter": "classes/echo/NotificationFormatter.php",
 		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
 		"CurseProfile\\CommentLogFormatter": "classes/CommentLogFormatter.php",
 		"CurseProfile\\ProfileLogFormatter": "classes/ProfileLogFormatter.php",
@@ -254,6 +255,12 @@
 			"value": 1,
 			"path": false,
 			"descriptionmsg": "curseprofile-config-cpeditstocomment",
+			"public": false
+		},
+		"CPCommentModGroup": {
+			"value": "sysop",
+			"path": false,
+			"descriptionmsg": "curseprofile-config-cpcommentmodgroup",
 			"public": false
 		},
 		"SyncServices": {

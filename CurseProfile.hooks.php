@@ -428,9 +428,7 @@ class Hooks {
 			'email-body-batch-params' => ['agent', 'user', 'comment_id', 'comment'],
 			'email-body-batch-bundle-message' => 'notification-comment-report-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
-			]
+			EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getHydraAdmins']
 		];
 
 		return true;

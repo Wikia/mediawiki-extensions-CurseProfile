@@ -274,10 +274,10 @@ class CommentApi extends \HydraApiBase {
 	}
 
 	public function doEdit() {
-		$comment_id = $this->getMain()->getVal('comment_id');
+		$commentId = $this->getMain()->getVal('comment_id');
 		$text = $this->getMain()->getVal('text');
-		if ($comment_id && CommentBoard::canEdit($comment_id)) {
-			$res = CommentBoard::editComment($comment_id, $text);
+		if ($commentId && CommentBoard::canEdit($commentId)) {
+			$res = CommentBoard::editComment($commentId, $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			global $wgOut;
@@ -288,9 +288,9 @@ class CommentApi extends \HydraApiBase {
 	}
 
 	public function doRestore() {
-		$comment_id = $this->getMain()->getVal('comment_id');
-		if ($comment_id && CommentBoard::canRestore($comment_id)) {
-			CommentBoard::restoreComment($comment_id);
+		$commentId = $this->getMain()->getVal('comment_id');
+		if ($commentId && CommentBoard::canRestore($commentId)) {
+			CommentBoard::restoreComment($commentId);
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -299,9 +299,9 @@ class CommentApi extends \HydraApiBase {
 	}
 
 	public function doRemove() {
-		$comment_id = $this->getMain()->getVal('comment_id');
-		if ($comment_id && CommentBoard::canRemove($comment_id)) {
-			CommentBoard::removeComment($comment_id);
+		$commentId = $this->getMain()->getVal('comment_id');
+		if ($commentId && CommentBoard::canRemove($commentId)) {
+			CommentBoard::removeComment($commentId);
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -310,9 +310,9 @@ class CommentApi extends \HydraApiBase {
 	}
 
 	public function doPurge() {
-		$comment_id = $this->getMain()->getVal('comment_id');
-		if ($comment_id && CommentBoard::canPurge()) {
-			CommentBoard::purgeComment($comment_id);
+		$commentId = $this->getMain()->getVal('comment_id');
+		if ($commentId && CommentBoard::canPurge()) {
+			CommentBoard::purgeComment($commentId);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
@@ -320,9 +320,9 @@ class CommentApi extends \HydraApiBase {
 	}
 
 	public function doReport() {
-		$comment_id = $this->getMain()->getVal('comment_id');
-		if ($comment_id) {
-			$res = CommentBoard::reportComment($comment_id);
+		$commentId = $this->getMain()->getVal('comment_id');
+		if ($commentId) {
+			$res = CommentBoard::reportComment($commentId);
 			$this->getResult()->addValue(null, 'result', $res ? 'success' : 'error');
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
