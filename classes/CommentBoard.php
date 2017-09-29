@@ -497,7 +497,7 @@ class CommentBoard {
 			$log = new \LogPage('curseprofile');
 			$log->addEntry(
 				'comment-'.$action,
-				\Title::newFromURL('User:'.$toUser->getName()),
+				\Title::newFromURL('UserProfile:'.$toUser->getName()),
 				null,
 				$extra,
 				$fromUser
