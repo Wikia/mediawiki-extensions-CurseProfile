@@ -296,19 +296,8 @@ class CommentReport {
 		} else {
 			// add report to existing archive
 			//$report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
+			return self::newFromRow($reportRow);
 		}
-
-		\EchoEvent::create([
-			'type' => 'comment-report',
-			'agent' => $fromUser,
-			'title' => $toUser->getUserPage(),
-			'extra' => [
-				'user' => $parentCommenter,
-				'target_user_id' => $parentCommenter->getId(),
-				'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
-				'comment_id' => $newCommentId,
-			]
-		]);
 
 		return $report;
 	}
@@ -317,7 +306,7 @@ class CommentReport {
 	 * Archive the contents of a comment into a new report
 	 *
 	 * @param	array	comment row from the user_board DB table
-	 * @return	obj		CommentReport instance
+	 * @return	object		CommentReport instance
 	 */
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
@@ -408,7 +397,10 @@ class CommentReport {
 	}
 
 	/**
-	 * @return	bool	true if report is stored on this wiki
+	 * Is this report stored in this local wiki database?
+	 *
+	 * @access	public
+	 * @return	boolean	True if report is stored on this wiki.
 	 */
 	public function isLocal() {
 		global $dsSiteKey;
@@ -416,16 +408,20 @@ class CommentReport {
 	}
 
 	/**
-	 * @return	bool	true if report is stored on this wiki
+	 * Is this report key stored in this local wiki database?
+	 *
+	 * @access	public
+	 * @param	string	Report Key
+	 * @return	boolean	True if report is stored on this wiki.
 	 */
-	public static function keyIsLocal($reportKey) {
+	static public function keyIsLocal($reportKey) {
 		global $dsSiteKey;
 		list($siteKey) = explode(':', $reportKey);
 		return $dsSiteKey == $siteKey;
 	}
 
 	/**
-	 * Insert a new report into the local database
+	 * Insert a new report into the local database.
 	 *
 	 * @access	private
 	 * @return	void
@@ -433,16 +429,20 @@ class CommentReport {
 	private function initialLocalInsert() {
 		// insert into local db tables
 		$db = CP::getDb(DB_MASTER);
-		$db->insert('user_board_report_archives', [
-			'ra_comment_id' => $this->data['comment']['cid'],
-			'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
-			'ra_global_id_from' => $this->data['comment']['author'],
-			'ra_comment_text' => $this->data['comment']['text'],
-			'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
-			'ra_action_taken' => $this->data['action_taken'],
-			'ra_action_taken_by' => $this->data['action_taken_by'],
-			'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
-		], __METHOD__);
+		$db->insert(
+			'user_board_report_archives',
+			[
+				'ra_comment_id' => $this->data['comment']['cid'],
+				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
+				'ra_global_id_from' => $this->data['comment']['author'],
+				'ra_comment_text' => $this->data['comment']['text'],
+				'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
+				'ra_action_taken' => $this->data['action_taken'],
+				'ra_action_taken_by' => $this->data['action_taken_by'],
+				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at'])
+			],
+			__METHOD__
+		);
 		$this->id = $db->insertId();
 	}
 
@@ -488,7 +488,7 @@ class CommentReport {
 	}
 
 	/**
-	 * Add a new report to comment that has already been archived
+	 * Add a new report to comment that has already been archived.
 	 *
 	 * @access	private
 	 * @param	object	The User reporting this comment
@@ -499,7 +499,7 @@ class CommentReport {
 		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
 
 		if (!isset($this->id) || !$globalId) {
-			return false; // can't add to a comment that hasn't been archived yet
+			return false; //Can't add to a comment that hasn't been archived yet.
 		}
 
 		$newReport = [
@@ -507,26 +507,41 @@ class CommentReport {
 			'timestamp' => time(),
 		];
 
-		// add new report row to local DB
+		//Add new report row to the local database.
 		$db = CP::getDb(DB_MASTER);
-		$db->insert('user_board_reports', [
-			'ubr_report_archive_id' => $this->id,
-			'ubr_reporter_id' => $user->getId(),
-			'ubr_reporter_global_id' => $globalId,
-			'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp']),
-		], __METHOD__);
+		$db->insert(
+			'user_board_reports',
+			[
+				'ubr_report_archive_id' => $this->id,
+				'ubr_reporter_id' => $user->getId(),
+				'ubr_reporter_global_id' => $globalId,
+				'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp'])
+			],
+			__METHOD__
+		);
+
+		\EchoEvent::create([
+			'type' => 'comment-report',
+			'agent' => $user,
+			'title' => $toUser->getUserPage(),
+			'extra' => [
+				'comment_id' => $this->data['comment_id'],
+			]
+		]);
 
 		$redis = \RedisCache::getClient('cache');
 
-		try {
-			// increment volume index in redis
-			$redis->zIncrBy(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
+		if ($redis !== false) {
+			try {
+				//Increment volume index in Redis.
+				$redis->zIncrBy(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
 
-			// update serialized redis data
-			$this->data['reports'][] = $newReport;
-			$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+				//Update serialized Redis data.
+				$this->data['reports'][] = $newReport;
+				$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
+			} catch (\Throwable $e) {
+				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			}
 		}
 	}
 

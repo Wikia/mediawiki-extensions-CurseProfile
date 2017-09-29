@@ -415,7 +415,7 @@ class Hooks {
 				'message' => 'notification-link-text-view-comment',
 				'destination' => 'profile'
 			],
-			'category' => 'profile-comment',
+			'category' => 'profile-report',
 			'group' => 'interactive',
 			'icon' => 'mention',
 			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
@@ -425,10 +425,10 @@ class Hooks {
 			'email-subject-message' => 'notification-comment-report-email-subject',
 			'email-subject-params' => ['agent', 'user'],
 			'email-body-batch-message' => 'notification-comment-report-email-body',
-			'email-body-batch-params' => ['agent', 'user', 'comment_id', 'comment'],
+			'email-body-batch-params' => ['agent', 'user', 'comment_id'],
 			'email-body-batch-bundle-message' => 'notification-comment-report-email-batch-body',
 			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getHydraAdmins']
+			\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getAdmins']
 		];
 
 		return true;

@@ -158,11 +158,11 @@ class TemplateCommentModeration {
 	 */
 	private function permalink($rep) {
 		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
+			$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
 			if ($rep['comment']['origin_wiki'] == 'master') {
 				$domain = $GLOBALS['wgServer'];
 				$wikiName = $GLOBALS['wgSitename'];
-			} else {
-				$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
+			} elseif ($wiki !== false) {
 				$domain = $wiki->getDomains()->getDomain();
 				$wikiName = $wiki->getNameForDisplay();
 			}

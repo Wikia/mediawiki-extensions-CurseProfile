@@ -322,8 +322,8 @@ class CommentApi extends \HydraApiBase {
 	public function doReport() {
 		$commentId = $this->getMain()->getVal('comment_id');
 		if ($commentId) {
-			$res = CommentBoard::reportComment($commentId);
-			$this->getResult()->addValue(null, 'result', $res ? 'success' : 'error');
+			$result = CommentBoard::reportComment($commentId);
+			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {
 			return $this->dieUsageMsg(['comment-invalidaction']);
 		}
