@@ -344,13 +344,14 @@ class CommentBoard {
 	}
 
 	/**
-	 * Checks if a user has permissions to leave a comment
+	 * Checks if a user has permissions to leave a comment.
 	 *
-	 * @param	obj		int user id or mw User object who owns the potential board
-	 * @param	obj		[Optional] mw User object for comment author, defaults to $wgUser
-	 * @return	bool
+	 * @access	public
+	 * @param	object	Integer user ID or User object who owns the potential board.
+	 * @param	object	[Optional] User object for comment author, defaults to $wgUser.
+	 * @return	boolean	Can Comment
 	 */
-	public static function canComment($toUser, $fromUser = null) {
+	static public function canComment($toUser, $fromUser = null) {
 		global $wgCPEditsToComment, $wgEmailAuthentication;
 
 		if (is_numeric($toUser)) {
@@ -363,6 +364,8 @@ class CommentBoard {
 			global $wgUser;
 			$fromUser = $wgUser;
 		}
+
+		$editCount = $fromUser->getEditCount();
 
 		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($fromUser->getEmail())));
 
@@ -379,14 +382,14 @@ class CommentBoard {
 					]
 				);
 				$stats = \Cheevos\CheevosHelper::makeNiceStatProgressArray($stats);
-				$wgCPEditsToComment = (isset($stats[$globalId]['article_edit']['count']) && $stats[$globalId]['article_edit']['count'] > $wgCPEditsToComment ? $stats[$globalId]['article_edit']['count'] : $wgCPEditsToComment);
+				$editCount = (isset($stats[$globalId]['article_edit']['count']) && $stats[$globalId]['article_edit']['count'] > $editCount ? $stats[$globalId]['article_edit']['count'] : $editCount);
 			} catch (\Cheevos\CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting article_edit count.");
 			}
 		}
 
 		//User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
-		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($fromUser->getEditCount() >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
+		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($editCount >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
 	}
 
 	/**
