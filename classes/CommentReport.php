@@ -256,10 +256,9 @@ class CommentReport {
 			return null;
 		}
 
-		// get last touched timestamp
 		$res = $db->select(
 			['user_board'],
-			['ub_id', 'ub_user_id_from', 'ub_date', 'ub_edited', 'ub_message'],
+			['*'],
 			[
 				"ub_id" => $commentId,
 				"ub_type" => CommentBoard::PUBLIC_MESSAGE
@@ -278,7 +277,7 @@ class CommentReport {
 		$comment['last_touched'] = $comment['ub_edited'] ? $comment['ub_edited'] : $comment['ub_date'];
 		$res = $db->select(
 			['user_board_report_archives'],
-			['ra_id', 'ra_comment_id', 'ra_last_edited', 'ra_action_taken'],
+			['*'],
 			[
 				"ra_comment_id" => $commentId,
 				"ra_last_edited" => $comment['last_touched']
@@ -347,12 +346,13 @@ class CommentReport {
 	}
 
 	/**
-	 * Creates a new comment report object from a DB row
+	 * Creates a new comment report object from a DB row.
 	 *
-	 * @param	array	row from the the user_board_report_archives table
-	 * @return	obj		CommentReport instance
+	 * @access	private
+	 * @param	array	Row from the the user_board_report_archives table.
+	 * @return	object	CommentReport instance
 	 */
-	private static function newFromRow($report) {
+	static private function newFromRow($report) {
 		global $dsSiteKey;
 		$data = [
 			'comment' => [
@@ -374,12 +374,13 @@ class CommentReport {
 	}
 
 	/**
-	 * Loads individual user reports for a given comment report
+	 * Loads individual user reports for a given comment report.
 	 *
-	 * @param   int     the ra_comment_id from the user_board_report_archives table
-	 * @return  array   with sub arrays for each report having keys reporter => global_id, timestamp
+	 * @access	private
+	 * @param	integer	The ra_comment_id from the user_board_report_archives table
+	 * @return	array	With sub arrays for each report having keys reporter => global_id, timestamp
 	 */
-	private static function getReportsForId($id) {
+	static private function getReportsForId($id) {
 		$db = CP::getDb(DB_SLAVE);
 		$res = $db->select(
 			['user_board_reports'],
@@ -514,7 +515,6 @@ class CommentReport {
 			'user_board_reports',
 			[
 				'ubr_report_archive_id' => $this->id,
-				'ubr_reporter_id' => $user->getId(),
 				'ubr_reporter_global_id' => $globalId,
 				'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp'])
 			],
@@ -524,9 +524,8 @@ class CommentReport {
 		\EchoEvent::create([
 			'type' => 'comment-report',
 			'agent' => $user,
-			'title' => $toUser->getUserPage(),
 			'extra' => [
-				'comment_id' => $this->data['comment_id'],
+				'comment_id' => $this->data['comment']['cid'],
 			]
 		]);
 
