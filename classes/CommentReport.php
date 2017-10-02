@@ -148,12 +148,13 @@ class CommentReport {
 	/**
 	 * Queries redis data store for reports
 	 *
+	 * @access	private
 	 * @param	string	sort style
 	 * @param	integer	max number of reports to return
 	 * @param	integer	offset
 	 * @return	array	0 or more CommentReport instances
 	 */
-	private static function getReportsRedis($sortStyle, $limit, $offest) {
+	static private function getReportsRedis($sortStyle, $limit, $offset) {
 		$redis = \RedisCache::getClient('cache');
 
 		$reports = [];
@@ -166,7 +167,7 @@ class CommentReport {
 
 				case 'byVolume':
 				default:
-					$keys = $redis->zRevRange(self::REDIS_KEY_VOLUME_INDEX, $offest, $limit+$offset);
+					$keys = $redis->zRevRange(self::REDIS_KEY_VOLUME_INDEX, $offset, $limit+$offset);
 			}
 
 			if (count($keys)) {

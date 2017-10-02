@@ -166,6 +166,9 @@ class TemplateCommentModeration {
 				$domain = $wiki->getDomains()->getDomain();
 				$wikiName = $wiki->getNameForDisplay();
 			}
+			if (!isset($domain) || !isset($wikiName)) {
+				return '';
+			}
 			return 'content as posted '.Html::rawElement('a', ['href'=>'http://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']], CP::timeTag($rep['comment']['last_touched']).' on '.$wikiName);
 		} else {
 			return CP::timeTag($rep['comment']['last_touched']);
