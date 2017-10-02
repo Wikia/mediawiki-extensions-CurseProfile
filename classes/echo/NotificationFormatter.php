@@ -53,16 +53,17 @@ class NotificationFormatter extends \EchoModelFormatter {
 	 * @return	void	Deliver the appropriate value to the message via ->params() instead of returning a value.
 	 */
 	protected function processParam($event, $param, $message, $user) {
+		$extra = $event->getExtra();
 		switch ($param) {
 			case 'gamepedia-footer':
 				$message->params(wfMessage('emailfooter-gamepedia')->text());
 				break;
 			case 'comment_id':
-				$extra = $event->getExtra();
-				$message->params( $extra['comment_id'] ? $extra['comment_id'] : 0 );
+				$message->params(isset($extra['comment_id']) ? $extra['comment_id'] : 0);
 				break;
 			default:
 				parent::processParam($event, $param, $message, $user);
+				break;
 		}
 	}
 

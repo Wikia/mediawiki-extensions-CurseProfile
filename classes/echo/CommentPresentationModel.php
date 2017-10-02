@@ -38,7 +38,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	 * Return the icon used for this notification.
 	 *
 	 * @access	public
-	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons
+	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons.
 	 */
 	public function getIconType() {
 		return 'mention';

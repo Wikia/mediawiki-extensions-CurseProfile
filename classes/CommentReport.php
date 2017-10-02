@@ -528,6 +528,7 @@ class CommentReport {
 		\EchoEvent::create([
 			'type' => 'comment-report',
 			'agent' => $user,
+			'title' => \Title::newFromText('Special:CommentModeration'),
 			'extra' => [
 				'comment_id' => $this->data['comment']['cid']
 			]
