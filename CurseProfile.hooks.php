@@ -343,6 +343,10 @@ class Hooks {
 			'tooltip' => 'echo-pref-tooltip-profile-comment',
 			'priority' => 4,
 		];
+		$wgEchoNotificationCategories['profile-report'] = [
+			'tooltip' => 'echo-pref-tooltip-profile-comment-report',
+			'priority' => 5,
+		];
 
 		$wgEchoNotifications['friendship'] = [
 			'primary-link' => [
@@ -421,13 +425,13 @@ class Hooks {
 			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
 			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
 			'title-message' => 'notification-header-comment-report',
-			'title-params' => ['agent', 'user'],
+			'title-params' => ['agent', 'user', 'comment_id'],
 			'email-subject-message' => 'notification-comment-report-email-subject',
-			'email-subject-params' => ['agent', 'user'],
+			'email-subject-params' => ['agent', 'user', 'comment_id'],
 			'email-body-batch-message' => 'notification-comment-report-email-body',
 			'email-body-batch-params' => ['agent', 'user', 'comment_id'],
 			'email-body-batch-bundle-message' => 'notification-comment-report-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
+			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count', 'comment_id'],
 			\EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getAdmins']
 		];
 

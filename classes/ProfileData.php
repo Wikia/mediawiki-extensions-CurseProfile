@@ -196,13 +196,18 @@ class ProfileData {
 
 	/**
 	 * Adds default values for preferences added by curse profile
-	 * @param array of default values
+	 *
+	 * @access	public
+	 * @param	array	Default Values
+	 * @return	null
 	 */
-	public static function insertProfilePrefsDefaults(&$defaultOptions) {
+	static public function insertProfilePrefsDefaults(&$defaultOptions) {
 		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
 		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
+		$defaultOptions['echo-subscriptions-web-profile-report'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-report'] = 1;
 
 		// Allow overriding by setting the value in the global $wgDefaultUserOptions
 		if (!isset($defaultOptions['profile-pref'])) {
@@ -212,10 +217,13 @@ class ProfileData {
 
 	/**
 	 * Runs when the user saves their preferences.
-	 * @param $user
-	 * @param $preferences
+	 *
+	 * @access	public
+	 * @param	object	User
+	 * @param	array	User Preferences
+	 * @return	null
 	 */
-	public static function processPreferenceSave($user, &$preferences) {
+	static public function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
 
 		// Try to determine what flag to display based on what they have entered as their country

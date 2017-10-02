@@ -57,7 +57,7 @@ class NotificationFormatter extends \EchoModelFormatter {
 			case 'gamepedia-footer':
 				$message->params(wfMessage('emailfooter-gamepedia')->text());
 				break;
-			case 'comment-id':
+			case 'comment_id':
 				$extra = $event->getExtra();
 				$message->params( $extra['comment_id'] ? $extra['comment_id'] : 0 );
 				break;

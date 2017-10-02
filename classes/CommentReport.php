@@ -31,20 +31,23 @@ class CommentReport {
 	const REDIS_KEY_ACTED_INDEX = 'cp:reportedcomments:processed';
 
 	/**
-	 * The structured data that is serialized into redis
-	 * @var		array
+	 * The structured data that is serialized into Redis.
+	 *
+	 * @var	array
 	 */
 	public $data;
 
 	/**
-	 * ID from the ra_id column of user_board_report_archives
-	 * @var		int
+	 * ID from the ra_id column of user_board_report_archives.
+	 *
+	 * @var	integer
 	 */
 	private $id = 0;
 
 	/**
-	 * Constructor used by static methods to create instances of this class
+	 * Constructor used by static methods to create instances of this class.
 	 *
+	 * @access	private
 	 * @param	array	$data a mostly filled out data set (see newFromRow)
 	 * @return	void
 	 */
@@ -55,11 +58,12 @@ class CommentReport {
 	/**
 	 * Gets the total count of how many comments are in a given queue
 	 *
+	 * @access	public
 	 * @param	string	$sortStyle which queue to count
 	 * @param	string	$qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
-	 * @return	int
+	 * @return	integer
 	 */
-	public static function getCount($sortStyle, $qualifier = null) {
+	static public function getCount($sortStyle, $qualifier = null) {
 		$redis = \RedisCache::getClient('cache');
 
 		try {
@@ -525,7 +529,7 @@ class CommentReport {
 			'type' => 'comment-report',
 			'agent' => $user,
 			'extra' => [
-				'comment_id' => $this->data['comment']['cid'],
+				'comment_id' => $this->data['comment']['cid']
 			]
 		]);
 
