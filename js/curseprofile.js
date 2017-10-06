@@ -5,8 +5,8 @@ function CurseProfile($) {
 			window.location = $(this).data('href');
 		});
 
-		if ($('.userinfo a.profileedit').length > 0) {
-			$('.userinfo')
+		$('.userinfo').each(function() {
+			$(this)
 				.on('click', 'a.profileedit', function(element) {
 					var fieldParent = $(this).parents("div[data-field]");
 					profile.editField(element, $(fieldParent).attr('data-field'));
@@ -19,7 +19,7 @@ function CurseProfile($) {
 					var fieldParent = $(this).parents("form[data-field]");
 					profile.saveField(element, $(fieldParent).attr('data-field'));
 				});
-		}
+		});
 		friendship.init();
 	};
 
@@ -104,14 +104,12 @@ function CurseProfile($) {
 			// obscure comment with translucent throbber
 			$block.append(profile.overlay);
 
-			// create new form to function as an edit form
-			if (profile.editForm === null) {
-				profile.editForm = $('<div>').addClass('entryform');
-				profile.editForm.append('<form data-field="'+field+'"><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
-				profile.editForm.find('button.cancel').text(mw.message('cancel').text());
-				profile.editForm.find('button.save').text(mw.message('save').text());
-				autosize(profile.editForm.find('textarea'));
-			}
+			//Create new form to function as an edit form.
+			profile.editForm = $('<div>').addClass('entryform');
+			profile.editForm.append('<form data-field="'+field+'"><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+			profile.editForm.find('button.cancel').text(mw.message('cancel').text());
+			profile.editForm.find('button.save').text(mw.message('save').text());
+			autosize(profile.editForm.find('textarea'));
 
 			//Use API to download raw text.
 			(new mw.Api()).post({
