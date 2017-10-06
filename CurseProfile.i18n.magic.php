@@ -1,20 +1,18 @@
 <?php
-
 $magicWords = [];
 $magicWords['en'] = [
-	'recentactivity' => array(0, 'recentactivity'),
-	'friendadd'      => array(0, 'friendadd'),
-	'friendcount'    => array(0, 'friendcount'),
-	'friendlist'     => array(0, 'friendlist'),
-	'comments'       => array(0, 'comments'),
-	'avatar'         => array(0, 'avatar'),
-	'groups'         => array(0, 'groups'),
-	'aboutme'        => array(0, 'aboutme'),
-	'location'       => array(0, 'location'),
-	'profilelinks'   => array(0, 'profilelinks'),
-	'favwiki'        => array(0, 'favwiki'),
-	'userstats'      => array(0, 'userstats'),
-	'userlevel'      => array(0, 'userlevel'),
-	'editorfriends'  => array(0, 'editorfriends'),
-	'achievements'   => array(0, 'achievements'),
+	'achievements'		=> [0, 'achievements'],
+	'avatar'			=> [0, 'avatar'],
+	'comments'			=> [0, 'comments'],
+	'editorfriends'		=> [0, 'editorfriends'],
+	'favwiki'			=> [0, 'favwiki'],
+	'friendadd'			=> [0, 'friendadd'],
+	'friendcount'		=> [0, 'friendcount'],
+	'friendlist'		=> [0, 'friendlist'],
+	'groups'			=> [0, 'groups'],
+	'profilefield'		=> [0, 'profilefield'],
+	'profilelinks'		=> [0, 'profilelinks'],
+	'recentactivity'	=> [0, 'recentactivity'],
+	'userlevel'			=> [0, 'userlevel'],
+	'userstats'			=> [0, 'userstats']
 ];

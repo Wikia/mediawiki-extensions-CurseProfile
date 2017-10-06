@@ -50,8 +50,14 @@ class ProfileApi extends \HydraApiBase {
 	 */
 	public function getActions() {
 		return [
-			'getRawAboutMe' => [
+			'getRawField' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
 				'params' => [
+					'field' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
 					'userId' => [
 						\ApiBase::PARAM_TYPE => 'integer',
 						\ApiBase::PARAM_MIN => 1,
@@ -77,10 +83,14 @@ class ProfileApi extends \HydraApiBase {
 					],
 				],
 			],
-			'editAboutMe' => [
+			'editField' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
+					'field' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
 					'userId' => [
 						\ApiBase::PARAM_TYPE		=> 'integer',
 						\ApiBase::PARAM_MIN			=> 1,
@@ -93,19 +103,6 @@ class ProfileApi extends \HydraApiBase {
 				],
 			],
 		];
-	}
-
-	/**
-	 * Add the raw about me text into the API response.
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	public function doGetRawAboutMe() {
-		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-moderate')) {
-			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
-			$this->getResult()->addValue(null, 'text', $profileData->getAboutText());
-		}
 	}
 
 	/**
@@ -152,14 +149,37 @@ class ProfileApi extends \HydraApiBase {
 	}
 
 	/**
+	 * Add the raw about me text into the API response.
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+	public function doGetRawField() {
+		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-moderate')) {
+			$field = strtolower($this->getRequest()->getText('field'));
+			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+			try {
+				$fieldText = $profileData->getField($field);
+			} catch (\MWException $e) {
+				$this->getResult()->addValue(null, 'result', 'failure');
+				$this->getResult()->addValue(null, 'errormsg', 'Invalid profile field.');
+				return;
+			}
+
+			$this->getResult()->addValue(null, $field, $profileData->getField($field));
+		}
+	}
+
+	/**
 	 * Perform an edit on the about me section.
 	 *
 	 * @access	public
 	 * @return	void
 	 */
-	public function doEditAboutMe() {
+	public function doEditField() {
 		global $wgOut;
 
+		$field = strtolower($this->getRequest()->getText('field'));
 		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
 
 		$canEdit = $profileData->canEdit($this->getUser());
@@ -169,12 +189,18 @@ class ProfileApi extends \HydraApiBase {
 			return;
 		}
 
-		$text = $this->getMain()->getVal('text');
-		$profileData->setAboutText($text, $this->getUser());
-		$this->getResult()->addValue(null, 'result', 'success');
-		//Add parsed text to result.
-		$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
-
-		return;
+		try {
+			$text = $this->getMain()->getVal('text');
+			$profileData->setField($field, $text, $this->getUser());
+			$fieldText = $profileData->getField($field);
+			$this->getResult()->addValue(null, 'result', 'success');
+			//Add parsed text to result.
+			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($fieldText));
+			return;
+		} catch (\MWException $e) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', 'invalid_profile_field');
+			return;
+		}
 	}
 }

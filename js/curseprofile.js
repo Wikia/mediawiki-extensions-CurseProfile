@@ -7,9 +7,18 @@ function CurseProfile($) {
 
 		if ($('.userinfo a.profileedit').length > 0) {
 			$('.userinfo')
-				.on('click', 'a.profileedit', profile.editAboutMe)
-				.on('click', 'button.cancel', profile.cancelEdit)
-				.on('click', 'button.save', profile.saveAboutMe);
+				.on('click', 'a.profileedit', function(element) {
+					var fieldParent = $(this).parents("div[data-field]");
+					profile.editField(element, $(fieldParent).attr('data-field'));
+				})
+				.on('click', 'button.cancel', function(element) {
+					var fieldParent = $(this).parents("form[data-field]");
+					profile.cancelEdit(element, $(fieldParent).attr('data-field'));
+				})
+				.on('click', 'button.save', function(element) {
+					var fieldParent = $(this).parents("form[data-field]");
+					profile.saveField(element, $(fieldParent).attr('data-field'));
+				});
 		}
 		friendship.init();
 	};
@@ -88,8 +97,8 @@ function CurseProfile($) {
 		editForm: null,
 		overlay: $('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>'),
 
-		editAboutMe: function(e) {
-			var $this = $(this), $profile = $('.curseprofile'), $block = $('.aboutme');
+		editField: function(e, field) {
+			var $this = $(this), $profile = $('.curseprofile'), $block = $('#profile-'+field);
 			e.preventDefault();
 
 			// obscure comment with translucent throbber
@@ -98,26 +107,27 @@ function CurseProfile($) {
 			// create new form to function as an edit form
 			if (profile.editForm === null) {
 				profile.editForm = $('<div>').addClass('entryform');
-				profile.editForm.append('<form><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+				profile.editForm.append('<form data-field="'+field+'"><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
 				profile.editForm.find('button.cancel').text(mw.message('cancel').text());
 				profile.editForm.find('button.save').text(mw.message('save').text());
 				autosize(profile.editForm.find('textarea'));
 			}
 
-			// use API to download raw comment text
+			//Use API to download raw text.
 			(new mw.Api()).post({
 				action: 'profile',
-				do: 'getRawAboutMe',
+				do: 'getRawField',
+				field: field,
 				userId: $profile.data('userid'),
 				format: 'json',
 				formatversion: 2,
 				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
-				if (resp.text !== null) {
-					// insert edit form into DOM to replace throbber
+				if (resp[field] !== undefined && resp[field] !== null) {
+					//Insert edit form into DOM to replace throbber.
 					$block.hide().after(profile.editForm);
 
-					// insert raw comment text in to edit form
+					//Insert raw comment text in to edit form.
 					profile.editForm.find('textarea').val(resp.text).trigger('autosize:update');
 				} else {
 					profile.cancelEdit();
@@ -125,20 +135,20 @@ function CurseProfile($) {
 			});
 		},
 
-		cancelEdit: function(e) {
-			var $block = $('.aboutme');
+		cancelEdit: function(e, field) {
+			var $block = $('#profile-'+field);
 			if (e && e.preventDefault) {
 				e.preventDefault();
 			}
 
-			// remove edit form and show old comment content
+			//Remove edit form and show old comment content.
 			profile.overlay.detach();
 			profile.editForm.detach();
 			$block.show();
 		},
 
-		saveAboutMe: function(e) {
-			var $this = $(this), $block = $('.aboutme'), $profile = $('.curseprofile'), $editPencil = $('.aboutme a.profileedit'), api = new mw.Api();
+		saveField: function(e, field) {
+			var $this = $(this), $block = $('#profile-'+field), $profile = $('.curseprofile'), $editPencil = $('#profile-'+field+' a.profileedit'), api = new mw.Api();
 			e.preventDefault();
 
 			// overlay throbber
@@ -147,7 +157,8 @@ function CurseProfile($) {
 			// use API to post new comment text
 			api.post({
 				action: 'profile',
-				do: 'editAboutMe',
+				do: 'editField',
+				field: field,
 				userId: $profile.data('userid'),
 				text: profile.editForm.find('textarea').val(),
 				format: 'json',
@@ -160,12 +171,12 @@ function CurseProfile($) {
 					$block.html(resp.parsedContent);
 					$block.prepend($editPencil);
 					// end the editing context
-					profile.cancelEdit();
+					profile.cancelEdit(e, field);
 				} else if (resp.result === 'failure') {
-					alert(mw.msg(resp.errormsg));
-					profile.cancelEdit();
+					alert(mw.message(resp.errormsg).text());
+					profile.cancelEdit(e, field);
 				} else {
-					profile.cancelEdit();
+					profile.cancelEdit(e, field);
 				}
 			});
 		}

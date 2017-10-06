@@ -371,16 +371,17 @@ class ProfilePage extends \Article {
 	 * @param	object	parser reference
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public function aboutBlock(&$parser) {
+	public function fieldBlock(&$parser, $field) {
 		global $wgOut, $wgUser;
-		$aboutText = $wgOut->parse($this->profile->getAboutText());
+
+		$fieldText = $wgOut->parse($this->profile->getField($field));
 
 		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
-			if (empty($aboutText)) {
-				$aboutText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
+			if (empty($fieldText)) {
+				$fieldText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
 			}
 
-			$aboutText = \Html::rawElement(
+			$fieldText = \Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat profileedit',
@@ -388,10 +389,10 @@ class ProfilePage extends \Article {
 					'title' =>	wfMessage('editaboutme-tooltip')->plain()
 				],
 				\HydraCore::awesomeIcon('pencil')
-			).$aboutText;
+			).$fieldText;
 		}
 		return [
-			$aboutText,
+			$fieldText,
 			'isHTML' => true
 		];
 	}
@@ -851,11 +852,11 @@ class ProfilePage extends \Article {
 				{{#groups:}}
 			</div>
 			<div>
-				<div class="location">{{#location:}}</div>
+				<div id="profile-location" data-field="location">{{#profilefield:location}}</div>
 				{{#profilelinks:}}
 			</div>
-			<div class="aboutme">
-				{{#aboutme:}}
+			<div id="profile-aboutme" data-field="aboutme">
+				{{#profilefield:aboutme}}
 			</div>
 		</div>
 		<div class="activity section">

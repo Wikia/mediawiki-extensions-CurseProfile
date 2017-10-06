@@ -48,24 +48,20 @@ class Hooks {
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
 		// onBeforeInitialize and not setting self::$profilePage
 		if (self::$profilePage && self::$profilePage->isProfilePage()) {
-			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
-
-			// methods on the profile object
-			$parser->setFunctionHook('groups',				[self::$profilePage, 'groupList']);
-			$parser->setFunctionHook('aboutme',				[self::$profilePage, 'aboutBlock']);
-			$parser->setFunctionHook('favwiki',				[self::$profilePage, 'favoriteWiki']);
-			$parser->setFunctionHook('location',			[self::$profilePage, 'location']);
-			$parser->setFunctionHook('profilelinks',		[self::$profilePage, 'profileLinks']);
-			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline due to parser issues)
-			$parser->setFunctionHook('userlevel',			[self::$profilePage, 'userLevel']);
-			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
 			$parser->setFunctionHook('achievements',		[self::$profilePage, 'recentAchievements']);
-
-			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
+			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
+			$parser->setFunctionHook('favwiki',				[self::$profilePage, 'favoriteWiki']);
+			$parser->setFunctionHook('groups',				[self::$profilePage, 'groupList']);
+			$parser->setFunctionHook('profilefield',		[self::$profilePage, 'fieldBlock']);
+			$parser->setFunctionHook('profilelinks',		[self::$profilePage, 'profileLinks']);
+			$parser->setFunctionHook('userlevel',			[self::$profilePage, 'userLevel']);
+			$parser->setFunctionHook('avatar',				'CurseProfile\ProfilePage::userAvatar');
+			$parser->setFunctionHook('comments',			'CurseProfile\CommentDisplay::comments');
 			$parser->setFunctionHook('friendadd',			'CurseProfile\FriendDisplay::addFriendLink');
 			$parser->setFunctionHook('friendcount',			'CurseProfile\FriendDisplay::count');
 			$parser->setFunctionHook('friendlist',			'CurseProfile\FriendDisplay::friendList');
-			$parser->setFunctionHook('comments',			'CurseProfile\CommentDisplay::comments');
+			$parser->setFunctionHook('recentactivity',		'CurseProfile\RecentActivity::parserHook');
+			// $parser->setFunctionHook('userstats',			'CurseProfile\ProfilePage::userStats'); (replaced inline due to parser issues)
 		}
 		return true;
 	}

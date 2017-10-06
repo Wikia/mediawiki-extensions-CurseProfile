@@ -217,5 +217,6 @@
 	"cp-master-only": "This special page is only available on the master wiki.",
 	"stat_id": "Stat ID",
 	"count": "Count",
-	"last_incremented": "Last Incremented"
+	"last_incremented": "Last Incremented",
+	"invalid_profile_field": "Invalid profile field."
 }

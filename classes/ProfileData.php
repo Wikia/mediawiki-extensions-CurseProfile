@@ -29,13 +29,12 @@ class ProfileData {
 
 	/**
 	 * Fields in user preferences that a user can edit to earn a "customize your profile" achievement
+	 *
 	 * @var		array
 	 */
-	public static $editProfileFields = [
+	static public $editProfileFields = [
 		'profile-aboutme',
-		'profile-city',
-		'profile-state',
-		'profile-country',
+		'profile-location',
 		'profile-link-twitter',
 		'profile-link-facebook',
 		'profile-link-google',
@@ -76,10 +75,13 @@ class ProfileData {
 	}
 
 	/**
-	 * Inserts curse profile fields into the user preferences form
-	 * @param array of data for HTMLForm to generate the Special:Preferences form
+	 * Inserts curse profile fields into the user preferences form.
+	 *
+	 * @access	public
+	 * @param	array	Data for HTMLForm to generate the Special:Preferences form
+	 * @return	void
 	 */
-	public static function insertProfilePrefs(&$preferences) {
+	static public function insertProfilePrefs(&$preferences) {
 		$preferences['profile-pref'] = [
 			'type' => 'select',
 			'label-message' => 'profileprefselect',
@@ -119,19 +121,9 @@ class ProfileData {
 			'default' => wfMessage('avatar-help')->parse(),
 			'raw' => true,
 		];
-		$preferences['profile-city'] = [
+		$preferences['profile-location'] = [
 			'type' => 'text',
 			'label-message' => 'citylabel',
-			'section' => 'personal/info/location',
-		];
-		$preferences['profile-state'] = [
-			'type' => 'text',
-			'label-message' => 'statelabel',
-			'section' => 'personal/info/location',
-		];
-		$preferences['profile-country'] = [
-			'type' => 'text',
-			'label-message' => 'countrylabel',
 			'section' => 'personal/info/location',
 		];
 		$preferences['profile-link-facebook'] = [
@@ -257,7 +249,7 @@ class ProfileData {
 		}
 
 		// run hooks on profile preferences (mostly for achievements)
-		foreach(self::$editProfileFields as $field) {
+		foreach (self::$editProfileFields as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $field, $preferences[$field]]);
 			}
@@ -280,16 +272,6 @@ class ProfileData {
 			}
 			$this->user = \User::newFromId($user);
 		}
-	}
-
-	/**
-	 * Get the user's "About Me" text
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	public function getAboutText() {
-		return (string) $this->user->getOption('profile-aboutme');
 	}
 
 	/**
@@ -321,20 +303,43 @@ class ProfileData {
 	}
 
 	/**
-	 * Set the user's "About Me" text
+	 * Get a the profile field text.
 	 *
-	 * @param  string  the new text for the user's aboutme
-	 * @param	object	[Optional] User who performed the action.  Null to use the current user.
+	 * @access	public
+	 * @param	string	Field Name - Examples: aboutme, location, link_twitch
+	 * @return	string
 	 */
-	public function setAboutText($text, $performer = null) {
-		$this->user->setOption('profile-aboutme', $text);
+	public function getField($field) {
+		$field = 'profile-'.$field;
+		if (!in_array($field, self::$editProfileFields)) {
+			throw new \MWException(__METHOD__.': Invalid profile field.');
+		}
+		return (string) $this->user->getOption($field);
+	}
+
+	/**
+	 * Set a profile field.
+	 *
+	 * @access	public
+	 * @param	string	Field Name - Examples: aboutme, location, link_twitch
+	 * @param	string	the new text for the user's aboutme
+	 * @param	object	[Optional] User who performed the action.  Null to use the current user.
+	 * @return	void
+	 */
+	public function setField($field, $text, $performer = null) {
+		$field = 'profile-'.$field;
+		if (!in_array($field, self::$editProfileFields)) {
+			throw new \MWException(__METHOD__.': Invalid profile field.');
+		}
+
+		$this->user->setOption($field, $text);
 		$this->user->saveSettings();
 
 		if ($performer === null) {
 			$performer = $this->user;
 		}
 
-		self::logProfileChange('profile-aboutme', $text, $this->user, $performer);
+		self::logProfileChange($field, $text, $this->user, $performer);
 	}
 
 	/**
