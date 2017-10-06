@@ -128,7 +128,7 @@ function CurseProfile($) {
 					$block.hide().after(profile.editForm);
 
 					//Insert raw comment text in to edit form.
-					profile.editForm.find('textarea').val(resp.text).trigger('autosize:update');
+					profile.editForm.find('textarea').val(resp[field]).trigger('autosize:update');
 				} else {
 					profile.cancelEdit();
 				}

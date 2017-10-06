@@ -180,6 +180,7 @@ class ProfileApi extends \HydraApiBase {
 		global $wgOut;
 
 		$field = strtolower($this->getRequest()->getText('field'));
+		$text = $this->getMain()->getVal('text');
 		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
 
 		$canEdit = $profileData->canEdit($this->getUser());
@@ -190,7 +191,6 @@ class ProfileApi extends \HydraApiBase {
 		}
 
 		try {
-			$text = $this->getMain()->getVal('text');
 			$profileData->setField($field, $text, $this->getUser());
 			$fieldText = $profileData->getField($field);
 			$this->getResult()->addValue(null, 'result', 'success');

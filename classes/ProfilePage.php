@@ -378,7 +378,7 @@ class ProfilePage extends \Article {
 
 		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
 			if (empty($fieldText)) {
-				$fieldText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty_about_text' : 'empty_about_text_mod'))->plain());
+				$fieldText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-'.$field.'-text' : 'empty-'.$field.'-text-mod'))->plain());
 			}
 
 			$fieldText = \Html::rawElement(
@@ -386,7 +386,7 @@ class ProfilePage extends \Article {
 				[
 					'class'	=> 'rightfloat profileedit',
 					'href'	=> '#',
-					'title' =>	wfMessage('editaboutme-tooltip')->plain()
+					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
 				],
 				\HydraCore::awesomeIcon('pencil')
 			).$fieldText;
@@ -923,7 +923,7 @@ __NOTOC__
 			</div>
 		</div>
 		<h1>'.wfMessage('cp-mobile-aboutme').'</h1>
-		{{#aboutme:}}
+		{{#profilefield:aboutme}}
 		<h1>'.wfMessage('cp-mobile-groups').'</h1>
 		{{#groups:}}
 		<h1>'.wfMessage('cp-statisticssection').'</h1>
