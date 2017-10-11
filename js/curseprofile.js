@@ -268,10 +268,11 @@ function CurseProfile($) {
 						}
 					});
 				} else {
+					/*
+						This is a social edit.
+					*/
 					var $block = $('#'+blockId),
 						$editPencil = $('#' + blockId + ' a.socialedit');
-
-
 
 					var data = {};
 					for (var x in fields) {
@@ -297,12 +298,6 @@ function CurseProfile($) {
 							// replace the text of the old comment object
 							$editPencil.detach();
 							$block.html(resp.parsedContent);
-
-
-							// we are good - this is bad.
-							// till we can figure out a clean way of doing this...
-							//window.location.reload();
-
 							$block.prepend($editPencil);
 							// end the editing context
 							profile.cancelEdit(e, field);

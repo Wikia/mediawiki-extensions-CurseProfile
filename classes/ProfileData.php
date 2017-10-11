@@ -46,7 +46,7 @@ class ProfileData {
 	];
 
 	/**
-	 * Undocumented function
+	 * Return editProfileFields.
 	 *
 	 * @return void
 	 */

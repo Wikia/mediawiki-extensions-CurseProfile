@@ -398,17 +398,14 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Undocumented function
+	 * Generate Profile Links HTML
 	 *
-	 * @param [type] $wgUser
-	 * @param [type] $profileLinks
-	 * @param [type] $fields
+	 * @param wgUser $wgUser
+	 * @param array $profileLinks
+	 * @param array $fields
 	 * @return void
 	 */
 	public static function generateProfileLinks($wgUser, $profileLinks, $fields) {
-
-
-
 		$HTML = '<ul class="profilelinks">';
 		if (count($profileLinks)) {
 			foreach ($profileLinks as $key => $link) {
@@ -470,7 +467,6 @@ class ProfilePage extends \Article {
 		global $wgUser;
 
 		$profileLinks = $this->profile->getProfileLinks();
-
 		$links = $this->profile->getValidEditFields();
 		$fields = [];
 		foreach($links as $i => $link) {
@@ -478,20 +474,11 @@ class ProfilePage extends \Article {
 				$fields[] = str_replace("profile-link","link",$link);
 			}
 		}
-
 		$HTML = "";
-
 		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
 			if (!count($profileLinks)) {
 				$HTML .= "".\Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."";
 			}
-
-			/*
-				Generate list for profile fields.
-			*/
-
-
-
 			$HTML .= "".\Html::rawElement(
 				'a',
 				[
@@ -502,12 +489,8 @@ class ProfilePage extends \Article {
 				\HydraCore::awesomeIcon('pencil')
 			)."";
 		}
-
 		$HTML .= self::generateProfileLinks($wgUser,$profileLinks,$fields);
-
 		$HTML = "<div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".$HTML."</div>";
-
-
 		return [
 			$HTML,
 			'isHTML' => true,

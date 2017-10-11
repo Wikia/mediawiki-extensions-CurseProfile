@@ -253,16 +253,8 @@ class ProfileApi extends \HydraApiBase {
 				$fields[] = $field;
 				$profileLinks[str_replace("link-","",$field)] = $profileData->getField($field);;
 			}
-
-			$this->getResult()->addValue(null, 'data', $data);
-			$this->getResult()->addValue(null, 'fields', $fields);
-			$this->getResult()->addValue(null, 'profileLinks', $profileLinks);
-
 			$output = \CurseProfile\ProfilePage::generateProfileLinks($this->getUser(),$profileLinks,$fields);
-
 			$this->getResult()->addValue(null, 'result', 'success');
-			//Add parsed text to result.
-
 			$this->getResult()->addValue(null, 'parsedContent', $output);
 			return;
 		} catch (\MWException $e) {
