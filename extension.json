@@ -128,7 +128,21 @@
 				"purgeaboutme-prompt",
 				"save",
 				"tooltip-t-contributions",
-				"userrights"
+				"userrights",
+				"profile-link-twitter",
+				"profile-link-facebook",
+				"profile-link-google",
+				"profile-link-reddit",
+				"profile-link-steam",
+				"profile-link-xbl",
+				"profile-link-psn",
+				"twitterlinkplaceholder",
+				"facebooklinkplaceholder",
+				"googlelinkplaceholder",
+				"redditlinkplaceholder",
+				"steamlinkplaceholder",
+				"xbllinkplaceholder",
+				"psnlinkplaceholder"
 			]
 		},
 		"ext.curseprofile.preferences": {

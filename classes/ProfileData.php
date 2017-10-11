@@ -338,7 +338,7 @@ class ProfileData {
 	public function setField($field, $text, $performer = null) {
 		$field = 'profile-'.$field;
 		if (!in_array($field, self::$editProfileFields)) {
-			throw new \MWException(__METHOD__.': Invalid profile field.');
+			throw new \MWException(__METHOD__.': Invalid profile field ('.$field.').');
 		}
 
 		$this->user->setOption($field, $text);

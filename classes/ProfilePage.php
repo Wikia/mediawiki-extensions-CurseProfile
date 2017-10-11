@@ -467,7 +467,7 @@ class ProfilePage extends \Article {
 				}
 			}
 
-			$HTML .= "<li><div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".\Html::rawElement(
+			$HTML .= "<li>".\Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat socialedit',
@@ -475,10 +475,12 @@ class ProfilePage extends \Article {
 					'title' =>	wfMessage('editfield-social-tooltip')->plain()
 				],
 				\HydraCore::awesomeIcon('pencil')
-			)."</div></li>";
+			)."</li>";
 		}
 
 		$HTML .= '</ul>';
+
+		$HTML = "<div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".$HTML."</div>";
 
 		return [
 			$HTML,

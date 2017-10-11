@@ -102,6 +102,22 @@ class ProfileApi extends \HydraApiBase {
 					],
 				],
 			],
+			'editFields' => [
+				'tokenRequired' => true,
+				'postRequired' => true,
+				'params' => [
+					'data' => [
+						\ApiBase::PARAM_TYPE => 'string',
+						\ApiBase::PARAM_REQUIRED => true,
+					],
+					'userId' => [
+						\ApiBase::PARAM_TYPE		=> 'integer',
+						\ApiBase::PARAM_MIN			=> 1,
+						\ApiBase::PARAM_REQUIRED	=> true,
+					],
+
+				],
+			],
 		];
 	}
 
@@ -199,7 +215,53 @@ class ProfileApi extends \HydraApiBase {
 			return;
 		} catch (\MWException $e) {
 			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'invalid_profile_field');
+			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
+			return;
+		}
+	}
+
+	/**
+	 * Perform an edit on the about me section with multiple fields.
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+	public function doEditFields() {
+		global $wgOut;
+
+		$odata = $this->getRequest()->getText('data');
+		$data = json_decode($odata,1);
+		if (!$data) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', 'Failed to decode data sent. ('.$odata.')');
+			return;
+		}
+
+		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+		$canEdit = $profileData->canEdit($this->getUser());
+		if ($canEdit !== true) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', $canEdit);
+			return;
+		}
+
+		try {
+			$fieldText = [];
+			foreach ($data as $field => $text) {
+				$profileData->setField($field, $text, $this->getUser());
+				$fieldText[$field] = $profileData->getField($field);
+			}
+			$output = json_encode($fieldText);
+			$this->getResult()->addValue(null, 'result', 'success');
+			//Add parsed text to result.
+			if ($this->getRequest()->getText('returnParsed')) {
+				$output = $wgOut->parse($this->getRequest()->getText('returnParsed'));
+			}
+			$this->getResult()->addValue(null, 'parsedContent', $output);
+			return;
+		} catch (\MWException $e) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
 			return;
 		}
 	}

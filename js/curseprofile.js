@@ -11,13 +11,21 @@ function CurseProfile($) {
 					var fieldParent = $(this).parents("div[data-field]");
 					profile.editField(element, $(fieldParent).attr('data-field'), $(fieldParent).attr('id'));
 				})
+				.on('click', 'a.socialedit', function (element) {
+					var fieldParent = $(this).parents("div[data-field]");
+					profile.editSocialField(element, $(fieldParent).attr('data-field'), $(fieldParent).attr('id'));
+				})
 				.on('click', 'button.cancel', function (element) {
 					var fieldParent = $(this).parents("form[data-field]");
-					profile.cancelEdit(element, $(fieldParent).attr('data-field'));
+					profile.cancelEdit(element, $(fieldParent).attr('data-field'), $(fieldParent).attr('id'));
 				})
 				.on('click', 'button.save', function (element) {
 					var fieldParent = $(this).parents("form[data-field]");
-					profile.saveField(element, $(fieldParent).attr('data-field'));
+					profile.saveField(element, $(fieldParent).attr('data-field'), $(fieldParent).attr('id'));
+				})
+				.on('click', 'button.saveGroup', function (element) {
+					var fieldParent = $(this).parents("form[data-field]");
+					profile.saveField(element, $(fieldParent).attr('data-field'), $(fieldParent).attr('data-block-id'));
 				});
 		});
 		friendship.init();
@@ -96,7 +104,13 @@ function CurseProfile($) {
 		profile = {
 			editForms: null,
 			overlay: $('<div class="overlay"><span class="fa fa-spinner fa-2x fa-pulse"></span></div>'),
-
+			removeUnfinished: function(){
+				if (profile.editForms) {
+					$("#" + profile.editForms.attr('id').replace("block-", "")).show();
+					profile.editForms.remove();
+					profile.editForms = null;
+				}
+			},
 			editField: function (e, field, blockId) {
 				var $this = $(this),
 					$profile = $('.curseprofile'),
@@ -104,19 +118,14 @@ function CurseProfile($) {
 				e.preventDefault();
 
 				// remove any currently active edit forms since they will all get screwed up anyway
-				if (profile.editForms) {
-					$("#" + profile.editForms.attr('id').replace("block-", "")).show();
-					profile.editForms.remove();
-					profile.editForms = null;
-				}
+				profile.removeUnfinished();
 
-				console.log('Making edit box for ' + field);
 				// obscure comment with translucent throbber
 				$block.append(profile.overlay);
 
 				//Create new form to function as an edit form.
 				profile.editForms = $('<div>').addClass('entryform').attr('id', 'block-' + blockId);
-				profile.editForms.append('<form data-field="' + field + '"><textarea maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+				profile.editForms.append('<form data-field="' + field + '"><textarea class="autoresizeme" maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
 				profile.editForms.find('button.cancel').text(mw.message('cancel').text());
 				profile.editForms.find('button.save').text(mw.message('save').text());
 				autosize(profile.editForms.find('textarea'));
@@ -138,6 +147,7 @@ function CurseProfile($) {
 
 						//Insert raw comment text in to edit form.
 						profile.editForms.find('textarea').val(resp[field]).trigger('autosize:update');
+						autosize($('.autoresizeme'));
 					} else {
 						profile.cancelEdit();
 					}
@@ -145,56 +155,163 @@ function CurseProfile($) {
 
 			},
 
-			cancelEdit: function (e, field) {
-				var $block = $('#profile-' + field);
-				if (e && e.preventDefault) {
-					e.preventDefault();
-				}
-
-				//Remove edit form and show old comment content.
-				profile.overlay.detach();
-				for (var x in profile.editForms) {
-					profile.editForms.remove();
-				}
-				$block.show();
-			},
-
-			saveField: function (e, field) {
-				var $this = $(this), $block = $('#profile-' + field), $profile = $('.curseprofile'), $editPencil = $('#profile-' + field + ' a.profileedit'), api = new mw.Api();
+			editSocialField: function (e, getfields, blockId) {
+				// Here we have a really similar, but not the same as editField function. FUN.
+				var $this = $(this),
+					$profile = $('.curseprofile'),
+					$block = $('#' + blockId);
 				e.preventDefault();
 
 
 
+				var fields = getfields.split(" ");
+
+				// remove any currently active edit forms since they will all get screwed up anyway
+				profile.removeUnfinished();
+
+				// obscure comment with translucent throbber
+				$block.append(profile.overlay);
+
+				var editFormInner = '<form data-field="' + getfields + '" data-block-id="'+blockId+'">';
+					for (var x in fields) {
+						var title = mw.message('profile-' + fields[x] ).text();
+						var placeholder = mw.message(fields[x].replace('link-','') + 'linkplaceholder' ).text();
+						editFormInner += '<strong>' + title +':</strong> <input type="text" name="edit-'+fields[x]+'" placeholder="'+placeholder+'" class="sociallink"/><br />';
+					}
+				editFormInner += '<button class="cancel"></button><button class="saveGroup"></button></form>'
+
+				//Create new form to function as an edit form.
+				profile.editForms = $('<div>').addClass('entryform').attr('id', 'block-' + blockId);
+				profile.editForms.append(editFormInner);
+				profile.editForms.find('button.cancel').text(mw.message('cancel').text());
+				profile.editForms.find('button.saveGroup').text(mw.message('save').text());
+
+				for (var x in fields) {
+				//Use API to download raw text.
+					(new mw.Api()).post({
+						action: 'profile',
+						do: 'getRawField',
+						field: fields[x],
+						userId: $profile.data('userid'),
+						format: 'json',
+						formatversion: 2,
+						token: mw.user.tokens.get('csrfToken')
+					}).done(function (resp) {
+						var x = this, field = fields[x];
+						if (resp[field] !== undefined && resp[field] !== null) {
+							//Insert edit form into DOM to replace throbber.
+
+							$block.hide().after(profile.editForms);
+
+							//Insert raw comment text in to edit form.
+							$("input[name=\"edit-" + field + "\"]").val(resp[field]);
+						} else {
+							profile.cancelEdit();
+						}
+					}.bind(x));
+				}
+
+			},
+
+			cancelEdit: function (e, fields, blockId) {
+
+				var fields = fields.split(" "); // handle both multi-field and single field.
+				if (fields.length == 1) {
+					var $block = $('#profile-' + fields[0])
+				} else {
+					var $block = $('#'+blockId);
+				}
+
+				e.preventDefault();
+
+				//Remove edit form and show old comment content.
+				profile.overlay.detach();
+				profile.removeUnfinished();
+				$block.show();
+			},
+
+			saveField: function (e, fields, blockId) {
+				var $this = $(this), $profile = $('.curseprofile'), api = new mw.Api();
+				e.preventDefault();
+				console.log(blockId);
+
+				var fields = fields.split(" "); // handle both multi-field and single field.
 				// overlay throbber
 				profile.editForms.append(profile.overlay);
 
-				// use API to post new comment text
-				api.post({
-					action: 'profile',
-					do: 'editField',
-					field: field,
-					userId: $profile.data('userid'),
-					text: profile.editForms.find('textarea').val(),
-					format: 'json',
-					formatversion: 2,
-					token: mw.user.tokens.get('csrfToken')
-				}).done(function (resp) {
-					if (resp.result === 'success') {
-						// replace the text of the old comment object
-						$editPencil.detach();
-						$block.html(resp.parsedContent);
-						$block.prepend($editPencil);
-						// end the editing context
-						profile.cancelEdit(e, field);
-					} else if (resp.result === 'failure') {
-						alert(mw.message(resp.errormsg).text());
-						profile.cancelEdit(e, field);
-					} else {
-						profile.cancelEdit(e, field);
+				if (fields.length == 1) {
+					var field = fields[0];
+					var $block = $('#profile-' + field),
+						$editPencil = $('#profile-' + field + ' a.profileedit');
+
+					api.post({
+						action: 'profile',
+						do: 'editField',
+						field: field,
+						userId: $profile.data('userid'),
+						text: profile.editForms.find('textarea').val(),
+						format: 'json',
+						formatversion: 2,
+						token: mw.user.tokens.get('csrfToken')
+					}).done(function (resp) {
+						if (resp.result === 'success') {
+							// replace the text of the old comment object
+							$editPencil.detach();
+							$block.html(resp.parsedContent);
+							$block.prepend($editPencil);
+							// end the editing context
+							profile.cancelEdit(e, field);
+						} else if (resp.result === 'failure') {
+							alert(mw.message(resp.errormsg).text());
+							profile.cancelEdit(e, field);
+						} else {
+							profile.cancelEdit(e, field);
+						}
+					});
+				} else {
+					var $block = $('#'+blockId),
+						$editPencil = $('#' + blockId + ' a.profileedit');
+
+					var data = {};
+					for (var x in fields) {
+						var field = fields[x];
+						var value = $("input[name=\"edit-" + field + "\"]").val();
+						data[field] = value;
 					}
-				});
+
+					data = JSON.stringify(data);
+					// use API to post new comment text
+					api.post({
+						action: 'profile',
+						do: 'editFields',
+						data: data,
+						userId: $profile.data('userid'),
+						format: 'json',
+						returnParsed: '{{#profilelinks:}}',
+						formatversion: 2,
+						token: mw.user.tokens.get('csrfToken')
+					}).done(function (resp) {
+						console.log(resp);
+						if (resp.result === 'success') {
+							// replace the text of the old comment object
+							$editPencil.detach();
+							console.log($block);
+							$block.html(resp.parsedContent);
+							$block.prepend($editPencil);
+							// end the editing context
+							profile.cancelEdit(e, field);
+						} else if (resp.result === 'failure') {
+							alert(mw.message(resp.errormsg).text());
+							profile.cancelEdit(e, field);
+						} else {
+							profile.cancelEdit(e, field);
+						}
+					});
+
+				}
+
 			}
-		};
+	};
 }
 
 var CP = new CurseProfile(jQuery);
