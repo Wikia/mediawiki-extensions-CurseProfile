@@ -398,76 +398,101 @@ class ProfilePage extends \Article {
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $wgUser
+	 * @param [type] $profileLinks
+	 * @param [type] $fields
+	 * @return void
+	 */
+	public static function generateProfileLinks($wgUser, $profileLinks, $fields) {
+
+
+
+		$HTML = '<ul class="profilelinks">';
+		if (count($profileLinks)) {
+			foreach ($profileLinks as $key => $link) {
+				if (!empty($link)) {
+					$item = "<li class='$key' title='$key'>";
+					$HTML .= "<!-- $key $link -->";
+					switch (strtolower($key)) {
+						case 'xbl':
+							$link = urlencode($link);
+							$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
+							break;
+						case 'psn':
+							$link = urlencode($link);
+							$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
+							break;
+						case 'reddit':
+							if (!self::validateUrl($key, $link)) {
+								$item = '';
+							} else {
+								$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
+							}
+							break;
+						case 'twitch':
+							$link = urlencode($link);
+							$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
+							break;
+						case 'twitter':
+							if (!self::validateUrl($key, $link)) {
+								$item = '';
+							} else {
+								$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
+							}
+							break;
+						default:
+							if (self::validateUrl($key, $link)) {
+								$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
+							} else {
+								$item = '';
+							}
+					}
+					if (!empty($item)) {
+						$item .= '</li>';
+					}
+					$HTML .= $item;
+				}
+			}
+		}
+		$HTML .= '</ul>';
+		return $HTML;
+	}
+
+	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
 	 * @param	object	parser reference
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
-	public function profileLinks(&$parser) {
+	public function profileLinks(&$parser = null) {
 		global $wgUser;
 
 		$profileLinks = $this->profile->getProfileLinks();
-		$HTML = '<ul class="profilelinks">';
-		if (count($profileLinks)) {
-			foreach ($profileLinks as $key => $link) {
-				$item = "<li class='$key' title='$key'>";
-				switch ($key) {
-					case 'XBL':
-						$link = urlencode($link);
-						$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
-						break;
-					case 'PSN':
-						$link = urlencode($link);
-						$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
-						break;
-					case 'Reddit':
-						if (!self::validateUrl($key, $link)) {
-							$item = '';
-						} else {
-							$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
-						}
-						break;
-					case 'Twitch':
-						$link = urlencode($link);
-						$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
-						break;
-					case 'Twitter':
-						if (!self::validateUrl($key, $link)) {
-							$item = '';
-						} else {
-							$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
-						}
-						break;
-					default:
-						if (self::validateUrl($key, $link)) {
-							$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
-						} else {
-							$item = '';
-						}
-				}
-				$item .= '</li>';
-				$HTML .= $item;
+
+		$links = $this->profile->getValidEditFields();
+		$fields = [];
+		foreach($links as $i => $link) {
+			if (substr($link,0,12) == "profile-link") {
+				$fields[] = str_replace("profile-link","link",$link);
 			}
 		}
 
+		$HTML = "";
+
 		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
 			if (!count($profileLinks)) {
-				$HTML .= "<li>".\Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."</li>";
+				$HTML .= "".\Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."";
 			}
 
 			/*
 				Generate list for profile fields.
 			*/
 
-			$links = $this->profile->getValidEditFields();
-			$fields = [];
-			foreach($links as $i => $link) {
-				if (substr($link,0,12) == "profile-link") {
-					$fields[] = str_replace("profile-link","link",$link);
-				}
-			}
 
-			$HTML .= "<li>".\Html::rawElement(
+
+			$HTML .= "".\Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat socialedit',
@@ -475,12 +500,13 @@ class ProfilePage extends \Article {
 					'title' =>	wfMessage('editfield-social-tooltip')->plain()
 				],
 				\HydraCore::awesomeIcon('pencil')
-			)."</li>";
+			)."";
 		}
 
-		$HTML .= '</ul>';
+		$HTML .= self::generateProfileLinks($wgUser,$profileLinks,$fields);
 
 		$HTML = "<div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".$HTML."</div>";
+
 
 		return [
 			$HTML,
@@ -496,13 +522,14 @@ class ProfilePage extends \Article {
 	 * @return	mixed	false or validated string value
 	 */
 	private static function validateUrl($service, &$url) {
+		$service = strtolower($service);
 		$patterns = [
-			'Facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'Google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
-			'Reddit'	=> '#^[\w\-_]{3,20}$#',
-			'Steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
-			'Twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
-			'Twitter'	=> '|^@?(\\w{1,15})$|',
+			'facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
+			'google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
+			'reddit'	=> '#^[\w\-_]{3,20}$#',
+			'steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
+			'twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
+			'twitter'	=> '|^@?(\\w{1,15})$|',
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];

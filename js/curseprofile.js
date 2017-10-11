@@ -1,6 +1,7 @@
 function CurseProfile($) {
 	'use strict';
 	this.init = function () {
+
 		$('button.linksub').click(function () {
 			window.location = $(this).data('href');
 		});
@@ -142,9 +143,7 @@ function CurseProfile($) {
 				}).done(function (resp) {
 					if (resp[field] !== undefined && resp[field] !== null) {
 						//Insert edit form into DOM to replace throbber.
-
 						$block.hide().after(profile.editForms);
-
 						//Insert raw comment text in to edit form.
 						profile.editForms.find('textarea').val(resp[field]).trigger('autosize:update');
 						autosize($('.autoresizeme'));
@@ -270,7 +269,9 @@ function CurseProfile($) {
 					});
 				} else {
 					var $block = $('#'+blockId),
-						$editPencil = $('#' + blockId + ' a.profileedit');
+						$editPencil = $('#' + blockId + ' a.socialedit');
+
+
 
 					var data = {};
 					for (var x in fields) {
@@ -280,14 +281,14 @@ function CurseProfile($) {
 					}
 
 					data = JSON.stringify(data);
+					console.log(data);
 					// use API to post new comment text
 					api.post({
 						action: 'profile',
-						do: 'editFields',
+						do: 'editSocialFields',
 						data: data,
 						userId: $profile.data('userid'),
 						format: 'json',
-						returnParsed: '{{#profilelinks:}}',
 						formatversion: 2,
 						token: mw.user.tokens.get('csrfToken')
 					}).done(function (resp) {
@@ -295,8 +296,13 @@ function CurseProfile($) {
 						if (resp.result === 'success') {
 							// replace the text of the old comment object
 							$editPencil.detach();
-							console.log($block);
 							$block.html(resp.parsedContent);
+
+
+							// we are good - this is bad.
+							// till we can figure out a clean way of doing this...
+							//window.location.reload();
+
 							$block.prepend($editPencil);
 							// end the editing context
 							profile.cancelEdit(e, field);

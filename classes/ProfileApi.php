@@ -102,7 +102,7 @@ class ProfileApi extends \HydraApiBase {
 					],
 				],
 			],
-			'editFields' => [
+			'editSocialFields' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
@@ -226,7 +226,7 @@ class ProfileApi extends \HydraApiBase {
 	 * @access	public
 	 * @return	void
 	 */
-	public function doEditFields() {
+	public function doEditSocialFields() {
 		global $wgOut;
 
 		$odata = $this->getRequest()->getText('data');
@@ -246,17 +246,23 @@ class ProfileApi extends \HydraApiBase {
 		}
 
 		try {
-			$fieldText = [];
+			$fields = [];
+			$profileLinks = [];
 			foreach ($data as $field => $text) {
 				$profileData->setField($field, $text, $this->getUser());
-				$fieldText[$field] = $profileData->getField($field);
+				$fields[] = $field;
+				$profileLinks[str_replace("link-","",$field)] = $profileData->getField($field);;
 			}
-			$output = json_encode($fieldText);
+
+			$this->getResult()->addValue(null, 'data', $data);
+			$this->getResult()->addValue(null, 'fields', $fields);
+			$this->getResult()->addValue(null, 'profileLinks', $profileLinks);
+
+			$output = \CurseProfile\ProfilePage::generateProfileLinks($this->getUser(),$profileLinks,$fields);
+
 			$this->getResult()->addValue(null, 'result', 'success');
 			//Add parsed text to result.
-			if ($this->getRequest()->getText('returnParsed')) {
-				$output = $wgOut->parse($this->getRequest()->getText('returnParsed'));
-			}
+
 			$this->getResult()->addValue(null, 'parsedContent', $output);
 			return;
 		} catch (\MWException $e) {
