@@ -404,55 +404,81 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function profileLinks(&$parser) {
+		global $wgUser;
+
 		$profileLinks = $this->profile->getProfileLinks();
-
-		if (count($profileLinks) == 0) {
-			return '';
-		}
-
-		$HTML = '
-		<ul class="profilelinks">';
-		foreach ($profileLinks as $key => $link) {
-			$item = "<li class='$key' title='$key'>";
-			switch ($key) {
-				case 'XBL':
-					$link = urlencode($link);
-					$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
-					break;
-				case 'PSN':
-					$link = urlencode($link);
-					$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
-					break;
-				case 'Reddit':
-					if (!self::validateUrl($key, $link)) {
-						$item = '';
-					} else {
-						$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
-					}
-					break;
-				case 'Twitch':
-					$link = urlencode($link);
-					$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
-					break;
-				case 'Twitter':
-					if (!self::validateUrl($key, $link)) {
-						$item = '';
-					} else {
-						$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
-					}
-					break;
-				default:
-					if (self::validateUrl($key, $link)) {
-						$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
-					} else {
-						$item = '';
-					}
+		$HTML = '<ul class="profilelinks">';
+		if (count($profileLinks)) {
+			foreach ($profileLinks as $key => $link) {
+				$item = "<li class='$key' title='$key'>";
+				switch ($key) {
+					case 'XBL':
+						$link = urlencode($link);
+						$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
+						break;
+					case 'PSN':
+						$link = urlencode($link);
+						$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
+						break;
+					case 'Reddit':
+						if (!self::validateUrl($key, $link)) {
+							$item = '';
+						} else {
+							$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
+						}
+						break;
+					case 'Twitch':
+						$link = urlencode($link);
+						$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
+						break;
+					case 'Twitter':
+						if (!self::validateUrl($key, $link)) {
+							$item = '';
+						} else {
+							$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
+						}
+						break;
+					default:
+						if (self::validateUrl($key, $link)) {
+							$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
+						} else {
+							$item = '';
+						}
+				}
+				$item .= '</li>';
+				$HTML .= $item;
 			}
-			$item .= '</li>';
-			$HTML .= $item;
 		}
-		$HTML .= '
-		</ul>';
+
+		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
+			if (!count($profileLinks)) {
+				$HTML .= "<li>".\Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."</li>";
+			}
+
+			/*
+				Generate list for profile fields.
+			*/
+
+			$links = $this->profile->getValidEditFields();
+			$fields = [];
+			foreach($links as $i => $link) {
+				if (substr($link,0,12) == "profile-link") {
+					$fields[] = str_replace("profile-link","link",$link);
+				}
+			}
+
+			$HTML .= "<li><div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".\Html::rawElement(
+				'a',
+				[
+					'class'	=> 'rightfloat socialedit',
+					'href'	=> '#',
+					'title' =>	wfMessage('editfield-social-tooltip')->plain()
+				],
+				\HydraCore::awesomeIcon('pencil')
+			)."</div></li>";
+		}
+
+		$HTML .= '</ul>';
 
 		return [
 			$HTML,

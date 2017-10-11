@@ -46,6 +46,15 @@ class ProfileData {
 	];
 
 	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public static function getValidEditFields() {
+		return self::$editProfileFields;
+	}
+
+	/**
 	 * Returns the canonical URL path to a user's profile based on their profile preference
 	 * @return string
 	 */
