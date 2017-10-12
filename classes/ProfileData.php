@@ -132,7 +132,7 @@ class ProfileData {
 		];
 		$preferences['profile-location'] = [
 			'type' => 'text',
-			'label-message' => 'citylabel',
+			'label-message' => 'locationlabel',
 			'section' => 'personal/info/location',
 		];
 		$preferences['profile-link-facebook'] = [
@@ -226,13 +226,6 @@ class ProfileData {
 	 */
 	static public function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
-
-		// Try to determine what flag to display based on what they have entered as their country
-		if (!empty($preferences['profile-country'])) {
-			$preferences['profile-country-flag'] = \FlagFinder::getCode($preferences['profile-country']);
-		} else {
-			$preferences['profile-country-flag'] = '';
-		}
 
 		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
 		if (isset($preferences['profile-pref'])) {
@@ -380,14 +373,11 @@ class ProfileData {
 	 * Returns all the user's location profile data
 	 *
 	 * @access	public
-	 * @return	array	Possibly including keys: city, state, country, country-flag
+	 * @return	array	Possibly including key: location
 	 */
-	public function getLocations() {
+	public function getLocation() {
 		$profile = [
-			'city' => $this->user->getOption('profile-city'),
-			'state' => $this->user->getOption('profile-state'),
-			'country' => $this->user->getOption('profile-country'),
-			'country-flag' => $this->user->getOption('profile-country-flag'),
+			'location' => $this->user->getOption('profile-location')
 		];
 		return array_filter($profile);
 	}

@@ -347,20 +347,10 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function location(&$parser) {
-		$locations = $this->profile->getLocations();
-
-		$HTML = '';
-
-		if (isset($locations['country-flag'])) {
-			$src = \FlagFinder::getFlagPath($locations['country-flag']);
-			$HTML = "<img src='$src' class='countryflag' alt='flag for {$locations['country-flag']}'/> ".$HTML;
-			unset($locations['country-flag']);
-		}
-
-		$HTML .= implode(', ', array_map('htmlentities', $locations));
+		$location = $this->profile->getLocation();
 
 		return [
-			$HTML,
+			array_map('htmlentities', $location),
 			'isHTML' => true,
 		];
 	}

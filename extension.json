@@ -50,7 +50,6 @@
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
 	"AutoloadClasses": {
-		"FlagFinder": "classes/FlagFinder.php",
 		"CurseProfile\\Hooks": "CurseProfile.hooks.php",
 		"CurseProfile\\CP": "classes/CP.php",
 		"CurseProfile\\ProfileApi": "classes/ProfileApi.php",
