@@ -77,7 +77,7 @@
 	"directfriendreqplaceholder": "Entrez votre nom d'utilisateur",
 	"aboutmeplaceholder": "Écrivez quelques mots sur vous !",
 	"steamlinkplaceholder": "https://steamcommunity.com/id/exemple",
-	"fblinkplaceholder": "https://www.facebook.com/exemple",
+	"facebooklinkplaceholder": "https://www.facebook.com/exemple",
 	"googlelinkplaceholder": "https://plus.google.com/+exemple/posts",
 	"profilelink-help": "Les liens de profil ci-dessus doivent correspondre exactement au format des exemples pour être affichés.",
 	"twitterlinkplaceholder": "Partagez votre nom d'utilisateur Twitter",

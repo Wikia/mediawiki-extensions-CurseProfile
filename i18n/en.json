@@ -104,7 +104,7 @@
 	"directfriendreqplaceholder": "Enter a username",
 	"aboutmeplaceholder": "Write something about yourself!",
 	"steamlinkplaceholder": "https://steamcommunity.com/id/example",
-	"fblinkplaceholder": "https://www.facebook.com/example",
+	"facebooklinkplaceholder": "https://www.facebook.com/example",
 	"googlelinkplaceholder": "https://plus.google.com/+example/posts",
 	"profilelink-help": "The above profile links must exactly match the example format to be displayed.",
 	"twitterlinkplaceholder": "Share your Twitter screen name",

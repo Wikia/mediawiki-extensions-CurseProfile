@@ -140,7 +140,7 @@ class ProfileData {
 			'pattern' => 'https?://www\\.facebook\\.com/([\\w\\.]+)',
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('fblinkplaceholder')->plain(),
+			'placeholder' => wfMessage('facebooklinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
