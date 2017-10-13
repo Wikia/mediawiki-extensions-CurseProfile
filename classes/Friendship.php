@@ -14,6 +14,17 @@
 namespace CurseProfile;
 
 /**
+ * API NOTES FOR THE CHEEVOS THINGAMIJIGGER
+ - GET /user_options/{id} - retrieve UserOptions
+- PUT /user_options/{id} - write UserOptions
+- GET /friends/{id} - Returns all relationships for a user by global id: { friends: [id, ...], incoming_requests: [...], outgoing_requests: [...] }
+- PUT /friends/{from_id}/{to_id} - Write a friend request / accept a friend request
+- DELETE /friends/{from_id}/{to_id} - Reject a friend request / remove a friendship
+UserOptions: `{ user_id: globalId, user_name: name, options: { option: value, ... } }`
+*/
+
+
+/**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
  * All relationships statuses are then described from the perspective of that user.
  */
@@ -45,35 +56,14 @@ class Friendship {
 	 * @return	integer	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
 	public function getRelationship($toUser) {
-		$toUser = intval($toUser);
-		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
+		if ($this->globalId < 1) {
 			return -1;
 		}
-
-		$redis = \RedisCache::getClient('cache');
-		if ($redis === false) {
-			return -1;
+		$status = \Cheevos\Cheevos::getFriendStatus($this->globalId, $toUser);
+		if ($status['status']) {
+			return $get['status'];
 		}
-
-		try {
-			//First check for existing friends.
-			if ($redis->sIsMember($this->friendListRedisKey(), $toUser)) {
-				return self::FRIENDS;
-			}
-
-			//Check for pending requests.
-			if ($redis->hExists($this->requestsRedisKey(), $toUser)) {
-				return self::REQUEST_RECEIVED;
-			}
-			if ($redis->hExists($this->requestsRedisKey($toUser), $this->globalId)) {
-				return self::REQUEST_SENT;
-			}
-		} catch (\Exception $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return -1;
-		}
-
-		return self::STRANGERS; // assumption when not found in redis
+		return -1;
 	}
 
 	/**
@@ -90,11 +80,10 @@ class Friendship {
 		if ($user == null) {
 			$user = $this->globalId;
 		}
-		$redis = \RedisCache::getClient('cache');
-		try {
-			return $redis->sMembers($this->friendListRedisKey($user));
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+
+		$friends = \Cheevos\Cheevos::getFriends($user);
+		if ($friends['friends']) {
+			return $friends['friends'];
 		}
 		return [];
 	}
@@ -106,20 +95,9 @@ class Friendship {
 	 * @return	integer	a number of friends
 	 */
 	public function getFriendCount($user = null) {
-		if ($this->globalId < 1) {
-			return 0;
-		}
-
-		if ($user == null) {
-			$user = $this->globalId;
-		}
-		$redis = \RedisCache::getClient('cache');
-		try {
-			return intval($redis->sCard($this->friendListRedisKey($user)));
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-		}
-		return 0;
+		// my god look how efficiant this is
+		$friends = $this->getFriends($user);
+		return count($friends);
 	}
 
 	/**
@@ -132,12 +110,9 @@ class Friendship {
 		if ($this->globalId < 1) {
 			return [];
 		}
-
-		$redis = \RedisCache::getClient('cache');
-		try {
-			return $redis->hGetAll($this->requestsRedisKey());
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+		if ($friends['incoming_requests']) {
+			return $friends['incoming_requests'];
 		}
 		return [];
 	}
@@ -151,54 +126,13 @@ class Friendship {
 		if ($this->globalId < 1) {
 			return [];
 		}
-
-		$redis = \RedisCache::getClient('cache');
-		try {
-			return $redis->sMembers($this->sentRequestsRedisKey());
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+		if ($friends['outgoing_requests']) {
+			return $friends['outgoing_requests'];
 		}
 		return [];
 	}
 
-	/**
-	 * Generates a redis key for the hash of pending requests received
-	 *
-	 * @param	integer	optional curse ID of a user (default $this->globalId)
-	 * @return	string	redis key to be used
-	 */
-	private function requestsRedisKey($user = null) {
-		if ($user == null) {
-			$user = $this->globalId;
-		}
-		return 'friendrequests:'.$user;
-	}
-
-	/**
-	 * Generates a redis key for the set of pending requests sent
-	 *
-	 * @param	integer	optional curse ID of a user (default $this->globalId)
-	 * @return	string	redis key to be used
-	 */
-	private function sentRequestsRedisKey($user = null) {
-		if ($user == null) {
-			$user = $this->globalId;
-		}
-		return 'friendrequests:'.$user.':sent';
-	}
-
-	/**
-	 * Generates a redis key for a set of friends
-	 *
-	 * @param	integer	optional curse ID of a user (default $this->globalId)
-	 * @return	string	redis key to be used
-	 */
-	private function friendListRedisKey($user = null) {
-		if ($user == null) {
-			$user = $this->globalId;
-		}
-		return 'friendlist:'.$user;
-	}
 
 	/**
 	 * Sends a friend request to a given user
@@ -214,29 +148,16 @@ class Friendship {
 			return false;
 		}
 
-		$toGlobalId = intval($toGlobalId);
-		$lookup = \CentralIdLookup::factory();
-		$toLocalUser = $lookup->localUserFromCentralId($toGlobalId);
-		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
-			return false;
-		}
-
-		//Queue sync before error check in case redis is not in sync.
-		FriendSync::queue([
-			'task' => 'add',
-			'actor' => $this->globalId,
-			'target' => $toGlobalId,
-		]);
+		$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
 		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
 			return false;
 		}
 
-		$redis = \RedisCache::getClient('cache');
-		try {
-			$redis->hSet($this->requestsRedisKey($toGlobalId), $this->globalId, '{}');
-			$redis->sAdd($this->sentRequestsRedisKey(), $toGlobalId);
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		$toGlobalId = intval($toGlobalId);
+		$lookup = \CentralIdLookup::factory();
+		$toLocalUser = $lookup->localUserFromCentralId($toGlobalId);
+
+		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
 			return false;
 		}
 
@@ -251,7 +172,6 @@ class Friendship {
 		]);
 
 		wfRunHooks('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
-
 		return true;
 	}
 
@@ -263,7 +183,14 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
-		return $this->respondToRequest($toGlobalId, 'accept');
+		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
+			return -1;
+		}
+		$res = \Cheevos\Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
+		if ($res['status']) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -274,60 +201,20 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function ignoreRequest($toGlobalId) {
-		return $this->respondToRequest($toGlobalId, 'ignore');
-	}
-
-	/**
-	 * Shared logic between accepting and ignoring pending requests
-	 *
-	 * @param	integer	user id of whose request is being responded to
-	 * @param	string	responce being sent. one of 'accept' or 'ignore'
-	 * @return	bool	true on success
-	 */
-	private function respondToRequest($toUserId, $response) {
-		global $wgUser;
-
-		$toUserId = intval($toUserId);
 		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
 			return -1;
 		}
-
-		FriendSync::queue([
-			'task' => ($response == 'accept' ? 'confirm' : 'ignore'),
-			'actor' => $this->globalId,
-			'target' => $toUserId
-		]);
-		if ($this->getRelationship($toUserId) != self::REQUEST_RECEIVED) {
-			return false;
+		$res = \Cheevos\Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
+		if ($res['status']) {
+			return true;
 		}
-
-		$redis = \RedisCache::getClient('cache');
-		try {
-			// delete pending request
-			$redis->hDel($this->requestsRedisKey(), $toUserId);
-			$redis->sRem($this->sentRequestsRedisKey($toUserId), $this->globalId);
-
-			if ($response == 'accept') {
-				// add reciprocal friendship
-				$redis->sAdd($this->friendListRedisKey(), $toUserId);
-				$redis->sAdd($this->friendListRedisKey($toUserId), $this->globalId);
-				$toUser = \User::newFromId($toUserId);
-				if ($toUser) {
-					wfRunHooks('CurseProfileAcceptFriend', [$wgUser, $toUser]);
-				}
-			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return false;
-		}
-
-		return true;
+		return false;
 	}
 
 	/**
 	 * Removes a friend relationship, or cancels a pending request
 	 *
-	 * @param	integer	curse ID of a user
+	 * @param	integer	global ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function removeFriend($toUser) {
@@ -336,189 +223,23 @@ class Friendship {
 			return false;
 		}
 
-		FriendSync::queue([
-			'task' => 'remove',
-			'actor' => $this->globalId,
-			'target' => $toUser
-		]);
+		/*
+			// NOTE: The documentation of this function suggests this may be a local id and not a global id.
+			// Uncomment this to fix that issue if we find it in testing.
 
-		$redis = \RedisCache::getClient('cache');
-		try {
-			// remove pending incoming requests
-			$redis->hDel($this->requestsRedisKey($toUser), $this->globalId);
-			$redis->hDel($this->requestsRedisKey(), $toUser);
+			$localUser = \User::newFromId($toUser);
+			$lookup = \CentralIdLookup::factory();
+			$globalId = $lookup->centralIdFromLocalUser($localUser);
 
-			// remove sent request references
-			$redis->sRem($this->sentRequestsRedisKey($toUser), $this->globalId);
-			$redis->sRem($this->sentRequestsRedisKey(), $toUser);
+			// Otherwise, the below code handles it just fine.
+		*/
 
-			// remove existing friendship
-			$redis->sRem($this->friendListRedisKey($toUser), $this->globalId);
-			$redis->sRem($this->friendListRedisKey(), $toUser);
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-			return false;
-		}
+		$globalId = $toUser;
+
+		\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
 
 		wfRunHooks('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
 
 		return true;
-	}
-
-	/**
-	 * Treats the current database info as authoritative and corrects redis to match
-	 * If instance of Friendship was created with a null curse ID, will sync entire table
-	 *
-	 * @param	ILogger	instance of a logger if output is desired
-	 * @return	null
-	 */
-	public function syncToRedis(\SyncService\ILogger $logger = null) {
-		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
-			return;
-		}
-		if (is_null($logger)) {
-			$log = function($str, $time=null) {};
-		} else {
-			$log = function($str, $time=null) use ($logger) {
-				$logger->outputLine($str, $time);
-			};
-		}
-		$redis = \RedisCache::getClient('cache');
-		$db = CP::getDb(DB_MASTER);
-
-		$where = ['r_type' => 1];
-		if ($this->globalId > 0) {
-			$where[] = "(r_user_id = ".$db->addQuotes($this->globalId)." OR r_user_id_relation = ".$db->addQuotes($this->globalId);
-		}
-		$results = $db->select(
-			['user_relationship'],
-			['*'],
-			$where,
-			__METHOD__
-		);
-
-		try {
-			while ($friend = $results->fetchRow()) {
-				$redis->sAdd($this->friendListRedisKey($friend['r_user_id']), $friend['r_user_id_relation']);
-				$redis->sAdd($this->friendListRedisKey($friend['r_user_id_relation']), $friend['r_user_id']);
-				$log("Added friendship between curse IDs {$friend['r_user_id']} and {$friend['r_user_id_relation']}", time());
-			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-		}
-
-		$where = ['ur_type' => 1];
-		if ($this->globalId > 0) {
-			$where[] = "(ur_user_id_from = ".$db->addQuotes($this->globalId)." OR ur_user_id_to = ".$db->addQuotes($this->globalId);
-		}
-		$results = $db->select(
-			['user_relationship_request'],
-			['*'],
-			$where,
-			__METHOD__
-		);
-
-		try {
-			while ($friendReq = $results->fetchRow()) {
-				$redis->hSet($this->requestsRedisKey($friendReq['ur_user_id_to']), $friendReq['ur_user_id_from'], '{}');
-				$redis->sAdd($this->sentRequestsRedisKey($friendReq['ur_user_id_from']), $friendReq['ur_user_id_to']);
-				$log("Added pending friendship between curse IDs {$friendReq['ur_user_id_to']} and {$friendReq['ur_user_id_from']}", time());
-			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
-		}
-	}
-
-	/**
-	 * This will write a given change to the database. Called by FriendSync job.
-	 *
-	 * @param	array	args sent to the FriendSync job
-	 * @return	integer	exit code: 0 for success, 1 for failure
-	 */
-	public function saveToDB($args) {
-		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
-			return 1; // the appropriate tables don't exist here
-		}
-		$args['target'] = intval($args['target']);
-		if ($args['target'] < 1) {
-			return 1;
-		}
-
-		$db = CP::getDb(DB_MASTER);
-		switch ($args['task']) {
-			case 'add':
-				$db->insert(
-					'user_relationship_request',
-					[
-						'ur_user_id_from' => $this->globalId,
-						'ur_user_id_to'   => $args['target'],
-						'ur_type'         => 1,
-						'ur_date'         => date('Y-m-d H:i:s'),
-					],
-					__METHOD__
-				);
-				break;
-			case 'confirm':
-				$db->insert(
-					'user_relationship',
-					[
-						'r_user_id'          => $this->globalId,
-						'r_user_id_relation' => $args['target'],
-						'r_type'             => 1,
-						'r_date'             => date('Y-m-d H:i:s'),
-					],
-					__METHOD__
-				);
-				$db->insert(
-					'user_relationship',
-					[
-						'r_user_id'          => $args['target'],
-						'r_user_id_relation' => $this->globalId,
-						'r_type'             => 1,
-						'r_date'             => date('Y-m-d H:i:s'),
-					],
-					__METHOD__
-				);
-				//Intentional fall-through.
-			case 'ignore':
-				$db->delete(
-					'user_relationship_request',
-					[
-						'ur_user_id_from'	=> $args['target'],
-						'ur_user_id_to'		=> $this->globalId
-					],
-					__METHOD__
-				);
-				break;
-			case 'remove':
-				$db->delete(
-					'user_relationship',
-					[
-						'r_user_id'				=> $args['target'],
-						'r_user_id_relation'	=> $this->globalId
-					],
-					__METHOD__
-				);
-				$db->delete(
-					'user_relationship',
-					[
-						'r_user_id'				=> $this->globalId,
-						'r_user_id_relation'	=> $args['target']
-					],
-					__METHOD__
-				);
-				$db->delete(
-					'user_relationship_request',
-					[
-						'ur_user_id_from'	=> $this->globalId,
-						'ur_user_id_to'		=> $args['target']
-					],
-					__METHOD__
-				);
-				break;
-			default:
-				return 1;
-		}
-		return 0;
 	}
 }
