@@ -63,7 +63,6 @@
 		"CurseProfile\\CommentBoard": "classes/CommentBoard.php",
 		"CurseProfile\\CommentReport": "classes/CommentReport.php",
 		"CurseProfile\\CommentDisplay": "classes/CommentDisplay.php",
-		"CurseProfile\\FriendSync": "classes/jobs/FriendSync.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
 		"CurseProfile\\MWEcho\\CommentPresentationModel": "classes/echo/CommentPresentationModel.php",
 		"CurseProfile\\MWEcho\\EchoUserLocator": "classes/echo/EchoUserLocator.php",
@@ -279,7 +278,6 @@
 		},
 		"SyncServices": {
 			"value": {
-				"FriendSync": "CurseProfile\\FriendSync",
 				"ResolveComment": "CurseProfile\\ResolveComment",
 				"StatsRecache": "CurseProfile\\StatsRecache"
 			},
