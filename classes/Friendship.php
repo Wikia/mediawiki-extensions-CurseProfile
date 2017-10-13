@@ -48,9 +48,13 @@ class Friendship {
 		if ($this->globalId < 1) {
 			return -1;
 		}
-		$status = \Cheevos\Cheevos::getFriendStatus($this->globalId, $toUser);
-		if ($status['status']) {
-			return $get['status'];
+		try {
+			$status = \Cheevos\Cheevos::getFriendStatus($this->globalId, $toUser);
+			if ($status['status']) {
+				return $get['status'];
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one care. Cheevos Down.
 		}
 		return -1;
 	}
@@ -70,9 +74,13 @@ class Friendship {
 			$user = $this->globalId;
 		}
 
-		$friends = \Cheevos\Cheevos::getFriends($user);
-		if ($friends['friends']) {
-			return $friends['friends'];
+		try {
+			$friends = \Cheevos\Cheevos::getFriends($user);
+			if ($friends['friends']) {
+				return $friends['friends'];
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one cares. Cheevos Down.
 		}
 		return [];
 	}
@@ -99,9 +107,13 @@ class Friendship {
 		if ($this->globalId < 1) {
 			return [];
 		}
-		$friends = \Cheevos\Cheevos::getFriends($this->globalId);
-		if ($friends['incoming_requests']) {
-			return $friends['incoming_requests'];
+		try {
+			$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+			if ($friends['incoming_requests']) {
+				return $friends['incoming_requests'];
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one cares. Cheevos Down.
 		}
 		return [];
 	}
@@ -115,9 +127,13 @@ class Friendship {
 		if ($this->globalId < 1) {
 			return [];
 		}
-		$friends = \Cheevos\Cheevos::getFriends($this->globalId);
-		if ($friends['outgoing_requests']) {
-			return $friends['outgoing_requests'];
+		try {
+			$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+			if ($friends['outgoing_requests']) {
+				return $friends['outgoing_requests'];
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one cares. Cheevos Down.
 		}
 		return [];
 	}
@@ -136,7 +152,12 @@ class Friendship {
 			return false;
 		}
 
-		$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
+		try {
+			$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
+		} catch (\Cheevos\CheevosException $e) {
+			return false;
+		}
+
 		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
 			return false;
 		}
@@ -174,9 +195,13 @@ class Friendship {
 		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
 			return -1;
 		}
-		$res = \Cheevos\Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
-		if ($res['status']) {
-			return true;
+		try {
+			$res = \Cheevos\Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
+			if ($res['status']) {
+				return true;
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one cares. Cheevos Down.
 		}
 		return false;
 	}
@@ -192,9 +217,13 @@ class Friendship {
 		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
 			return -1;
 		}
-		$res = \Cheevos\Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
-		if ($res['status']) {
-			return true;
+		try {
+			$res = \Cheevos\Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
+			if ($res['status']) {
+				return true;
+			}
+		} catch (\Cheevos\CheevosException $e) {
+			// do nothing with this. No one cares. Cheevos Down.
 		}
 		return false;
 	}
@@ -223,7 +252,11 @@ class Friendship {
 		*/
 		$globalId = $toUser;
 
-		\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
+		try {
+			\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
+		} catch (\Cheevos\CheevosException $e) {
+			return false;
+		}
 
 		wfRunHooks('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
 
