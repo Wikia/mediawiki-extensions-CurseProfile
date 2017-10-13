@@ -14,17 +14,6 @@
 namespace CurseProfile;
 
 /**
- * API NOTES FOR THE CHEEVOS THINGAMIJIGGER
- - GET /user_options/{id} - retrieve UserOptions
-- PUT /user_options/{id} - write UserOptions
-- GET /friends/{id} - Returns all relationships for a user by global id: { friends: [id, ...], incoming_requests: [...], outgoing_requests: [...] }
-- PUT /friends/{from_id}/{to_id} - Write a friend request / accept a friend request
-- DELETE /friends/{from_id}/{to_id} - Reject a friend request / remove a friendship
-UserOptions: `{ user_id: globalId, user_name: name, options: { option: value, ... } }`
-*/
-
-
-/**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
  * All relationships statuses are then described from the perspective of that user.
  */
@@ -133,7 +122,6 @@ class Friendship {
 		return [];
 	}
 
-
 	/**
 	 * Sends a friend request to a given user
 	 *
@@ -233,7 +221,6 @@ class Friendship {
 
 			// Otherwise, the below code handles it just fine.
 		*/
-
 		$globalId = $toUser;
 
 		\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
