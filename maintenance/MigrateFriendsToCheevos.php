@@ -47,11 +47,13 @@ class MigrateFriendsToCheevos extends \Maintenance {
 				echo "$userId => $friend -- ";
 				try {
 					\Cheevos\Cheevos::createFriendRequest($userId, $friend);
-					echo "Relationship Created\n";
+					echo "Relationship Created";
 				} catch (\Cheevos\CheevosException $e) {
-					echo "Error\n";
+					echo "Error";
 					var_dump($e->getMessage());
 				}
+				$status = \Cheevos\Cheevos::getFriendStatus($userId, $friend);
+				echo " -- Status: ".$status['status_name']."\n";
 			}
 		}
 	}
