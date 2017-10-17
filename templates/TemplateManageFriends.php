@@ -57,7 +57,7 @@ class TemplateManageFriends {
 
 		if (count($received)) {
 			$this->HTML .= '<h2>'.wfMessage('pendingrequests').'</h2>';
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray(array_keys($received), true);
+			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($received), true);
 		}
 
 		$this->HTML .= '<h2>'.wfMessage('friends').'</h2>';
