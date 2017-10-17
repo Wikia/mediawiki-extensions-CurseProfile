@@ -54,7 +54,7 @@ class Friendship {
 				return $status['status'];
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one care. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return -1;
 	}
@@ -80,7 +80,7 @@ class Friendship {
 				return $friends['friends'];
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one cares. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return [];
 	}
@@ -113,7 +113,7 @@ class Friendship {
 				return $friends['incoming_requests'];
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one cares. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return [];
 	}
@@ -133,7 +133,7 @@ class Friendship {
 				return $friends['outgoing_requests'];
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one cares. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return [];
 	}
@@ -155,6 +155,7 @@ class Friendship {
 		try {
 			$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
 		} catch (\Cheevos\CheevosException $e) {
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 			return false;
 		}
 
@@ -201,7 +202,7 @@ class Friendship {
 				return true;
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one cares. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return false;
 	}
@@ -223,7 +224,7 @@ class Friendship {
 				return true;
 			}
 		} catch (\Cheevos\CheevosException $e) {
-			// do nothing with this. No one cares. Cheevos Down.
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 		}
 		return false;
 	}
@@ -255,6 +256,7 @@ class Friendship {
 		try {
 			\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
 		} catch (\Cheevos\CheevosException $e) {
+			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
 			return false;
 		}
 
