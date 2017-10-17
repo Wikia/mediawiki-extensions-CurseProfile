@@ -51,7 +51,7 @@ class Friendship {
 		try {
 			$status = \Cheevos\Cheevos::getFriendStatus($this->globalId, $toUser);
 			if ($status['status']) {
-				return $get['status'];
+				return $status['status'];
 			}
 		} catch (\Cheevos\CheevosException $e) {
 			// do nothing with this. No one care. Cheevos Down.
@@ -192,12 +192,12 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
-		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
+		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
 			return -1;
 		}
 		try {
 			$res = \Cheevos\Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
-			if ($res['status']) {
+			if ($res['message'] == "success") {
 				return true;
 			}
 		} catch (\Cheevos\CheevosException $e) {
@@ -214,12 +214,12 @@ class Friendship {
 	 * @return	bool	true on success, false on failure
 	 */
 	public function ignoreRequest($toGlobalId) {
-		if ($this->globalId < 1 || $this->globalId == $toUserId || $toUserId < 1) {
+		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
 			return -1;
 		}
 		try {
 			$res = \Cheevos\Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
-			if ($res['status']) {
+			if ($res['message'] == "success") {
 				return true;
 			}
 		} catch (\Cheevos\CheevosException $e) {
