@@ -32,6 +32,7 @@ class MigrateFriendsToCheevos extends \Maintenance {
 	 */
 	public function execute() {
 		global $wgRedisServers;
+
 		$redis = RedisCache::getClient('cache');
 		$keys = $redis->keys('friendlist:*');
 		$prefix = $wgRedisServers['cache']['options']['prefix'];
@@ -44,16 +45,16 @@ class MigrateFriendsToCheevos extends \Maintenance {
 			$friendIds = $redis->sMembers($actualUsableRedisKey);
 			foreach ($friendIds as $friend) {
 				$friend = intval($friend);
-				echo "$userId => $friend -- ";
+				$this->output("$userId => $friend -- ");
 				try {
 					\Cheevos\Cheevos::createFriendRequest($userId, $friend);
-					echo "Relationship Created";
+					$this->output("Relationship Created");
 				} catch (\Cheevos\CheevosException $e) {
-					echo "Error";
+					$this->output("Error");
 					var_dump($e->getMessage());
 				}
 				$status = \Cheevos\Cheevos::getFriendStatus($userId, $friend);
-				echo " -- Status: ".$status['status_name']."\n";
+				$this->output(" -- Status: ".$status['status_name']."\n");
 			}
 		}
 	}
