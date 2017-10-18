@@ -55,50 +55,50 @@ class FriendDisplay {
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
-			$links['views']['add_friend'] = [
-				'action'  => 'send',
-				'class'   => false,
-				'href'    => "/Special:AddFriend/$user_id",
-				'text'    => wfMessage('friendrequestsend')->plain(),
-			];
-			break;
+				$links['views']['add_friend'] = [
+					'action'  => 'send',
+					'class'   => false,
+					'href'    => "/Special:AddFriend/$user_id",
+					'text'    => wfMessage('friendrequestsend')->plain(),
+				];
+				break;
 
 			case Friendship::REQUEST_SENT:
-			$links['views']['add_friend'] = [
-				'action'  => 'remove',
-				'class'   => 'friend-request-sent',
-				'href'    => "/Special:RemoveFriend/$user_id",
-				'text'    => wfMessage('friendrequestcancel')->plain(),
-			];
-			break;
+				$links['views']['add_friend'] = [
+					'action'  => 'remove',
+					'class'   => 'friend-request-sent',
+					'href'    => "/Special:RemoveFriend/$user_id",
+					'text'    => wfMessage('friendrequestcancel')->plain(),
+				];
+				break;
 
 			case Friendship::REQUEST_RECEIVED:
-			$links['actions']['add_friend'] = [
-				'action'  => 'confirm',
-				'class'   => 'friend-request-confirm',
-				'href'    => "/Special:ConfirmFriend/$user_id",
-				'text'    => wfMessage('confirmfriend-response')->plain(),
-			];
-			$links['actions']['ignore_friend'] = [
-				'action'  => 'ignore',
-				'class'   => 'friend-request-ignore',
-				'href'    => "/Special:ConfirmFriend/$user_id",
-				'text'    => wfMessage('ignorefriend-response')->plain(),
-			];
-			break;
+				$links['actions']['add_friend'] = [
+					'action'  => 'confirm',
+					'class'   => 'friend-request-confirm',
+					'href'    => "/Special:ConfirmFriend/$user_id",
+					'text'    => wfMessage('confirmfriend-response')->plain(),
+				];
+				$links['actions']['ignore_friend'] = [
+					'action'  => 'ignore',
+					'class'   => 'friend-request-ignore',
+					'href'    => "/Special:ConfirmFriend/$user_id",
+					'text'    => wfMessage('ignorefriend-response')->plain(),
+				];
+				break;
 
 			case Friendship::FRIENDS:
-			$links['views']['remove_friend'] = [
-				'action'  => 'remove',
-				'class'   => 'friend-request-sent',
-				'href'    => "/Special:RemoveFriend/$user_id",
-				'text'    => wfMessage('removefriend')->plain(),
-				'confirm' => wfMessage('friendrequestremove-prompt', $user->getName())->plain(),
-			];
-			break;
+				$links['views']['remove_friend'] = [
+					'action'  => 'remove',
+					'class'   => 'friend-request-sent',
+					'href'    => "/Special:RemoveFriend/$user_id",
+					'text'    => wfMessage('removefriend')->plain(),
+					'confirm' => wfMessage('friendrequestremove-prompt', $user->getName())->plain(),
+				];
+				break;
 
 			default:
-			return;
+				return;
 		}
 	}
 
