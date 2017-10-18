@@ -89,7 +89,9 @@ class FriendApi extends \HydraApiBase {
 		}
 
 		$result = $this->f->sendRequest($globalId);
-		if (!$result) {
+		if (is_array($result) && isset($result['error'])) {
+			$this->dieUsage(wfMessage($result['error'])->text(), $result['error']);
+		} elseif (!$result) {
 			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}
 		$html = wfMessage('friendrequest-direct-success')->text();

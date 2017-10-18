@@ -149,11 +149,11 @@ class Friendship {
 		global $wgUser;
 
 		if ($wgUser->isBlocked()) {
-			return false;
+			return ['error'=>'friendrequest-blocked'];
 		}
 
 		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
-			return false;
+			return ['error'=>'friendrequest-already-friends'];;
 		}
 
 		try {
