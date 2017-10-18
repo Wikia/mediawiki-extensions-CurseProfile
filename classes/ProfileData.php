@@ -76,7 +76,7 @@ class ProfileData {
 		global $wgScriptPath;
 		$path = "/User:" . $this->user->getTitleKey();
 
-		if ( $this->getTypePref() ) {
+		if ($this->getTypePref()) {
 			$path .= "?profile=no";
 		}
 

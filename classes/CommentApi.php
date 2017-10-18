@@ -203,7 +203,7 @@ class CommentApi extends \HydraApiBase {
 	 */
 	public function doAddToDefault() {
 		// intentional use of value returned from assignment
-		if (! ($user_id = $this->getMain()->getVal('user_id')) ) {
+		if (!($user_id = $this->getMain()->getVal('user_id'))) {
 			$lookup = \CentralIdLookup::factory();
 			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
 			if ($user->isAnon()) {

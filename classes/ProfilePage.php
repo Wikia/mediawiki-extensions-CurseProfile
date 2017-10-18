@@ -108,7 +108,7 @@ class ProfilePage extends \Article {
 		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
 
 		$outputString = \MessageCache::singleton()->parse($layout, $this->getTitle());
-		if ($outputString instanceOf \ParserOutput) {
+		if ($outputString instanceof \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
 		$output->addHTML($outputString);
