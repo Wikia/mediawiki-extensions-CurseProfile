@@ -3,6 +3,7 @@
  * A job to asyncronously call the comment api on a remote wiki
  */
 namespace CurseProfile;
+
 use DynamicSettings\Wiki;
 
 class ResolveComment extends \SyncService\Job {
