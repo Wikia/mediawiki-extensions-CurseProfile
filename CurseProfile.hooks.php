@@ -70,8 +70,7 @@ class Hooks {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
-		if ( $title->getNamespace() == "-1"
-			&& $title->equals( \Title::newFromText("Special:Preferences") ) ) {
+		if ($title->getNamespace() == "-1" && $title->equals( \Title::newFromText("Special:Preferences"))) {
 			// inject - limit to special pages. The javascript will only run on Preferences.
 			$output->addModules('ext.curseprofile.preferences');
 		}
@@ -139,12 +138,12 @@ class Hooks {
 		// However, some of the crappy static stuff in ProfilePage makes that
 		// more appropriate approach problematic until the ProfilePage class
 		// gets cleaned up first.
-		if (self::$title instanceOf Title && !self::$title->equals($title)) {
+		if (self::$title instanceof Title && !self::$title->equals($title)) {
 			return true;
 		}
 
 		// handle rendering duties for any of our namespaces
-		if (self::$profilePage instanceOf \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
+		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
 				if ($title->getNamespace() == NS_USER_PROFILE) {
 					// we are on our UserProfile namespace. Render.
 					$article = self::$profilePage;
@@ -443,7 +442,7 @@ class Hooks {
 	 * @return	boolean True
 	 */
 	static public function onSkinMinervaDefaultModules($skin, &$modules) {
-		if(self::$profilePage instanceOf \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
+		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
 			$modules = array_merge(
 				['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile']],
 				$modules
