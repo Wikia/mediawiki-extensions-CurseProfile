@@ -152,14 +152,14 @@ class Friendship {
 			return false;
 		}
 
+		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
+			return false;
+		}
+
 		try {
 			$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
 		} catch (\Cheevos\CheevosException $e) {
 			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
-			return false;
-		}
-
-		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
 			return false;
 		}
 
