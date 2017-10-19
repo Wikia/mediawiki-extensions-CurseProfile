@@ -468,6 +468,9 @@ class CommentBoard {
 			}
 
 			wfRunHooks('CurseProfileAddComment', [$fromUser, $toUser, $inReplyTo, $commentText]);
+			if ($inReplyTo) {
+				wfRunHooks('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
+			}
 
 			if ($toUser->getId() != $fromUser->getId()) {
 				\EchoEvent::create([
