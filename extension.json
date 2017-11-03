@@ -150,9 +150,13 @@
 			"dependencies": [
 				"mediawiki.user",
 				"mediawiki.api",
-				"jquery.ui.autocomplete"
+				"jquery.ui.autocomplete",
+				"ext.hydraCore.font-awesome"
 			],
-			"position": "top"
+			"position": "top",
+			"messages": [
+				"profile-preference-global"
+			]
 		},
 		"ext.curseprofile.comments": {
 			"styles": [

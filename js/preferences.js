@@ -1,4 +1,15 @@
 $(function(){
+	var globalPreferenceMsg = mw.message('profile-preference-global').text();
+	$('.mw-label label').each(function(){
+		var f = $(this).attr("for");
+		if (typeof f !== "undefined") {
+			f = f.replace("mw-input-wp","").replace("-display","").trim();
+			if (mw.config.get('HydraPreferencesWhitelist').indexOf(f) !== -1) {
+				$(this).append(' <span class="fa fa-globe" title="' + globalPreferenceMsg + '"></span>');
+			}
+		}
+	});
+
 	var api = new mw.Api();
 	var favwiki = $("#mw-input-wpprofile-favwiki");
 	var favwikiDisplayOrig = $("#mw-input-wpprofile-favwiki-display");
