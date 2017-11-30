@@ -70,8 +70,8 @@ class Hooks {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
-		if ($title->getNamespace() == "-1" && $title->equals( \Title::newFromText("Special:Preferences"))) {
-			// inject - limit to special pages. The javascript will only run on Preferences.
+
+		if ($title->isSpecialPage() && ($title->getText() == \Message::newFromKey('preferences')->plain()) ) {
 			$output->addModules('ext.curseprofile.preferences');
 		}
 
