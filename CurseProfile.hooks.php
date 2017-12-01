@@ -71,7 +71,7 @@ class Hooks {
 		self::$profilePage = new ProfilePage($title);
 
 
-		if ($title->isSpecialPage() && ($title->getText() == \Message::newFromKey('preferences')->plain()) ) {
+		if ($title->equals(\SpecialPage::getTitleFor("Preferences"))) {
 			$output->addModules('ext.curseprofile.preferences');
 		}
 
