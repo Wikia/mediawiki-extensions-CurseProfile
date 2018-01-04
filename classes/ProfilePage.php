@@ -927,6 +927,7 @@ class ProfilePage extends \Article {
 	{{#if: '.( $this->user->isBlocked() ? 'true' : '' ).' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
+__NOINDEX__
 ';
 	}
 
@@ -977,6 +978,7 @@ __NOTOC__
 	{{#if: '.( $this->user->isBlocked() ? 'true' : '' ).' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
+__NOINDEX__
 ';
 	}
 }
