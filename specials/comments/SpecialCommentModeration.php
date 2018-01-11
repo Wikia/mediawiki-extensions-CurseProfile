@@ -62,7 +62,7 @@ class SpecialCommentModeration extends \SpecialPage {
 			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
-		$pagination = \HydraCore::generatePaginationHtml($total, $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
 		$wgOut->addHTML($pagination);

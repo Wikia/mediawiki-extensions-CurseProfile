@@ -53,7 +53,7 @@ class TemplateManageFriends {
 	 */
 	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
 		$this->HTML = '';
-		$pagination = \HydraCore::generatePaginationHtml(count($friends), $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml(\SpecialPage::getTitleFor('ManageFriends'), count($friends), $itemsPerPage, $start);
 
 		if (count($received)) {
 			$this->HTML .= '<h2>'.wfMessage('pendingrequests').'</h2>';

@@ -76,7 +76,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		}
 
 		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
-		$pagination = \HydraCore::generatePaginationHtml($total, $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateCommentBoard->comments($comments, $user_id, $pagination, $mobile));
 

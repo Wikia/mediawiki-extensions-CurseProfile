@@ -85,7 +85,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 
 		$friends = $f->getFriends();
 		$wgOut->addModules('ext.hydraCore.pagination');
-		$pagination = \HydraCore::generatePaginationHtml(count($friends), $itemsPerPage, $start);
+		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateManageFriends->display($friends, $pagination, $itemsPerPage, $start));
 
