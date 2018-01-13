@@ -207,8 +207,8 @@ class Hooks {
 		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_global_id_from.sql", true]);
 
 		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
-			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/create_user_relationship.sql", true));
-			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/create_user_relationship_request.sql", true));
+			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/table_user_relationship.sql", true));
+			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/table_user_relationship_request.sql", true));
 		}
 
 		return true;
