@@ -369,7 +369,7 @@ class ProfileData {
 		$log = new \LogPage('curseprofile');
 		$log->addEntry(
 			'profile-edited',
-			\Title::newFromURL('User:'.$target->getName()),
+			\Title::newFromURL('UserProfile:'.$target->getName()),
 			$comment,
 			['section' => $section],
 			$performer
