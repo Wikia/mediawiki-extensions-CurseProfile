@@ -310,6 +310,8 @@ class ProfilePage extends \Article {
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function groupList(&$parser) {
+		global $wgUser;
+
 		$groups = $this->user->getEffectiveGroups();
 		if (count($groups) == 0) {
 			return '';
@@ -329,7 +331,8 @@ class ProfilePage extends \Article {
 				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
 		}
-		if ($this->user->isAllowed('userrights')) {
+		//Check the rights of the person viewing this page.
+		if ($wgUser->isAllowed('userrights')) {
 			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
 		}
 		$HTML .= '</ul>';
