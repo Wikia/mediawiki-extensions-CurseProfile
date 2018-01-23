@@ -221,7 +221,7 @@ class CommentReport {
 						$subTable,
 					],
 					['ra.*', 'report_count'],
-					['ra_action_taken0' => 0],
+					['ra_action_taken' => 0],
 					__METHOD__,
 					[
 						'ORDER BY' => 'report_count DESC',

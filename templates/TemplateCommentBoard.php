@@ -58,17 +58,17 @@ class TemplateCommentBoard {
 	 * @param	string	[optional] built HTML fragment for pagination
 	 * @return	string	Built HTML
 	 */
-	public function comments($comments, $user_id, $pagination = '', $mobile = false) {
+	public function comments($comments, $user_id, $pagination = '') {
 		$this->HTML = '';
 		$this->HTML .= '<div>'.$pagination.'</div>';
 
 		$this->HTML .= '<div class="comments curseprofile" data-userid="'.$user_id.'">';
 
 		// add hidden compose form, to support replies
-		$this->HTML .= CurseProfile\CommentDisplay::newCommentForm($user_id, true, $mobile);
+		$this->HTML .= CurseProfile\CommentDisplay::newCommentForm($user_id, true);
 
 		foreach ($comments as $comment) {
-			$this->HTML .= CurseProfile\CommentDisplay::singleComment($comment, false, $mobile);
+			$this->HTML .= CurseProfile\CommentDisplay::singleComment($comment, false);
 		}
 
 		$this->HTML .= '</div>';

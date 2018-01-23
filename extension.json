@@ -38,6 +38,7 @@
 		"curseprofile/comment-created": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-replied": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-edited": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/comment-deleted": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/profile-edited": "\\CurseProfile\\ProfileLogFormatter"
 	},
 	"MessagesDirs": {
@@ -120,27 +121,32 @@
 				"contributions-title",
 				"email-auth-required",
 				"emailuser",
+				"facebooklinkplaceholder",
+				"googlelinkplaceholder",
 				"invalid_profile_field",
 				"log",
 				"no-perm-profile-moderate",
-				"purgeaboutme-prompt",
-				"save",
-				"tooltip-t-contributions",
-				"userrights",
-				"profile-link-twitter",
+				"profile-blocked",
 				"profile-link-facebook",
 				"profile-link-google",
+				"profile-link-psn",
 				"profile-link-reddit",
 				"profile-link-steam",
+				"profile-link-twitter",
 				"profile-link-xbl",
-				"profile-link-psn",
-				"twitterlinkplaceholder",
-				"facebooklinkplaceholder",
-				"googlelinkplaceholder",
+				"psnlinkplaceholder",
+				"purgeaboutme-prompt",
 				"redditlinkplaceholder",
+				"save",
 				"steamlinkplaceholder",
-				"xbllinkplaceholder",
-				"psnlinkplaceholder"
+				"tooltip-t-contributions",
+				"twitterlinkplaceholder",
+				"userrights",
+				"xbllinkplaceholder"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.preferences": {
@@ -156,6 +162,10 @@
 			"position": "top",
 			"messages": [
 				"profile-preference-global"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.comments": {
@@ -180,6 +190,10 @@
 				"purge-prompt",
 				"report-prompt",
 				"report-thanks"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.commentmoderation": {
@@ -214,7 +228,6 @@
 				"jquery.timeago",
 				"jquery.autosize"
 			],
-			"remoteBasePath": "CurseProfile",
 			"position": "top"
 		},
 		"jquery.timeago": {
@@ -236,7 +249,11 @@
 			]
 		},
 		"ext.curseprofile.customskin": {
-			"class": "CurseProfile\\ResourceLoaderModule"
+			"class": "CurseProfile\\ResourceLoaderModule",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -259,7 +276,8 @@
 		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions"
+		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
+		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
 		"profile": "CurseProfile\\ProfileApi",

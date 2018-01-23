@@ -34,15 +34,16 @@ class ProfileData {
 	 */
 	static public $editProfileFields = [
 		'profile-aboutme',
-		'profile-location',
-		'profile-link-twitter',
+		'profile-favwiki',
 		'profile-link-facebook',
 		'profile-link-google',
+		'profile-link-psn',
 		'profile-link-reddit',
 		'profile-link-steam',
+		'profile-link-twitch',
+		'profile-link-twitter',
 		'profile-link-xbl',
-		'profile-link-psn',
-		'profile-favwiki'
+		'profile-location'
 	];
 
 	/**
@@ -91,6 +92,7 @@ class ProfileData {
 	 * @return	void
 	 */
 	static public function insertProfilePrefs(&$preferences) {
+		global $wgUser;
 		$preferences['profile-pref'] = [
 			'type' => 'select',
 			'label-message' => 'profileprefselect',
@@ -118,11 +120,6 @@ class ProfileData {
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];
-		global $wgUser;
-		if ($wgUser->isBlocked()) {
-			$preferences['profile-aboutme']['help-message'] = 'aboutmehelp-blocked';
-			$preferences['profile-aboutme']['disabled'] = true;
-		}
 		$preferences['profile-avatar'] = [
 			'type' => 'info',
 			'label-message' =>'avatar',
@@ -193,6 +190,12 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
 		];
+		if ($wgUser->isBlocked()) {
+			foreach (self::$editProfileFields as $field) {
+				$preferences[$field]['help-message'] = 'profile-blocked';
+				$preferences[$field]['disabled'] = true;
+			}
+		}
 	}
 
 	/**
@@ -286,6 +289,10 @@ class ProfileData {
 	public function canEdit($performer) {
 		global $wgEmailAuthentication;
 
+		if ($performer->isBlocked()) {
+			return 'profile-blocked';
+		}
+
 		if ($performer->isAllowed('profile-moderate')) {
 			//Moderators can always edit a profile to remove spam.
 			return true;
@@ -362,7 +369,7 @@ class ProfileData {
 		$log = new \LogPage('curseprofile');
 		$log->addEntry(
 			'profile-edited',
-			\Title::newFromURL('User:'.$target->getName()),
+			\Title::newFromURL('UserProfile:'.$target->getName()),
 			$comment,
 			['section' => $section],
 			$performer

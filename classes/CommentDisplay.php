@@ -24,26 +24,21 @@ class CommentDisplay {
 	 * @param	integer	id of the user whose recent comments should be displayed
 	 * @return	array	with html at index 0
 	 */
-	public static function comments(&$parser, $userId = '') {
-		$mobile = false;
+	static public function comments(&$parser, $userId = '') {
 		$userId = intval($userId);
 		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 
-		if (\HydraCore::isMobileSkin(\RequestContext::getMain()->getSkin())) {
-			$mobile = true;
-		}
-
 		$HTML = '';
 
-		$HTML .= self::newCommentForm($userId, false, $mobile);
+		$HTML .= self::newCommentForm($userId, false);
 
 		$board = new CommentBoard($userId);
 		$comments = $board->getComments();
 
 		foreach ($comments as $comment) {
-			$HTML .= self::singleComment($comment, false, $mobile);
+			$HTML .= self::singleComment($comment, false);
 		}
 
 		return [
@@ -55,15 +50,15 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param	integer	id of the user whose comment board will recieve a new comment via this form
-	 * @param	bool	if true, the form will have an added class to be hidden by css
-	 * @param	bool	if true, the form will add the mobilefrontend class for parsing.
+	 * @param	integer	ID of the user whose comment board will recieve a new comment via this form
+	 * @param	boolean	If true, the form will have an added class to be hidden by css/
 	 * @return	string	html fragment or empty string
 	 */
-	public static function newCommentForm($userId, $hidden = false, $mobile = false) {
+	static public function newCommentForm($userId, $hidden = false) {
 		global $wgUser;
+
 		$targetUser = \User::newFromId($userId);
-		if (CommentBoard::canComment($targetUser) && !$mobile) {
+		if (CommentBoard::canComment($targetUser)) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			$page = \Title::newFromText("Special:AddComment/".$userId);
@@ -90,7 +85,7 @@ class CommentDisplay {
 	 * @param	integer	[optional] id of a comment to highlight from among those displayed
 	 * @return	string	html for display
 	 */
-	public static function singleComment($comment, $highlight = false, $mobile = false) {
+	static public function singleComment($comment, $highlight = false) {
 		global $wgOut, $wgUser;
 
 		$HTML = '';
@@ -115,7 +110,11 @@ class CommentDisplay {
 			$type .= ' highlighted';
 		}
 
-		$avatarSize = ($mobile ? 36 : 48);
+		if (\HydraCore::isMobileSkin(\RequestContext::getMain()->getSkin())) {
+			$avatarSize = 36;
+		} else {
+			$avatarSize = 48;
+		}
 
 		$HTML .= '
 		<div class="commentdisplay '.$type.'" data-id="'.$comment['ub_id'].'">
@@ -123,24 +122,19 @@ class CommentDisplay {
 			<div class="commentblock">
 				<div class="avatar">'.ProfilePage::userAvatar($nothing, $avatarSize, $cUser->getEmail(), $cUser->getName())[0].'</div>
 				<div class="commentheader">';
-				if (!$mobile) {
-					$HTML .= '<div class="right">'
-						.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
-						.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
-						.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \HydraCore::awesomeIcon('reply')) . ' ' : '')
-						.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \HydraCore::awesomeIcon('pencil')) . ' ' : '')
-						.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \HydraCore::awesomeIcon('trash')) : '')
-						.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \HydraCore::awesomeIcon('undo')) : '')
-						.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \HydraCore::awesomeIcon('eraser')) : '')
-						.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \HydraCore::awesomeIcon('flag')) : '')
-						.'</div>'
-						.CP::userLink($comment['ub_user_id_from']);
-					} else {
-						$HTML .= CP::userLink($comment['ub_user_id_from'])
-							.'<div>'
-							.\Html::rawElement('a', ['href' =>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::mobileTimestamp($comment))
-							.'</div>';
-					}
+		$HTML .= '
+					<div class="right">'
+				.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
+				.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
+				.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \HydraCore::awesomeIcon('reply')) . ' ' : '')
+				.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \HydraCore::awesomeIcon('pencil')) . ' ' : '')
+				.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \HydraCore::awesomeIcon('trash')) : '')
+				.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \HydraCore::awesomeIcon('undo')) : '')
+				.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \HydraCore::awesomeIcon('eraser')) : '')
+				.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \HydraCore::awesomeIcon('flag')) : '')
+				.'
+					</div>'
+				.CP::userLink($comment['ub_user_id_from']);
 		$HTML .= '
 				</div>
 				<div class="commentbody">
@@ -163,7 +157,7 @@ class CommentDisplay {
 				}
 
 				foreach ($comment['replies'] as $reply) {
-					$HTML .= self::singleComment($reply, $highlight, $mobile);
+					$HTML .= self::singleComment($reply, $highlight);
 				}
 				$HTML .= '</div>';
 			}
@@ -222,7 +216,7 @@ class CommentDisplay {
 	 * @param	integer	the id of the comment for which replies need to be loaded
 	 * @return	string	html for display
 	 */
-	public static function repliesTo($userId, $commentId) {
+	static public function repliesTo($userId, $commentId) {
 		$userId = intval($userId);
 		if ($userId < 1) {
 			return 'Invalid user ID given';
