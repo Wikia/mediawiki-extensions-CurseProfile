@@ -29,7 +29,7 @@ class Hooks {
 	 */
 	private static $title;
 
-	public static function onRegistration() {
+	static public function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
 		define('NS_USER_WIKI', 200);
@@ -43,7 +43,7 @@ class Hooks {
 		];
 	}
 
-	public static function onParserFirstCall(&$parser) {
+	static public function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
 		// onBeforeInitialize and not setting self::$profilePage
@@ -66,7 +66,7 @@ class Hooks {
 		return true;
 	}
 
-	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
+	static public function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
 		self::$title = $title;
 		self::$profilePage = new ProfilePage($title);
 
@@ -87,7 +87,31 @@ class Hooks {
 		return true;
 	}
 
-	public static function onTestCanonicalRedirect( $request, $title, $output ) {
+	/**
+	 * Hide NS_USER_PROFILE from Special:WantedPages.
+	 *
+	 * @access	public
+	 * @return	boolean	True
+	 */
+	public function onWantedPagesGetQueryInfo(&$wantedPages, &$query) {
+		if (isset($query['conds'])) {
+			$db = wfGetDB(DB_REPLICA);
+			foreach ($query['conds'] as $index => $condition) {
+				if (strpos($condition, 'pl_namespace NOT IN') === 0) {
+					$query['conds'][$index] = 'pl_namespace NOT IN('.$db->makeList([NS_USER, NS_USER_TALK, NS_USER_PROFILE]).')';
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Function Documentation
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+	static public function onTestCanonicalRedirect( $request, $title, $output ) {
 		if (self::$profilePage->isUserWikiPage()) {
 			return false; // don't redirect if we're forcing the wiki page to render
 		}
@@ -97,7 +121,7 @@ class Hooks {
 	/**
 	 * Make links to user pages known (not red) when that user opts for a profile page
 	 */
-	public static function onLinkBegin( $dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret ) {
+	static public function onLinkBegin( $dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret ) {
 		// only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE])) {
 			return true;
@@ -120,7 +144,7 @@ class Hooks {
 	 * @param	mixed	Article object or null
 	 * @return	bool
 	 */
-	public static function onArticleFromTitle(\Title &$title, &$article) {
+	static public function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
 		// TODO shouldn't need to special case against static vars here.
@@ -135,24 +159,24 @@ class Hooks {
 
 		// handle rendering duties for any of our namespaces
 		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
-				if ($title->getNamespace() == NS_USER_PROFILE) {
-					// we are on our UserProfile namespace. Render.
-					$article = self::$profilePage;
-					$wgOut->addModules('ext.curseprofile.profilepage');
-					return true;
-				} else {
-					// we are on the User namespace with our enhanced profile object enabled.
-					if ($wgRequest->getVal('profile') !== "no") {
-						// only redirect if we dont have "?profile=no"
-						$wgOut->redirect( self::$profilePage->getCustomUserProfileTitle()->getFullURL() );
-					}
+			if ($title->getNamespace() == NS_USER_PROFILE) {
+				// we are on our UserProfile namespace. Render.
+				$article = self::$profilePage;
+				$wgOut->addModules('ext.curseprofile.profilepage');
+				return true;
+			} else {
+				// we are on the User namespace with our enhanced profile object enabled.
+				if ($wgRequest->getVal('profile') !== "no") {
+					// only redirect if we dont have "?profile=no"
+					$wgOut->redirect(self::$profilePage->getCustomUserProfileTitle()->getFullURL());
 				}
+			}
 		}
 
 		return true;
 	}
 
-	public static function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
+	static public function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
 		if (self::$profilePage->isUserPage(false) && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'profile=no';
 		}
@@ -160,7 +184,7 @@ class Hooks {
 	}
 
 	// TODO: Currently unused? Either remove or find out how to properly use.
-	public static function markUncachable($parser, &$limitReport) {
+	static public function markUncachable($parser, &$limitReport) {
 		$parser->disableCache();
 		return true;
 	}
@@ -221,7 +245,7 @@ class Hooks {
 	 * @param	array	$files
 	 * @return	boolean	true
 	 */
-	public static function onUnitTestsList( &$files ) {
+	static public function onUnitTestsList( &$files ) {
 		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
 		$files = array_merge( $files, glob(__DIR__.'/tests/phpunit/*Test.php'));
 		return true;

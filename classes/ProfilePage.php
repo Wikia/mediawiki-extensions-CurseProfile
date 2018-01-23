@@ -116,7 +116,7 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Shortcut method to retrieving the user's profile page preference
-	 * @return	bool	true if profile page is preferred, false if wiki is preferred
+	 * @return	boolean	true if profile page is preferred, false if wiki is preferred
 	 */
 	public function profilePreferred() {
 		return $this->profile->getTypePref();
@@ -126,8 +126,9 @@ class ProfilePage extends \Article {
 	 * True if we are not on a subpage, and if we are in the basic User namespace,
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
-	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
-	 * @return	bool
+	 * @access	public
+	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	boolean
 	 */
 	public function isUserPage($onlyView = true) {
 		return $this->user_id && !$this->getTitle()->isSubpage()
@@ -138,7 +139,8 @@ class ProfilePage extends \Article {
 	/**
 	 * True if we are viewing the user's default option (in the default User namespace)
 	 *
-	 * @return	bool
+	 * @access	public
+	 * @return	boolean
 	 */
 	public function isDefaultPage() {
 		return $this->isUserPage() && $this->getTitle()->getNamespace() == NS_USER;
@@ -147,7 +149,8 @@ class ProfilePage extends \Article {
 	/**
 	 * True if we are viewing a user_talk namespace page.
 	 *
-	 * @return	bool
+	 * @access	public
+	 * @return	boolean
 	 */
 	public function isTalkPage() {
 		return $this->getTitle()->getNamespace() == NS_USER_TALK;
@@ -156,8 +159,9 @@ class ProfilePage extends \Article {
 	/**
 	 * True if we need to render the user's profile page on either namespace
 	 *
-	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
-	 * @return	bool
+	 * @access	public
+	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	boolean
 	 */
 	public function isProfilePage($onlyView = true) {
 		return $this->isUserPage($onlyView) && (
@@ -177,8 +181,9 @@ class ProfilePage extends \Article {
 	/**
 	 * True when we need to render the user's wiki page on either namespace
 	 *
-	 * @param	bool	[optional] if true (default), will return false for any action other than 'view'
-	 * @return	bool
+	 * @access	public
+	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
+	 * @return	boolean
 	 */
 	public function isUserWikiPage($onlyView = true) {
 		if ($onlyView) {

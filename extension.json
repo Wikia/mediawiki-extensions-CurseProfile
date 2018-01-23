@@ -276,7 +276,8 @@
 		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions"
+		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
+		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
 		"profile": "CurseProfile\\ProfileApi",
