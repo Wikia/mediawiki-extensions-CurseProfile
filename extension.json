@@ -143,6 +143,10 @@
 				"twitterlinkplaceholder",
 				"userrights",
 				"xbllinkplaceholder"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.preferences": {
@@ -158,6 +162,10 @@
 			"position": "top",
 			"messages": [
 				"profile-preference-global"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.comments": {
@@ -182,6 +190,10 @@
 				"purge-prompt",
 				"report-prompt",
 				"report-thanks"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.curseprofile.commentmoderation": {
@@ -216,7 +228,6 @@
 				"jquery.timeago",
 				"jquery.autosize"
 			],
-			"remoteBasePath": "CurseProfile",
 			"position": "top"
 		},
 		"jquery.timeago": {
@@ -238,7 +249,11 @@
 			]
 		},
 		"ext.curseprofile.customskin": {
-			"class": "CurseProfile\\ResourceLoaderModule"
+			"class": "CurseProfile\\ResourceLoaderModule",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
