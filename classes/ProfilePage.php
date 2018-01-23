@@ -366,7 +366,7 @@ class ProfilePage extends \Article {
 
 		$fieldText = $wgOut->parse($this->profile->getField($field));
 
-		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
+		if ($this->profile->canEdit($wgUser) === true) {
 			if (empty($fieldText)) {
 				$fieldText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-'.$field.'-text' : 'empty-'.$field.'-text-mod'))->plain());
 			}
