@@ -556,7 +556,7 @@ class CommentBoard {
 		// Preparing stuff for the Log Entry
 		$comment = self::getCommentById($commentId);
 		$toUser = \User::newFromId($comment[0]['ub_user_id']);
-		$title = \Title::newFromURL('User:'.$toUser->getName());
+		$title = \Title::newFromURL('UserProfile:'.$toUser->getName());
 		$fromUser = $wgUser;
 		$extra['comment_id'] = $commentId;
 
@@ -631,6 +631,21 @@ class CommentBoard {
 			$time = date('Y-m-d H:i:s');
 		}
 
+		// Preparing stuff for the Log Entry
+		$comment = self::getCommentById($commentId);
+		$toUser = \User::newFromId($comment[0]['ub_user_id']);
+		$title = \Title::newFromURL('UserProfile:'.$toUser->getName());
+		$extra['comment_id'] = $commentId;
+
+		$log = new \LogPage('curseprofile');
+		$log->addEntry(
+			'comment-deleted',
+			$title,
+			null,
+			$extra,
+			$user
+		);
+
 		$db = CP::getDb(DB_MASTER);
 		return $db->update(
 			'user_board',
@@ -670,7 +685,7 @@ class CommentBoard {
 	}
 
 	/**
-	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
+	 * Restore a comment to the board. Permissions are not checked. Use canRemove() to check.
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param	integer	id of a comment to remove

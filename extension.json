@@ -38,6 +38,7 @@
 		"curseprofile/comment-created": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-replied": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-edited": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/comment-deleted": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/profile-edited": "\\CurseProfile\\ProfileLogFormatter"
 	},
 	"MessagesDirs": {
