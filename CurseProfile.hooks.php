@@ -93,7 +93,7 @@ class Hooks {
 	 * @access	public
 	 * @return	boolean	True
 	 */
-	public function onWantedPagesGetQueryInfo(&$wantedPages, &$query) {
+	static public function onWantedPagesGetQueryInfo(&$wantedPages, &$query) {
 		if (isset($query['conds'])) {
 			$db = wfGetDB(DB_REPLICA);
 			foreach ($query['conds'] as $index => $condition) {
