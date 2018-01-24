@@ -273,7 +273,6 @@
 		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
 		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
 		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
-		"TestCanonicalRedirect": "CurseProfile\\Hooks::onTestCanonicalRedirect",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
 		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
