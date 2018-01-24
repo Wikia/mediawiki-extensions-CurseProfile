@@ -77,7 +77,15 @@ class ProfileData {
 	public function getUserPageUrl($talk = false) {
 		$title = \Title::newFromText(($talk ? 'User_talk:' : 'User:').$this->user->getTitleKey());
 
-		return $title->getFullURL(($this->getTypePref() ? ['profile' => 'no'] : null));
+		$arguments = [];
+		if ($this->getTypePref()) {
+			$arguments['profile'] = 'no';
+		}
+		if (!$title->isKnown()) {
+			$arguments['redlink'] = 1;
+		}
+
+		return $title->getFullURL($arguments);
 	}
 
 	/**

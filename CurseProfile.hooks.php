@@ -121,16 +121,6 @@ class Hooks {
 	static public function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
-		// TODO shouldn't need to special case against static vars here.
-		// We should be able to statelessly create a new ProfilePage from
-		// the given title and perform logic from that object.
-		// However, some of the crappy static stuff in ProfilePage makes that
-		// more appropriate approach problematic until the ProfilePage class
-		// gets cleaned up first.
-		if (self::$title instanceof Title && !self::$title->equals($title)) {
-			return true;
-		}
-
 		//Handle rendering duties for any user namespaces.
 		if (self::$profilePage !== false) {
 			$redirect = false;
@@ -143,9 +133,9 @@ class Hooks {
 					$wgOut->addModules('ext.curseprofile.profilepage');
 				}
 			} else {
-				// we are on the User namespace with our enhanced profile object enabled.
-				if ($wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
-					// only redirect if we dont have "?profile=no"
+				//We are on the User namespace with our enhanced profile object enabled.
+				if (self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+					//Only redirect if we dont have "?profile=no" and they prefer the profile.
 					$redirect = true;
 				}
 			}

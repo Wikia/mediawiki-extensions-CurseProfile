@@ -215,51 +215,59 @@ class ProfilePage extends \Article {
 	public function customizeNavBar(&$links) {
 		global $wgUser;
 
-		// links specific to the profile page
+		$links['namespaces'] = [];
 		if ($this->isProfilePage()) {
-			$oldLinks = $links;
-			// let's start with a fresh array
+			//Clear out all the things that would tempt someone to create the hidden article.
 			$links = [
 				'namespaces' => [],
 				'views' => [],
 				'actions' => [],
-				'variants' => [],
-			];
-
-			$links['namespaces']['userprofile'] = [
-				'href'	=> $this->profile->getProfilePath(),
-				'text'	=> wfMessage('userprofiletab')->text(),
-				'class'	=> 'selected'
-			];
-
-			$links['namespaces']['user'] = [
-				'class'	=> false,
-				'text'	=> wfMessage('userwikitab')->text(),
-				'href'	=> $this->profile->getUserPageUrl(),
-			];
-
-			$links['namespaces']['user_talk'] = [
-				'class'	=> false,
-				'text'	=> wfMessage('talk')->text(),
-				'href'	=> $this->profile->getUserPageUrl(true),
-			];
-
-			$links['views']['contribs'] = [
-				'class'	=> false,
-				'text'	=> wfMessage('contributions')->text(),
-				'href'	=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
+				'variants' => []
 			];
 		}
 
-		//Link to NS_USER page from NS_USER_PROFILE.
-		if ($this->isUserPage() || $this->isUserTalkPage()) {
-			$links['namespaces']['userprofile'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('userprofiletab')->text(),
-				'href'		=> $this->profile->getProfilePath(),
-				'primary'	=> true,
-			];
+		$links['namespaces']['userprofile'] = [
+			'class'		=> ($this->isProfilePage() ? 'selected' : ''),
+			'href'		=> $this->profile->getProfilePath(),
+			'text'		=> wfMessage('userprofiletab')->text(),
+			'primary'	=> true
+		];
+
+		$class = [];
+		$title = \Title::newFromText('User:'.$this->user->getTitleKey());
+		if ($this->isUserPage()) {
+			$class[] = 'selected';
 		}
+		if (!$title->isKnown()) {
+			$class[] = 'new';
+		}
+		$links['namespaces']['user'] = [
+			'class'		=> implode(' ', $class),
+			'text'		=> wfMessage('userwikitab')->text(),
+			'href'		=> $this->profile->getUserPageUrl(),
+			'primary'	=> true
+		];
+
+		$class = [];
+		$title = \Title::newFromText('User_talk:'.$this->user->getTitleKey());
+		if ($this->isUserTalkPage()) {
+			$class[] = 'selected';
+		}
+		if (!$title->isKnown()) {
+			$class[] = 'new';
+		}
+		$links['namespaces']['user_talk'] = [
+			'class'		=> implode(' ', $class),
+			'text'		=> wfMessage('talk')->text(),
+			'href'		=> $this->profile->getUserPageUrl(true),
+			'primary'	=> true
+		];
+
+		$links['views']['contribs'] = [
+			'class'	=> false,
+			'text'	=> wfMessage('contributions')->text(),
+			'href'	=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
+		];
 	}
 
 	/**
