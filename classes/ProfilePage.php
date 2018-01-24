@@ -20,40 +20,43 @@ namespace CurseProfile;
 class ProfilePage extends \Article {
 
 	/**
-	 * @var String
+	 * @var		string
 	 */
 	protected $userName;
 
 	/**
-	 * @var int
+	 * @var		integer
 	 */
 	protected $userId;
 
 	/**
-	 * @var \User instance
+	 * @var		object	User instance
 	 */
 	protected $user;
 
 	/**
-	 * @var ProfileData instance
+	 * @var		object	ProfileData instance
 	 */
 	protected $profile;
 
 	/**
-	 * Whether or not the current page being rendered is with action=view
-	 * @var bool
+	 * Whether or not the current page being rendered is with action=view.
+	 *
+	 * @var		boolean
 	 */
 	private $actionIsView;
 
 	/**
 	 * An array of groups to be excluded from display on profiles
-	 * @var array
+	 *
+	 * @var		array
 	 */
 	private $hiddenGroups = ['hydra_admin', '*', 'autoconfirmed', 'checkuser', 'ads_manager', 'widget_editor', 'wiki_manager'];
 
 	/**
 	 * Whether or not we're on a mobile view.
-	 * @var	bool
+	 *
+	 * @var		boolean
 	 */
 	private $mobile;
 
@@ -145,7 +148,7 @@ class ProfilePage extends \Article {
 	 * Shortcut method to retrieving the user's profile page preference
 	 *
 	 * @access	public
-	 * @return	boolean	true if profile page is preferred, false if wiki is preferred
+	 * @return	boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
 	public function profilePreferred() {
 		return $this->profile->getTypePref();
@@ -160,16 +163,6 @@ class ProfilePage extends \Article {
 	 */
 	public function isUserPage() {
 		return $this->getTitle()->getNamespace() == NS_USER;
-	}
-
-	/**
-	 * True if we are viewing the user's default option (in the default User namespace)
-	 *
-	 * @access	public
-	 * @return	boolean
-	 */
-	public function isDefaultPage() {
-		return $this->isUserPage() && $this->getTitle()->getNamespace() == NS_USER;
 	}
 
 	/**
@@ -194,25 +187,29 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Returns the article object for the User's page in the standard User namespace
-	 * @return	Article instance
+	 * Is the action for this page 'view'?
+	 *
+	 * @access	public
+	 * @return	boolean
 	 */
-	public function getUserWikiArticle() {
-		$article = new \Article($this->user->getUserPage());
-		$article->setContext($this->getContext());
-		return $article;
+	public function isActionView() {
+		return $this->actionIsView;
 	}
 
 	/**
 	 * Returns the title object for the user's page in the UserProfile namespace
+	 *
+	 * @access	public
 	 * @return	\Title instance
 	 */
-	public function getCustomUserProfileTitle() {
+	public function getUserProfileTitle() {
 		return \Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
 	}
 
 	/**
 	 * Adjusts the links in the primary action bar on profile pages and user wiki pages
+	 *
+	 * @access	public
 	 * @param	array	structured info on what links will appear on the rendered page
 	 */
 	public function customizeNavBar(&$links) {
@@ -230,28 +227,27 @@ class ProfilePage extends \Article {
 			];
 
 			$links['namespaces']['userprofile'] = [
-				'href' => $this->profile->getProfilePath(),
-				'text' => wfMessage('userprofiletab')->text(),
-				'class' => 'selected'
+				'href'	=> $this->profile->getProfilePath(),
+				'text'	=> wfMessage('userprofiletab')->text(),
+				'class'	=> 'selected'
 			];
 
-			// add link to user wiki
 			$links['namespaces']['user'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('userwikitab')->text(),
-				'href'		=> $this->profile->getUserWikiPath(),
+				'class'	=> false,
+				'text'	=> wfMessage('userwikitab')->text(),
+				'href'	=> $this->profile->getUserPageUrl(),
 			];
 
 			$links['namespaces']['user_talk'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('talk')->text(),
-				'href'		=> $this->user->getTalkPage()->getLinkURL(),
+				'class'	=> false,
+				'text'	=> wfMessage('talk')->text(),
+				'href'	=> $this->profile->getUserPageUrl(true),
 			];
 
 			$links['views']['contribs'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('contributions')->text(),
-				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
+				'class'	=> false,
+				'text'	=> wfMessage('contributions')->text(),
+				'href'	=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
 			];
 		}
 
@@ -520,7 +516,8 @@ class ProfilePage extends \Article {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
 
-		$link = "https://".$wiki['wiki_domain'].$this->profile->getProfilePath(false);
+		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
+		$link = "https://".$wiki['wiki_domain'].$title->getLocalURL();
 
 		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;

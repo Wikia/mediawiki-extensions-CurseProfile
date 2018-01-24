@@ -56,32 +56,28 @@ class ProfileData {
 	}
 
 	/**
-	 * Returns the canonical URL path to a user's profile based on their profile preference
-	 * @return string
+	 * Returns the canonical URL path to a user's profile.
+	 *
+	 * @access	public
+	 * @param	boolean	True to generate User_talk URL.
+	 * @return	string
 	 */
-	public function getProfilePath($expand = true) {
-		global $wgScriptPath;
-		$path = "/UserProfile:" . $this->user->getTitleKey();
-		if ($expand) {
-			return wfExpandUrl($wgScriptPath.$path);
-		} else {
-			return $path;
-		}
+	public function getProfilePath() {
+		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
+		return $title->getFullURL();
 	}
 
 	/**
-	 * Returns the canonical URL path to a user's wiki page based on their profile preference
-	 * @return string
+	 * Returns the canonical URL path to a user's wiki page based on their profile preference.
+	 *
+	 * @access	public
+	 * @param	boolean	True to generate User_talk URL.
+	 * @return	string
 	 */
-	public function getUserWikiPath() {
-		global $wgScriptPath;
-		$path = "/User:" . $this->user->getTitleKey();
+	public function getUserPageUrl($talk = false) {
+		$title = \Title::newFromText(($talk ? 'User_talk:' : 'User:').$this->user->getTitleKey());
 
-		if ($this->getTypePref()) {
-			$path .= "?profile=no";
-		}
-
-		return wfExpandUrl($wgScriptPath.$path);
+		return $title->getFullURL(($this->getTypePref() ? ['profile' => 'no'] : null));
 	}
 
 	/**

@@ -131,19 +131,26 @@ class Hooks {
 			return true;
 		}
 
-		// handle rendering duties for any of our namespaces
-		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
-			if ($title->getNamespace() == NS_USER_PROFILE) {
-				// we are on our UserProfile namespace. Render.
-				$article = self::$profilePage;
-				$wgOut->addModules('ext.curseprofile.profilepage');
-				return true;
+		//Handle rendering duties for any user namespaces.
+		if (self::$profilePage !== false) {
+			$redirect = false;
+			if (self::$profilePage->isProfilePage()) {
+				if (!self::$profilePage->isActionView()) {
+					$redirect = true;
+				} else {
+					// we are on our UserProfile namespace. Render.
+					$article = self::$profilePage;
+					$wgOut->addModules('ext.curseprofile.profilepage');
+				}
 			} else {
 				// we are on the User namespace with our enhanced profile object enabled.
-				if ($wgRequest->getVal('profile') !== "no") {
+				if ($wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
 					// only redirect if we dont have "?profile=no"
-					$wgOut->redirect(self::$profilePage->getCustomUserProfileTitle()->getFullURL());
+					$redirect = true;
 				}
+			}
+			if ($redirect) {
+				$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 			}
 		}
 
@@ -151,7 +158,7 @@ class Hooks {
 	}
 
 	static public function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
-		if (self::$profilePage->isUserPage(false) && self::$profilePage->profilePreferred()) {
+		if ((self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'profile=no';
 		}
 		return true;
