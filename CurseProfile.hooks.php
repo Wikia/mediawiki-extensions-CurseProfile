@@ -20,15 +20,22 @@ class Hooks {
 	 * @access	private
 	 * @var		object	CurseProfile\ProfilePage
 	 */
-	private static $profilePage;
+	static private $profilePage;
 
 	/**
 	 * Reference to the title originally parsed from this request
 	 * @access	private
 	 * @var		object	Title
 	 */
-	private static $title;
+	static private $title;
 
+	/**
+	 * Setup extra namespaces during MediaWiki setup process.
+	 *
+	 * @access	public
+	 * @param	object	Parser
+	 * @return	boolean	True
+	 */
 	static public function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
@@ -38,8 +45,16 @@ class Hooks {
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Gratitude.png"
 		];
+		return true;
 	}
 
+	/**
+	 * Set parser hooks for the profile pages.
+	 *
+	 * @access	public
+	 * @param	object	Parser
+	 * @return	boolean	True
+	 */
 	static public function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
