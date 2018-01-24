@@ -32,10 +32,7 @@ class Hooks {
 	static public function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
-		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
-
-		$wgExtraNamespaces[NS_USER_WIKI] = 'UserWiki';
 		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
 		$wgEchoNotificationIcons['gratitude'] = [
@@ -68,20 +65,10 @@ class Hooks {
 
 	static public function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
 		self::$title = $title;
-		self::$profilePage = new ProfilePage($title);
-
+		self::$profilePage = ProfilePage::newFromTitle($title);
 
 		if ($title->equals(\SpecialPage::getTitleFor("Preferences"))) {
 			$output->addModules('ext.curseprofile.preferences');
-		}
-
-
-		// Force temporary hard redirect from UserWiki: to User:
-		if (defined('NS_USER_WIKI') && $title->getNamespace() == NS_USER_WIKI) {
-			$link = $title->getLinkURL();
-			$link = str_replace("UserWiki:", "User:", $link);
-			$link = $link . "?profile=no";
-			$output->redirect($link, 301);
 		}
 
 		return true;
@@ -101,19 +88,6 @@ class Hooks {
 					$query['conds'][$index] = 'pl_namespace NOT IN('.$db->makeList([NS_USER, NS_USER_TALK, NS_USER_PROFILE]).')';
 				}
 			}
-		}
-		return true;
-	}
-
-	/**
-	 * Function Documentation
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	static public function onTestCanonicalRedirect( $request, $title, $output ) {
-		if (self::$profilePage->isUserWikiPage()) {
-			return false; // don't redirect if we're forcing the wiki page to render
 		}
 		return true;
 	}
@@ -193,7 +167,7 @@ class Hooks {
 	 * Adds links to the navigation tabs
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage && (self::$profilePage->isUserPage(false) || self::$profilePage->isTalkPage())) {
+		if (self::$profilePage !== false) {
 			self::$profilePage->customizeNavBar($links);
 		}
 		return true;
