@@ -20,7 +20,7 @@ class Hooks {
 	 * @access	private
 	 * @var		object	CurseProfile\ProfilePage
 	 */
-	static private $profilePage;
+	static private $profilePage = false;
 
 	/**
 	 * Reference to the title originally parsed from this request
@@ -137,7 +137,7 @@ class Hooks {
 		global $wgRequest, $wgOut;
 
 		//Handle rendering duties for any user namespaces.
-		if (self::$profilePage !== false) {
+		if (self::$profilePage) {
 			$redirect = false;
 			if (self::$profilePage->isProfilePage()) {
 				if (!self::$profilePage->isActionView()) {
