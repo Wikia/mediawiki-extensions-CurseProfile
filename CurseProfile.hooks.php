@@ -44,7 +44,7 @@ class Hooks {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
 		// onBeforeInitialize and not setting self::$profilePage
-		if (self::$profilePage !== false && self::$profilePage->isProfilePage()) {
+		if (self::$profilePage && self::$profilePage->isProfilePage()) {
 			$parser->setFunctionHook('achievements',		[self::$profilePage, 'recentAchievements']);
 			$parser->setFunctionHook('editorfriends',		[self::$profilePage, 'editOrFriends']);
 			$parser->setFunctionHook('favwiki',				[self::$profilePage, 'favoriteWiki']);
