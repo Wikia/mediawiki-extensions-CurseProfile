@@ -20,29 +20,41 @@ class Hooks {
 	 * @access	private
 	 * @var		object	CurseProfile\ProfilePage
 	 */
-	private static $profilePage;
+	static private $profilePage;
 
 	/**
 	 * Reference to the title originally parsed from this request
 	 * @access	private
 	 * @var		object	Title
 	 */
-	private static $title;
+	static private $title;
 
+	/**
+	 * Setup extra namespaces during MediaWiki setup process.
+	 *
+	 * @access	public
+	 * @param	object	Parser
+	 * @return	boolean	True
+	 */
 	static public function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
-		define('NS_USER_WIKI', 200);
 		define('NS_USER_PROFILE', 202);
-
-		$wgExtraNamespaces[NS_USER_WIKI] = 'UserWiki';
 		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
 		$wgEchoNotificationIcons['gratitude'] = [
 			'path' => "CurseProfile/img/notifications/Gratitude.png"
 		];
+		return true;
 	}
 
+	/**
+	 * Set parser hooks for the profile pages.
+	 *
+	 * @access	public
+	 * @param	object	Parser
+	 * @return	boolean	True
+	 */
 	static public function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
@@ -68,20 +80,10 @@ class Hooks {
 
 	static public function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
 		self::$title = $title;
-		self::$profilePage = new ProfilePage($title);
-
+		self::$profilePage = ProfilePage::newFromTitle($title);
 
 		if ($title->equals(\SpecialPage::getTitleFor("Preferences"))) {
 			$output->addModules('ext.curseprofile.preferences');
-		}
-
-
-		// Force temporary hard redirect from UserWiki: to User:
-		if (defined('NS_USER_WIKI') && $title->getNamespace() == NS_USER_WIKI) {
-			$link = $title->getLinkURL();
-			$link = str_replace("UserWiki:", "User:", $link);
-			$link = $link . "?profile=no";
-			$output->redirect($link, 301);
 		}
 
 		return true;
@@ -101,19 +103,6 @@ class Hooks {
 					$query['conds'][$index] = 'pl_namespace NOT IN('.$db->makeList([NS_USER, NS_USER_TALK, NS_USER_PROFILE]).')';
 				}
 			}
-		}
-		return true;
-	}
-
-	/**
-	 * Function Documentation
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	static public function onTestCanonicalRedirect( $request, $title, $output ) {
-		if (self::$profilePage->isUserWikiPage()) {
-			return false; // don't redirect if we're forcing the wiki page to render
 		}
 		return true;
 	}
@@ -147,29 +136,26 @@ class Hooks {
 	static public function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
-		// TODO shouldn't need to special case against static vars here.
-		// We should be able to statelessly create a new ProfilePage from
-		// the given title and perform logic from that object.
-		// However, some of the crappy static stuff in ProfilePage makes that
-		// more appropriate approach problematic until the ProfilePage class
-		// gets cleaned up first.
-		if (self::$title instanceof Title && !self::$title->equals($title)) {
-			return true;
-		}
-
-		// handle rendering duties for any of our namespaces
-		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
-			if ($title->getNamespace() == NS_USER_PROFILE) {
-				// we are on our UserProfile namespace. Render.
-				$article = self::$profilePage;
-				$wgOut->addModules('ext.curseprofile.profilepage');
-				return true;
-			} else {
-				// we are on the User namespace with our enhanced profile object enabled.
-				if ($wgRequest->getVal('profile') !== "no") {
-					// only redirect if we dont have "?profile=no"
-					$wgOut->redirect(self::$profilePage->getCustomUserProfileTitle()->getFullURL());
+		//Handle rendering duties for any user namespaces.
+		if (self::$profilePage !== false) {
+			$redirect = false;
+			if (self::$profilePage->isProfilePage()) {
+				if (!self::$profilePage->isActionView()) {
+					$redirect = true;
+				} else {
+					// we are on our UserProfile namespace. Render.
+					$article = self::$profilePage;
+					$wgOut->addModules('ext.curseprofile.profilepage');
 				}
+			} else {
+				//We are on the User namespace with our enhanced profile object enabled.
+				if (self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+					//Only redirect if we dont have "?profile=no" and they prefer the profile.
+					$redirect = true;
+				}
+			}
+			if ($redirect) {
+				$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 			}
 		}
 
@@ -177,7 +163,7 @@ class Hooks {
 	}
 
 	static public function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
-		if (self::$profilePage->isUserPage(false) && self::$profilePage->profilePreferred()) {
+		if ((self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'profile=no';
 		}
 		return true;
@@ -193,7 +179,7 @@ class Hooks {
 	 * Adds links to the navigation tabs
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage && (self::$profilePage->isUserPage(false) || self::$profilePage->isTalkPage())) {
+		if (self::$profilePage !== false) {
 			self::$profilePage->customizeNavBar($links);
 		}
 		return true;

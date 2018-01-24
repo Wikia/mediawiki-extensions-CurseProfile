@@ -20,46 +20,60 @@ namespace CurseProfile;
 class ProfilePage extends \Article {
 
 	/**
-	 * @var String
+	 * @var		string
 	 */
-	protected $user_name;
+	protected $userName;
 
 	/**
-	 * @var int
+	 * @var		integer
 	 */
-	protected $user_id;
+	protected $userId;
 
 	/**
-	 * @var \User instance
+	 * @var		object	User instance
 	 */
 	protected $user;
 
 	/**
-	 * @var ProfileData instance
+	 * @var		object	ProfileData instance
 	 */
 	protected $profile;
 
 	/**
-	 * Whether or not the current page being rendered is with action=view
-	 * @var bool
+	 * Whether or not the current page being rendered is with action=view.
+	 *
+	 * @var		boolean
 	 */
 	private $actionIsView;
 
 	/**
 	 * An array of groups to be excluded from display on profiles
-	 * @var array
+	 *
+	 * @var		array
 	 */
 	private $hiddenGroups = ['hydra_admin', '*', 'autoconfirmed', 'checkuser', 'ads_manager', 'widget_editor', 'wiki_manager'];
 
 	/**
 	 * Whether or not we're on a mobile view.
-	 * @var	bool
+	 *
+	 * @var		boolean
 	 */
 	private $mobile;
 
 	/**
-	 * @param \Title $title
-	 * @param IContextSource $context
+	 * Namespaces that CurseProfile operates inside.
+	 *
+	 * @var		array
+	 */
+	static private $userNamespaces = [NS_USER, NS_USER_TALK, NS_USER_PROFILE];
+
+	/**
+	 * Main Constructor
+	 *
+	 * @access	public
+	 * @param	object	Title $title
+	 * @param	object	IContextSource $context
+	 * @return	void
 	 */
 	public function __construct($title, $context = null) {
 		parent::__construct($title);
@@ -72,18 +86,34 @@ class ProfilePage extends \Article {
 			$_userNames = explode('/', $title->getText());
 			$userName = array_shift($_userNames);
 		}
-		$this->user_name = $userName;
+		$this->userName = $userName;
 		$this->user = \User::newFromName($userName);
 		if ($this->user) {
 			$this->user->load();
-			$this->user_id = $this->user->getID();
+			$this->userId = $this->user->getID();
 		} else {
 			$this->user = \User::newFromId(0);
-			$this->user_id = 0;
+			$this->userId = 0;
 		}
 
 		$this->mobile = \HydraCore::isMobileSkin($this->getContext()->getSkin());
-		$this->profile = new ProfileData($this->user_id);
+		$this->profile = new ProfileData($this->userId);
+	}
+
+	/**
+	 * Create a new instance from a page title.  This is the preferred entry point since it handles if the title is in an usable namespace.
+	 *
+	 * @access	public
+	 * @param	object	Title $title
+	 * @param	object	IContextSource $context
+	 * @return	mixed	New self or false for a bad title.
+	 */
+	static public function newFromTitle($title, \IContextSource $context = null) {
+		if (in_array($title->getNamespace(), self::$userNamespaces)) {
+			//We do not call the parent newFromTitle since it could return the wrong class.
+			return new self($title, $context);
+		}
+		return false;
 	}
 
 	/**
@@ -116,7 +146,9 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Shortcut method to retrieving the user's profile page preference
-	 * @return	boolean	true if profile page is preferred, false if wiki is preferred
+	 *
+	 * @access	public
+	 * @return	boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
 	public function profilePreferred() {
 		return $this->profile->getTypePref();
@@ -127,23 +159,10 @@ class ProfilePage extends \Article {
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
 	 * @access	public
-	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
 	 * @return	boolean
 	 */
-	public function isUserPage($onlyView = true) {
-		return $this->user_id && !$this->getTitle()->isSubpage()
-			&& (!$onlyView || $this->actionIsView)
-			&& in_array($this->getTitle()->getNamespace(), [NS_USER, NS_USER_PROFILE]);
-	}
-
-	/**
-	 * True if we are viewing the user's default option (in the default User namespace)
-	 *
-	 * @access	public
-	 * @return	boolean
-	 */
-	public function isDefaultPage() {
-		return $this->isUserPage() && $this->getTitle()->getNamespace() == NS_USER;
+	public function isUserPage() {
+		return $this->getTitle()->getNamespace() == NS_USER;
 	}
 
 	/**
@@ -152,141 +171,103 @@ class ProfilePage extends \Article {
 	 * @access	public
 	 * @return	boolean
 	 */
-	public function isTalkPage() {
+	public function isUserTalkPage() {
 		return $this->getTitle()->getNamespace() == NS_USER_TALK;
 	}
 
 	/**
-	 * True if we need to render the user's profile page on either namespace
+	 * True if we need to render the user's profile page.
 	 *
 	 * @access	public
 	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
 	 * @return	boolean
 	 */
 	public function isProfilePage($onlyView = true) {
-		return $this->isUserPage($onlyView) && (
-				(	$this->profile->getTypePref() &&
-					$this->getTitle()->getNamespace() == NS_USER &&
-					$this->getContext()->getRequest()->getVal('profile') !== "no" ) ||
-				($this->getTitle()->getNamespace() == NS_USER_PROFILE)
-			) && (
-				$this->getContext()->getRequest()->getInt('diff') == 0 &&
-				$this->getContext()->getRequest()->getInt('oldid') == 0 &&
-				// The rcid parameter is deprecated and nonfunctional in any recent version of MW.
-				// However, CurseProfile creates unexpected behavior if left unsupported here
-				$this->getContext()->getRequest()->getInt('rcid') == 0
-			);
+		return $this->getTitle()->getNamespace() == NS_USER_PROFILE;
 	}
 
 	/**
-	 * True when we need to render the user's wiki page on either namespace
+	 * Is the action for this page 'view'?
 	 *
 	 * @access	public
-	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
 	 * @return	boolean
 	 */
-	public function isUserWikiPage($onlyView = true) {
-		if ($onlyView) {
-			return $this->isUserPage($onlyView) && (
-					(!$this->profile->getTypePref() && $this->getTitle()->getNamespace() == NS_USER)
-				);
-		} else {
-			return $this->isUserWikiPage(true) || (
-				$this->isUserPage(false) && ($this->getTitle()->getNamespace() == NS_USER && !$this->actionIsView)
-			);
-		}
-	}
-
-	/**
-	 * Returns the article object for the User's page in the standard User namespace
-	 * @return	Article instance
-	 */
-	public function getUserWikiArticle() {
-		$article = new \Article($this->user->getUserPage());
-		$article->setContext($this->getContext());
-		return $article;
+	public function isActionView() {
+		return $this->actionIsView;
 	}
 
 	/**
 	 * Returns the title object for the user's page in the UserProfile namespace
+	 *
+	 * @access	public
 	 * @return	\Title instance
 	 */
-	public function getCustomUserProfileTitle() {
+	public function getUserProfileTitle() {
 		return \Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
 	}
 
 	/**
 	 * Adjusts the links in the primary action bar on profile pages and user wiki pages
+	 *
+	 * @access	public
 	 * @param	array	structured info on what links will appear on the rendered page
 	 */
 	public function customizeNavBar(&$links) {
 		global $wgUser;
 
-		// links specific to the profile page
+		$links['namespaces'] = [];
 		if ($this->isProfilePage()) {
-			$oldLinks = $links;
-			// let's start with a fresh array
+			//Clear out all the things that would tempt someone to create the hidden article.
 			$links = [
 				'namespaces' => [],
 				'views' => [],
 				'actions' => [],
-				'variants' => [],
-			];
-
-			$links['namespaces']['userprofile'] = [
-				'href' => $this->profile->getProfilePath(),
-				'text' => wfMessage('userprofiletab')->text(),
-				'class' => 'selected'
-			];
-
-			// add link to user wiki
-			$links['namespaces']['user'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('userwikitab')->text(),
-				'href'		=> $this->profile->getUserWikiPath(),
-			];
-
-			$links['namespaces']['user_talk'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('talk')->text(),
-				'href'		=> $this->user->getTalkPage()->getLinkURL(),
-			];
-
-			$links['views']['contribs'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('contributions')->text(),
-				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
+				'variants' => []
 			];
 		}
 
-		if ($this->isDefaultPage() || $this->isTalkPage()) {
-			// add user profile link to user page
-			$links['namespaces']['userprofile'] = [
-				'href' => $this->profile->getProfilePath(),
-				'text' => wfMessage('userprofiletab')->text(),
-				'class' => false
-			];
-			/*$links['views']['contribs'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('contributions')->text(),
-				'href'		=> \SpecialPage::getTitleFor('Contributions', $this->user_name)->getFullURL(),
-			];*/
+		$links['namespaces']['userprofile'] = [
+			'class'		=> ($this->isProfilePage() ? 'selected' : ''),
+			'href'		=> $this->profile->getProfilePath(),
+			'text'		=> wfMessage('userprofiletab')->text(),
+			'primary'	=> true
+		];
+
+		$class = [];
+		$title = \Title::newFromText('User:'.$this->user->getTitleKey());
+		if ($this->isUserPage()) {
+			$class[] = 'selected';
 		}
-
-		// links specific to a user wiki page
-		if ($this->isUserWikiPage(false)) {
-			$links['namespaces']['userprofile'] = [
-				'class'		=> false,
-				'text'		=> wfMessage('userprofiletab')->text(),
-				'href'		=> $this->profile->getProfilePath(),
-				'primary'	=> true,
-			];
-
-			// correct User profile to "User wiki" and use appropriate link
-			$links['namespaces']['user']['text'] = wfMessage('userwikitab')->text();
-			$links['namespaces']['user']['href'] = $this->profile->getUserWikiPath();
+		if (!$title->isKnown()) {
+			$class[] = 'new';
 		}
+		$links['namespaces']['user'] = [
+			'class'		=> implode(' ', $class),
+			'text'		=> wfMessage('userwikitab')->text(),
+			'href'		=> $this->profile->getUserPageUrl(),
+			'primary'	=> true
+		];
 
+		$class = [];
+		$title = \Title::newFromText('User_talk:'.$this->user->getTitleKey());
+		if ($this->isUserTalkPage()) {
+			$class[] = 'selected';
+		}
+		if (!$title->isKnown()) {
+			$class[] = 'new';
+		}
+		$links['namespaces']['user_talk'] = [
+			'class'		=> implode(' ', $class),
+			'text'		=> wfMessage('talk')->text(),
+			'href'		=> $this->profile->getUserPageUrl(true),
+			'primary'	=> true
+		];
+
+		$links['views']['contribs'] = [
+			'class'	=> false,
+			'text'	=> wfMessage('contributions')->text(),
+			'href'	=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
+		];
 	}
 
 	/**
@@ -299,11 +280,11 @@ class ProfilePage extends \Article {
 	 * @param	string	additional html attributes to include in the IMG tag
 	 * @return	string	the HTML fragment containing a IMG tag
 	 */
-	public static function userAvatar(&$parser, $size, $email, $user_name, $attributeString = '') {
+	public static function userAvatar(&$parser, $size, $email, $userName, $attributeString = '') {
 		$size = intval($size);
-		$user_name = htmlspecialchars($user_name, ENT_QUOTES);
+		$userName = htmlspecialchars($userName, ENT_QUOTES);
 		return [
-			"<img src='//www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $user_name)->escaped()."' $attributeString />",
+			"<img src='//www.gravatar.com/avatar/".md5(strtolower(trim($email)))."?d=mm&amp;s=$size' height='$size' width='$size' alt='".wfMessage('avataralt', $userName)->escaped()."' $attributeString />",
 			'isHTML' => true,
 		];
 	}
@@ -543,7 +524,8 @@ class ProfilePage extends \Article {
 			$HTML = htmlspecialchars($wiki['wiki_name']);
 		}
 
-		$link = "https://".$wiki['wiki_domain'].$this->profile->getProfilePath(false);
+		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
+		$link = "https://".$wiki['wiki_domain'].$title->getLocalURL();
 
 		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
 		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
@@ -654,7 +636,7 @@ class ProfilePage extends \Article {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					$output .= "<dt>".wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain()."</dt>";
+					$output .= "<dt>".wfMessage($msgKey, $this->userId, $wgUser->getId())->plain()."</dt>";
 				}
 				// check for sub-list, if there is one
 				if (is_array($value)) {
@@ -835,7 +817,7 @@ class ProfilePage extends \Article {
 	 * @return	array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
-		$HTML = FriendDisplay::addFriendButton($this->user_id);
+		$HTML = FriendDisplay::addFriendButton($this->userId);
 
 		if ($this->viewingSelf()) {
 			$HTML .= \Html::element(
