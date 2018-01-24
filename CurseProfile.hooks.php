@@ -163,7 +163,7 @@ class Hooks {
 	}
 
 	static public function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
-		if ((self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
+		if (self::$profilePage && (self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
 			$extraQuery = 'profile=no';
 		}
 		return true;
