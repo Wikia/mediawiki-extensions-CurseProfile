@@ -262,10 +262,10 @@
 	},
 	"Hooks": {
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
-		"ArticleUpdateBeforeRedirect": "CurseProfile\\Hooks::onArticleUpdateBeforeRedirect",
 		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
 		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
+		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
 		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
 		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",

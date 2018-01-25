@@ -162,21 +162,28 @@ class Hooks {
 		return true;
 	}
 
-	static public function onArticleUpdateBeforeRedirect($article, &$anchor, &$extraQuery) {
+	/**
+	 * Handle adding profile=no to redirects after articles are created or edited in the NS_USER and NS_USER_TALK namespaces.
+	 *
+	 * @access	public
+	 * @param	object	EditPage
+	 * @param	object	WebRequest
+	 * @return	boolean	True
+	 */
+	static public function onEditPageImportFormData(\EditPage $editpage, \WebRequest $request) {
 		if (self::$profilePage && (self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
-			$extraQuery = 'profile=no';
+			$request->setVal('wpExtraQueryRedirect', 'profile=no');
 		}
 		return true;
 	}
 
-	// TODO: Currently unused? Either remove or find out how to properly use.
-	static public function markUncachable($parser, &$limitReport) {
-		$parser->disableCache();
-		return true;
-	}
-
 	/**
-	 * Adds links to the navigation tabs
+	 * Adds links to the navigation tabs.
+	 *
+	 * @access	public
+	 * @param	object	SkinTemplate
+	 * @param	array	Link Descriptors
+	 * @return	boolean	True
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
 		if (self::$profilePage !== false) {
