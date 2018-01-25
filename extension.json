@@ -132,7 +132,9 @@
 				"profile-link-psn",
 				"profile-link-reddit",
 				"profile-link-steam",
+				"profile-link-twitch",
 				"profile-link-twitter",
+				"profile-link-vk",
 				"profile-link-xbl",
 				"psnlinkplaceholder",
 				"purgeaboutme-prompt",
@@ -140,8 +142,10 @@
 				"save",
 				"steamlinkplaceholder",
 				"tooltip-t-contributions",
+				"twitchlinkplaceholder",
 				"twitterlinkplaceholder",
 				"userrights",
+				"vklinkplaceholder",
 				"xbllinkplaceholder"
 			],
 			"targets": [
