@@ -149,7 +149,7 @@ class Hooks {
 				}
 			} else {
 				//We are on the User namespace with our enhanced profile object enabled.
-				if (self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+				if (strpos($title->getText(), '/') === false && self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
 					//Only redirect if we dont have "?profile=no" and they prefer the profile.
 					$redirect = true;
 				}
