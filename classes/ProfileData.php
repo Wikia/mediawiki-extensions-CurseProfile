@@ -42,6 +42,7 @@ class ProfileData {
 		'profile-link-steam',
 		'profile-link-twitch',
 		'profile-link-twitter',
+		'profile-link-vk',
 		'profile-link-xbl',
 		'profile-location'
 	];
@@ -181,6 +182,13 @@ class ProfileData {
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
+		];
+		$preferences['profile-link-vk'] = [
+			'type' => 'text',
+			'pattern' => 'https://vk\\.com/([\\w\\.]+)',
+			'label-message' => 'vklink',
+			'section' => 'personal/info/profiles',
+			'placeholder' => wfMessage('vklinkplaceholder')->plain(),
 		];
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
@@ -397,7 +405,7 @@ class ProfileData {
 	 * Returns all the user's social profile links
 	 *
 	 * @access	public
-	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, XBL, PSN
+	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
 	 */
 	public function getProfileLinks() {
 		$profile = [
@@ -408,6 +416,7 @@ class ProfileData {
 			'Steam' => $this->user->getOption('profile-link-steam'),
 			'Twitch' => $this->user->getOption('profile-link-twitch'),
 			'Twitter' => $this->user->getOption('profile-link-twitter'),
+			'VK' => $this->user->getOption('profile-link-vk'),
 			'XBL' => $this->user->getOption('profile-link-xbl')
 		];
 		return array_filter($profile);

@@ -392,10 +392,6 @@ class ProfilePage extends \Article {
 					$item = "<li class='$key' title='$key'>";
 					$HTML .= "<!-- $key $link -->";
 					switch (strtolower($key)) {
-						case 'xbl':
-							$link = urlencode($link);
-							$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
-							break;
 						case 'psn':
 							$link = urlencode($link);
 							$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
@@ -417,6 +413,10 @@ class ProfilePage extends \Article {
 							} else {
 								$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
 							}
+							break;
+						case 'xbl':
+							$link = urlencode($link);
+							$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
 							break;
 						default:
 							if (self::validateUrl($key, $link)) {
@@ -492,6 +492,7 @@ class ProfilePage extends \Article {
 			'steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
 			'twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
 			'twitter'	=> '|^@?(\\w{1,15})$|',
+			'vk'		=> '#^https://vk\\.com/[\\w\\.]+#is'
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
