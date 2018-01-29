@@ -208,10 +208,10 @@ class ProfileApi extends \HydraApiBase {
 
 		try {
 			$profileData->setField($field, $text, $this->getUser());
-			$fieldText = $profileData->getField($field);
+			$fieldText = $profileData->getFieldHtml($field);
 			$this->getResult()->addValue(null, 'result', 'success');
 			//Add parsed text to result.
-			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($fieldText));
+			$this->getResult()->addValue(null, 'parsedContent', $fieldText);
 			return;
 		} catch (\MWException $e) {
 			$this->getResult()->addValue(null, 'result', 'failure');
@@ -230,7 +230,7 @@ class ProfileApi extends \HydraApiBase {
 		global $wgOut;
 
 		$odata = $this->getRequest()->getText('data');
-		$data = json_decode($odata,1);
+		$data = json_decode($odata, 1);
 		if (!$data) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', 'Failed to decode data sent. ('.$odata.')');
@@ -246,16 +246,11 @@ class ProfileApi extends \HydraApiBase {
 		}
 
 		try {
-			$fields = [];
-			$profileLinks = [];
 			foreach ($data as $field => $text) {
 				$profileData->setField($field, $text, $this->getUser());
-				$fields[] = $field;
-				$profileLinks[str_replace("link-","",$field)] = $profileData->getField($field);;
 			}
-			$output = \CurseProfile\ProfilePage::generateProfileLinks($this->getUser(),$profileLinks,$fields);
 			$this->getResult()->addValue(null, 'result', 'success');
-			$this->getResult()->addValue(null, 'parsedContent', $output);
+			$this->getResult()->addValue(null, 'parsedContent', $profileData->getProfileLinksHtml());
 			return;
 		} catch (\MWException $e) {
 			$this->getResult()->addValue(null, 'result', 'failure');

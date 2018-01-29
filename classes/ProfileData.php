@@ -363,6 +363,93 @@ class ProfileData {
 		self::logProfileChange($field, $text, $this->user, $performer);
 	}
 
+
+
+	/**
+	 * Performs the work for the parser tag that displays the user's "About Me" text
+	 *
+	 * @access	public
+	 * @param	string	Field name to retrieve.
+	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 */
+	public function getFieldHtml($field) {
+		global $wgOut, $wgUser;
+
+		$fieldHtml = $wgOut->parse($this->getField($field));
+
+		if ($this->canEdit($wgUser) === true) {
+			if (empty($fieldHtml)) {
+				$fieldHtml = \Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-'.$field.'-text' : 'empty-'.$field.'-text-mod'))->plain());
+			}
+
+			$fieldHtml = \Html::rawElement(
+				'a',
+				[
+					'class'	=> 'rightfloat profileedit',
+					'href'	=> '#',
+					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
+				],
+				\HydraCore::awesomeIcon('pencil')
+			).$fieldHtml;
+		}
+
+		return $fieldHtml;
+	}
+
+	/**
+	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
+	 *
+	 * @access	public
+	 * @return	mixed	Array with HTML string at index 0 or an HTML string.
+	 */
+	public function getProfileLinksHtml() {
+		global $wgUser;
+
+		$profileLinks = $this->getProfileLinks();
+		$links = $this->getValidEditFields();
+		$fields = [];
+
+		foreach ($links as $i => $link) {
+			if (substr($link, 0, 12) == "profile-link") {
+				$fields[] = str_replace("profile-link", "link", $link);
+			}
+		}
+
+		$html = "";
+
+		if ($this->canEdit($wgUser) === true) {
+			if (!count($profileLinks)) {
+				$html .= "".\Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."";
+			}
+			$html .= "".\Html::rawElement(
+				'a',
+				[
+					'class'	=> 'rightfloat socialedit',
+					'href'	=> '#',
+					'title' =>	wfMessage('editfield-social-tooltip')->plain()
+				],
+				\HydraCore::awesomeIcon('pencil')
+			);
+		}
+
+		$html .= ProfilePage::generateProfileLinks($wgUser, $profileLinks, $fields);
+		$html = "<div id=\"profile-social\" data-field=\"".implode(" ", $fields)."\">".$html."</div>";
+
+		return $html;
+	}
+
+	/**
+	 * Check whether we are viewing the profile of the logged-in user
+	 *
+	 * @access	public
+	 * @return	boolean
+	 */
+	public function isViewingSelf() {
+		global $wgUser;
+
+		return $wgUser->isLoggedIn() && $wgUser->getID() == $this->user->getID();
+	}
+
 	/**
 	 * Log a profile change.
 	 *

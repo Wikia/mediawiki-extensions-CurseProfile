@@ -117,16 +117,6 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Check whether we are viewing the profile of the logged-in user
-	 *
-	 * @return	boolean
-	 */
-	public function viewingSelf() {
-		global $wgUser;
-		return $wgUser->isLoggedIn() && $wgUser->getID() == $this->user->getID();
-	}
-
-	/**
 	 * Primary rendering function for mediawiki's Article
 	 */
 	public function view() {
@@ -347,31 +337,16 @@ class ProfilePage extends \Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
-	 * @param	object	parser reference
+	 * @access	public
+	 * @param	object	Parser reference.
+	 * @param	string	Field name to retrieve.
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function fieldBlock(&$parser, $field) {
 		global $wgOut, $wgUser;
 
-		$fieldText = $wgOut->parse($this->profile->getField($field));
-
-		if ($this->profile->canEdit($wgUser) === true) {
-			if (empty($fieldText)) {
-				$fieldText = \Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-'.$field.'-text' : 'empty-'.$field.'-text-mod'))->plain());
-			}
-
-			$fieldText = \Html::rawElement(
-				'a',
-				[
-					'class'	=> 'rightfloat profileedit',
-					'href'	=> '#',
-					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
-				],
-				\HydraCore::awesomeIcon('pencil')
-			).$fieldText;
-		}
 		return [
-			$fieldText,
+			$this->profile->getFieldHtml($field),
 			'isHTML' => true
 		];
 	}
@@ -384,7 +359,7 @@ class ProfilePage extends \Article {
 	 * @param array $fields
 	 * @return void
 	 */
-	public static function generateProfileLinks($wgUser, $profileLinks, $fields) {
+	static public function generateProfileLinks($wgUser, $profileLinks, $fields) {
 		$HTML = '<ul class="profilelinks">';
 		if (count($profileLinks)) {
 			foreach ($profileLinks as $key => $link) {
@@ -445,34 +420,9 @@ class ProfilePage extends \Article {
 	public function profileLinks(&$parser = null) {
 		global $wgUser;
 
-		$profileLinks = $this->profile->getProfileLinks();
-		$links = $this->profile->getValidEditFields();
-		$fields = [];
-		foreach($links as $i => $link) {
-			if (substr($link,0,12) == "profile-link") {
-				$fields[] = str_replace("profile-link","link",$link);
-			}
-		}
-		$HTML = "";
-		if ($wgUser->isAllowed('profile-moderate') || $this->viewingSelf()) {
-			if (!count($profileLinks)) {
-				$HTML .= "".\Html::element('em', [], wfMessage(($this->viewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."";
-			}
-			$HTML .= "".\Html::rawElement(
-				'a',
-				[
-					'class'	=> 'rightfloat socialedit',
-					'href'	=> '#',
-					'title' =>	wfMessage('editfield-social-tooltip')->plain()
-				],
-				\HydraCore::awesomeIcon('pencil')
-			)."";
-		}
-		$HTML .= self::generateProfileLinks($wgUser,$profileLinks,$fields);
-		$HTML = "<div id=\"profile-social\" data-field=\"".implode(" ",$fields)."\">".$HTML."</div>";
 		return [
-			$HTML,
-			'isHTML' => true,
+			$this->profile->getProfileLinksHtml(),
+			'isHTML' => true
 		];
 	}
 
@@ -814,13 +764,15 @@ class ProfilePage extends \Article {
 
 	/**
 	 * Parser hook function that inserts either an "edit profile" button or a "add/remove friend" button
+	 *
+	 * @access	public
 	 * @param	$parser
 	 * @return	array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
 		$HTML = FriendDisplay::addFriendButton($this->userId);
 
-		if ($this->viewingSelf()) {
+		if ($this->profile->isViewingSelf()) {
 			$HTML .= \Html::element(
 				'button',
 				[

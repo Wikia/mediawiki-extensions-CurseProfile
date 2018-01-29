@@ -240,8 +240,7 @@ function CurseProfile($) {
 
 				if (fields.length == 1) {
 					var field = fields[0];
-					var $block = $('#profile-' + field),
-						$editPencil = $('#profile-' + field + ' a.profileedit');
+					var $block = $('#profile-' + field);
 
 					api.post({
 						action: 'profile',
@@ -255,9 +254,7 @@ function CurseProfile($) {
 					}).done(function (resp) {
 						if (resp.result === 'success') {
 							// replace the text of the old comment object
-							$editPencil.detach();
 							$block.html(resp.parsedContent);
-							$block.prepend($editPencil);
 							// end the editing context
 							profile.cancelEdit(e, field);
 						} else if (resp.result === 'failure') {
@@ -271,8 +268,7 @@ function CurseProfile($) {
 					/*
 						This is a social edit.
 					*/
-					var $block = $('#'+blockId),
-						$editPencil = $('#' + blockId + ' a.socialedit');
+					var $block = $('#'+blockId);
 
 					var data = {};
 					for (var x in fields) {
@@ -296,9 +292,7 @@ function CurseProfile($) {
 						console.log(resp);
 						if (resp.result === 'success') {
 							// replace the text of the old comment object
-							$editPencil.detach();
-							$block.html(resp.parsedContent);
-							$block.prepend($editPencil);
+							$block.replaceWith(resp.parsedContent);
 							// end the editing context
 							profile.cancelEdit(e, field);
 						} else if (resp.result === 'failure') {
