@@ -149,8 +149,13 @@ class Hooks {
 				}
 			} else {
 				//We are on the User namespace with our enhanced profile object enabled.
-				//2018-01-30 - People disagree on if the User_talk namespace should redirect to UserProfile to have people use comments on UserProfile.  For an unified experience and getting people to use the product it should.  However, older legacy user hold overs want this functionally removed so that is why '!self::$profilePage->isUserTalkPage()' is here.  --Alexia
-				if (strpos($title->getText(), '/') === false && !self::$profilePage->isUserTalkPage() && self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+				if (
+					strpos($title->getText(), '/') === false &&
+					empty($wgRequest->getVal('oldid')) &&
+					empty($wgRequest->getVal('diff')) &&
+					((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred())) &&
+					$wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()
+				) {
 					//Only redirect if we dont have "?profile=no" and they prefer the profile.
 					$redirect = true;
 				}
@@ -172,7 +177,7 @@ class Hooks {
 	 * @return	boolean	True
 	 */
 	static public function onEditPageImportFormData(\EditPage $editpage, \WebRequest $request) {
-		if (self::$profilePage && (self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
+		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
 			$request->setVal('wpExtraQueryRedirect', 'profile=no');
 		}
 		return true;

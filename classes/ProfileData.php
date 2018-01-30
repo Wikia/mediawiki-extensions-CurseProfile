@@ -79,7 +79,7 @@ class ProfileData {
 		$title = \Title::newFromText(($talk ? 'User_talk:' : 'User:').$this->user->getTitleKey());
 
 		$arguments = [];
-		if ($this->getTypePref()) {
+		if ($this->getProfileTypePreference()) {
 			$arguments['profile'] = 'no';
 		}
 		if (!$title->isKnown()) {
@@ -98,6 +98,7 @@ class ProfileData {
 	 */
 	static public function insertProfilePrefs(&$preferences) {
 		global $wgUser;
+
 		$preferences['profile-pref'] = [
 			'type' => 'select',
 			'label-message' => 'profileprefselect',
@@ -107,15 +108,28 @@ class ProfileData {
 				wfMessage('profilepref-wiki')->plain() => 0,
 			],
 		];
+
+		$preferences['comment-pref'] = [
+			'type' => 'select',
+			'label-message' => 'commentprefselect',
+			'section' => 'personal/info/public',
+			'options' => [
+				wfMessage('commentpref-profile')->plain() => 1,
+				wfMessage('commentpref-wiki')->plain() => 0,
+			],
+		];
+
 		$preferences['profile-favwiki-display'] = [
 			'type' => 'text',
 			'label-message' => 'favoritewiki',
 			'section' => 'personal/info/public',
 		];
+
 		$preferences['profile-favwiki'] = [
 			'type' => 'hidden',
 			'section' => 'personal/info/public',
 		];
+
 		$preferences['profile-aboutme'] = [
 			'type' => 'textarea',
 			'label-message' => 'aboutme',
@@ -125,6 +139,7 @@ class ProfileData {
 			'placeholder' => wfMessage('aboutmeplaceholder')->plain(),
 			'help-message' => 'aboutmehelp',
 		];
+
 		$preferences['profile-avatar'] = [
 			'type' => 'info',
 			'label-message' =>'avatar',
@@ -132,11 +147,13 @@ class ProfileData {
 			'default' => wfMessage('avatar-help')->parse(),
 			'raw' => true,
 		];
+
 		$preferences['profile-location'] = [
 			'type' => 'text',
 			'label-message' => 'locationlabel',
 			'section' => 'personal/info/location',
 		];
+
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
 			'pattern' => 'https?://www\\.facebook\\.com/([\\w\\.]+)',
@@ -151,6 +168,7 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-reddit'] = [
 			'type' => 'text',
 			'pattern' => '^[\w\-_]{3,20}$',
@@ -159,6 +177,7 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
 			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
@@ -167,6 +186,7 @@ class ProfileData {
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
 			'help-message' => 'profilelink-help',
 		];
+
 		$preferences['profile-link-twitch'] = [
 			'type' => 'text',
 			'pattern' => '^[a-zA-Z0-9\w_]{3,24}$',
@@ -175,6 +195,7 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitchlinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-twitter'] = [
 			'type' => 'text',
 			'pattern' => '@?(\\w{1,15})',
@@ -183,6 +204,7 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-vk'] = [
 			'type' => 'text',
 			'pattern' => 'https://vk\\.com/([\\w\\.]+)',
@@ -190,18 +212,21 @@ class ProfileData {
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('vklinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
 			'label-message' => 'xbllink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('xbllinkplaceholder')->plain(),
 		];
+
 		$preferences['profile-link-psn'] = [
 			'type' => 'text',
 			'label-message' => 'psnlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
 		];
+
 		if ($wgUser->isBlocked()) {
 			foreach (self::$editProfileFields as $field) {
 				$preferences[$field]['help-message'] = 'profile-blocked';
@@ -228,6 +253,10 @@ class ProfileData {
 		// Allow overriding by setting the value in the global $wgDefaultUserOptions
 		if (!isset($defaultOptions['profile-pref'])) {
 			$defaultOptions['profile-pref'] = 1;
+		}
+
+		if (!isset($defaultOptions['comment-pref'])) {
+			$defaultOptions['comment-pref'] = 0;
 		}
 	}
 
@@ -602,16 +631,15 @@ class ProfileData {
 	 * Returns true if the profile page should be used, false if the wiki should be used
 	 * @return bool
 	 */
-	public function getTypePref() {
+	public function getProfileTypePreference() {
 		return $this->user->getIntOption('profile-pref');
 	}
 
 	/**
-	 * Changes the user's profile preference to the opposite of what it was before, and saves their user preferences.
-	 * @return	void
+	 * Returns true if the profile page should be used, false if the wiki should be used
+	 * @return bool
 	 */
-	public function toggleTypePref() {
-		$this->user->setOption('profile-pref', !$this->getTypePref());
-		$this->user->saveSettings();
+	public function getCommentTypePreference() {
+		return $this->user->getIntOption('comment-pref');
 	}
 }

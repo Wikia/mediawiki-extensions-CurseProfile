@@ -213,7 +213,7 @@ class CommentApi extends \HydraApiBase {
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
-		if ($user->getIntOption('profile-pref')) {
+		if ($user->getIntOption('comment-pref')) {
 			$board = new CommentBoard($user_id);
 			$commentSuccess = $board->addComment($text, null, $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));

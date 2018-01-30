@@ -140,8 +140,18 @@ class ProfilePage extends \Article {
 	 * @access	public
 	 * @return	boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
-	public function profilePreferred() {
-		return $this->profile->getTypePref();
+	public function isProfilePreferred() {
+		return $this->profile->getProfileTypePreference();
+	}
+
+	/**
+	 * Shortcut method to retrieving the user's comment page preference
+	 *
+	 * @access	public
+	 * @return	boolean	True if profile comment page is preferred, false if wiki is preferred.
+	 */
+	public function isCommentsPreferred() {
+		return $this->profile->getCommentTypePreference();
 	}
 
 	/**
@@ -197,10 +207,10 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Adjusts the links in the primary action bar on profile pages and user wiki pages
+	 * Adjusts the links in the primary action bar on profile pages and user wiki pages.
 	 *
 	 * @access	public
-	 * @param	array	structured info on what links will appear on the rendered page
+	 * @param	array	Structured info on what links will appear on the rendered page.
 	 */
 	public function customizeNavBar(&$links) {
 		global $wgUser;
@@ -233,7 +243,7 @@ class ProfilePage extends \Article {
 		}
 		$links['namespaces']['user'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('userwikitab')->text(),
+			'text'		=> wfMessage('nstab-'.$title->getNamespaceKey('')),
 			'href'		=> $this->profile->getUserPageUrl(),
 			'primary'	=> true
 		];
@@ -248,7 +258,7 @@ class ProfilePage extends \Article {
 		}
 		$links['namespaces']['user_talk'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('talk')->text(),
+			'text'		=> wfMessage('talk'),
 			'href'		=> $this->profile->getUserPageUrl(true),
 			'primary'	=> true
 		];
