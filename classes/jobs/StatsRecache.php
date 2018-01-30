@@ -118,6 +118,7 @@ class StatsRecache extends \SyncService\Job {
 
 		$profileFields = ProfileData::$editProfileFields;
 		$profileFields[] = 'profile-pref';
+		$profileFields[] = 'comment-pref';
 		$profileFields[] = 'users-tallied';
 		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');

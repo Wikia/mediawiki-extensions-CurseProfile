@@ -149,7 +149,13 @@ class Hooks {
 				}
 			} else {
 				//We are on the User namespace with our enhanced profile object enabled.
-				if (strpos($title->getText(), '/') === false && self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+				if (
+					strpos($title->getText(), '/') === false &&
+					empty($wgRequest->getVal('oldid')) &&
+					empty($wgRequest->getVal('diff')) &&
+					((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred())) &&
+					$wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()
+				) {
 					//Only redirect if we dont have "?profile=no" and they prefer the profile.
 					$redirect = true;
 				}
@@ -171,7 +177,7 @@ class Hooks {
 	 * @return	boolean	True
 	 */
 	static public function onEditPageImportFormData(\EditPage $editpage, \WebRequest $request) {
-		if (self::$profilePage && (self::$profilePage->isUserPage() || self::$profilePage->isUserTalkPage()) && self::$profilePage->profilePreferred()) {
+		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
 			$request->setVal('wpExtraQueryRedirect', 'profile=no');
 		}
 		return true;
