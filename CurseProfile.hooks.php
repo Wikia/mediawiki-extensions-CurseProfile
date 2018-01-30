@@ -149,7 +149,8 @@ class Hooks {
 				}
 			} else {
 				//We are on the User namespace with our enhanced profile object enabled.
-				if (strpos($title->getText(), '/') === false && self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
+				//2018-01-30 - People disagree on if the User_talk namespace should redirect to UserProfile to have people use comments on UserProfile.  For an unified experience and getting people to use the product it should.  However, older legacy user hold overs want this functionally removed so that is why '!self::$profilePage->isUserTalkPage()' is here.  --Alexia
+				if (strpos($title->getText(), '/') === false && !self::$profilePage->isUserTalkPage() && self::$profilePage->profilePreferred() && $wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()) {
 					//Only redirect if we dont have "?profile=no" and they prefer the profile.
 					$redirect = true;
 				}
