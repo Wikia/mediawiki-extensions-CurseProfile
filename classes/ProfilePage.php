@@ -243,7 +243,7 @@ class ProfilePage extends \Article {
 		}
 		$links['namespaces']['user'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('nstab-'.$title->getNamespaceKey('')),
+			'text'		=> wfMessage('nstab-'.$title->getNamespaceKey(''))->text(),
 			'href'		=> $this->profile->getUserPageUrl(),
 			'primary'	=> true
 		];
@@ -258,7 +258,7 @@ class ProfilePage extends \Article {
 		}
 		$links['namespaces']['user_talk'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('talk'),
+			'text'		=> wfMessage('talk')->text(),
 			'href'		=> $this->profile->getUserPageUrl(true),
 			'primary'	=> true
 		];
