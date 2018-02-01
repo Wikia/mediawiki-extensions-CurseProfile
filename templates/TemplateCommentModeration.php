@@ -40,18 +40,18 @@ class TemplateCommentModeration {
 			}
 			$params = [];
 			if (isset($sort[1])) {
-				$params['href'] = '/Special:CommentModeration';
+				$title = \SpecialPage::getTitleFor('CommentModeration');
 			} else {
-				$params['href'] = '/Special:CommentModeration/'.$key;
+				$title = \SpecialPage::getTitleFor('CommentModeration/'.$key);
 			}
+			$params['href'] = $title->getLocalUrl();
 			if ($currentStyle == $key) {
-				$params['style'] = 'font-weight:bold';
-				unset($params['href']);
+				$params['style'] = 'font-weight: bold;';
 			}
 			$html .= Html::element('a', $params, $sort[0]);
 		}
 
-		return '<p>View: '.$html.'</p>';
+		return '<p>'.wfMessage('commentmoderation-view')->text().': '.$html.'</p>';
 	}
 
 	/**
@@ -84,7 +84,7 @@ class TemplateCommentModeration {
 				if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
 					$html .= '
 							<div class="moderation-actions">
-								<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>
+								<div class="actions"><a class="del">'.wfMessage('commentmoderation-delete')->text().'</a> <a class="dis">'.wfMessage('commentmoderation-dismiss')->text().'</a></div>
 								<div class="confirm"><a></a></div>
 							</div>';
 				} else {
