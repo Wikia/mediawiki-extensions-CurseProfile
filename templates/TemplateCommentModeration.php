@@ -56,8 +56,10 @@ class TemplateCommentModeration {
 
 	/**
 	 * Renders the main body of the CommentModeration special page
-	 * @param reports array of CommentReport instances
-	 * @return string HTML fragment
+	 *
+	 * @access public
+	 * @param	array	CommentReport instances.
+	 * @return	string	HTML fragment
 	 */
 	public function renderComments($reports) {
 		$html = '
@@ -123,6 +125,8 @@ class TemplateCommentModeration {
 
 	/**
 	 * Produces the introduction line above a reported comment "First reporteded X time ago by [user]:"
+	 *
+	 * @access private
 	 * @param  rep    array CommentReport data
 	 * @return string HTML fragment
 	 */
@@ -136,8 +140,10 @@ class TemplateCommentModeration {
 
 	/**
 	 * Creates the small user icons indicating who has reported a comment
-	 * @param reports array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
-	 * @return string HTML fragment
+	 *
+	 * @access private
+	 * @param	array	Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
+	 * @return	string	HTML fragment
 	 */
 	private function reporterIcons($reports) {
 		$html = '';
@@ -161,24 +167,28 @@ class TemplateCommentModeration {
 	}
 
 	/**
-	 * Returns a permalink to a comment on its origin wiki
-	 * @param rep CommentReport instance
-	 * @return string HTML fragment
+	 * Returns a permalink to a comment on its origin wiki.
+	 *
+	 * @access private
+	 * @param	object	CommentReport instance
+	 * @return	string	HTML fragment
 	 */
 	private function permalink($rep) {
 		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
 			$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
 			if ($rep['comment']['origin_wiki'] == 'master') {
-				$domain = $GLOBALS['wgServer'];
-				$wikiName = $GLOBALS['wgSitename'];
+				global $wgSitename;
+				$wikiName = $wgSitename;
+				$url = \SpecialPage::getTitleFor('CommentModeration/'.$rep['comment']['cid'])->getFullUrl();
 			} elseif ($wiki !== false) {
 				$domain = $wiki->getDomains()->getDomain();
 				$wikiName = $wiki->getNameForDisplay();
+				if (!isset($domain) || !isset($wikiName)) {
+					return '';
+				}
+				$url = wfExpandUrl('https://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']);
 			}
-			if (!isset($domain) || !isset($wikiName)) {
-				return '';
-			}
-			return 'content as posted '.Html::rawElement('a', ['href'=>'http://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']], CP::timeTag($rep['comment']['last_touched']).' on '.$wikiName);
+			return 'content as posted '.Html::rawElement('a', ['href' => $url], CP::timeTag($rep['comment']['last_touched']).' on '.$wikiName);
 		} else {
 			return CP::timeTag($rep['comment']['last_touched']);
 		}
