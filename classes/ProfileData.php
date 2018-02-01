@@ -72,11 +72,13 @@ class ProfileData {
 	 * Returns the canonical URL path to a user's wiki page based on their profile preference.
 	 *
 	 * @access	public
-	 * @param	boolean	True to generate User_talk URL.
+	 * @param	object	Title override.
 	 * @return	string
 	 */
-	public function getUserPageUrl($talk = false) {
-		$title = \Title::newFromText(($talk ? 'User_talk:' : 'User:').$this->user->getTitleKey());
+	public function getUserPageUrl($title = null) {
+		if ($title === null) {
+			$title = \Title::newFromText('User:'.$this->user->getTitleKey());
+		}
 
 		$arguments = [];
 		if ($this->getProfileTypePreference()) {

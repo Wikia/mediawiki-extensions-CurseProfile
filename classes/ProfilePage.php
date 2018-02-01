@@ -211,10 +211,10 @@ class ProfilePage extends \Article {
 	 *
 	 * @access	public
 	 * @param	array	Structured info on what links will appear on the rendered page.
+	 * @param	object	Title of the page the user is on in the User or User_talk namespace.
+	 * @return	void
 	 */
-	public function customizeNavBar(&$links) {
-		global $wgUser;
-
+	public function customizeNavBar(&$links, $title) {
 		$links['namespaces'] = [];
 		if ($this->isProfilePage()) {
 			//Clear out all the things that would tempt someone to create the hidden article.
@@ -234,32 +234,40 @@ class ProfilePage extends \Article {
 		];
 
 		$class = [];
-		$title = \Title::newFromText('User:'.$this->user->getTitleKey());
+		if ($title->isTalkPage()) {
+			$subjectTitle = $title->getSubjectPage();
+		} else {
+			$subjectTitle = $title;
+		}
 		if ($this->isUserPage()) {
 			$class[] = 'selected';
 		}
-		if (!$title->isKnown()) {
+		if (!$subjectTitle->isKnown()) {
 			$class[] = 'new';
 		}
 		$links['namespaces']['user'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('nstab-'.$title->getNamespaceKey(''))->text(),
-			'href'		=> $this->profile->getUserPageUrl(),
+			'text'		=> wfMessage('nstab-'.$subjectTitle->getNamespaceKey(''))->text(),
+			'href'		=> $this->profile->getUserPageUrl($subjectTitle),
 			'primary'	=> true
 		];
 
 		$class = [];
-		$title = \Title::newFromText('User_talk:'.$this->user->getTitleKey());
+		if (!$title->isTalkPage()) {
+			$talkTitle = $title->getTalkPage();
+		} else {
+			$talkTitle = $title;
+		}
 		if ($this->isUserTalkPage()) {
 			$class[] = 'selected';
 		}
-		if (!$title->isKnown()) {
+		if (!$talkTitle->isKnown()) {
 			$class[] = 'new';
 		}
 		$links['namespaces']['user_talk'] = [
 			'class'		=> implode(' ', $class),
 			'text'		=> wfMessage('talk')->text(),
-			'href'		=> $this->profile->getUserPageUrl(true),
+			'href'		=> $this->profile->getUserPageUrl($talkTitle),
 			'primary'	=> true
 		];
 

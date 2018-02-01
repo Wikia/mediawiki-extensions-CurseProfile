@@ -110,7 +110,7 @@ class Hooks {
 	/**
 	 * Make links to user pages known (not red) when that user opts for a profile page
 	 */
-	static public function onLinkBegin( $dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret ) {
+	static public function onLinkBegin($dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret) {
 		// only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE])) {
 			return true;
@@ -193,7 +193,64 @@ class Hooks {
 	 */
 	static public function onSkinTemplateNavigation($skin, &$links) {
 		if (self::$profilePage !== false) {
-			self::$profilePage->customizeNavBar($links);
+			self::$profilePage->customizeNavBar($links, $skin->getContext()->getTitle());
+		}
+		return true;
+	}
+
+	/**
+	 * Customize subpage links to use profile=no as needed.
+	 *
+	 * @access	public
+	 * @param	string	Subpages HTML
+	 * @param	object	SkinTemplate
+	 * @param	object	Output
+	 * @return	boolean	True
+	 */
+	static public function onSkinSubPageSubtitle(&$subpages, $skinTemplate, $output) {
+		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
+			$title = $output->getTitle();
+			if ($output->isArticle() && \MWNamespace::hasSubpages($title->getNamespace())) {
+				$ptext = $title->getPrefixedText();
+				if (strpos($ptext, '/') !== false) {
+					$links = explode('/', $ptext);
+					array_pop($links);
+					$c = 0;
+					$growinglink = '';
+					$display = '';
+					$lang = $skinTemplate->getLanguage();
+
+					foreach ($links as $link) {
+						$growinglink .= $link;
+						$display .= $link;
+						$linkObj = \Title::newFromText($growinglink);
+
+						if (is_object($linkObj) && $linkObj->isKnown()) {
+							$getlink = \Linker::linkKnown(
+								$linkObj,
+								htmlspecialchars($display),
+								[],
+								['profile' => 'no']
+							);
+
+							$c++;
+
+							if ($c > 1) {
+								$subpages .= $lang->getDirMarkEntity() . $skinTemplate->msg('pipe-separator')->escaped();
+							} else {
+								$subpages .= '&lt; ';
+							}
+
+							$subpages .= $getlink;
+							$display = '';
+						} else {
+							$display .= '/';
+						}
+						$growinglink .= '/';
+					}
+				}
+				return false;
+			}
 		}
 		return true;
 	}
@@ -244,9 +301,9 @@ class Hooks {
 	 * @param	array	$files
 	 * @return	boolean	true
 	 */
-	static public function onUnitTestsList( &$files ) {
+	static public function onUnitTestsList(&$files) {
 		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
-		$files = array_merge( $files, glob(__DIR__.'/tests/phpunit/*Test.php'));
+		$files = array_merge($files, glob(__DIR__.'/tests/phpunit/*Test.php'));
 		return true;
 	}
 
