@@ -476,7 +476,7 @@ class CommentBoard {
 				\EchoEvent::create([
 					'type' => 'comment',
 					'agent' => $fromUser,
-					'title' => $toUser->getUserPage(),
+					'title' => \Title::makeTitle(NS_USER_PROFILE, $toUser->getName()),
 					'extra' => [
 						'user' => $toUser,
 						'target_user_id' => $toUser->getId(),
@@ -489,7 +489,7 @@ class CommentBoard {
 				\EchoEvent::create([
 					'type' => 'comment-reply',
 					'agent' => $fromUser,
-					'title' => $toUser->getUserPage(),
+					'title' => \Title::makeTitle(NS_USER_PROFILE, $toUser->getName()),
 					'extra' => [
 						'user' => $parentCommenter,
 						'target_user_id' => $parentCommenter->getId(),
