@@ -217,6 +217,7 @@ class ProfilePage extends \Article {
 	public function customizeNavBar(&$links, $title) {
 		$links['namespaces'] = [];
 		if ($this->isProfilePage()) {
+			$title = \Title::makeTitle(NS_USER, $this->user->getName());
 			//Clear out all the things that would tempt someone to create the hidden article.
 			$links = [
 				'namespaces' => [],
