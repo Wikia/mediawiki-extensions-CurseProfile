@@ -11,7 +11,9 @@
  * @link		http://www.curse.com/
  *
 **/
-use CurseProfile\CP, CurseProfile\ProfilePage, CurseProfile\CommentReport;
+use CurseProfile\CP;
+use CurseProfile\ProfilePage;
+use CurseProfile\CommentReport;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -30,11 +32,11 @@ class TemplateCommentModeration {
 			// 'byDate' => ['Most Recent Reports First'],
 			'byActionDate' => ['Moderation Log'],
 		];
-		$HTML = '';
+		$html = '';
 
 		foreach ($styles as $key => $sort) {
-			if (!empty($HTML)) {
-				$HTML .= ' | ';
+			if (!empty($html)) {
+				$html .= ' | ';
 			}
 			$params = [];
 			if (isset($sort[1])) {
@@ -46,10 +48,10 @@ class TemplateCommentModeration {
 				$params['style'] = 'font-weight:bold';
 				unset($params['href']);
 			}
-			$HTML .= Html::element('a', $params, $sort[0]);
+			$html .= Html::element('a', $params, $sort[0]);
 		}
 
-		return '<p>View: '.$HTML.'</p>';
+		return '<p>View: '.$html.'</p>';
 	}
 
 	/**
@@ -58,7 +60,8 @@ class TemplateCommentModeration {
 	 * @return string HTML fragment
 	 */
 	public function renderComments($reports) {
-		$HTML = '<div id="commentmoderation" class="comments">';
+		$html = '
+				<div id="commentmoderation" class="comments">';
 
 		$lookup = \CentralIdLookup::factory();
 
@@ -66,35 +69,41 @@ class TemplateCommentModeration {
 			$rep = $report->data;
 			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
 			if ($author) { // handle failures where central ID doesn't exist on local wiki
-				$HTML .= '<div class="report-item" data-key="'.$report->reportKey().'">';
+				$html .= '
+					<div class="report-item" data-key="'.$report->reportKey().'">';
 
-				$HTML .= Html::rawElement('p', [], $this->itemLine($rep));
-				$HTML .= '<div class="reported-comment">';
-
-				$HTML .= '<div class="commentdisplay">'.
-							'<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $author->getEmail(), $author->getName())[0].'</div>'.
-							'<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>'.
-							'<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>';
-				$HTML .= '</div>';
+				$html .= Html::rawElement('p', [], $this->itemLine($rep));
+				$html .= '
+						<div class="reported-comment">
+							<div class="commentdisplay">
+								<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $author->getEmail(), $author->getName())[0].'</div>
+								<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>
+								<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>
+							</div>';
 
 				if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
-					$HTML .= '<div class="moderation-actions">';
-						$HTML .= '<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>';
-						$HTML .= '<div class="confirm"><a></a></div>';
-					$HTML .= '</div>';
+					$html .= '
+							<div class="moderation-actions">
+								<div class="actions"><a class="del">Delete</a> <a class="dis">Dismiss</a></div>
+								<div class="confirm"><a></a></div>
+							</div>';
 				} else {
-					$HTML .= '<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
+					$html .= '
+							<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
 				}
 
-				$HTML .= '</div>';
+				$html .= '
+						</div>';
 
-				$HTML .= '</div>';
+				$html .= '
+					</div>';
 			}
 		}
 
-		$HTML .= '</div>';
+		$html .= '
+				</div>';
 
-		return $HTML;
+		return $html;
 	}
 
 	private function actionTaken($rep) {
@@ -119,9 +128,9 @@ class TemplateCommentModeration {
 	 */
 	private function itemLine($rep) {
 		if (count($rep['reports']) <= self::MAX_REPORTER_AVATARS) {
-			return sprintf(wfMessage('commentmoderation-item')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']));
+			return wfMessage('commentmoderation-item', CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']))->text();
 		} else {
-			return sprintf(wfMessage('commentmoderation-item-andothers')->text(), CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']), count($rep['reports'])-self::MAX_REPORTER_AVATARS);
+			return wfMessage('commentmoderation-item-andothers', CP::timeTag($rep['first_reported']), $this->reporterIcons($rep['reports']), count($rep['reports']) - self::MAX_REPORTER_AVATARS)->text();
 		}
 	}
 
@@ -131,13 +140,13 @@ class TemplateCommentModeration {
 	 * @return string HTML fragment
 	 */
 	private function reporterIcons($reports) {
-		$HTML = '';
+		$html = '';
 		$iter = 0;
 		$lookup = \CentralIdLookup::factory();
 		foreach ($reports as $rep) {
 			$reporter = $lookup->localUserFromCentralId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
-			$HTML .= \Html::rawElement(
+			$html .= \Html::rawElement(
 				'a', [
 					'href' => $reporter->getUserPage()->getLinkURL()
 				],
@@ -148,7 +157,7 @@ class TemplateCommentModeration {
 				break;
 			}
 		}
-		return $HTML;
+		return $html;
 	}
 
 	/**
