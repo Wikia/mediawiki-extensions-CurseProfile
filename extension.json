@@ -276,6 +276,7 @@
 		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
 		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
 		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
+		"SkinSubPageSubtitle": "CurseProfile\\Hooks::onSkinSubPageSubtitle",
 		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",

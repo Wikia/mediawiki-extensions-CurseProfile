@@ -13,7 +13,7 @@
 **/
 namespace CurseProfile;
 
-class SpecialCommentModeration extends \SpecialPage {
+class SpecialCommentModeration extends \HydraCore\SpecialPage {
 	public function __construct() {
 		parent::__construct( 'CommentModeration', 'profile-moderate' );
 	}
@@ -38,10 +38,10 @@ class SpecialCommentModeration extends \SpecialPage {
 	public function execute( $sortBy ) {
 		$this->checkPermissions();
 		$wgRequest = $this->getRequest();
-		$wgOut = $this->getOutput();
-		$wgOut->setPageTitle(wfMessage('commentmoderation-title')->plain());
-		$wgOut->addModules('ext.curseprofile.commentmoderation');
-		$wgOut->addModules('ext.hydraCore.pagination');
+
+		$this->output->setPageTitle(wfMessage('commentmoderation-title')->plain());
+		$this->output->addModules('ext.curseprofile.commentmoderation');
+		$this->output->addModules('ext.hydraCore.pagination');
 		$templateCommentModeration = new \TemplateCommentModeration;
 		$this->setHeaders();
 
@@ -56,7 +56,7 @@ class SpecialCommentModeration extends \SpecialPage {
 		$total = $this->countModQueue();
 
 		if (!$total) {
-			$wgOut->addWikiMsg('commentmoderation-empty');
+			$this->output->addWikiMsg('commentmoderation-empty');
 			return;
 		} else {
 			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
@@ -64,10 +64,10 @@ class SpecialCommentModeration extends \SpecialPage {
 
 		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
-		$wgOut->addHTML($pagination);
-		$wgOut->addHTML($content);
-		$wgOut->addHTML($pagination);
+		$this->output->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
+		$this->output->addHTML($pagination);
+		$this->output->addHTML($content);
+		$this->output->addHTML($pagination);
 	}
 
 	private function countModQueue() {
