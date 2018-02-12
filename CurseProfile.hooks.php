@@ -140,7 +140,7 @@ class Hooks {
 		if (self::$profilePage) {
 			$redirect = false;
 			if (self::$profilePage->isProfilePage()) {
-				if (!self::$profilePage->isActionView()) {
+				if (!self::$profilePage->isActionView() || strpos($title->getText(), '/') !== false) {
 					$redirect = true;
 				} else {
 					// we are on our UserProfile namespace. Render.
@@ -148,7 +148,7 @@ class Hooks {
 					$wgOut->addModules('ext.curseprofile.profilepage');
 				}
 			} else {
-				//We are on the User namespace with our enhanced profile object enabled.
+				//We are on the User namespace.
 				if (
 					strpos($title->getText(), '/') === false &&
 					empty($wgRequest->getVal('oldid')) &&
