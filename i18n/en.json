@@ -161,7 +161,7 @@
 	"echo-category-title-profile-comment": "Profile comments",
 	"echo-pref-tooltip-profile-comment": "Notifications about new comments or replies to comments on your profile.",
 	"echo-category-title-profile-report": "Comment reports",
-	"echo-pref-tooltip-profile-report": "Notifications about new comment reports.",
+	"echo-pref-tooltip-profile-comment-report": "Notifications about new comment reports.",
 	"notification-link-text-view-friendship": "View friendship request",
 	"notification-link-text-view-comment": "View profile comment",
 	"notification-header-friendship": "$1 is requesting to be your friend.",
