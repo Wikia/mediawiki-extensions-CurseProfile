@@ -137,7 +137,7 @@ class Hooks {
 		global $wgRequest, $wgOut;
 
 		//Handle rendering duties for any user namespaces.
-		if (self::$profilePage) {
+		if (self::$profilePage && self::$profilePage->getUser()->getId()) {
 			$redirect = false;
 			if (self::$profilePage->isProfilePage()) {
 				if (!self::$profilePage->isActionView() || strpos($title->getText(), '/') !== false) {

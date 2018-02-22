@@ -135,6 +135,26 @@ class ProfilePage extends \Article {
 	}
 
 	/**
+	 * Return the User object for this profile.
+	 *
+	 * @access	public
+	 * @return	object	User
+	 */
+	public function getUser($audience = \Revision::FOR_PUBLIC, \User $user = null) {
+		return $this->user;
+	}
+
+	/**
+	 * Return the User object for who created this profile.(The user, technically.)
+	 *
+	 * @access	public
+	 * @return	object	User
+	 */
+	public function getCreator($audience = \Revision::FOR_PUBLIC, \User $user = null) {
+		return $this->user;
+	}
+
+	/**
 	 * Shortcut method to retrieving the user's profile page preference
 	 *
 	 * @access	public
