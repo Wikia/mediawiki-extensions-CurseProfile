@@ -165,7 +165,7 @@ class Hooks {
 					$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 				}
 			} else {
-				if ($title->getNamespace() !== 2) { //dont drop this into the User namespace.
+				if ($title->getNamespace() !== NS_USER) { //dont drop this into the User namespace.
 					$username = $title->getText();
 					$wgOut->addModules('ext.curseprofile.noprofile');
 					$wgOut->wrapWikiMsg( "<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
