@@ -136,32 +136,45 @@ class Hooks {
 	static public function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
-		//Handle rendering duties for any user namespaces.
-		if (self::$profilePage && self::$profilePage->getUser()->getId()) {
-			$redirect = false;
-			if (self::$profilePage->isProfilePage()) {
-				if (!self::$profilePage->isActionView() || strpos($title->getText(), '/') !== false) {
-					$redirect = true;
+
+
+
+		if (self::$profilePage) {
+			// we are on a Profile Page of some sort.
+			if (self::$profilePage->getUser()->getId()) {
+				// its a real profile page
+				$redirect = false;
+				if (self::$profilePage->isProfilePage()) {
+					if (!self::$profilePage->isActionView() || strpos($title->getText(), '/') !== false) {
+						$redirect = true;
+					} else {
+						// we are on our UserProfile namespace. Render.
+						$article = self::$profilePage;
+						$wgOut->addModules('ext.curseprofile.profilepage');
+					}
 				} else {
-					// we are on our UserProfile namespace. Render.
-					$article = self::$profilePage;
-					$wgOut->addModules('ext.curseprofile.profilepage');
+					//We are on the User namespace.
+					if (strpos($title->getText(), '/') === false &&
+						empty($wgRequest->getVal('oldid')) &&
+						empty($wgRequest->getVal('diff')) &&
+						((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred())) &&
+						$wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()
+					) {
+						//Only redirect if we dont have "?profile=no" and they prefer the profile.
+						$redirect = true;
+					}
+				}
+				if ($redirect) {
+					$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 				}
 			} else {
-				//We are on the User namespace.
-				if (
-					strpos($title->getText(), '/') === false &&
-					empty($wgRequest->getVal('oldid')) &&
-					empty($wgRequest->getVal('diff')) &&
-					((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred())) &&
-					$wgRequest->getVal('profile') !== "no" && self::$profilePage->isActionView()
-				) {
-					//Only redirect if we dont have "?profile=no" and they prefer the profile.
-					$redirect = true;
+				if ($title->getNamespace() !== 2) { //dont drop this into the User namespace.
+					$username = $title->getText();
+					$wgOut->addModules('ext.curseprofile.noprofile');
+					$wgOut->wrapWikiMsg( "<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
+						[ 'cp-user-does-not-exist', wfEscapeWikiText( $username ) ] );
+					return false;
 				}
-			}
-			if ($redirect) {
-				$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 			}
 		}
 

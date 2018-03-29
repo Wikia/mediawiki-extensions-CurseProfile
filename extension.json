@@ -87,6 +87,11 @@
 		"CurseProfile\\SpecialWikiImageRedirect": "specials/SpecialWikiImageRedirect.php"
 	},
 	"ResourceModules": {
+		"ext.curseprofile.noprofile": {
+			"scripts": [
+				"js/noprofile.js"
+			]
+		},
 		"ext.curseprofile.profilestats": {
 			"styles": [
 				"css/profilestats.css"
