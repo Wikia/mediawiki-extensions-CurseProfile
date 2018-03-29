@@ -136,9 +136,6 @@ class Hooks {
 	static public function onArticleFromTitle(\Title &$title, &$article, $context) {
 		global $wgRequest, $wgOut;
 
-
-
-
 		if (self::$profilePage) {
 			// we are on a Profile Page of some sort.
 			if (self::$profilePage->getUser()->getId()) {
