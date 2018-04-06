@@ -166,7 +166,7 @@
 				"mediawiki.user",
 				"mediawiki.api",
 				"jquery.ui.autocomplete",
-				"ext.hydraCore.font-awesome"
+				"ext.hydraCore.font-awesome.styles"
 			],
 			"position": "top",
 			"messages": [
@@ -189,7 +189,7 @@
 				"jquery.autosize",
 				"mediawiki.user",
 				"mediawiki.api",
-				"ext.hydraCore.font-awesome"
+				"ext.hydraCore.font-awesome.styles"
 			],
 			"position": "top",
 			"messages": [

@@ -41,7 +41,7 @@ class SpecialCommentModeration extends \HydraCore\SpecialPage {
 
 		$this->output->setPageTitle(wfMessage('commentmoderation-title')->plain());
 		$this->output->addModules('ext.curseprofile.commentmoderation');
-		$this->output->addModules('ext.hydraCore.pagination');
+		$this->output->addModules('ext.hydraCore.pagination.styles');
 		$templateCommentModeration = new \TemplateCommentModeration;
 		$this->setHeaders();
 
