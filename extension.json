@@ -87,15 +87,17 @@
 		"CurseProfile\\SpecialWikiImageRedirect": "specials/SpecialWikiImageRedirect.php"
 	},
 	"ResourceModules": {
-		"ext.curseprofile.noprofile": {
+		"ext.curseprofile.noprofile.scripts": {
 			"scripts": [
 				"js/noprofile.js"
 			]
 		},
-		"ext.curseprofile.profilestats": {
+		"ext.curseprofile.profilestats.styles": {
 			"styles": [
 				"css/profilestats.css"
-			],
+			]
+		},
+		"ext.curseprofile.profilestats.scripts": {
 			"scripts": [
 				"js/profilestats.js"
 			],
@@ -104,7 +106,21 @@
 				"highcharts"
 			]
 		},
-		"ext.curseprofile.profilepage": {
+		"ext.curseprofile.profilepage.styles": {
+			"styles": [
+				"css/curseprofile.css"
+			],
+			"dependencies": [
+				"ext.curseprofile.customskin.styles",
+				"ext.curseprofile.comments.styles"
+			],
+			"position": "top",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.curseprofile.profilepage.scripts": {
 			"styles": [
 				"css/curseprofile.css"
 			],
@@ -113,8 +129,7 @@
 				"js/modifysidebar.js"
 			],
 			"dependencies": [
-				"ext.curseprofile.customskin",
-				"ext.curseprofile.comments",
+				"ext.curseprofile.comments.scripts",
 				"jquery.autosize",
 				"mediawiki.user",
 				"mediawiki.api"
@@ -158,15 +173,24 @@
 				"mobile"
 			]
 		},
-		"ext.curseprofile.preferences": {
+		"ext.curseprofile.preferences.styles": {
+			"dependencies": [
+				"ext.hydraCore.font-awesome.styles"
+			],
+			"position": "top",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.curseprofile.preferences.scripts": {
 			"scripts": [
 				"js/preferences.js"
 			],
 			"dependencies": [
 				"mediawiki.user",
 				"mediawiki.api",
-				"jquery.ui.autocomplete",
-				"ext.hydraCore.font-awesome.styles"
+				"jquery.ui.autocomplete"
 			],
 			"position": "top",
 			"messages": [
@@ -177,10 +201,20 @@
 				"mobile"
 			]
 		},
-		"ext.curseprofile.comments": {
+		"ext.curseprofile.comments.styles": {
 			"styles": [
 				"css/comments.css"
 			],
+			"dependencies": [
+				"ext.hydraCore.font-awesome.styles"
+			],
+			"position": "top",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.curseprofile.comments.scripts": {
 			"scripts": [
 				"js/comments.js"
 			],
@@ -188,8 +222,7 @@
 				"jquery.timeago",
 				"jquery.autosize",
 				"mediawiki.user",
-				"mediawiki.api",
-				"ext.hydraCore.font-awesome.styles"
+				"mediawiki.api"
 			],
 			"position": "top",
 			"messages": [
@@ -205,15 +238,21 @@
 				"mobile"
 			]
 		},
-		"ext.curseprofile.commentmoderation": {
+		"ext.curseprofile.commentmoderation.styles": {
 			"styles": [
 				"css/commentmoderation.less"
 			],
+			"dependencies": [
+				"ext.curseprofile.comments.styles"
+			],
+			"position": "top"
+		},
+		"ext.curseprofile.commentmoderation.scripts": {
 			"scripts": [
 				"js/commentmoderation.js"
 			],
 			"dependencies": [
-				"ext.curseprofile.comments"
+				"ext.curseprofile.comments.scripts"
 			],
 			"position": "top",
 			"messages": [
@@ -221,15 +260,18 @@
 				"report-confirmdelete"
 			]
 		},
-		"a.ext.curseprofile.profilepage.mobile": {
-			"targets": [
-				"mobile"
-			],
-			"group": "site",
+		"a.ext.curseprofile.profilepage.mobile.styles": {
 			"styles": [
 				"css/curseprofile.mobile.css",
 				"css/comments.mobile.css"
 			],
+			"position": "top",
+			"targets": [
+				"mobile"
+			],
+			"group": "site"
+		},
+		"a.ext.curseprofile.profilepage.mobile.scripts": {
 			"scripts": [
 				"js/comments.js"
 			],
@@ -237,7 +279,11 @@
 				"jquery.timeago",
 				"jquery.autosize"
 			],
-			"position": "top"
+			"position": "top",
+			"targets": [
+				"mobile"
+			],
+			"group": "site"
 		},
 		"jquery.timeago": {
 			"targets": [
@@ -257,7 +303,7 @@
 				"js/jquery.autosize.min.js"
 			]
 		},
-		"ext.curseprofile.customskin": {
+		"ext.curseprofile.customskin.styles": {
 			"class": "CurseProfile\\ResourceLoaderModule",
 			"targets": [
 				"desktop",

@@ -47,7 +47,8 @@ class SpecialManageFriends extends \SpecialPage {
 
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
-		$wgOut->addModules('ext.curseprofile.profilepage');
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
+		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 		$templateManageFriends = new \TemplateManageFriends;
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
@@ -61,10 +62,6 @@ class SpecialManageFriends extends \SpecialPage {
 		$rcvd = $f->getReceivedRequests();
 		$sent = $f->getSentRequests();
 
-		$wgOut->addModuleStyles(['ext.hydraCore.pagination.styles']);
-
 		$wgOut->addHTML($templateManageFriends->manage($friends, $rcvd, $sent, $itemsPerPage, $start));
-
-		return;
 	}
 }

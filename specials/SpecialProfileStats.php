@@ -52,7 +52,8 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 			$favoriteWikis = [];
 		}
 
-		$this->output->addModules('ext.curseprofile.profilestats');
+		$this->output->addModuleStyles('ext.curseprofile.profilestats.styles');
+		$this->output->addModules('ext.curseprofile.profilestats.scripts');
 		$this->output->addHTML(\TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
 	}
 }

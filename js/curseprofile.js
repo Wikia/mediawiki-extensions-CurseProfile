@@ -232,7 +232,6 @@ function CurseProfile($) {
 			saveField: function (e, fields, blockId) {
 				var $this = $(this), $profile = $('.curseprofile'), api = new mw.Api();
 				e.preventDefault();
-				console.log(blockId);
 
 				var fields = fields.split(" "); // handle both multi-field and single field.
 				// overlay throbber
@@ -278,7 +277,6 @@ function CurseProfile($) {
 					}
 
 					data = JSON.stringify(data);
-					console.log(data);
 					// use API to post new comment text
 					api.post({
 						action: 'profile',
@@ -289,7 +287,6 @@ function CurseProfile($) {
 						formatversion: 2,
 						token: mw.user.tokens.get('csrfToken')
 					}).done(function (resp) {
-						console.log(resp);
 						if (resp.result === 'success') {
 							// replace the text of the old comment object
 							$block.replaceWith(resp.parsedContent);

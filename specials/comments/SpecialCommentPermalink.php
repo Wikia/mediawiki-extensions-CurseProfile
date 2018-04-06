@@ -41,7 +41,8 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 		$user->load();
 
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
-		$wgOut->addModules('ext.curseprofile.comments');
+		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles']);
+		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
 		$templateCommentBoard = new \TemplateCommentBoard;
 
 		$wgOut->addHTML($templateCommentBoard->permalinkHeader($user, $wgOut->getPageTitle()));

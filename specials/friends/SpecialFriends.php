@@ -75,7 +75,8 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
 		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
-		$wgOut->addModules('ext.curseprofile.profilepage');
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
+		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 		$templateManageFriends = new \TemplateManageFriends;
 
 		$lookup = \CentralIdLookup::factory();
@@ -84,7 +85,6 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$f = new Friendship($globalId);
 
 		$friends = $f->getFriends();
-		$wgOut->addModuleStyles(['ext.hydraCore.pagination.styles']);
 		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateManageFriends->display($friends, $pagination, $itemsPerPage, $start));

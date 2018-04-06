@@ -83,7 +83,8 @@ class Hooks {
 		self::$profilePage = ProfilePage::newFromTitle($title);
 
 		if ($title->equals(\SpecialPage::getTitleFor("Preferences"))) {
-			$output->addModules('ext.curseprofile.preferences');
+			$output->addModuleStyles(['ext.curseprofile.preferences.styles']);
+			$output->addModules(['ext.curseprofile.preferences.scripts']);
 		}
 
 		return true;
@@ -147,7 +148,8 @@ class Hooks {
 					} else {
 						// we are on our UserProfile namespace. Render.
 						$article = self::$profilePage;
-						$wgOut->addModules('ext.curseprofile.profilepage');
+						$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles']);
+						$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 					}
 				} else {
 					//We are on the User namespace.
@@ -167,7 +169,7 @@ class Hooks {
 			} else {
 				if ($title->getNamespace() !== NS_USER) { //dont drop this into the User namespace.
 					$username = $title->getText();
-					$wgOut->addModules('ext.curseprofile.noprofile');
+					$wgOut->addModules('ext.curseprofile.noprofile.scripts');
 					$wgOut->wrapWikiMsg( "<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
 						[ 'cp-user-does-not-exist', wfEscapeWikiText( $username ) ] );
 					return false;
@@ -525,7 +527,7 @@ class Hooks {
 	static public function onSkinMinervaDefaultModules($skin, &$modules) {
 		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {
 			$modules = array_merge(
-				['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile']],
+				['curseprofile-mobile' => ['a.ext.curseprofile.profilepage.mobile.styles', 'a.ext.curseprofile.profilepage.mobile.scripts']],
 				$modules
 			);
 		}

@@ -29,8 +29,7 @@ class ResourceLoaderModule extends \ResourceLoaderWikiModule {
 	 */
 	protected function getPages( \ResourceLoaderContext $context ) {
 		$pages = array(
-			// 'MediaWiki:CurseProfile.js' => array( 'type' => 'script' ),
-			'MediaWiki:CurseProfile.css' => array( 'type' => 'style' ),
+			'MediaWiki:CurseProfile.css' => array( 'type' => 'style' )
 		);
 		return $pages;
 	}

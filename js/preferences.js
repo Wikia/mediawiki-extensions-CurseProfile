@@ -38,10 +38,8 @@ $(function(){
 				if (data.result == "success") {
 					var fill = [];
 					var results = data.data;
-					console.log(results);
 					for (hash in results) {
 						var res = results[hash];
-						console.log(res);
 						var label = (typeof res.wiki_name_display !== 'undefined') ? res.wiki_name_display : res.wiki_name;
 						fill.push({ label: label });
 						wikiresponse[label] = hash; // push into the store object
