@@ -70,16 +70,21 @@ class CP {
 	 * Returns an HTML string linking to the user page with the given ID
 	 *
 	 * @param	mixed	user id or user object
+	 * @param	string	classes to add, if defined
 	 * @return	string	html anchor tag fragment
 	 */
-	public static function userLink($user) {
+	public static function userLink($user, $class = false) {
 		if ($user instanceof \User) {
 			$userId = $user->getId();
 		} else {
 			$userId = $user;
 			$user = \User::newFromId($user);
 		}
-		return \Linker::linkKnown($user->getUserPage(), $user->getName()); //htmlspecialchars($user->getName())
+		$customAttribs = [];
+		if ($class && is_string($class)) {
+			$customAttribs['class'] = $class;
+		}
+		return \Linker::linkKnown($user->getUserPage(), $user->getName(), $customAttribs); //htmlspecialchars($user->getName())
 		// return \Linker::userLink($userId, $user->getName());
 	}
 

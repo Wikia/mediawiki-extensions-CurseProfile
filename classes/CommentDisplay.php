@@ -134,7 +134,7 @@ class CommentDisplay {
 				.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \HydraCore::awesomeIcon('flag')) : '')
 				.'
 					</div>'
-				.CP::userLink($comment['ub_user_id_from']);
+				.CP::userLink($comment['ub_user_id_from'], "commentUser");
 		$HTML .= '
 				</div>
 				<div class="commentbody">
