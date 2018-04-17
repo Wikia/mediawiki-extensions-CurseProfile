@@ -247,7 +247,9 @@ class ProfileApi extends \HydraApiBase {
 
 		try {
 			foreach ($data as $field => $text) {
-				$profileData->setField($field, $text, $this->getUser());
+				if ($profileData->getField($field) != $text) {
+					$profileData->setField($field, $text, $this->getUser());
+				}
 			}
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'parsedContent', $profileData->getProfileLinksHtml());
