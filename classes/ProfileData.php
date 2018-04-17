@@ -161,14 +161,14 @@ class ProfileData {
 			'pattern' => 'https?://www\\.facebook\\.com/([\\w\\.]+)',
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('facebooklinkplaceholder')->plain(),
+			'placeholder' => wfMessage('facebooklinkplaceholder')->plain()
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
 			'pattern' => 'https?://(plus|www)\\.google\\.com/(u/\\d/)?\\+?\\w+(/(posts|about)?)?',
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('googlelinkplaceholder')->plain(),
+			'placeholder' => wfMessage('googlelinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-reddit'] = [
@@ -177,7 +177,7 @@ class ProfileData {
 			'maxlength' => 20,
 			'label-message' => 'redditlink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('redditlinkplaceholder')->plain(),
+			'placeholder' => wfMessage('redditlinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-steam'] = [
@@ -185,8 +185,7 @@ class ProfileData {
 			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
 			'label-message' => 'steamlink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('steamlinkplaceholder')->plain(),
-			'help-message' => 'profilelink-help',
+			'placeholder' => wfMessage('steamlinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-twitch'] = [
@@ -195,7 +194,7 @@ class ProfileData {
 			'maxlength' => 24,
 			'label-message' => 'twitchlink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('twitchlinkplaceholder')->plain(),
+			'placeholder' => wfMessage('twitchlinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-twitter'] = [
@@ -204,7 +203,7 @@ class ProfileData {
 			'maxlength' => 15,
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('twitterlinkplaceholder')->plain(),
+			'placeholder' => wfMessage('twitterlinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-vk'] = [
@@ -212,14 +211,14 @@ class ProfileData {
 			'pattern' => 'https://vk\\.com/([\\w\\.]+)',
 			'label-message' => 'vklink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('vklinkplaceholder')->plain(),
+			'placeholder' => wfMessage('vklinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
 			'label-message' => 'xbllink',
 			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('xbllinkplaceholder')->plain(),
+			'placeholder' => wfMessage('xbllinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-psn'] = [
@@ -227,6 +226,7 @@ class ProfileData {
 			'label-message' => 'psnlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
+			'help-message' => 'profilelink-help'
 		];
 
 		if ($wgUser->isBlocked()) {

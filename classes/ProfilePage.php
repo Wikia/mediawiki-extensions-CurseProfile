@@ -406,32 +406,6 @@ class ProfilePage extends \Article {
 					$item = "<li class='$key' title='$key'>";
 					$HTML .= "<!-- $key $link -->";
 					switch (strtolower($key)) {
-						case 'psn':
-							$link = urlencode($link);
-							$item .= \Html::element('a', ['href' => "http://psnprofiles.com/$link", 'target' => '_blank']);
-							break;
-						case 'reddit':
-							if (!self::validateUrl($key, $link)) {
-								$item = '';
-							} else {
-								$item .= \Html::element('a', ['href' => "https://www.reddit.com/user/$link", 'target' => '_blank']);
-							}
-							break;
-						case 'twitch':
-							$link = urlencode($link);
-							$item .= \Html::element('a', ['href' => "https://www.twitch.tv/$link", 'target' => '_blank']);
-							break;
-						case 'twitter':
-							if (!self::validateUrl($key, $link)) {
-								$item = '';
-							} else {
-								$item .= \Html::element('a', ['href' => "https://twitter.com/$link", 'target' => '_blank']);
-							}
-							break;
-						case 'xbl':
-							$link = urlencode($link);
-							$item .= \Html::element('a', ['href' => "https://live.xbox.com/en-US/Profile?gamertag=$link", 'target' => '_blank']);
-							break;
 						default:
 							if (self::validateUrl($key, $link)) {
 								$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
@@ -466,22 +440,24 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Extracts the username from a steamcommunity.com profile link
+	 * Extracts the username from a profile link.
 	 *
-	 * @param	string	name of service to validate
-	 * @param	string	url to profile or username, may be modified to strip leading @ from twitter
-	 * @return	mixed	false or validated string value
+	 * @param	string	Name of service to validate.
+	 * @param	string	URL to profile or username.
+	 * @return	mixed	False or validated string value.
 	 */
-	private static function validateUrl($service, &$url) {
+	static private function validateUrl($service, $url) {
 		$service = strtolower($service);
 		$patterns = [
-			'facebook'	=> '|^https?://www\\.facebook\\.com/[\\w\\.]+$|',
-			'google'	=> '~^https?://(?:plus|www)\\.google\\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$~',
-			'reddit'	=> '#^[\w\-_]{3,20}$#',
-			'steam'		=> '|^https?://steamcommunity\\.com/id/[\\w-]+/?$|',
-			'twitch'	=> '#^[a-zA-Z0-9\w_]{3,24}$#',
-			'twitter'	=> '|^@?(\\w{1,15})$|',
-			'vk'		=> '#^https://vk\\.com/[\\w\\.]+#is'
+			'facebook'	=> '#^https://www\.facebook\.com/([\w\.]+)$#',
+			'google'	=> '#^https://(?:plus|www)\.google\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$#',
+			'psn'		=> '#^https://psnprofiles\.com/(\w+?)/?$#',
+			'reddit'	=> '#^https://www\.reddit\.com/user/([\w\-_]{3,20})/?$#',
+			'steam'		=> '#^https://steamcommunity\.com/id/([\w-]+?)/?$#',
+			'twitch'	=> '#^https://www\.twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$#',
+			'twitter'	=> '#^https://twitter\.com/@?(\w{1,15})$#',
+			'vk'		=> '#^https://vk\.com/([\w\.]+)#is',
+			'xbl'		=> '#^https://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?#is'
 		];
 		if (isset($patterns[$service])) {
 			$pattern = $patterns[$service];
@@ -489,10 +465,10 @@ class ProfilePage extends \Article {
 			return false;
 		}
 		$result = preg_match($pattern, $url, $matches);
-		if (count($matches) > 1) {
-			$url = $matches[1];
+		if ($result > 0 && count($matches) > 1) {
+			return true;
 		}
-		return $result;
+		return false;
 	}
 
 	/**
