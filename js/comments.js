@@ -216,7 +216,7 @@
 		removeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
-			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a[class="commentUser"]').first().text()).text() ) ) {
+			if ( !window.confirm( mw.message('remove-prompt', $comment.find('a.commentUser').first().text()).text() ) ) {
 				return;
 			}
 			$this.hide();
