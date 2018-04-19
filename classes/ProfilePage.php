@@ -450,7 +450,7 @@ class ProfilePage extends \Article {
 		$service = strtolower($service);
 		$patterns = [
 			'facebook'	=> '#^https://www\.facebook\.com/([\w\.]+)$#',
-			'google'	=> '#^https://(?:plus|www)\.google\.com/(?:u/\\d/)?\\+?\\w+(?:/(?:posts|about)?)?$#',
+			'google'	=> '#^https://(?:plus|www)\.google\.com/(?:u/\d/)?\+?\w+(?:/(?:posts|about)?)?$#',
 			'psn'		=> '#^https://psnprofiles\.com/(\w+?)/?$#',
 			'reddit'	=> '#^https://www\.reddit\.com/user/([\w\-_]{3,20})/?$#',
 			'steam'		=> '#^https://steamcommunity\.com/id/([\w-]+?)/?$#',

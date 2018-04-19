@@ -158,14 +158,16 @@ class ProfileData {
 
 		$preferences['profile-link-facebook'] = [
 			'type' => 'text',
-			'pattern' => 'https?://www\\.facebook\\.com/([\\w\\.]+)',
+			'pattern' => '^https://www\.facebook\.com/([\w\.]+)$',
+			'maxlength' => 2083,
 			'label-message' => 'facebooklink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('facebooklinkplaceholder')->plain()
 		];
 		$preferences['profile-link-google'] = [
 			'type' => 'text',
-			'pattern' => 'https?://(plus|www)\\.google\\.com/(u/\\d/)?\\+?\\w+(/(posts|about)?)?',
+			'pattern' => '^https://(?:plus|www)\.google\.com/(?:u/\d/)?\+?\w+(?:/(?:posts|about)?)?$',
+			'maxlength' => 2083,
 			'label-message' => 'googlelink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('googlelinkplaceholder')->plain()
@@ -173,8 +175,8 @@ class ProfileData {
 
 		$preferences['profile-link-reddit'] = [
 			'type' => 'text',
-			'pattern' => '^[\w\-_]{3,20}$',
-			'maxlength' => 20,
+			'pattern' => '^https://www\.reddit\.com/user/([\w\-_]{3,20})/?$',
+			'maxlength' => 2083,
 			'label-message' => 'redditlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('redditlinkplaceholder')->plain()
@@ -182,7 +184,8 @@ class ProfileData {
 
 		$preferences['profile-link-steam'] = [
 			'type' => 'text',
-			'pattern' => 'https?://steamcommunity\\.com/id/([\\w-]+)/?',
+			'pattern' => '^https://steamcommunity\.com/id/([\w-]+?)/?$',
+			'maxlength' => 2083,
 			'label-message' => 'steamlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('steamlinkplaceholder')->plain()
@@ -190,8 +193,8 @@ class ProfileData {
 
 		$preferences['profile-link-twitch'] = [
 			'type' => 'text',
-			'pattern' => '^[a-zA-Z0-9\w_]{3,24}$',
-			'maxlength' => 24,
+			'pattern' => '^https://www\.twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$',
+			'maxlength' => 2083,
 			'label-message' => 'twitchlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitchlinkplaceholder')->plain()
@@ -199,8 +202,8 @@ class ProfileData {
 
 		$preferences['profile-link-twitter'] = [
 			'type' => 'text',
-			'pattern' => '@?(\\w{1,15})',
-			'maxlength' => 15,
+			'pattern' => '^https://twitter\.com/@?(\w{1,15})$',
+			'maxlength' => 2083,
 			'label-message' => 'twitterlink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('twitterlinkplaceholder')->plain()
@@ -208,7 +211,8 @@ class ProfileData {
 
 		$preferences['profile-link-vk'] = [
 			'type' => 'text',
-			'pattern' => 'https://vk\\.com/([\\w\\.]+)',
+			'pattern' => '^https://vk\.com/([\w\.]+)',
+			'maxlength' => 2083,
 			'label-message' => 'vklink',
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('vklinkplaceholder')->plain()
@@ -216,14 +220,18 @@ class ProfileData {
 
 		$preferences['profile-link-xbl'] = [
 			'type' => 'text',
+			'pattern' => '^https://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?',
 			'label-message' => 'xbllink',
+			'maxlength' => 2083,
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('xbllinkplaceholder')->plain()
 		];
 
 		$preferences['profile-link-psn'] = [
 			'type' => 'text',
+			'pattern' => '^https://psnprofiles\.com/(\w+?)/?$',
 			'label-message' => 'psnlink',
+			'maxlength' => 2083,
 			'section' => 'personal/info/profiles',
 			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
 			'help-message' => 'profilelink-help'
