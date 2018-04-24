@@ -62,50 +62,6 @@ class ProfilePage extends \Article {
 	];
 
 	/**
-	 * Validation matrixes for external profiles.
-	 *
-	 * @var		array
-	 */
-	static private $externalProfiles = [
-		'facebook'	=> [
-			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
-			'user'	=> '^([\w\.]+)$'
-		],
-		'google'	=> [
-			'url'	=> '^https?://(?:www\.|plus\.)google.com/(\+\w+)(?:/.*?)?$',
-			'user'	=> '^(\+\w+)$'
-		],
-		'psn'	=> [
-			'url'	=> '^https?://(?:www\.)?psnprofiles\.com/(\w+?)/?$',
-			'user'	=> '^(\w+?)$'
-		],
-		'reddit'	=> [
-			'url'	=> '^https?://(?:www\.)?reddit\.com/u(?:ser)?/([\w\-_]{3,20})/?$',
-			'user'	=> '^([\w\-_]{3,20})$'
-		],
-		'steam'	=> [
-			'url'	=> '^https?://(?:www\.)?steamcommunity\.com/id/([\w-]+?)/?$',
-			'user'	=> '^([\w\.]+)$'
-		],
-		'twitch'	=> [
-			'url'	=> '^https?://(?:www\.)?twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$',
-			'user'	=> '^([a-zA-Z0-9\w_]{3,24})$'
-		],
-		'twitter'	=> [
-			'url'	=> '^https?://(?:www\.)?twitter\.com/@?(\w{1,15})$',
-			'user'	=> '^@?(\w{1,15})$'
-		],
-		'vk'	=> [
-			'url'	=> '^https?://(?:www\.)?vk\.com/([\w\.]+)$',
-			'user'	=> '^([\w\.]+)$'
-		],
-		'xbl'	=> [
-			'url'	=> '^https?://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?$',
-			'user'	=> '^(.+?)$'
-		]
-	];
-
-	/**
 	 * Whether or not we're on a mobile view.
 	 *
 	 * @var		boolean
@@ -385,27 +341,27 @@ class ProfilePage extends \Article {
 		}
 
 		$specialListUsersTitle = \SpecialPage::getTitleFor('ListUsers');
-		$HTML = '<ul class="grouptags">';
+		$html = '<ul class="grouptags">';
 		foreach ($groups as $group) {
 			if (in_array($group, $this->hiddenGroups)) {
 				continue;
 			}
 			$groupMessage = new \Message('group-'.$group);
 			if ($groupMessage->exists()) {
-				$HTML .= '<li>'.\Linker::linkKnown($specialListUsersTitle, $groupMessage->text(), [], ['group' => $group]).'</li>';
+				$html .= '<li>'.\Linker::linkKnown($specialListUsersTitle, $groupMessage->text(), [], ['group' => $group]).'</li>';
 			} else {
 				//Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
-				$HTML .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
+				$html .= '<li>'.mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8").'</li>';
 			}
 		}
 		//Check the rights of the person viewing this page.
 		if ($wgUser->isAllowed('userrights')) {
-			$HTML .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
+			$html .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
 		}
-		$HTML .= '</ul>';
+		$html .= '</ul>';
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true
 		];
 	}
@@ -445,35 +401,27 @@ class ProfilePage extends \Article {
 	/**
 	 * Generate Profile Links HTML
 	 *
-	 * @param wgUser $wgUser
-	 * @param array $profileLinks
-	 * @param array $fields
-	 * @return void
+	 * @access	public
+	 * @param	array	Profile Links
+	 * @return	string	HTML
 	 */
-	static public function generateProfileLinks($wgUser, $profileLinks, $fields) {
-		$HTML = '<ul class="profilelinks">';
+	static public function generateProfileLinks($profileLinks) {
+		$html = '<ul class="profilelinks">';
 		if (count($profileLinks)) {
-			foreach ($profileLinks as $key => $link) {
-				if (!empty($link)) {
-					$item = "<li class='$key' title='$key'>";
-					$HTML .= "<!-- $key $link -->";
-					switch (strtolower($key)) {
-						default:
-							if (self::validateExternalProfile($key, $link)) {
-								$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
-							} else {
-								$item = '';
-							}
-					}
+			foreach ($profileLinks as $service => $text) {
+				if (!empty($text)) {
+					$item = "<li class='{$service}' title='{$service}'>";
+					$html .= "<!-- {$service} $text -->";
+					$item .= \Html::element('a', ['href' => ProfileData::getExternalProfileLink($service, $text), 'target' => '_blank']);
 					if (!empty($item)) {
 						$item .= '</li>';
 					}
-					$HTML .= $item;
+					$html .= $item;
 				}
 			}
 		}
-		$HTML .= '</ul>';
-		return $HTML;
+		$html .= '</ul>';
+		return $html;
 	}
 
 	/**
@@ -492,32 +440,6 @@ class ProfilePage extends \Article {
 	}
 
 	/**
-	 * Extracts the username from a profile link.
-	 *
-	 * @param	string	Name of service to validate.
-	 * @param	string	Raw text to test for an URL or user name to extract.
-	 * @return	mixed	False or validated string value.
-	 */
-	static private function validateExternalProfile($service, $test) {
-		$service = strtolower($service);
-
-		if (isset(self::$externalProfiles[$service])) {
-			$patterns = self::$externalProfiles[$service];
-		} else {
-			return false;
-		}
-
-		foreach ($patterns as $pattern) {
-			$result = preg_match("#".str_replace('#', '\#', $pattern)."#", $test, $matches);
-			if ($result > 0 && isset($matches[1]) && !empty($matches[1])) {
-				return $matches[1];
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
 	 *
 	 * @param	object	parser reference
@@ -531,19 +453,19 @@ class ProfilePage extends \Article {
 
 		$imgPath = CP::getWikiImageByHash($wiki['md5_key']);
 		if (!empty($imgPath) && !empty($wiki['md5_key'])) {
-			$HTML = \Html::element('img', ['src' => $imgPath, 'height' => 118, 'width' => 157, 'alt' => $wiki['wiki_name']]);
+			$html = \Html::element('img', ['src' => $imgPath, 'height' => 118, 'width' => 157, 'alt' => $wiki['wiki_name']]);
 		} else {
-			$HTML = htmlspecialchars($wiki['wiki_name']);
+			$html = htmlspecialchars($wiki['wiki_name']);
 		}
 
 		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
 		$link = "https://".$wiki['wiki_domain'].$title->getLocalURL();
 
-		$HTML = "<a target='_blank' href='{$link}'>".$HTML."</a>";
-		$HTML = wfMessage('favoritewiki')->plain().'<br/>' . $HTML;
+		$html = "<a target='_blank' href='{$link}'>".$html."</a>";
+		$html = wfMessage('favoritewiki')->plain().'<br/>' . $html;
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true,
 		];
 	}
@@ -631,9 +553,9 @@ class ProfilePage extends \Article {
 			unset($statsOutput['globalrank']);
 		}
 
-		$HTML = $this->generateStatsDL($statsOutput);
+		$html = $this->generateStatsDL($statsOutput);
 
-		return $HTML;
+		return $html;
 	}
 
 	/**
@@ -799,12 +721,12 @@ class ProfilePage extends \Article {
 			return '';
 		}
 
-		$HTML = '';
+		$html = '';
 		foreach ($levelDefinitions as $tier) {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
 				// TODO display $tier['image_icon'] or $tier['image_large']
-				$HTML = \Html::element(
+				$html = \Html::element(
 					'img',
 					[
 						'class'	=> 'level',
@@ -818,7 +740,7 @@ class ProfilePage extends \Article {
 		}
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true,
 		];
 	}
@@ -831,10 +753,10 @@ class ProfilePage extends \Article {
 	 * @return	array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
-		$HTML = FriendDisplay::addFriendButton($this->userId);
+		$html = FriendDisplay::addFriendButton($this->userId);
 
 		if ($this->profile->isViewingSelf()) {
-			$HTML .= \Html::element(
+			$html .= \Html::element(
 				'button',
 				[
 					'data-href'	=> \Title::newFromText('Special:Preferences')->getFullURL().'#mw-prefsection-personal-info-public',
@@ -845,7 +767,7 @@ class ProfilePage extends \Article {
 		}
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true,
 		];
 	}

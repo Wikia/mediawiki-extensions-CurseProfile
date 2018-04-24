@@ -56,6 +56,59 @@ class ProfileData {
 	];
 
 	/**
+	 * Validation matrixes for external profiles.
+	 *
+	 * @var		array
+	 */
+	static private $externalProfiles = [
+		'facebook'	=> [
+			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
+			'user'	=> '^([\w\.]+)$',
+			'link'	=> 'https://www.facebook.com/%s'
+		],
+		'google'	=> [
+			'url'	=> '^https?://(?:www\.|plus\.)google.com/(\+\w+)(?:/.*?)?$',
+			'user'	=> '^(\+\w+)$',
+			'link'	=> 'https://plus.google.com/%s'
+		],
+		'psn'	=> [
+			'url'	=> '^https?://(?:www\.)?psnprofiles\.com/(\w+?)/?$',
+			'user'	=> '^(\w+?)$',
+			'link'	=> 'https://psnprofiles.com/%s'
+		],
+		'reddit'	=> [
+			'url'	=> '^https?://(?:www\.)?reddit\.com/u(?:ser)?/([\w\-_]{3,20})/?$',
+			'user'	=> '^([\w\-_]{3,20})$',
+			'link'	=> 'https://www.reddit.com/user/%s'
+		],
+		'steam'	=> [
+			'url'	=> '^https?://(?:www\.)?steamcommunity\.com/id/([\w-]+?)/?$',
+			'user'	=> '^([\w\.]+)$',
+			'link'	=> 'https://steamcommunity.com/id/%s'
+		],
+		'twitch'	=> [
+			'url'	=> '^https?://(?:www\.)?twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$',
+			'user'	=> '^([a-zA-Z0-9\w_]{3,24})$',
+			'link'	=> 'https://www.twitch.tv/%s'
+		],
+		'twitter'	=> [
+			'url'	=> '^https?://(?:www\.)?twitter\.com/@?(\w{1,15})$',
+			'user'	=> '^@?(\w{1,15})$',
+			'link'	=> 'https://www.twitter.com/@%s'
+		],
+		'vk'	=> [
+			'url'	=> '^https?://(?:www\.)?vk\.com/([\w\.]+)$',
+			'user'	=> '^([\w\.]+)$',
+			'link'	=> 'https://vk.com/%s'
+		],
+		'xbl'	=> [
+			'url'	=> '^https?://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(\w+?)&?$',
+			'user'	=> '^(\w+?)$',
+			'link'	=> 'https://account.xbox.com/en-US/Profile?gamerTag=%s'
+		]
+	];
+
+	/**
 	 * Return basic plus external profile fields.
 	 *
 	 * @access	public
@@ -63,6 +116,18 @@ class ProfileData {
 	 */
 	static public function getValidEditFields() {
 		return array_merge(self::$basicProfileFields, self::$externalProfileFields);
+	}
+
+	/**
+	 * Get an URL to an external profile.
+	 *
+	 * @access	public
+	 * @param	string	Service Name
+	 * @param	string	Text Replacement/User Name
+	 * @return	string	URL to the external profile.
+	 */
+	static public function getExternalProfileLink($service, $text) {
+		return sprintf(self::$externalProfiles[$service]['link'], $text);
 	}
 
 	/**
@@ -252,6 +317,14 @@ class ProfileData {
 				wfRunHooks('CurseProfileEdited', [$user, $field, $preferences[$field]]);
 			}
 		}
+
+		foreach (self::$externalProfileFields as $field) {
+			$valid = self::validateExternalProfile(str_replace('profile-link-', '', $field), $preferences[$field]);
+			if ($valid === false) {
+				$preferences[$field] = '';
+			}
+			$preferences[$field] = $valid;
+		}
 	}
 
 	/**
@@ -344,7 +417,31 @@ class ProfileData {
 		self::logProfileChange($field, $text, $this->user, $performer);
 	}
 
+	/**
+	 * Extracts the username from a profile link.
+	 *
+	 * @param	string	Name of service to validate.
+	 * @param	string	Raw text to test for an URL or user name to extract.
+	 * @return	mixed	False or validated string value.
+	 */
+	static private function validateExternalProfile($service, $test) {
+		$service = strtolower($service);
 
+		if (isset(self::$externalProfiles[$service])) {
+			$patterns = self::$externalProfiles[$service];
+		} else {
+			return false;
+		}
+
+		foreach ($patterns as $pattern) {
+			$result = preg_match("#".str_replace('#', '\#', $pattern)."#", $test, $matches);
+			if ($result > 0 && isset($matches[1]) && !empty($matches[1])) {
+				return $matches[1];
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
@@ -387,12 +484,6 @@ class ProfileData {
 		global $wgUser;
 
 		$profileLinks = $this->getProfileLinks();
-		$links = self::$externalProfileFields;
-		$fields = [];
-
-		foreach ($links as $i => $link) {
-			$fields[] = str_replace("profile-link", "link", $link);
-		}
 
 		$html = "";
 
@@ -411,8 +502,11 @@ class ProfileData {
 			);
 		}
 
-		$html .= ProfilePage::generateProfileLinks($wgUser, $profileLinks, $fields);
-		$html = "<div id=\"profile-social\" data-field=\"".implode(" ", $fields)."\">".$html."</div>";
+		$html .= ProfilePage::generateProfileLinks($profileLinks);
+		foreach ($profileLinks as $field => $unused) {
+			$fields[] = 'link-'.$field;
+		}
+		$html = "<div id='profile-social' data-field='".implode(" ", $fields)."'>".$html."</div>";
 
 		return $html;
 	}
@@ -468,23 +562,15 @@ class ProfileData {
 	}
 
 	/**
-	 * Returns all the user's social profile links
+	 * Returns all the user's social profile links.
 	 *
 	 * @access	public
 	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
 	 */
 	public function getProfileLinks() {
-		$profile = [
-			'Facebook' => $this->user->getOption('profile-link-facebook'),
-			'Google' => $this->user->getOption('profile-link-google'),
-			'PSN' => $this->user->getOption('profile-link-psn'),
-			'Reddit' => $this->user->getOption('profile-link-reddit'),
-			'Steam' => $this->user->getOption('profile-link-steam'),
-			'Twitch' => $this->user->getOption('profile-link-twitch'),
-			'Twitter' => $this->user->getOption('profile-link-twitter'),
-			'VK' => $this->user->getOption('profile-link-vk'),
-			'XBL' => $this->user->getOption('profile-link-xbl')
-		];
+		foreach (self::$externalProfiles as $service => $data) {
+			$profile[$service] = $this->user->getOption('profile-link-'.$service);
+		}
 		return array_filter($profile);
 	}
 
