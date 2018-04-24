@@ -420,11 +420,12 @@ class ProfileData {
 	/**
 	 * Extracts the username from a profile link.
 	 *
+	 * @access	public
 	 * @param	string	Name of service to validate.
 	 * @param	string	Raw text to test for an URL or user name to extract.
 	 * @return	mixed	False or validated string value.
 	 */
-	static private function validateExternalProfile($service, $test) {
+	static public function validateExternalProfile($service, $test) {
 		$service = strtolower($service);
 
 		if (isset(self::$externalProfiles[$service])) {
