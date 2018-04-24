@@ -239,7 +239,7 @@ class ProfileData {
 				'section' => 'personal/info/profiles',
 				'placeholder' => wfMessage($service.'linkplaceholder')->plain()
 			];
-			if (count(self::$externalProfileFields) -1 == $index) {
+			if (count(self::$externalProfileFields) - 1 == $index) {
 				$preferences[$field]['help-message'] = 'profilelink-help';
 			}
 		}
