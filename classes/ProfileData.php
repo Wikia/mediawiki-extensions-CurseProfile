@@ -127,7 +127,7 @@ class ProfileData {
 	 * @return	string	URL to the external profile.
 	 */
 	static public function getExternalProfileLink($service, $text) {
-		return sprintf(self::$externalProfiles[$service]['link'], $text);
+		return sprintf(self::$externalProfiles[$service]['link'], urlencode($text));
 	}
 
 	/**
