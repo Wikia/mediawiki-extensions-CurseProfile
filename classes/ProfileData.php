@@ -322,6 +322,7 @@ class ProfileData {
 			$valid = self::validateExternalProfile(str_replace('profile-link-', '', $field), $preferences[$field]);
 			if ($valid === false) {
 				$preferences[$field] = '';
+				continue;
 			}
 			$preferences[$field] = $valid;
 		}
