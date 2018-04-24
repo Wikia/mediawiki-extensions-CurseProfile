@@ -51,7 +51,59 @@ class ProfilePage extends \Article {
 	 *
 	 * @var		array
 	 */
-	private $hiddenGroups = ['hydra_admin', '*', 'autoconfirmed', 'checkuser', 'ads_manager', 'widget_editor', 'wiki_manager'];
+	private $hiddenGroups = [
+		'*',
+		'ads_manager',
+		'autoconfirmed',
+		'checkuser',
+		'hydra_admin',
+		'widget_editor',
+		'wiki_manager'
+	];
+
+	/**
+	 * Validation matrixes for external profiles.
+	 *
+	 * @var		array
+	 */
+	static private $externalProfiles = [
+		'facebook'	=> [
+			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
+			'user'	=> '^([\w\.]+)$'
+		],
+		'google'	=> [
+			'url'	=> '^https?://(?:www\.|plus\.)google.com/(\+\w+)(?:/.*?)?$',
+			'user'	=> '^(\+\w+)$'
+		],
+		'psn'	=> [
+			'url'	=> '^https?://(?:www\.)?psnprofiles\.com/(\w+?)/?$',
+			'user'	=> '^(\w+?)$'
+		],
+		'reddit'	=> [
+			'url'	=> '^https?://(?:www\.)?reddit\.com/u(?:ser)?/([\w\-_]{3,20})/?$',
+			'user'	=> '^([\w\-_]{3,20})$'
+		],
+		'steam'	=> [
+			'url'	=> '^https?://(?:www\.)?steamcommunity\.com/id/([\w-]+?)/?$',
+			'user'	=> '^([\w\.]+)$'
+		],
+		'twitch'	=> [
+			'url'	=> '^https?://(?:www\.)?twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$',
+			'user'	=> '^([a-zA-Z0-9\w_]{3,24})$'
+		],
+		'twitter'	=> [
+			'url'	=> '^https?://(?:www\.)?twitter\.com/@?(\w{1,15})$',
+			'user'	=> '^@?(\w{1,15})$'
+		],
+		'vk'	=> [
+			'url'	=> '^https?://(?:www\.)?vk\.com/([\w\.]+)$',
+			'user'	=> '^([\w\.]+)$'
+		],
+		'xbl'	=> [
+			'url'	=> '^https?://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?$',
+			'user'	=> '^(.+?)$'
+		]
+	];
 
 	/**
 	 * Whether or not we're on a mobile view.
@@ -407,7 +459,7 @@ class ProfilePage extends \Article {
 					$HTML .= "<!-- $key $link -->";
 					switch (strtolower($key)) {
 						default:
-							if (self::validateUrl($key, $link)) {
+							if (self::validateExternalProfile($key, $link)) {
 								$item .= \Html::element('a', ['href' => $link, 'target' => '_blank']);
 							} else {
 								$item = '';
@@ -443,31 +495,25 @@ class ProfilePage extends \Article {
 	 * Extracts the username from a profile link.
 	 *
 	 * @param	string	Name of service to validate.
-	 * @param	string	URL to profile or username.
+	 * @param	string	Raw text to test for an URL or user name to extract.
 	 * @return	mixed	False or validated string value.
 	 */
-	static private function validateUrl($service, $url) {
+	static private function validateExternalProfile($service, $test) {
 		$service = strtolower($service);
-		$patterns = [
-			'facebook'	=> '#^https://www\.facebook\.com/([\w\.]+)$#',
-			'google'	=> '#^https://(?:plus|www)\.google\.com/(?:u/\d/)?\+?\w+(?:/(?:posts|about)?)?$#',
-			'psn'		=> '#^https://psnprofiles\.com/(\w+?)/?$#',
-			'reddit'	=> '#^https://www\.reddit\.com/user/([\w\-_]{3,20})/?$#',
-			'steam'		=> '#^https://steamcommunity\.com/id/([\w-]+?)/?$#',
-			'twitch'	=> '#^https://www\.twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$#',
-			'twitter'	=> '#^https://twitter\.com/@?(\w{1,15})$#',
-			'vk'		=> '#^https://vk\.com/([\w\.]+)#is',
-			'xbl'		=> '#^https://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?#is'
-		];
-		if (isset($patterns[$service])) {
-			$pattern = $patterns[$service];
+
+		if (isset(self::$externalProfiles[$service])) {
+			$patterns = self::$externalProfiles[$service];
 		} else {
 			return false;
 		}
-		$result = preg_match($pattern, $url, $matches);
-		if ($result > 0 && count($matches) > 1) {
-			return true;
+
+		foreach ($patterns as $pattern) {
+			$result = preg_match("#".str_replace('#', '\#', $pattern)."#", $test, $matches);
+			if ($result > 0 && isset($matches[1]) && !empty($matches[1])) {
+				return $matches[1];
+			}
 		}
+
 		return false;
 	}
 

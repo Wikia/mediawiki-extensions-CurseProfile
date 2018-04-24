@@ -28,13 +28,22 @@ class ProfileData {
 	protected $user;
 
 	/**
-	 * Fields in user preferences that a user can edit to earn a "customize your profile" achievement
+	 * Basic profile fields.
 	 *
 	 * @var		array
 	 */
-	static public $editProfileFields = [
+	static private $basicProfileFields = [
 		'profile-aboutme',
 		'profile-favwiki',
+		'profile-location'
+	];
+
+	/**
+	 * External Profile Fields
+	 *
+	 * @var		array
+	 */
+	static private $externalProfileFields = [
 		'profile-link-facebook',
 		'profile-link-google',
 		'profile-link-psn',
@@ -43,17 +52,17 @@ class ProfileData {
 		'profile-link-twitch',
 		'profile-link-twitter',
 		'profile-link-vk',
-		'profile-link-xbl',
-		'profile-location'
+		'profile-link-xbl'
 	];
 
 	/**
-	 * Return editProfileFields.
+	 * Return basic plus external profile fields.
 	 *
-	 * @return void
+	 * @access	public
+	 * @return	array	Edit Profile Fields
 	 */
-	public static function getValidEditFields() {
-		return self::$editProfileFields;
+	static public function getValidEditFields() {
+		return array_merge(self::$basicProfileFields, self::$externalProfileFields);
 	}
 
 	/**
@@ -156,89 +165,22 @@ class ProfileData {
 			'section' => 'personal/info/location',
 		];
 
-		$preferences['profile-link-facebook'] = [
-			'type' => 'text',
-			'pattern' => '^https://www\.facebook\.com/([\w\.]+)$',
-			'maxlength' => 2083,
-			'label-message' => 'facebooklink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('facebooklinkplaceholder')->plain()
-		];
-		$preferences['profile-link-google'] = [
-			'type' => 'text',
-			'pattern' => '^https://(?:plus|www)\.google\.com/(?:u/\d/)?\+?\w+(?:/(?:posts|about)?)?$',
-			'maxlength' => 2083,
-			'label-message' => 'googlelink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('googlelinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-reddit'] = [
-			'type' => 'text',
-			'pattern' => '^https://www\.reddit\.com/user/([\w\-_]{3,20})/?$',
-			'maxlength' => 2083,
-			'label-message' => 'redditlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('redditlinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-steam'] = [
-			'type' => 'text',
-			'pattern' => '^https://steamcommunity\.com/id/([\w-]+?)/?$',
-			'maxlength' => 2083,
-			'label-message' => 'steamlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('steamlinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-twitch'] = [
-			'type' => 'text',
-			'pattern' => '^https://www\.twitch\.tv/([a-zA-Z0-9\w_]{3,24})/?$',
-			'maxlength' => 2083,
-			'label-message' => 'twitchlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('twitchlinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-twitter'] = [
-			'type' => 'text',
-			'pattern' => '^https://twitter\.com/@?(\w{1,15})$',
-			'maxlength' => 2083,
-			'label-message' => 'twitterlink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('twitterlinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-vk'] = [
-			'type' => 'text',
-			'pattern' => '^https://vk\.com/([\w\.]+)',
-			'maxlength' => 2083,
-			'label-message' => 'vklink',
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('vklinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-xbl'] = [
-			'type' => 'text',
-			'pattern' => '^https://(?:live|account)\.xbox\.com/..-../Profile\?gamerTag=(.+?)&?',
-			'label-message' => 'xbllink',
-			'maxlength' => 2083,
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('xbllinkplaceholder')->plain()
-		];
-
-		$preferences['profile-link-psn'] = [
-			'type' => 'text',
-			'pattern' => '^https://psnprofiles\.com/(\w+?)/?$',
-			'label-message' => 'psnlink',
-			'maxlength' => 2083,
-			'section' => 'personal/info/profiles',
-			'placeholder' => wfMessage('psnlinkplaceholder')->plain(),
-			'help-message' => 'profilelink-help'
-		];
+		foreach (self::$externalProfileFields as $index => $field) {
+			$service = str_replace('profile-link-', '', $field);
+			$preferences[$field] = [
+				'type' => 'text',
+				'maxlength' => 2083,
+				'label-message' => $service.'link',
+				'section' => 'personal/info/profiles',
+				'placeholder' => wfMessage($service.'linkplaceholder')->plain()
+			];
+			if (count(self::$externalProfileFields) -1 == $index) {
+				$preferences[$field]['help-message'] = 'profilelink-help';
+			}
+		}
 
 		if ($wgUser->isBlocked()) {
-			foreach (self::$editProfileFields as $field) {
+			foreach (self::getValidEditFields() as $field) {
 				$preferences[$field]['help-message'] = 'profile-blocked';
 				$preferences[$field]['disabled'] = true;
 			}
@@ -305,7 +247,7 @@ class ProfileData {
 		}
 
 		// run hooks on profile preferences (mostly for achievements)
-		foreach (self::$editProfileFields as $field) {
+		foreach (self::getValidEditFields() as $field) {
 			if (!empty($preferences[$field])) {
 				wfRunHooks('CurseProfileEdited', [$user, $field, $preferences[$field]]);
 			}
@@ -371,7 +313,7 @@ class ProfileData {
 	 */
 	public function getField($field) {
 		$field = 'profile-'.$field;
-		if (!in_array($field, self::$editProfileFields)) {
+		if (!in_array($field, self::getValidEditFields())) {
 			throw new \MWException(__METHOD__.': Invalid profile field.');
 		}
 		return (string) $this->user->getOption($field);
@@ -388,7 +330,7 @@ class ProfileData {
 	 */
 	public function setField($field, $text, $performer = null) {
 		$field = 'profile-'.$field;
-		if (!in_array($field, self::$editProfileFields)) {
+		if (!in_array($field, self::getValidEditFields())) {
 			throw new \MWException(__METHOD__.': Invalid profile field ('.$field.').');
 		}
 
@@ -445,13 +387,11 @@ class ProfileData {
 		global $wgUser;
 
 		$profileLinks = $this->getProfileLinks();
-		$links = $this->getValidEditFields();
+		$links = self::$externalProfileFields;
 		$fields = [];
 
 		foreach ($links as $i => $link) {
-			if (substr($link, 0, 12) == "profile-link") {
-				$fields[] = str_replace("profile-link", "link", $link);
-			}
+			$fields[] = str_replace("profile-link", "link", $link);
 		}
 
 		$html = "";

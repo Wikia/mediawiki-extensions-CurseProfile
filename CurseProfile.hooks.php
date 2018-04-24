@@ -389,12 +389,12 @@ class Hooks {
 	}
 
 	/**
-	 * Save preferences
+	 * Save preferences.
 	 *
 	 * @access	public
-	 * @param	object	user whose preferences are being modified
-	 * @param	array	Preferences description object, to be fed to an HTMLForm
-	 * @return	boolean	true
+	 * @param	object	User whose preferences are being modified.
+	 * @param	array	Preferences description object, to be fed to an HTMLForm.
+	 * @return	boolean	True
 	 */
 	static public function onUserSaveOptions(\User $user, array &$options) {
 		if ($user && $user->getId()) {

@@ -116,7 +116,7 @@ class StatsRecache extends \SyncService\Job {
 		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
 		//self::populateLastPref();
 
-		$profileFields = ProfileData::$editProfileFields;
+		$profileFields = ProfileData::getValidEditFields();
 		$profileFields[] = 'profile-pref';
 		$profileFields[] = 'comment-pref';
 		$profileFields[] = 'users-tallied';
