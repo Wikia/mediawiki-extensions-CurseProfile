@@ -109,6 +109,24 @@ class ProfileData {
 	];
 
 	/**
+	 * Create a new ProfileData instance
+	 * @param $user local user ID or User instance
+	 */
+	public function __construct($user) {
+		if (is_a($user, 'User')) {
+			$this->user = $user;
+			$this->user_id = $user->getId();
+		} else {
+			$this->user_id = intval($user);
+			if ($this->user_id < 1) {
+				// if a user hasn't saved a profile yet, just use the default values
+				$this->user_id = 0;
+			}
+			$this->user = \User::newFromId($user);
+		}
+	}
+
+	/**
 	 * Return basic plus external profile fields.
 	 *
 	 * @access	public
@@ -329,24 +347,6 @@ class ProfileData {
 	}
 
 	/**
-	 * Create a new ProfileData instance
-	 * @param $user local user ID or User instance
-	 */
-	public function __construct($user) {
-		if (is_a($user, 'User')) {
-			$this->user = $user;
-			$this->user_id = $user->getId();
-		} else {
-			$this->user_id = intval($user);
-			if ($this->user_id < 1) {
-				// if a user hasn't saved a profile yet, just use the default values
-				$this->user_id = 0;
-			}
-			$this->user = \User::newFromId($user);
-		}
-	}
-
-	/**
 	 * Can the given user edit this profile profile?
 	 *
 	 * @access	public
@@ -485,7 +485,7 @@ class ProfileData {
 	public function getProfileLinksHtml() {
 		global $wgUser;
 
-		$profileLinks = $this->getProfileLinks();
+		$profileLinks = $this->getExternalProfiles();
 
 		$html = "";
 
@@ -564,14 +564,14 @@ class ProfileData {
 	}
 
 	/**
-	 * Returns all the user's social profile links.
+	 * Returns all the user's external social profiles.
 	 *
 	 * @access	public
 	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
 	 */
-	public function getProfileLinks() {
+	public function getExternalProfiles() {
 		foreach (self::$externalProfiles as $service => $data) {
-			$profile[$service] = $this->user->getOption('profile-link-'.$service);
+			$profile[$service] = self::validateExternalProfile($service, $this->user->getOption('profile-link-'.$service));
 		}
 		return array_filter($profile);
 	}
