@@ -505,9 +505,11 @@ class ProfileData {
 		}
 
 		$html .= ProfilePage::generateProfileLinks($profileLinks);
-		foreach ($profileLinks as $field => $unused) {
+		//Get all of the possible external profiles to shove into the data-field for Javascript to know which ones to be able to edit.
+		foreach (self::$externalProfiles as $field => $unused) {
 			$fields[] = 'link-'.$field;
 		}
+		sort($fields);
 		$html = "<div id='profile-social' data-field='".implode(" ", $fields)."'>".$html."</div>";
 
 		return $html;
