@@ -247,7 +247,11 @@ class ProfileApi extends \HydraApiBase {
 
 		try {
 			foreach ($data as $field => $text) {
-				if ($profileData->getField($field) != $text && ProfileData::validateExternalProfile(str_replace('link-', '', $field), $text)) {
+				$text = ProfileData::validateExternalProfile(str_replace('link-', '', $field), $text);
+				if ($text === false) {
+					$text = '';
+				}
+				if ($profileData->getField($field) != $text) {
 					$profileData->setField($field, $text, $this->getUser());
 				}
 			}
