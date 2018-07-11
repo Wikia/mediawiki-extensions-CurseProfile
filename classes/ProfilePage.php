@@ -94,7 +94,7 @@ class ProfilePage extends \Article {
 			$_userNames = explode('/', $title->getText());
 			$userName = array_shift($_userNames);
 		}
-		$this->userName = $userName;
+		$this->userName = \User::getCanonicalName($userName);
 		$this->user = \User::newFromName($userName);
 		if ($this->user) {
 			$this->user->load();
@@ -243,6 +243,18 @@ class ProfilePage extends \Article {
 	 * @return	void
 	 */
 	public function customizeNavBar(&$links, $title) {
+		$userName = $this->user->getName();
+		if ($this->user->isAnon()) {
+			$userName = $this->userName;
+		}
+		if ($userName === false) {
+			if ($this->isProfilePage()) {
+				$links['views'] = [];
+				unset($links['namespaces']['userprofile_talk']);
+			}
+			return;
+		}
+
 		$links['namespaces'] = [];
 		if ($this->isProfilePage()) {
 			$title = \Title::makeTitle(NS_USER, $this->user->getName());
@@ -303,7 +315,7 @@ class ProfilePage extends \Article {
 		$links['views']['contribs'] = [
 			'class'	=> false,
 			'text'	=> wfMessage('contributions')->text(),
-			'href'	=> \SpecialPage::getTitleFor('Contributions', $this->userName)->getFullURL(),
+			'href'	=> \SpecialPage::getTitleFor('Contributions', $this->user->getName())->getFullURL(),
 		];
 	}
 
