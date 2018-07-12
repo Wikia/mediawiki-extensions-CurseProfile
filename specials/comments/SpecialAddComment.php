@@ -40,7 +40,7 @@ class SpecialAddComment extends \UnlistedSpecialPage {
 		if ($newCommentId && $redirectToComment) {
 			$wgOut->redirect(\SpecialPage::getTitleFor('CommentPermalink', $newCommentId)->getFullURL());
 		} else {
-			$wgOut->redirect((new ProfileData($toUser))->getProfilePath());
+			$wgOut->redirect((new ProfileData($toUser))->getProfilePageUrl());
 		}
 	}
 }

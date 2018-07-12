@@ -23,11 +23,12 @@ class Hooks {
 	static private $profilePage = false;
 
 	/**
-	 * Reference to the title originally parsed from this request
+	 * Reference to the title originally parsed from this request.
+	 *
 	 * @access	private
 	 * @var		object	Title
 	 */
-	static private $title;
+	static private $title = null;
 
 	/**
 	 * Setup extra namespaces during MediaWiki setup process.
@@ -78,6 +79,12 @@ class Hooks {
 		return true;
 	}
 
+	/**
+	 * Handle setting up profile page handlers.
+	 *
+	 * @access	public
+	 * @return	void
+	 */
 	static public function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
 		self::$title = $title;
 		self::$profilePage = ProfilePage::newFromTitle($title);
@@ -86,8 +93,22 @@ class Hooks {
 			$output->addModuleStyles(['ext.curseprofile.preferences.styles']);
 			$output->addModules(['ext.curseprofile.preferences.scripts']);
 		}
+	}
 
-		return true;
+	/**
+	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
+	 *
+	 * @access	public
+	 * @param	object	Destination Article
+	 * @return	void
+	 */
+	static public function onArticleViewRedirect($destArticle) {
+		if (self::$title !== null && !self::$title->equals($destArticle->getTitle())) {
+			//Reset profile context.
+			self::$title = $destArticle->getTitle();
+			self::$profilePage = ProfilePage::newFromTitle(self::$title);
+			self::onArticleFromTitle(self::$title, $destArticle, $destArticle->getContext());
+		}
 	}
 
 	/**

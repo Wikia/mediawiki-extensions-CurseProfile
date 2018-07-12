@@ -31,7 +31,7 @@ class TemplateCommentBoard {
 	public function header($user, $title) {
 		return
 		'<p>'.
-			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
+			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePageUrl()], wfMessage('commentboard-link-backtoprofile')).
 		'</p>';
 	}
 
@@ -43,7 +43,7 @@ class TemplateCommentBoard {
 	public function permalinkHeader($user, $title) {
 		return
 		'<p>'.
-			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePath()], wfMessage('commentboard-link-backtoprofile')).
+			Html::element('a', ['href'=>(new CurseProfile\ProfileData($user->getId()))->getProfilePageUrl()], wfMessage('commentboard-link-backtoprofile')).
 			' | '.
 			Html::element('a', ['href'=>SpecialPage::getTitleFor('CommentBoard', $user->getId())->getFullURL()], wfMessage('commentboard-link-backtoboard')).
 		'</p>';

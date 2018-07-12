@@ -152,10 +152,9 @@ class ProfileData {
 	 * Returns the canonical URL path to a user's profile.
 	 *
 	 * @access	public
-	 * @param	boolean	True to generate User_talk URL.
 	 * @return	string
 	 */
-	public function getProfilePath() {
+	public function getProfilePageUrl() {
 		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
 		return $title->getFullURL();
 	}
