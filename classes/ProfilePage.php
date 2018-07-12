@@ -187,31 +187,42 @@ class ProfilePage extends \Article {
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
 	 * @access	public
+	 * @param	object	[Optional] Title object to check instead of the assumed.
 	 * @return	boolean
 	 */
-	public function isUserPage() {
-		return $this->getTitle()->getNamespace() == NS_USER;
+	public function isUserPage($title = null) {
+		if ($title === null) {
+			$title = $this->getTitle();
+		}
+		return $title->getNamespace() == NS_USER;
 	}
 
 	/**
 	 * True if we are viewing a user_talk namespace page.
 	 *
 	 * @access	public
+	 * @param	object	[Optional] Title object to check instead of the assumed.
 	 * @return	boolean
 	 */
-	public function isUserTalkPage() {
-		return $this->getTitle()->getNamespace() == NS_USER_TALK;
+	public function isUserTalkPage($title = null) {
+		if ($title === null) {
+			$title = $this->getTitle();
+		}
+		return $title->getNamespace() == NS_USER_TALK;
 	}
 
 	/**
 	 * True if we need to render the user's profile page.
 	 *
 	 * @access	public
-	 * @param	boolean	[optional] if true (default), will return false for any action other than 'view'
+	 * @param	object	[Optional] Title object to check instead of the assumed.
 	 * @return	boolean
 	 */
-	public function isProfilePage($onlyView = true) {
-		return $this->getTitle()->getNamespace() == NS_USER_PROFILE;
+	public function isProfilePage($title = null) {
+		if ($title === null) {
+			$title = $this->getTitle();
+		}
+		return $title->getNamespace() == NS_USER_PROFILE;
 	}
 
 	/**
@@ -243,12 +254,10 @@ class ProfilePage extends \Article {
 	 * @return	void
 	 */
 	public function customizeNavBar(&$links, $title) {
-		$userName = $this->user->getName();
-		if ($this->user->isAnon()) {
-			$userName = $this->userName;
-		}
+		$userName = $title->getText(); //Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages since the context is switched without performing a HTTP redirect.
+
 		if ($userName === false) {
-			if ($this->isProfilePage()) {
+			if ($this->isProfilePage($title)) {
 				$links['views'] = [];
 				unset($links['namespaces']['userprofile_talk']);
 			}
@@ -256,8 +265,8 @@ class ProfilePage extends \Article {
 		}
 
 		$links['namespaces'] = [];
-		if ($this->isProfilePage()) {
-			$title = \Title::makeTitle(NS_USER, $this->user->getName());
+		if ($this->isProfilePage($title)) {
+			$title = \Title::makeTitle(NS_USER, $userName);
 			//Clear out all the things that would tempt someone to create the hidden article.
 			$links = [
 				'namespaces' => [],
@@ -268,8 +277,8 @@ class ProfilePage extends \Article {
 		}
 
 		$links['namespaces']['userprofile'] = [
-			'class'		=> ($this->isProfilePage() ? 'selected' : ''),
-			'href'		=> $this->profile->getProfilePath(),
+			'class'		=> ($this->isProfilePage($title) ? 'selected' : ''),
+			'href'		=> \Title::makeTitle(NS_USER_PROFILE, $userName)->getFullURL(),
 			'text'		=> wfMessage('userprofiletab')->text(),
 			'primary'	=> true
 		];
@@ -280,7 +289,7 @@ class ProfilePage extends \Article {
 		} else {
 			$subjectTitle = $title;
 		}
-		if ($this->isUserPage()) {
+		if ($this->isUserPage($title)) {
 			$class[] = 'selected';
 		}
 		if (!$subjectTitle->isKnown()) {
@@ -315,7 +324,7 @@ class ProfilePage extends \Article {
 		$links['views']['contribs'] = [
 			'class'	=> false,
 			'text'	=> wfMessage('contributions')->text(),
-			'href'	=> \SpecialPage::getTitleFor('Contributions', $this->user->getName())->getFullURL(),
+			'href'	=> \SpecialPage::getTitleFor('Contributions', $userName)->getFullURL(),
 		];
 	}
 

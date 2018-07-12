@@ -317,6 +317,7 @@
 	},
 	"Hooks": {
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
+		"ArticleViewRedirect": "CurseProfile\\Hooks::onArticleViewRedirect",
 		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
 		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
