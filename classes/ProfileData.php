@@ -471,7 +471,7 @@ class ProfileData {
 					'href'	=> '#',
 					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil')
+				\HydraCore::awesomeIcon('pencil-alt')
 			).$fieldHtml;
 		}
 
@@ -502,7 +502,7 @@ class ProfileData {
 					'href'	=> '#',
 					'title' =>	wfMessage('editfield-social-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil')
+				\HydraCore::awesomeIcon('pencil-alt')
 			);
 		}
 
