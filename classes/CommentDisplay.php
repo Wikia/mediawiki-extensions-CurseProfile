@@ -127,8 +127,8 @@ class CommentDisplay {
 				.($comment['ub_admin_acted'] ? self::adminAction($comment).', ' : '')
 				.\Html::rawElement('a', ['href'=>\SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)).' '
 				.(CommentBoard::canReply($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], \HydraCore::awesomeIcon('reply')) . ' ' : '')
-				.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
-				.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \HydraCore::awesomeIcon('trash-alt')) : '')
+				.(CommentBoard::canEdit($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], \HydraCore::awesomeIcon('pencil')) . ' ' : '')
+				.(CommentBoard::canRemove($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], \HydraCore::awesomeIcon('trash')) : '')
 				.(CommentBoard::canRestore($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], \HydraCore::awesomeIcon('undo')) : '')
 				.(CommentBoard::canPurge() ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], \HydraCore::awesomeIcon('eraser')) : '')
 				.(CommentBoard::canReport($comment) ? \Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], \HydraCore::awesomeIcon('flag')) : '')
