@@ -254,7 +254,9 @@ class ProfilePage extends \Article {
 	 * @return	void
 	 */
 	public function customizeNavBar(&$links, $title) {
-		$userName = $title->getText(); //Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages since the context is switched without performing a HTTP redirect.
+		// Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages
+		// since the context is switched without performing a HTTP redirect.
+		$userName = $title->getText();
 
 		if ($userName === false) {
 			if ($this->isProfilePage($title)) {
@@ -264,10 +266,14 @@ class ProfilePage extends \Article {
 			return;
 		}
 
+		$profileTitle = $this->isProfilePage($title) ? $title : \Title::makeTitle(NS_USER_PROFILE, $userName);
+		$userPageTitle = $this->isUserPage($title) ? $title : \Title::makeTitle(NS_USER, $userName);
+		$userTalkPageTitle = $this->isUserTalkPage($title) ? $title : \Title::makeTitle(NS_USER_TALK, $userName);
+
 		$links['namespaces'] = [];
+
 		if ($this->isProfilePage($title)) {
-			$title = \Title::makeTitle(NS_USER, $userName);
-			//Clear out all the things that would tempt someone to create the hidden article.
+			// Reset $links to prevent hidden article.
 			$links = [
 				'namespaces' => [],
 				'views' => [],
@@ -276,48 +282,41 @@ class ProfilePage extends \Article {
 			];
 		}
 
+		// Build Link for Profile
 		$links['namespaces']['userprofile'] = [
-			'class'		=> ($this->isProfilePage($title) ? 'selected' : ''),
-			'href'		=> \Title::makeTitle(NS_USER_PROFILE, $userName)->getFullURL(),
+			'class'		=> ($this->isProfilePage($title)) ? 'selected' : '',
+			'href'		=> $profileTitle->getFullURL(),
 			'text'		=> wfMessage('userprofiletab')->text(),
 			'primary'	=> true
 		];
 
+		// Build Link for User Page
 		$class = [];
-		if ($title->isTalkPage()) {
-			$subjectTitle = $title->getSubjectPage();
-		} else {
-			$subjectTitle = $title;
-		}
 		if ($this->isUserPage($title)) {
 			$class[] = 'selected';
 		}
-		if (!$subjectTitle->isKnown()) {
+		if (!$userPageTitle->isKnown()) {
 			$class[] = 'new';
 		}
 		$links['namespaces']['user'] = [
 			'class'		=> implode(' ', $class),
-			'text'		=> wfMessage('nstab-'.$subjectTitle->getNamespaceKey(''))->text(),
-			'href'		=> $this->profile->getUserPageUrl($subjectTitle),
+			'text'		=> wfMessage('nstab-' . $userPageTitle->getNamespaceKey(''))->text(),
+			'href'		=> $this->profile->getUserPageUrl($userPageTitle),
 			'primary'	=> true
 		];
 
+		// Build Link for User Talk Page
 		$class = [];
-		if (!$title->isTalkPage()) {
-			$talkTitle = $title->getTalkPage();
-		} else {
-			$talkTitle = $title;
-		}
-		if ($this->isUserTalkPage()) {
+		if ($this->isUserTalkPage($title)) {
 			$class[] = 'selected';
 		}
-		if (!$talkTitle->isKnown()) {
+		if (!$userTalkPageTitle->isKnown()) {
 			$class[] = 'new';
 		}
 		$links['namespaces']['user_talk'] = [
 			'class'		=> implode(' ', $class),
 			'text'		=> wfMessage('talk')->text(),
-			'href'		=> $this->profile->getUserPageUrl($talkTitle),
+			'href'		=> $this->profile->getUserPageUrl($userTalkPageTitle),
 			'primary'	=> true
 		];
 
