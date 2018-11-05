@@ -284,7 +284,7 @@ class ProfilePage extends \Article {
 
 		// Build Link for Profile
 		$links['namespaces']['userprofile'] = [
-			'class'		=> ($this->isProfilePage($title)) ? 'selected' : '',
+			'class'		=> $this->isProfilePage($title) ? 'selected' : '',
 			'href'		=> $profileTitle->getFullURL(),
 			'text'		=> wfMessage('userprofiletab')->text(),
 			'primary'	=> true
