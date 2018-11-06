@@ -11,7 +11,12 @@
  * @link		http://www.curse.com/
  *
 **/
+
 namespace CurseProfile;
+
+use ManualLogEntry;
+use Title;
+use User;
 
 /**
  * Class that manages a 'wall' of comments on a user profile page
@@ -75,7 +80,7 @@ class CommentBoard {
 			global $wgUser;
 			$asUser = $wgUser;
 		} else {
-			$asUser = \User::newFromId($asUser);
+			$asUser = User::newFromId($asUser);
 		}
 
 		if ($asUser->isAllowed('profile-moderate')) {
@@ -355,7 +360,7 @@ class CommentBoard {
 		global $wgCPEditsToComment, $wgEmailAuthentication;
 
 		if (is_numeric($toUser)) {
-			$toUser = \User::newFromId($toUser);
+			$toUser = User::newFromId($toUser);
 		}
 		if (empty($toUser)) {
 			return false;
@@ -402,19 +407,18 @@ class CommentBoard {
 	 * @return	integer	ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
-		$extra = [];
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
 		}
 		$dbw = CP::getDb(DB_MASTER);
 
-		$toUser = \User::newFromId($this->user_id);
+		$toUser = User::newFromId($this->user_id);
 		if (is_null($fromUser)) {
 			global $wgUser;
 			$fromUser = $wgUser;
 		} else {
-			$fromUser = \User::newFromId(intval($fromUser));
+			$fromUser = User::newFromId(intval($fromUser));
 		}
 		if (!self::canComment($toUser, $fromUser)) {
 			return false;
@@ -426,13 +430,13 @@ class CommentBoard {
 			$inReplyTo = intval($inReplyTo);
 			$parentComment = self::queryCommentById($inReplyTo);
 			if (isset($parentComment['ub_user_id_from'])) {
-				$parentCommenter = \User::newFromId($parentComment['ub_user_id_from']);
+				$parentCommenter = User::newFromId($parentComment['ub_user_id_from']);
 			}
 		}
 
 		$success = $dbw->insert(
 			'user_board',
-			array(
+			[
 				'ub_in_reply_to' => $inReplyTo,
 				'ub_user_id_from' => $fromUser->getId(),
 				'ub_user_name_from' => $fromUser->getName(),
@@ -441,7 +445,7 @@ class CommentBoard {
 				'ub_message' => $commentText,
 				'ub_type' => self::PUBLIC_MESSAGE,
 				'ub_date' => date( 'Y-m-d H:i:s' ),
-			),
+			],
 			__METHOD__
 		);
 
@@ -453,7 +457,6 @@ class CommentBoard {
 
 		if ($newCommentId) {
 			$action = 'created';
-			$extra['comment_id'] = $newCommentId;
 
 			if ($inReplyTo) {
 				$dbw->update(
@@ -472,11 +475,12 @@ class CommentBoard {
 				wfRunHooks('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
 			}
 
+			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 			if ($toUser->getId() != $fromUser->getId()) {
 				\EchoEvent::create([
 					'type' => 'comment',
 					'agent' => $fromUser,
-					'title' => \Title::makeTitle(NS_USER_PROFILE, $toUser->getName()),
+					'title' => $toUserTitle,
 					'extra' => [
 						'user' => $toUser,
 						'target_user_id' => $toUser->getId(),
@@ -489,7 +493,7 @@ class CommentBoard {
 				\EchoEvent::create([
 					'type' => 'comment-reply',
 					'agent' => $fromUser,
-					'title' => \Title::makeTitle(NS_USER_PROFILE, $toUser->getName()),
+					'title' => $toUserTitle,
 					'extra' => [
 						'user' => $parentCommenter,
 						'target_user_id' => $parentCommenter->getId(),
@@ -500,14 +504,17 @@ class CommentBoard {
 			}
 
 			//Insert an entry into the Log.
-			$log = new \LogPage('curseprofile');
-			$log->addEntry(
-				'comment-'.$action,
-				\Title::newFromURL('UserProfile:'.$toUser->getName()),
-				null,
-				$extra,
-				$fromUser
+			$log = new ManualLogEntry('curseprofile', 'comment-'.$action);
+			$log->setPerformer($fromUser);
+			$log->setTarget($toUserTitle);
+			$log->setComment(null);
+			$log->setParameters(
+				[
+					'4:comment_id' => $newCommentId
+				]
 			);
+			$logId = $log->insert();
+			$log->publish($logId);
 		}
 
 		return $newCommentId;
@@ -534,7 +541,7 @@ class CommentBoard {
 			$comment = self::queryCommentById($commentId);
 		}
 
-		$boardOwner = \User::newFromId($comment['ub_user_id']);
+		$boardOwner = User::newFromId($comment['ub_user_id']);
 
 		// comment must not be deleted and user must be logged in
 		return $comment['ub_type'] > self::DELETED_MESSAGE && !$user->isAnon() && !$user->isBlocked() && (($user->getEditCount() >= $wgCPEditsToComment && !$boardOwner->isBlocked()) || $user->isAllowed('block'));
@@ -555,20 +562,21 @@ class CommentBoard {
 
 		// Preparing stuff for the Log Entry
 		$comment = self::getCommentById($commentId);
-		$toUser = \User::newFromId($comment[0]['ub_user_id']);
+		$toUser = User::newFromId($comment[0]['ub_user_id']);
 		$title = \Title::newFromURL('UserProfile:'.$toUser->getName());
 		$fromUser = $wgUser;
-		$extra['comment_id'] = $commentId;
 
-		// Throwing an addition into the edit log
-		$log = new \LogPage('curseprofile');
-		$log->addEntry(
-			'comment-edited',
-			$title,
-			null,
-			$extra,
-			$fromUser
+		$log = new ManualLogEntry('curseprofile', 'comment-edited');
+		$log->setPerformer($fromUser);
+		$log->setTarget($title);
+		$log->setComment(null);
+		$log->setParameters(
+			[
+				'4:comment_id' => $newCommentId
+			]
 		);
+		$logId = $log->insert();
+		$log->publish($logId);
 
 		return $DB->update(
 			'user_board',
@@ -614,7 +622,7 @@ class CommentBoard {
 	 * @return	mixed	$db->update() return or false on error.
 	 */
 	public static function removeComment($commentId, $user = null, $time = null) {
-		if (!is_a($user, 'User')) {
+		if (!($user instanceof User)) {
 			global $wgUser;
 
 			$user = $wgUser;
@@ -633,18 +641,20 @@ class CommentBoard {
 
 		// Preparing stuff for the Log Entry
 		$comment = self::getCommentById($commentId);
-		$toUser = \User::newFromId($comment[0]['ub_user_id']);
-		$title = \Title::newFromURL('UserProfile:'.$toUser->getName());
-		$extra['comment_id'] = $commentId;
+		$toUser = User::newFromId($comment[0]['ub_user_id']);
+		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
-		$log = new \LogPage('curseprofile');
-		$log->addEntry(
-			'comment-deleted',
-			$title,
-			null,
-			$extra,
-			$user
+		$log = new ManualLogEntry('curseprofile', 'comment-deleted');
+		$log->setPerformer($user);
+		$log->setTarget($title);
+		$log->setComment(null);
+		$log->setParameters(
+			[
+				'4:comment_id' => $commentId
+			]
 		);
+		$logId = $log->insert();
+		$log->publish($logId);
 
 		$db = CP::getDb(DB_MASTER);
 		return $db->update(

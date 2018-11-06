@@ -377,7 +377,7 @@ class ProfilePage extends \Article {
 		}
 		//Check the rights of the person viewing this page.
 		if ($wgUser->isAllowed('userrights')) {
-			$html .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil'))."</li>";
+			$html .= "<li class=\"edit\">".\Linker::linkKnown(\Title::newFromText('Special:UserRights/'.$this->user->getName()), \HydraCore::awesomeIcon('pencil-alt'))."</li>";
 		}
 		$html .= '</ul>';
 

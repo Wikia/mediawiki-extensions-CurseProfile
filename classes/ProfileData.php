@@ -13,6 +13,10 @@
 **/
 namespace CurseProfile;
 
+use ManualLogEntry;
+use Title;
+use User;
+
 /**
  * Class for reading and saving custom user-set profile data
  */
@@ -122,7 +126,7 @@ class ProfileData {
 				// if a user hasn't saved a profile yet, just use the default values
 				$this->user_id = 0;
 			}
-			$this->user = \User::newFromId($user);
+			$this->user = User::newFromId($user);
 		}
 	}
 
@@ -471,7 +475,7 @@ class ProfileData {
 					'href'	=> '#',
 					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil')
+				\HydraCore::awesomeIcon('pencil-alt')
 			).$fieldHtml;
 		}
 
@@ -502,7 +506,7 @@ class ProfileData {
 					'href'	=> '#',
 					'title' =>	wfMessage('editfield-social-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil')
+				\HydraCore::awesomeIcon('pencil-alt')
 			);
 		}
 
@@ -539,19 +543,23 @@ class ProfileData {
 	 * @param	object	User who performed the action.  Null to use the current user.
 	 * @return	void
 	 */
-	static public function logProfileChange($section, $comment, $target, $performer) {
+	static public function logProfileChange($section, $comment, User $target, User $performer) {
 		if (strlen($comment) > 140) {
 			$comment = substr($comment, 0, 140)."...";
 		}
+
 		//Insert an entry into the Log.
-		$log = new \LogPage('curseprofile');
-		$log->addEntry(
-			'profile-edited',
-			\Title::newFromURL('UserProfile:'.$target->getName()),
-			$comment,
-			['section' => $section],
-			$performer
+		$log = new ManualLogEntry('curseprofile', 'profile-edited');
+		$log->setPerformer($performer);
+		$log->setTarget(Title::makeTitle(NS_USER_PROFILE, $target->getName()));
+		$log->setComment($comment);
+		$log->setParameters(
+			[
+				'4:section' => $section
+			]
 		);
+		$logId = $log->insert();
+		$log->publish($logId);
 	}
 
 	/**

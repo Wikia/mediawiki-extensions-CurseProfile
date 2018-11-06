@@ -11,12 +11,17 @@
  * @link		http://www.curse.com/
  *
  **/
+
 namespace CurseProfile;
+
+use Html;
+use LogFormatter;
+use SpecialPage;
 
 /**
  * A class that will handle log formating for Recent Changes
  */
-class CommentLogFormatter extends \LogFormatter {
+class CommentLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for comments.
 	 *
@@ -26,8 +31,9 @@ class CommentLogFormatter extends \LogFormatter {
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
+		//4:comment_id
 		if (!empty($parameters[3])) {
-			$parameters[3] = ['raw' => \Html::rawElement('a', ['href' =>\SpecialPage::getTitleFor('CommentPermalink', $parameters[3])->getLinkURL()], 'comment')];
+			$parameters[3] = ['raw' =>  Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $parameters[3])->getLinkURL()], 'comment')];
 		}
 
 		return $parameters;
