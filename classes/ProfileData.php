@@ -6,16 +6,23 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-use ManualLogEntry;
-use Title;
+use Html;
 use User;
+use Title;
+use HydraCore;
+use Throwable;
+use Redis;
+use RedisCache;
+use MWException;
+use ManualLogEntry;
+use CentralIdLookup;
 
 /**
  * Class for reading and saving custom user-set profile data
@@ -114,7 +121,7 @@ class ProfileData {
 
 	/**
 	 * Create a new ProfileData instance
-	 * @param $user local user ID or User instance
+	 * @param User $user local user ID or User instance
 	 */
 	public function __construct($user) {
 		if (is_a($user, 'User')) {
@@ -136,7 +143,7 @@ class ProfileData {
 	 * @access	public
 	 * @return	array	Edit Profile Fields
 	 */
-	static public function getValidEditFields() {
+	public static function getValidEditFields() {
 		return array_merge(self::$basicProfileFields, self::$externalProfileFields);
 	}
 
@@ -144,11 +151,11 @@ class ProfileData {
 	 * Get an URL to an external profile.
 	 *
 	 * @access	public
-	 * @param	string	Service Name
-	 * @param	string	Text Replacement/User Name
+	 * @param	string	$service Service Name
+	 * @param	string	$text Text Replacement/User Name
 	 * @return	string	URL to the external profile.
 	 */
-	static public function getExternalProfileLink($service, $text) {
+	public static function getExternalProfileLink($service, $text) {
 		return sprintf(self::$externalProfiles[$service]['link'], urlencode($text));
 	}
 
@@ -159,7 +166,7 @@ class ProfileData {
 	 * @return	string
 	 */
 	public function getProfilePageUrl() {
-		$title = \Title::newFromText('UserProfile:'.$this->user->getTitleKey());
+		$title = Title::newFromText('UserProfile:' . $this->user->getTitleKey());
 		return $title->getFullURL();
 	}
 
@@ -212,10 +219,10 @@ class ProfileData {
 	 * Inserts curse profile fields into the user preferences form.
 	 *
 	 * @access	public
-	 * @param	array	Data for HTMLForm to generate the Special:Preferences form
+	 * @param	array	&$preferences Data for HTMLForm to generate the Special:Preferences form
 	 * @return	void
 	 */
-	static public function insertProfilePrefs(&$preferences) {
+	public static function insertProfilePrefs(&$preferences) {
 		global $wgUser;
 
 		$preferences['profile-pref'] = [
@@ -261,7 +268,7 @@ class ProfileData {
 
 		$preferences['profile-avatar'] = [
 			'type' => 'info',
-			'label-message' =>'avatar',
+			'label-message' => 'avatar',
 			'section' => 'personal/info/public',
 			'default' => wfMessage('avatar-help')->parse(),
 			'raw' => true,
@@ -278,9 +285,9 @@ class ProfileData {
 			$preferences[$field] = [
 				'type' => 'text',
 				'maxlength' => 2083,
-				'label-message' => $service.'link',
+				'label-message' => $service . 'link',
 				'section' => 'personal/info/profiles',
-				'placeholder' => wfMessage($service.'linkplaceholder')->plain()
+				'placeholder' => wfMessage($service . 'linkplaceholder')->plain()
 			];
 			if (count(self::$externalProfileFields) - 1 == $index) {
 				$preferences[$field]['help-message'] = 'profilelink-help';
@@ -299,10 +306,10 @@ class ProfileData {
 	 * Adds default values for preferences added by curse profile
 	 *
 	 * @access	public
-	 * @param	array	Default Values
+	 * @param	array &$defaultOptions Default Values
 	 * @return	null
 	 */
-	static public function insertProfilePrefsDefaults(&$defaultOptions) {
+	public static function insertProfilePrefsDefaults(&$defaultOptions) {
 		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
@@ -324,32 +331,32 @@ class ProfileData {
 	 * Runs when the user saves their preferences.
 	 *
 	 * @access	public
-	 * @param	object	User
-	 * @param	array	User Preferences
+	 * @param	User	$user User
+	 * @param	array	&$preferences User Preferences
 	 * @return	null
 	 */
-	static public function processPreferenceSave($user, &$preferences) {
+	public static function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
 
 		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
 		if (isset($preferences['profile-pref'])) {
-			$redis = \RedisCache::getClient('cache');
+			$redis = RedisCache::getClient('cache');
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
-			$lookup = \CentralIdLookup::factory();
-			$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
+			$lookup = CentralIdLookup::factory();
+			$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 			try {
 				if ($redis !== false) {
 					$redis->hSet('profilestats:lastpref', $globalId, $preferences['profile-pref']);
 				}
-			} catch (\Throwable $e) {
-				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			} catch (Throwable $e) {
+				wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 				return '';
 			}
 		}
 
-		// don't allow blocked users to change their aboutme text
-		//Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
+		// don't allow blocked users to change their about me text
+		// Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
 		if ($user->isSafeToLoad() && $wgUser !== null && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
 			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
 		}
@@ -378,7 +385,7 @@ class ProfileData {
 	 * Can the given user edit this profile profile?
 	 *
 	 * @access	public
-	 * @param	object	User, the performer that needs to make changes.
+	 * @param	object	$performer User, the performer that needs to make changes.
 	 * @return	mixed	Boolean true if allowed, otherwise error message string to display.
 	 */
 	public function canEdit($performer) {
@@ -389,17 +396,17 @@ class ProfileData {
 		}
 
 		if ($performer->isAllowed('profile-moderate')) {
-			//Moderators can always edit a profile to remove spam.
+			// Moderators can always edit a profile to remove spam.
 			return true;
 		}
 
 		if ($performer->getId() !== $this->user->getId()) {
-			//Users can only edit their own profiles if they are not a moderator.
+			// Users can only edit their own profiles if they are not a moderator.
 			return 'no-perm-profile-moderate';
 		}
 
 		if ($wgEmailAuthentication && (!boolval($performer->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($performer->getEmail()))) {
-			//If email authentication is turned on and their email address is invalid then prevent editing.
+			// If email authentication is turned on and their email address is invalid then prevent editing.
 			return 'email-auth-required';
 		}
 
@@ -410,30 +417,30 @@ class ProfileData {
 	 * Get a the profile field text.
 	 *
 	 * @access	public
-	 * @param	string	Field Name - Examples: aboutme, location, link_twitch
+	 * @param	string	$field Field Name - Examples: aboutme, location, link_twitch
 	 * @return	string
 	 */
 	public function getField($field) {
-		$field = 'profile-'.$field;
+		$field = 'profile-' . $field;
 		if (!in_array($field, self::getValidEditFields())) {
-			throw new \MWException(__METHOD__.': Invalid profile field.');
+			throw new MWException(__METHOD__ . ': Invalid profile field.');
 		}
-		return (string) $this->user->getOption($field);
+		return (string)$this->user->getOption($field);
 	}
 
 	/**
 	 * Set a profile field.
 	 *
 	 * @access	public
-	 * @param	string	Field Name - Examples: aboutme, location, link_twitch
-	 * @param	string	the new text for the user's aboutme
-	 * @param	object	[Optional] User who performed the action.  Null to use the current user.
+	 * @param	string	$field Field Name - Examples: aboutme, location, link_twitch
+	 * @param	string	$text the new text for the user's aboutme
+	 * @param	object|null	$performer [Optional] User who performed the action.  Null to use the current user.
 	 * @return	void
 	 */
 	public function setField($field, $text, $performer = null) {
-		$field = 'profile-'.$field;
+		$field = 'profile-' . $field;
 		if (!in_array($field, self::getValidEditFields())) {
-			throw new \MWException(__METHOD__.': Invalid profile field ('.$field.').');
+			throw new MWException(__METHOD__ . ': Invalid profile field (' . $field . ').');
 		}
 
 		$this->user->setOption($field, $text);
@@ -450,11 +457,11 @@ class ProfileData {
 	 * Extracts the username from a profile link.
 	 *
 	 * @access	public
-	 * @param	string	Name of service to validate.
-	 * @param	string	Raw text to test for an URL or user name to extract.
+	 * @param	string	$service Name of service to validate.
+	 * @param	string	$test Raw text to test for an URL or user name to extract.
 	 * @return	mixed	False or validated string value.
 	 */
-	static public function validateExternalProfile($service, $test) {
+	public static function validateExternalProfile($service, $test) {
 		$service = strtolower($service);
 
 		if (isset(self::$externalProfiles[$service])) {
@@ -464,7 +471,7 @@ class ProfileData {
 		}
 
 		foreach ($patterns as $pattern) {
-			$result = preg_match("#".str_replace('#', '\#', $pattern)."#", $test, $matches);
+			$result = preg_match("#" . str_replace('#', '\#', $pattern) . "#", $test, $matches);
 			if ($result > 0 && isset($matches[1]) && !empty($matches[1])) {
 				return $matches[1];
 			}
@@ -477,7 +484,7 @@ class ProfileData {
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
 	 * @access	public
-	 * @param	string	Field name to retrieve.
+	 * @param	string	$field Field name to retrieve.
 	 * @return	mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function getFieldHtml($field) {
@@ -487,18 +494,18 @@ class ProfileData {
 
 		if ($this->canEdit($wgUser) === true) {
 			if (empty($fieldHtml)) {
-				$fieldHtml = \Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-'.$field.'-text' : 'empty-'.$field.'-text-mod'))->plain());
+				$fieldHtml = Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod'))->plain());
 			}
 
-			$fieldHtml = \Html::rawElement(
+			$fieldHtml = Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat profileedit',
 					'href'	=> '#',
-					'title' =>	wfMessage('editfield-'.$field.'-tooltip')->plain()
+					'title' =>	wfMessage('editfield-' . $field . '-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil-alt')
-			).$fieldHtml;
+				HydraCore::awesomeIcon('pencil-alt')
+			) . $fieldHtml;
 		}
 
 		return $fieldHtml;
@@ -519,26 +526,26 @@ class ProfileData {
 
 		if ($this->canEdit($wgUser) === true) {
 			if (!count($profileLinks)) {
-				$html .= "".\Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain())."";
+				$html .= "" . Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->plain()) . "";
 			}
-			$html .= "".\Html::rawElement(
+			$html .= "" . Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat socialedit',
 					'href'	=> '#',
 					'title' =>	wfMessage('editfield-social-tooltip')->plain()
 				],
-				\HydraCore::awesomeIcon('pencil-alt')
+				HydraCore::awesomeIcon('pencil-alt')
 			);
 		}
 
 		$html .= ProfilePage::generateProfileLinks($profileLinks);
-		//Get all of the possible external profiles to shove into the data-field for Javascript to know which ones to be able to edit.
+		// Get all of the possible external profiles to shove into the data-field for Javascript to know which ones to be able to edit.
 		foreach (self::$externalProfiles as $field => $unused) {
-			$fields[] = 'link-'.$field;
+			$fields[] = 'link-' . $field;
 		}
 		sort($fields);
-		$html = "<div id='profile-social' data-field='".implode(" ", $fields)."'>".$html."</div>";
+		$html = "<div id='profile-social' data-field='" . implode(" ", $fields) . "'>" . $html . "</div>";
 
 		return $html;
 	}
@@ -547,7 +554,7 @@ class ProfileData {
 	 * Check whether we are viewing the profile of the logged-in user
 	 *
 	 * @access	public
-	 * @return	boolean
+	 * @return	bool
 	 */
 	public function isViewingSelf() {
 		global $wgUser;
@@ -559,18 +566,18 @@ class ProfileData {
 	 * Log a profile change.
 	 *
 	 * @access	public
-	 * @param	string	Section string of the profile.  Example: profile-aboutme
-	 * @param	string	Comment for the log, usually the text of the change.
-	 * @param	object	User targeted for the action.
-	 * @param	object	User who performed the action.  Null to use the current user.
+	 * @param	string	$section Section string of the profile.  Example: profile-aboutme
+	 * @param	string	$comment Comment for the log, usually the text of the change.
+	 * @param	object	$target User targeted for the action.
+	 * @param	object	$performer User who performed the action.  Null to use the current user.
 	 * @return	void
 	 */
-	static public function logProfileChange($section, $comment, User $target, User $performer) {
+	public static function logProfileChange($section, $comment, User $target, User $performer) {
 		if (strlen($comment) > 140) {
-			$comment = substr($comment, 0, 140)."...";
+			$comment = substr($comment, 0, 140) . "...";
 		}
 
-		//Insert an entry into the Log.
+		// Insert an entry into the Log.
 		$log = new ManualLogEntry('curseprofile', 'profile-edited');
 		$log->setPerformer($performer);
 		$log->setTarget(Title::makeTitle(NS_USER_PROFILE, $target->getName()));
@@ -605,7 +612,7 @@ class ProfileData {
 	 */
 	public function getExternalProfiles() {
 		foreach (self::$externalProfiles as $service => $data) {
-			$profile[$service] = self::validateExternalProfile($service, $this->user->getOption('profile-link-'.$service));
+			$profile[$service] = self::validateExternalProfile($service, $this->user->getOption('profile-link-' . $service));
 		}
 		return array_filter($profile);
 	}
@@ -635,24 +642,24 @@ class ProfileData {
 	 * Get information about wiki sites from Redis for searching.
 	 *
 	 * @access	public
-	 * @param 	string	Search Term
+	 * @param string $search Search Term
 	 * @return	array	Search Results
 	 */
 	public static function getWikiSitesSearch($search) {
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 		if ($redis === false) {
 			return [];
 		}
 
-		$search = is_string($search) ? "*".mb_strtolower($search, "UTF-8")."*" : null;
+		$search = is_string($search) ? "*" . mb_strtolower($search, "UTF-8") . "*" : null;
 
 		$siteKeys = [];
 
 		$it = null;
-		$redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
-		while (($arr_keys = $redis->hScan('dynamicsettings:siteNameKeys', $it, $search)) !== false) {
-			foreach ($arr_keys as $str_field => $str_value) {
-				$siteKeys[] = $str_value;
+		$redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
+		while (($arrKeys = $redis->hScan('dynamicsettings:siteNameKeys', $it, $search)) !== false) {
+			foreach ($arrKeys as $strField => $strValue) {
+				$siteKeys[] = $strValue;
 			}
 			if (count($siteKeys) >= 15) {
 				break;
@@ -666,11 +673,11 @@ class ProfileData {
 	 * Returns the decoded wiki data available in redis
 	 *
 	 * @access	public
-	 * @param	string / array	$siteKey md5 key for wanted site, or array of keys.
+	 * @param	string|array|null $siteKey md5 key for wanted site, or array of keys.
 	 * @return	array	Wiki data arrays.
 	 */
 	public static function getWikiSites($siteKey = null) {
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 		if ($redis === false) {
 			return [];
 		}
@@ -686,7 +693,7 @@ class ProfileData {
 		$ret = [];
 		if (!empty($sites)) {
 			foreach ($sites as $md5) {
-				$data = $redis->hGetAll('dynamicsettings:siteInfo:'.$md5);
+				$data = $redis->hGetAll('dynamicsettings:siteInfo:' . $md5);
 				if (empty($data)) {
 					continue;
 				}

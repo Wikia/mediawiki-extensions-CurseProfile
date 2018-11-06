@@ -6,17 +6,21 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use ApiBase;
+use MWException;
+use HydraApiBase;
+
 /**
  * Class that allows manipulation of basic profile data
  */
-class ProfileApi extends \HydraApiBase {
+class ProfileApi extends HydraApiBase {
 	/**
 	 * Return description of this API module.
 	 *
@@ -37,7 +41,7 @@ class ProfileApi extends \HydraApiBase {
 		return array_merge(
 			parent::getParamDescription(),
 			[
-				'userId' => 'The local id for a user.',
+				'user_id' => 'The local id for a user.',
 			]
 		);
 	}
@@ -55,31 +59,31 @@ class ProfileApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'field' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
-					'userId' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_MIN => 1,
-						\ApiBase::PARAM_REQUIRED => true,
+					'user_id' => [
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_MIN => 1,
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
 			'getWikisByString' => [
 				'params' => [
 					'search' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_MIN => 1,
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_MIN => 1,
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
 			'getWiki' => [
 				'params' => [
 					'hash' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_MIN => 1,
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_MIN => 1,
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -88,17 +92,17 @@ class ProfileApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'field' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
-					'userId' => [
-						\ApiBase::PARAM_TYPE		=> 'integer',
-						\ApiBase::PARAM_MIN			=> 1,
-						\ApiBase::PARAM_REQUIRED	=> true,
+					'user_id' => [
+						ApiBase::PARAM_TYPE		=> 'integer',
+						ApiBase::PARAM_MIN			=> 1,
+						ApiBase::PARAM_REQUIRED	=> true,
 					],
 					'text' => [
-						\ApiBase::PARAM_TYPE		=> 'string',
-						\ApiBase::PARAM_REQUIRED	=> false,
+						ApiBase::PARAM_TYPE		=> 'string',
+						ApiBase::PARAM_REQUIRED	=> false,
 					],
 				],
 			],
@@ -107,13 +111,13 @@ class ProfileApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'data' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
-					'userId' => [
-						\ApiBase::PARAM_TYPE		=> 'integer',
-						\ApiBase::PARAM_MIN			=> 1,
-						\ApiBase::PARAM_REQUIRED	=> true,
+					'user_id' => [
+						ApiBase::PARAM_TYPE		=> 'integer',
+						ApiBase::PARAM_MIN			=> 1,
+						ApiBase::PARAM_REQUIRED	=> true,
 					],
 
 				],
@@ -130,11 +134,12 @@ class ProfileApi extends \HydraApiBase {
 		$returnGet = ProfileData::getWikiSitesSearch($search);
 		$return = [];
 		foreach ($returnGet as $hash => $r) {
+			// curated data return.
 			$return[$hash] = [
 				'wiki_name' => $r['wiki_name'],
 				'wiki_name_display' => $r['wiki_name_display'],
 				'md5_key' => $r['md5_key']
-			]; // curated data return.
+			];
 		}
 		$this->getResult()->addValue(null, 'result', 'success');
 		$this->getResult()->addValue(null, 'data', $return);
@@ -159,7 +164,7 @@ class ProfileApi extends \HydraApiBase {
 			$this->getResult()->addValue(null, 'data', $return);
 		} else {
 			$this->getResult()->addValue(null, 'result', 'error');
-			$this->getResult()->addValue(null, 'message', 'no result found for hash '.$hash);
+			$this->getResult()->addValue(null, 'message', 'no result found for hash ' . $hash);
 			$this->getResult()->addValue(null, 'data', []);
 		}
 	}
@@ -171,12 +176,12 @@ class ProfileApi extends \HydraApiBase {
 	 * @return	void
 	 */
 	public function doGetRawField() {
-		if ($this->getUser()->getId() === $this->getRequest()->getInt('userId') || $this->getUser()->isAllowed('profile-moderate')) {
+		if ($this->getUser()->getId() === $this->getRequest()->getInt('user_id') || $this->getUser()->isAllowed('profile-moderate')) {
 			$field = strtolower($this->getRequest()->getText('field'));
-			$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+			$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
 			try {
 				$fieldText = $profileData->getField($field);
-			} catch (\MWException $e) {
+			} catch (MWException $e) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				$this->getResult()->addValue(null, 'errormsg', 'Invalid profile field.');
 				return;
@@ -193,11 +198,9 @@ class ProfileApi extends \HydraApiBase {
 	 * @return	void
 	 */
 	public function doEditField() {
-		global $wgOut;
-
 		$field = strtolower($this->getRequest()->getText('field'));
 		$text = $this->getMain()->getVal('text');
-		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+		$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
 
 		$canEdit = $profileData->canEdit($this->getUser());
 		if ($canEdit !== true) {
@@ -210,10 +213,10 @@ class ProfileApi extends \HydraApiBase {
 			$profileData->setField($field, $text, $this->getUser());
 			$fieldText = $profileData->getFieldHtml($field);
 			$this->getResult()->addValue(null, 'result', 'success');
-			//Add parsed text to result.
+			// Add parsed text to result.
 			$this->getResult()->addValue(null, 'parsedContent', $fieldText);
 			return;
-		} catch (\MWException $e) {
+		} catch (MWException $e) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
 			return;
@@ -227,17 +230,15 @@ class ProfileApi extends \HydraApiBase {
 	 * @return	void
 	 */
 	public function doEditSocialFields() {
-		global $wgOut;
-
 		$odata = $this->getRequest()->getText('data');
 		$data = json_decode($odata, 1);
 		if (!$data) {
 			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'Failed to decode data sent. ('.$odata.')');
+			$this->getResult()->addValue(null, 'errormsg', 'Failed to decode data sent. (' . $odata . ')');
 			return;
 		}
 
-		$profileData = new ProfileData($this->getRequest()->getInt('userId'));
+		$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
 		$canEdit = $profileData->canEdit($this->getUser());
 		if ($canEdit !== true) {
 			$this->getResult()->addValue(null, 'result', 'failure');
@@ -258,7 +259,7 @@ class ProfileApi extends \HydraApiBase {
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'parsedContent', $profileData->getProfileLinksHtml());
 			return;
-		} catch (\MWException $e) {
+		} catch (MWException $e) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
 			return;

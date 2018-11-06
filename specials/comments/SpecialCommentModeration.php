@@ -6,16 +6,22 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class SpecialCommentModeration extends \HydraCore\SpecialPage {
+use HydraCore;
+use HydraCore\SpecialPage;
+use TemplateCommentModeration;
+
+class SpecialCommentModeration extends SpecialPage {
+	private $sortStyle;
+
 	public function __construct() {
-		parent::__construct( 'CommentModeration', 'profile-moderate' );
+		parent::__construct('CommentModeration', 'profile-moderate');
 	}
 
 	/**
@@ -28,14 +34,12 @@ class SpecialCommentModeration extends \HydraCore\SpecialPage {
 		return 'users';
 	}
 
-	private $sortStyle;
-
 	/**
 	 * Show the special page
 	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
+	 * @param string $sortBy Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute( $sortBy ) {
+	public function execute($sortBy) {
 		$this->checkPermissions();
 		$wgRequest = $this->getRequest();
 
@@ -44,7 +48,7 @@ class SpecialCommentModeration extends \HydraCore\SpecialPage {
 		$this->output->addModuleStyles(['ext.curseprofile.commentmoderation.styles', 'ext.hydraCore.pagination.styles']);
 		$this->output->addModules(['ext.curseprofile.commentmoderation.scripts']);
 
-		$templateCommentModeration = new \TemplateCommentModeration;
+		$templateCommentModeration = new TemplateCommentModeration;
 		$this->setHeaders();
 
 		$this->sortStyle = $sortBy;
@@ -64,7 +68,7 @@ class SpecialCommentModeration extends \HydraCore\SpecialPage {
 			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
 		}
 
-		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
 		$this->output->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
 		$this->output->addHTML($pagination);

@@ -6,21 +6,37 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use ApiBase;
+use ApiMain;
+use HydraApiBase;
+use CentralIdLookup;
+use DerivativeRequest;
+
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
  */
-class CommentApi extends \HydraApiBase {
+class CommentApi extends HydraApiBase {
+	/**
+	 * Get Description
+	 *
+	 * @return string
+	 */
 	public function getDescription() {
 		return 'Allows commenting actions to be taken.';
 	}
 
+	/**
+	 * Get Param Description
+	 *
+	 * @return array
+	 */
 	public function getParamDescription() {
 		return array_merge(parent::getParamDescription(), [
 			// getRaw, edit, remove, and restore
@@ -43,6 +59,11 @@ class CommentApi extends \HydraApiBase {
 		]);
 	}
 
+	/**
+	 * Get Actions
+	 *
+	 * @return array
+	 */
 	public function getActions() {
 		return [
 			'restore' => [
@@ -50,8 +71,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -61,8 +82,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -72,8 +93,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -83,20 +104,20 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'global_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_DFLT => 0,
 					],
 					'text' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'inReplyTo' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_DFLT => 0,
 					],
 				]
 			],
@@ -106,8 +127,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => false,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -117,8 +138,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => false,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -128,12 +149,12 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'text' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -143,24 +164,24 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'global_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_DFLT => 0,
 					],
 					'title' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'text' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'inReplyTo' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_DFLT => 0,
 					],
 				]
 			],
@@ -170,8 +191,8 @@ class CommentApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						\ApiBase::PARAM_TYPE => 'integer',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				]
 			],
@@ -182,15 +203,15 @@ class CommentApi extends \HydraApiBase {
 				'permissionRequired' => 'profile-moderate',
 				'params' => [
 					'reportKey' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					],
 					'byUser' => [
-						\ApiBase::PARAM_TYPE => 'integer',
+						ApiBase::PARAM_TYPE => 'integer',
 					],
 					'withAction' => [ // string param with two possible enumerated values:
-						\ApiBase::PARAM_TYPE => ['delete', 'dismiss'],
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => ['delete', 'dismiss'],
+						ApiBase::PARAM_REQUIRED => true,
 					],
 				]
 			],
@@ -204,7 +225,7 @@ class CommentApi extends \HydraApiBase {
 	public function doAddToDefault() {
 		// intentional use of value returned from assignment
 		if (!($user_id = $this->getMain()->getVal('user_id'))) {
-			$lookup = \CentralIdLookup::factory();
+			$lookup = CentralIdLookup::factory();
 			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
 			if ($user->isAnon()) {
 				return $this->dieUsageMsg(['comment-invaliduser']);
@@ -220,9 +241,10 @@ class CommentApi extends \HydraApiBase {
 		} else {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
 			// however there didn't seem to be an easy way to add a section rather than editing the entire content
-			$params = new \DerivativeRequest($this->getRequest(),
+			$params = new DerivativeRequest(
+    $this->getRequest(),
 				[
-					'title' => 'User_talk:'.$user->getName(),
+					'title' => 'User_talk:' . $user->getName(),
 					'action' => 'edit',
 					'section' => 'new',
 					'summary' => $this->getMain()->getVal('title'),
@@ -230,7 +252,7 @@ class CommentApi extends \HydraApiBase {
 					'token' => $this->getMain()->getVal('token'),
 				]
 			);
-			$api = new \ApiMain($params, true);
+			$api = new ApiMain($params, true);
 			$api->execute();
 			// TODO: check the result object from the internal API call to determine success/failure status
 			$this->getResult()->addValue(null, 'result', 'success');
@@ -243,7 +265,7 @@ class CommentApi extends \HydraApiBase {
 	public function doAdd() {
 		$toUser = $this->getMain()->getVal('user_id');
 		if (!$toUser) {
-			$lookup = \CentralIdLookup::factory();
+			$lookup = CentralIdLookup::factory();
 			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
 			if (!$user) {
 				$this->getResult()->addValue(null, 'result', 'failure');
@@ -270,7 +292,7 @@ class CommentApi extends \HydraApiBase {
 
 	public function doGetRaw() {
 		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'), false);
-		$this->getResult()->addValue(null, 'text', ( isset($comment[0]['ub_message']) ? $comment[0]['ub_message'] : ''));
+		$this->getResult()->addValue(null, 'text', (isset($comment[0]['ub_message']) ? $comment[0]['ub_message'] : ''));
 	}
 
 	public function doEdit() {
@@ -336,8 +358,8 @@ class CommentApi extends \HydraApiBase {
 	 * @return	boolean	Success
 	 */
 	public function doResolveReport() {
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), CentralIdLookup::AUDIENCE_RAW);
 		if (!$globalId) {
 			return false;
 		}

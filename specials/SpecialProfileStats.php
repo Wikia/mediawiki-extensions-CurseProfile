@@ -6,14 +6,20 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class SpecialProfileStats extends \HydraCore\SpecialPage {
+use RedisCache;
+use RedisException;
+use PermissionsError;
+use TemplateProfileStats;
+use HydraCore\SpecialPage;
+
+class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Constructor
 	 *
@@ -28,18 +34,19 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 	 * Main Executor
 	 *
 	 * @access	public
+	 * @param string $path unused
 	 * @return	void	[Outputs to screen]
 	 */
-	public function execute( $path ) {
+	public function execute($path) {
 		if (!defined('MASTER_WIKI') || MASTER_WIKI === false) {
-			throw new \PermissionsError('cp-master-only');
+			throw new PermissionsError('cp-master-only');
 		}
 		$this->setHeaders();
 		$this->checkPermissions();
 
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 
-		//Data built by StatsRecache job, refer to its contents for data format.
+		// Data built by StatsRecache job, refer to its contents for data format.
 		try {
 			$profileStats = $redis->hGetAll('profilestats');
 		} catch (RedisException $e) {
@@ -54,6 +61,6 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 
 		$this->output->addModuleStyles('ext.curseprofile.profilestats.styles');
 		$this->output->addModules('ext.curseprofile.profilestats.scripts');
-		$this->output->addHTML(\TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
+		$this->output->addHTML(TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
 	}
 }

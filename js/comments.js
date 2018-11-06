@@ -44,7 +44,7 @@
 			(new mw.Api()).post({
 				action: 'comment',
 				do: 'getReplies',
-				user_id: $('.curseprofile').data('userid'),
+				user_id: $('.curseprofile').data('user_id'),
 				comment_id: $this.data('id'),
 				format: 'json',
 				formatversion: 2,

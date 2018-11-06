@@ -6,24 +6,27 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class SpecialAddComment extends \UnlistedSpecialPage {
+use SpecialPage;
+use UnlistedSpecialPage;
+
+class SpecialAddComment extends UnlistedSpecialPage {
 	public function __construct() {
-		parent::__construct( 'AddComment' );
+		parent::__construct('AddComment');
 	}
 
 	/**
 	 * Show the special page
 	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
+	 * @param string $toUser Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute( $toUser ) {
+	public function execute($toUser) {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$wgUser = $wgOut->getUser();
@@ -32,13 +35,12 @@ class SpecialAddComment extends \UnlistedSpecialPage {
 		$redirectToComment = false;
 
 		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
-			$user = \User::newFromId($toUser);
 			$board = new CommentBoard($toUser);
 			$newCommentId = $board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));
 		}
 
 		if ($newCommentId && $redirectToComment) {
-			$wgOut->redirect(\SpecialPage::getTitleFor('CommentPermalink', $newCommentId)->getFullURL());
+			$wgOut->redirect(SpecialPage::getTitleFor('CommentPermalink', $newCommentId)->getFullURL());
 		} else {
 			$wgOut->redirect((new ProfileData($toUser))->getProfilePageUrl());
 		}

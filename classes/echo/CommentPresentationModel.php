@@ -6,17 +6,19 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2016 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile\MWEcho;
 
+use EchoEventPresentationModel;
+
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class CommentPresentationModel extends \EchoEventPresentationModel {
+class CommentPresentationModel extends EchoEventPresentationModel {
 	/**
 	 * Get a message object and add the performer's name as
 	 * a parameter. It is expected that subclasses will override
@@ -26,7 +28,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	 * @return Message
 	 */
 	public function getHeaderMessage() {
-		$message = $this->getMessageWithAgent( $this->getHeaderMessageKey() );
+		$message = $this->getMessageWithAgent($this->getHeaderMessageKey());
 		if ($this->event->getTitle() !== null) {
 			$message->params($this->event->getTitle()->getFullText());
 		}
@@ -54,7 +56,7 @@ class CommentPresentationModel extends \EchoEventPresentationModel {
 	public function getPrimaryLink() {
 		if ($this->event->getTitle() !== null) {
 			return [
-				'url' => $this->event->getTitle()->getLocalURL().($this->event->getExtraParam('comment_id') > 0 ? '#comment'.$this->event->getExtraParam('comment_id') : null),
+				'url' => $this->event->getTitle()->getLocalURL() . ($this->event->getExtraParam('comment_id') > 0 ? '#comment' . $this->event->getExtraParam('comment_id') : null),
 				'label' => $this->msg('notification-link-text-view-comment')->text(),
 			];
 		} else {

@@ -6,15 +6,18 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
-require_once(__DIR__.'/../../../maintenance/Maintenance.php');
 
-class SetProfilePreference extends \Maintenance {
+use Maintenance;
+
+require_once __DIR__ . '/../../../maintenance/Maintenance.php';
+
+class SetProfilePreference extends Maintenance {
 	protected static $preferences = [
 		'profile' => 1,
 		'wiki' => 0,
@@ -29,13 +32,13 @@ class SetProfilePreference extends \Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription('Overwrites the preference for profile vs. wiki pages for all users on a wiki');
-		$this->addArg('newPref', 'What the new user preference should be. One of: '.implode(', ', array_keys(self::$preferences)), true);
+		$this->addArg('newPref', 'What the new user preference should be. One of: ' . implode(', ', array_keys(self::$preferences)), true);
 	}
 
 	public function execute() {
 		$newSetting = $this->getArg();
 		if (!in_array($newSetting, array_keys(self::$preferences))) {
-			$this->error('Invalid new preference provided. Must be one of: '.implode(', ', array_keys(self::$preferences)));
+			$this->error('Invalid new preference provided. Must be one of: ' . implode(', ', array_keys(self::$preferences)));
 			return;
 		}
 
@@ -50,8 +53,10 @@ class SetProfilePreference extends \Maintenance {
 		$res = $db->select('user', ['user_id'], [], __METHOD__);
 
 		foreach ($res as $row) {
-			$this->output("Inserting preference row for user ID ".$row->user_id."\n");
-			$db->insert('user_properties', [
+			$this->output("Inserting preference row for user ID " . $row->user_id . "\n");
+			$db->insert(
+    'user_properties',
+    [
 					'up_user' => $row->user_id,
 					'up_property' => 'profile-pref',
 					'up_value' => $onOrOff,
@@ -65,4 +70,4 @@ class SetProfilePreference extends \Maintenance {
 }
 
 $maintClass = 'CurseProfile\SetProfilePreference';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

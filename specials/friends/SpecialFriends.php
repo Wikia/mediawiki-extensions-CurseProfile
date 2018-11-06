@@ -6,18 +6,25 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use User;
+use Title;
+use HydraCore;
+use CentralIdLookup;
+use UnlistedSpecialPage;
+use TemplateManageFriends;
+
 /**
  * Special page that lists the friends a user has.
  * Redirects to ManageFriends when viewing one's own friends page.
  */
-class SpecialFriends extends \UnlistedSpecialPage {
+class SpecialFriends extends UnlistedSpecialPage {
 	/**
 	 * Main Constructor
 	 *
@@ -25,7 +32,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 	 * @return	void
 	 */
 	public function __construct() {
-		parent::__construct( 'Friends' );
+		parent::__construct('Friends');
 	}
 
 	/**
@@ -47,7 +54,7 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		// parse path segment for special page url similar to:
 		// /Special:Friends/4/Cathadan
 		list($user_id, $user_name) = explode('/', $path);
-		$user = \User::newFromId($user_id);
+		$user = User::newFromId($user_id);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('friendsboard-invalid');
@@ -57,18 +64,19 @@ class SpecialFriends extends \UnlistedSpecialPage {
 
 		// when viewing your own friends list, use the manage page
 		if ($this->getUser()->getId() == $user->getId()) {
-			$specialManageFriends = \Title::newFromText('Special:ManageFriends');
+			$specialManageFriends = Title::newFromText('Special:ManageFriends');
 			$wgOut->redirect($specialManageFriends->getFullURL());
 			return;
 		}
 
 		// Fix missing or incorrect username segment in the path
 		if ($user->getTitleKey() != $user_name) {
-			$specialFriends = \Title::newFromText('Special:Friends/'.$user_id.'/'.$user->getTitleKey());
-			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
-				$query = '?'.$_SERVER['QUERY_STRING'];
+			$specialFriends = Title::newFromText('Special:Friends/' . $user_id . '/' . $user->getTitleKey());
+			if (!empty($_SERVER['QUERY_STRING'])) {
+				// don't destroy any extra params
+				$query = '?' . $_SERVER['QUERY_STRING'];
 			}
-			$wgOut->redirect($specialFriends->getFullURL().$query);
+			$wgOut->redirect($specialFriends->getFullURL() . $query);
 			return;
 		}
 
@@ -77,18 +85,16 @@ class SpecialFriends extends \UnlistedSpecialPage {
 		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
 		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
-		$templateManageFriends = new \TemplateManageFriends;
+		$templateManageFriends = new TemplateManageFriends;
 
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 
 		$f = new Friendship($globalId);
 
 		$friends = $f->getFriends();
-		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateManageFriends->display($friends, $pagination, $itemsPerPage, $start));
-
-		return;
 	}
 }

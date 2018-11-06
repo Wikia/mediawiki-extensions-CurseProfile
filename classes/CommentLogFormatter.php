@@ -6,7 +6,7 @@
  *
  * @author		Tim Aldridge
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
@@ -31,9 +31,9 @@ class CommentLogFormatter extends LogFormatter {
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
-		//4:comment_id
+		// 4:comment_id
 		if (!empty($parameters[3])) {
-			$parameters[3] = ['raw' =>  Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $parameters[3])->getLinkURL()], 'comment')];
+			$parameters[3] = ['raw' => Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $parameters[3])->getLinkURL()], 'comment')];
 		}
 
 		return $parameters;

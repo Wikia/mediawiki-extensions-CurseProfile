@@ -2,7 +2,7 @@
 use CurseProfile\ProfilePage;
 
 class StatsDLExposer extends ProfilePage {
-	public function __construct(){
+	public function __construct() {
 		$this->user_id = 12345;
 	}
 }
@@ -26,7 +26,7 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 	}
 
 	public function testNull() {
-		$this->assertEquals('0', $this->stats->generateStatsDL(NULL), 'Null should return zero');
+		$this->assertEquals('0', $this->stats->generateStatsDL(null), 'Null should return zero');
 	}
 
 	public function testFlatArray() {
@@ -37,10 +37,10 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt><a></dt><dd>10</dd>'
-				.'<dt><b></dt><dd>2,000</dd>'
-				.'<dt><c></dt><dd>3,455</dd>'
-			.'</dl>',
+				. '<dt><a></dt><dd>10</dd>'
+				. '<dt><b></dt><dd>2,000</dd>'
+				. '<dt><c></dt><dd>3,455</dd>'
+			. '</dl>',
 			$this->stats->generateStatsDL($template),
 			'A flat list should generate a simple definition list'
 		);
@@ -58,15 +58,15 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt><a></dt><dd>10</dd>'
-				.'<dt><b></dt><dd>2,000</dd>'
-				.'<dl>'
-					.'<dt><d></dt><dd>500</dd>'
-					.'<dt><e></dt><dd>1,500</dd>'
-					.'<dt><f></dt><dd>nothing</dd>'
-				.'</dl>'
-				.'<dt><c></dt><dd>3,455</dd>'
-			.'</dl>',
+				. '<dt><a></dt><dd>10</dd>'
+				. '<dt><b></dt><dd>2,000</dd>'
+				. '<dl>'
+					. '<dt><d></dt><dd>500</dd>'
+					. '<dt><e></dt><dd>1,500</dd>'
+					. '<dt><f></dt><dd>nothing</dd>'
+				. '</dl>'
+				. '<dt><c></dt><dd>3,455</dd>'
+			. '</dl>',
 			$this->stats->generateStatsDL($template),
 			'A nested list with a rollup should produce a nested list with a number across from its header'
 		);
@@ -84,15 +84,15 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 		];
 		$this->assertEquals(
 			'<dl>'
-				.'<dt><a></dt><dd>10</dd>'
-				.'<dt><b></dt>'
-				.'<dl>'
-					.'<dt><d></dt><dd>500</dd>'
-					.'<dt><e></dt><dd>1,500</dd>'
-					.'<dt><f></dt><dd>nothing</dd>'
-				.'</dl>'
-				.'<dt><c></dt><dd>3,455</dd>'
-			.'</dl>',
+				. '<dt><a></dt><dd>10</dd>'
+				. '<dt><b></dt>'
+				. '<dl>'
+					. '<dt><d></dt><dd>500</dd>'
+					. '<dt><e></dt><dd>1,500</dd>'
+					. '<dt><f></dt><dd>nothing</dd>'
+				. '</dl>'
+				. '<dt><c></dt><dd>3,455</dd>'
+			. '</dl>',
 			$this->stats->generateStatsDL($template),
 			'A nested list with a rollup should produce a nested list with a number across from its header'
 		);

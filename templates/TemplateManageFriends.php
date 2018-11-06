@@ -6,11 +6,13 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
-**/
+ **/
+
+use CurseProfile\FriendDisplay;
 
 class TemplateManageFriends {
 	/**
@@ -24,17 +26,17 @@ class TemplateManageFriends {
 	 * Displays a list of friends.
 	 *
 	 * @access	public
-	 * @param	array	Raw friend IDs.
-	 * @param	string	Pagination HTML
-	 * @param	integer	Items Per Page
-	 * @param	integer	Start Offset
+	 * @param	array	$friends Raw friend IDs.
+	 * @param	string	$pagination Pagination HTML
+	 * @param	int	$itemsPerPage Items Per Page
+	 * @param	int	$start Start Offset
 	 * @return	void
 	 */
 	public function display($friends, $pagination, $itemsPerPage, $start) {
-		$this->HTML = '<h2>'.wfMessage('friends').'</h2>';
+		$this->HTML = '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, false, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, false, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('nofriends')->plain();
@@ -46,38 +48,40 @@ class TemplateManageFriends {
 	 * Displays a management page for friends
 	 *
 	 * @access	public
-	 * @param	array	array of current friends Curse IDs
-	 * @param	array	array of received friend requests (curse IDs as keys)
-	 * @param	array	array of curse ids to whom friend requests are pending
+	 * @param	array	$friends array of current friends Curse IDs
+	 * @param	array	$received array of received friend requests (curse IDs as keys)
+	 * @param	array	$sent array of curse ids to whom friend requests are pending
+	 * @param	int	$itemsPerPage Items Per Page
+	 * @param	int	$start Start Offset
 	 * @return	string	Built HTML
 	 */
 	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
 		$this->HTML = '';
-		$pagination = \HydraCore::generatePaginationHtml(\SpecialPage::getTitleFor('ManageFriends'), count($friends), $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml(SpecialPage::getTitleFor('ManageFriends'), count($friends), $itemsPerPage, $start);
 
 		if (count($received)) {
-			$this->HTML .= '<h2>'.wfMessage('pendingrequests').'</h2>';
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($received, true);
+			$this->HTML .= '<h2>' . wfMessage('pendingrequests') . '</h2>';
+			$this->HTML .= FriendDisplay::listFromArray($received, true);
 		}
 
-		$this->HTML .= '<h2>'.wfMessage('friends').'</h2>';
+		$this->HTML .= '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($friends, true, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, true, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('soronery')->plain();
 		}
 
 		if (count($sent)) {
-			$this->HTML .= '<h2>'.wfMessage('sentrequests').'</h2>';
-			$this->HTML .= CurseProfile\FriendDisplay::listFromArray($sent, true);
+			$this->HTML .= '<h2>' . wfMessage('sentrequests') . '</h2>';
+			$this->HTML .= FriendDisplay::listFromArray($sent, true);
 		}
 
-		$this->HTML .= '<h3>'.wfMessage('senddirectrequest').'</h3>';
-		$this->HTML .= Html::element('input', ['type'=>'text', 'id'=>'directfriendreq', 'placeholder'=>wfMessage('directfriendreqplaceholder')->text()]);
-		$this->HTML .= Html::element('button', ['id'=>'senddirectreq'], wfMessage('sendrequest')->text());
+		$this->HTML .= '<h3>' . wfMessage('senddirectrequest') . '</h3>';
+		$this->HTML .= Html::element('input', ['type' => 'text', 'id' => 'directfriendreq', 'placeholder' => wfMessage('directfriendreqplaceholder')->text()]);
+		$this->HTML .= Html::element('button', ['id' => 'senddirectreq'], wfMessage('sendrequest')->text());
 
-		return '<div id="managefriends">'.$this->HTML.'</div>';
+		return '<div id="managefriends">' . $this->HTML . '</div>';
 	}
 }

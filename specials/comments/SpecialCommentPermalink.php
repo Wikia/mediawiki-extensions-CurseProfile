@@ -6,30 +6,33 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class SpecialCommentPermalink extends \UnlistedSpecialPage {
+use User;
+use UnlistedSpecialPage;
+use TemplateCommentBoard;
+
+class SpecialCommentPermalink extends UnlistedSpecialPage {
 	public function __construct() {
-		parent::__construct( 'CommentPermalink' );
+		parent::__construct('CommentPermalink');
 	}
 
 	/**
 	 * Show the special page
 	 *
-	 * @param $comment_id string: extra string added to the page request path (/Special:CommentPermalink/12345) -> "12345"
+	 * @param string $commentId extra string added to the page request path (/Special:CommentPermalink/12345) -> "12345"
 	 */
-	public function execute( $comment_id ) {
-		$wgRequest = $this->getRequest();
+	public function execute($commentId) {
 		$wgOut = $this->getOutput();
 		$this->setHeaders();
 
 		// checks if comment exists and if wgUser can view it
-		$comment = CommentBoard::getCommentById($comment_id);
+		$comment = CommentBoard::getCommentById($commentId);
 		if (empty($comment)) {
 			$wgOut->setPageTitle('commentboard-invalid-title');
 			$wgOut->addWikiMsg('commentboard-invalid');
@@ -37,19 +40,17 @@ class SpecialCommentPermalink extends \UnlistedSpecialPage {
 			return;
 		}
 
-		$user = \User::newFromId($comment[0]['ub_user_id']);
+		$user = User::newFromId($comment[0]['ub_user_id']);
 		$user->load();
 
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
 		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles']);
 		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
-		$templateCommentBoard = new \TemplateCommentBoard;
+		$templateCommentBoard = new TemplateCommentBoard;
 
 		$wgOut->addHTML($templateCommentBoard->permalinkHeader($user, $wgOut->getPageTitle()));
 
 		// display single comment while highlighting the selected ID
-		$wgOut->addHTML('<div class="comments">'.CommentDisplay::newCommentForm($user->getId(), true).CommentDisplay::singleComment($comment[0], $comment_id).'</div>');
-
-		return;
+		$wgOut->addHTML('<div class="comments">' . CommentDisplay::newCommentForm($user->getId(), true) . CommentDisplay::singleComment($comment[0], $commentId) . '</div>');
 	}
 }
