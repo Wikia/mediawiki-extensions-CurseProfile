@@ -316,7 +316,7 @@ class ProfilePage extends \Article {
 		$links['namespaces']['user_talk'] = [
 			'class'		=> implode(' ', $class),
 			'text'		=> wfMessage('talk')->text(),
-			'href'		=> $this->profile->getUserPageUrl($userTalkPageTitle),
+			'href'		=> $this->profile->getTalkPageUrl($userTalkPageTitle),
 			'primary'	=> true
 		];
 

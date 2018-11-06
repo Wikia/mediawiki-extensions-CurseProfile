@@ -164,26 +164,48 @@ class ProfileData {
 	}
 
 	/**
-	 * Returns the canonical URL path to a user's wiki page based on their profile preference.
+	 * Get the url for the User page based on preferences
 	 *
-	 * @access	public
-	 * @param	object	Title override.
-	 * @return	string
+	 * @param Title $title
+	 * @return string
 	 */
-	public function getUserPageUrl($title = null) {
-		if ($title === null) {
-			$title = \Title::newFromText('User:'.$this->user->getTitleKey());
-		}
-
-		$arguments = [];
+	public function getUserPageUrl($title) {
+		$args = [];
 		if ($this->getProfileTypePreference()) {
-			$arguments['profile'] = 'no';
-		}
-		if (!$title->isKnown()) {
-			$arguments['redlink'] = 1;
+			$args['profile'] = 'no';
 		}
 
-		return $title->getFullURL($arguments);
+		return $this->getFullURL($title, $args);
+	}
+
+	/**
+	 * Get the url for the User Talk Page based on preferences
+	 *
+	 * @param Title $title
+	 * @return string
+	 */
+	public function getTalkPageUrl($title) {
+		$args = [];
+		if ($this->getCommentTypePreference()) {
+			$args['profile'] = 'no';
+		}
+
+		return $this->getFullURL($title, $args);
+	}
+
+	/**
+	 * Get the full url from Title with the provided arguments
+	 *
+	 * @param Title $title
+	 * @param array $args
+	 * @return string
+	 */
+	private function getFullURL($title, $args) {
+		if (!$title->isKnown()) {
+			$args['redlink'] = 1;
+		}
+
+		return $title->getFullURL($args);
 	}
 
 	/**
