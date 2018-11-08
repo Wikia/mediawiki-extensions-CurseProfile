@@ -13,6 +13,7 @@
 **/
 namespace CurseProfile;
 
+use DynamicSettings\Environment;
 use Title;
 
 class Hooks {
@@ -376,7 +377,7 @@ class Hooks {
 		$updater->addExtensionUpdate(['dropIndex', 'user_board_report_archives', 'ra_curse_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_curse_id_from.sql", true]);
 		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_global_id_from.sql", true]);
 
-		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
+		if (Environment::isMasterWiki()) {
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship', "{$extDir}/install/sql/table_user_relationship.sql", true));
 			$updater->addExtensionUpdate(array('addTable', 'user_relationship_request', "{$extDir}/install/sql/table_user_relationship_request.sql", true));
 		}

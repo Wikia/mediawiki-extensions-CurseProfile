@@ -11,9 +11,11 @@
  * @link		http://www.curse.com/
  *
 **/
+
 use CurseProfile\CP;
 use CurseProfile\ProfilePage;
 use CurseProfile\CommentReport;
+use DynamicSettings\Environment;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -174,7 +176,7 @@ class TemplateCommentModeration {
 	 * @return	string	HTML fragment
 	 */
 	private function permalink($rep) {
-		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
+		if (Environment::isMasterWiki()) {
 			$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
 			if ($rep['comment']['origin_wiki'] == 'master') {
 				global $wgSitename;

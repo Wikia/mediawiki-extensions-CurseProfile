@@ -11,7 +11,10 @@
  * @link		http://www.curse.com/
  *
 **/
+
 namespace CurseProfile;
+
+use DynamicSettings\Environment;
 
 /**
  * Class that manages user-reported profile comments
@@ -95,7 +98,7 @@ class CommentReport {
 	 * @return	array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
-		if (defined('MASTER_WIKI') && MASTER_WIKI === true) {
+		if (Environment::isMasterWiki()) {
 			return self::getReportsRedis($sortStyle, $limit, $offset);
 		} else {
 			return self::getReportsDb($sortStyle, $limit, $offset);
