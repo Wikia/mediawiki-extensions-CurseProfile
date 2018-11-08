@@ -616,7 +616,7 @@ class CommentReport {
 				'ra_action_taken_by' => $this->data['action_taken_by'],
 				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
 			],
-   [
+			[
 				'ra_comment_id' => intval($this->data['comment']['cid']),
 				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched'])
 			],
