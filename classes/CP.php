@@ -13,9 +13,9 @@
 **/
 namespace CurseProfile;
 
-use User;
-use Title;
 use Linker;
+use Title;
+use User;
 
 /**
  * Assorted utility functions

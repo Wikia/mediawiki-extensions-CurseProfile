@@ -13,15 +13,15 @@
 **/
 namespace CurseProfile;
 
-use User;
-use Title;
-use Linker;
-use Status;
+use EchoAttributeManager;
 use EditPage;
-use WebRequest;
+use Linker;
 use MWNamespace;
 use SpecialPage;
-use EchoAttributeManager;
+use Status;
+use Title;
+use User;
+use WebRequest;
 
 class Hooks {
 	/**

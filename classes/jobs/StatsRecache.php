@@ -13,12 +13,12 @@
 **/
 namespace CurseProfile;
 
+use DynamicSettings\Wiki;
 use Exception;
+use MediaWiki\MediaWikiServices;
 use Redis;
 use RedisCache;
 use SyncService\Job;
-use DynamicSettings\Wiki;
-use MediaWiki\MediaWikiServices;
 
 class StatsRecache extends Job {
 	static public $forceSingleInstance = true;

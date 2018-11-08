@@ -12,8 +12,8 @@
  *
  **/
 
-use CurseProfile\ProfileData;
 use CurseProfile\CommentDisplay;
+use CurseProfile\ProfileData;
 
 class TemplateCommentBoard {
 	/**

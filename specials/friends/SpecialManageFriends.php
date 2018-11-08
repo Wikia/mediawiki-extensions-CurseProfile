@@ -13,10 +13,10 @@
 **/
 namespace CurseProfile;
 
-use SpecialPage;
 use CentralIdLookup;
-use UserNotLoggedIn;
+use SpecialPage;
 use TemplateManageFriends;
+use UserNotLoggedIn;
 
 /**
  * Special page that allows one to manage their friends.

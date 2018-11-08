@@ -13,10 +13,10 @@
 **/
 namespace CurseProfile;
 
-use User;
 use HydraCore;
-use UnlistedSpecialPage;
 use TemplateCommentBoard;
+use UnlistedSpecialPage;
+use User;
 
 class SpecialCommentBoard extends UnlistedSpecialPage {
 	public function __construct() {

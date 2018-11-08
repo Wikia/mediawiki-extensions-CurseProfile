@@ -13,12 +13,12 @@
 **/
 namespace CurseProfile;
 
-use User;
-use Title;
-use HydraCore;
 use CentralIdLookup;
-use UnlistedSpecialPage;
+use HydraCore;
 use TemplateManageFriends;
+use Title;
+use UnlistedSpecialPage;
+use User;
 
 /**
  * Special page that lists the friends a user has.

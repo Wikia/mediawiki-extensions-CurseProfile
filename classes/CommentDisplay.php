@@ -13,14 +13,14 @@
 **/
 namespace CurseProfile;
 
+use CentralIdLookup;
 use Html;
-use User;
-use Title;
 use HydraCore;
 use Parser;
 use RequestContext;
 use SpecialPage;
-use CentralIdLookup;
+use Title;
+use User;
 
 /**
  * A class to manage displaying a list of friends on a user profile

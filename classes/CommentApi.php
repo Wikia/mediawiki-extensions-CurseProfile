@@ -15,9 +15,9 @@ namespace CurseProfile;
 
 use ApiBase;
 use ApiMain;
-use HydraApiBase;
 use CentralIdLookup;
 use DerivativeRequest;
+use HydraApiBase;
 
 /**
  * Class that allows commenting actions to be performed by AJAX calls.

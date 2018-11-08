@@ -13,12 +13,12 @@
 **/
 namespace CurseProfile;
 
-use User;
-use Title;
-use EchoEvent;
-use Throwable;
-use RedisCache;
 use CentralIdLookup;
+use EchoEvent;
+use RedisCache;
+use Throwable;
+use Title;
+use User;
 
 /**
  * Class that manages user-reported profile comments

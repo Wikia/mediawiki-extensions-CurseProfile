@@ -13,9 +13,9 @@
 **/
 namespace CurseProfile;
 
+use CentralIdLookup;
 use Html;
 use User;
-use CentralIdLookup;
 
 /**
  * A class to manage displaying a list of friends on a user profile

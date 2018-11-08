@@ -13,8 +13,8 @@
 
 namespace CurseProfile\MWEcho;
 
-use User;
 use EchoEvent;
+use User;
 
 class EchoUserLocator {
 	/**

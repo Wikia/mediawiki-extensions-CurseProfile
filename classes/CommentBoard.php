@@ -14,16 +14,16 @@
 
 namespace CurseProfile;
 
-use User;
-use Title;
-use EchoEvent;
-use Exception;
-use Sanitizer;
-use ManualLogEntry;
 use CentralIdLookup;
 use Cheevos\Cheevos;
-use Cheevos\CheevosHelper;
 use Cheevos\CheevosException;
+use Cheevos\CheevosHelper;
+use EchoEvent;
+use Exception;
+use ManualLogEntry;
+use Sanitizer;
+use Title;
+use User;
 
 /**
  * Class that manages a 'wall' of comments on a user profile page

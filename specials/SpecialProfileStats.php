@@ -13,11 +13,11 @@
 **/
 namespace CurseProfile;
 
+use HydraCore\SpecialPage;
+use PermissionsError;
 use RedisCache;
 use RedisException;
-use PermissionsError;
 use TemplateProfileStats;
-use HydraCore\SpecialPage;
 
 class SpecialProfileStats extends SpecialPage {
 	/**

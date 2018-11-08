@@ -5,8 +5,8 @@
 namespace CurseProfile;
 
 use CentralIdLookup;
-use SyncService\Job;
 use DynamicSettings\Wiki;
+use SyncService\Job;
 use Wikimedia\Rdbms\DBConnectionError;
 
 class ResolveComment extends Job {

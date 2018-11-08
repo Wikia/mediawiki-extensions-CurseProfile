@@ -14,8 +14,8 @@
 namespace CurseProfile;
 
 use ApiBase;
-use MWException;
 use HydraApiBase;
+use MWException;
 
 /**
  * Class that allows manipulation of basic profile data

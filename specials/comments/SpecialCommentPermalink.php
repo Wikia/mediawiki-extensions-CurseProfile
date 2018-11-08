@@ -13,9 +13,9 @@
 **/
 namespace CurseProfile;
 
-use User;
-use UnlistedSpecialPage;
 use TemplateCommentBoard;
+use UnlistedSpecialPage;
+use User;
 
 class SpecialCommentPermalink extends UnlistedSpecialPage {
 	public function __construct() {

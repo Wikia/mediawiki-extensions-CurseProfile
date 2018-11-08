@@ -13,16 +13,16 @@
 **/
 namespace CurseProfile;
 
+use CentralIdLookup;
 use Html;
-use User;
-use Title;
 use HydraCore;
-use Throwable;
+use ManualLogEntry;
+use MWException;
 use Redis;
 use RedisCache;
-use MWException;
-use ManualLogEntry;
-use CentralIdLookup;
+use Throwable;
+use Title;
+use User;
 
 /**
  * Class for reading and saving custom user-set profile data

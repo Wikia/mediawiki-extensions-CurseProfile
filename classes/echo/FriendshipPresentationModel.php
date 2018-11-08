@@ -13,8 +13,8 @@
 **/
 namespace CurseProfile\MWEcho;
 
-use SpecialPage;
 use EchoEventPresentationModel;
+use SpecialPage;
 
 /**
  * Class that formats notifications for profile comments and friend requests

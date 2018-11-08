@@ -13,10 +13,10 @@
 **/
 namespace CurseProfile;
 
-use User;
 use ApiBase;
-use HydraApiBase;
 use CentralIdLookup;
+use HydraApiBase;
+use User;
 
 /**
  * Class that allows friendship actions to be performed by AJAX calls.

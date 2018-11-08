@@ -13,26 +13,26 @@
 **/
 namespace CurseProfile;
 
-use Html;
-use User;
-use Title;
 use Action;
-use Linker;
 use Article;
-use Message;
-use Revision;
-use HydraCore;
-use SpecialPage;
-use MessageCache;
-use IContextSource;
 use CentralIdLookup;
 use Cheevos\Cheevos;
-use Hydra\Subscription;
-use Cheevos\CheevosHelper;
-use Cheevos\CheevosException;
 use Cheevos\CheevosAchievement;
+use Cheevos\CheevosException;
+use Cheevos\CheevosHelper;
 use Cheevos\Points\PointLevels;
 use Cheevos\Points\PointsDisplay;
+use Html;
+use Hydra\Subscription;
+use HydraCore;
+use IContextSource;
+use Linker;
+use Message;
+use MessageCache;
+use Revision;
+use SpecialPage;
+use Title;
+use User;
 
 /**
  * Class ProfilePage

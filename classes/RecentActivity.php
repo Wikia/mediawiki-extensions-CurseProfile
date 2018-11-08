@@ -13,8 +13,8 @@
 **/
 namespace CurseProfile;
 
-use Title;
 use Linker;
+use Title;
 
 /**
  * A class to manage displaying a list of recent activity on a user profile
