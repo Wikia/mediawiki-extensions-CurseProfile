@@ -6,31 +6,34 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use ResourceLoaderContext;
+use ResourceLoaderWikiModule;
+
 /**
- * Module for site customizations
+ * Module for site customization
  */
-class ResourceLoaderModule extends \ResourceLoaderWikiModule {
+class ResourceLoaderModule extends ResourceLoaderWikiModule {
 
 	/* Protected Methods */
 
 	/**
 	 * Gets list of pages used by this module
 	 *
-	 * @param $context ResourceLoaderContext
+	 * @param ResourceLoaderContext $context
 	 *
-	 * @return Array: List of pages
+	 * @return Array List of pages
 	 */
-	protected function getPages( \ResourceLoaderContext $context ) {
-		$pages = array(
-			'MediaWiki:CurseProfile.css' => array( 'type' => 'style' )
-		);
+	protected function getPages(ResourceLoaderContext $context) {
+		$pages = [
+			'MediaWiki:CurseProfile.css' => [ 'type' => 'style' ]
+		];
 		return $pages;
 	}
 
@@ -39,7 +42,7 @@ class ResourceLoaderModule extends \ResourceLoaderWikiModule {
 	/**
 	 * Gets group name
 	 *
-	 * @return String: Name of group
+	 * @return String Name of group
 	 */
 	public function getGroup() {
 		return 'site';

@@ -5,14 +5,15 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2017 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
-require_once(__DIR__.'/../../../maintenance/Maintenance.php');
 
-class MigrateLocationField extends \Maintenance {
+require_once __DIR__ . '/../../../maintenance/Maintenance.php';
+
+class MigrateLocationField extends Maintenance {
 	/**
 	 * Constructor
 	 *
@@ -55,4 +56,4 @@ class MigrateLocationField extends \Maintenance {
 }
 
 $maintClass = 'MigrateLocationField';
-require_once(RUN_MAINTENANCE_IF_MAIN);
+require_once RUN_MAINTENANCE_IF_MAIN;

@@ -1,6 +1,6 @@
 {
 	"name": "Curse Profile",
-	"version": "1.5",
+	"version": "1.6",
 	"author": "Noah Manneschmidt, Curse Inc&copy;",
 	"descriptionmsg": "curseprofile_description",
 	"type": "specialpage",
@@ -51,7 +51,7 @@
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
 	"AutoloadClasses": {
-		"CurseProfile\\Hooks": "CurseProfile.hooks.php",
+		"CurseProfile\\Hooks": "classes/Hooks.php",
 		"CurseProfile\\CP": "classes/CP.php",
 		"CurseProfile\\ProfileApi": "classes/ProfileApi.php",
 		"CurseProfile\\ProfilePage": "classes/ProfilePage.php",

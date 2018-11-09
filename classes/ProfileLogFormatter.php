@@ -6,17 +6,19 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2016 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
  **/
 namespace CurseProfile;
 
+use LogFormatter;
+
 /**
  * A class that will handle log formating for Recent Changes
  */
-class ProfileLogFormatter extends \LogFormatter {
+class ProfileLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for profile edits.
 	 *
@@ -26,9 +28,9 @@ class ProfileLogFormatter extends \LogFormatter {
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
-		//4:section
+		// 4:section
 		if (!empty($parameters[3])) {
-			$parameters[3] = ['raw' => wfMessage('log-'.$parameters[3])];
+			$parameters[3] = ['raw' => wfMessage('log-' . $parameters[3])];
 		}
 
 		return $parameters;

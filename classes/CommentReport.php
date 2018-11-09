@@ -6,7 +6,7 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
@@ -14,7 +14,13 @@
 
 namespace CurseProfile;
 
+use CentralIdLookup;
 use DynamicSettings\Environment;
+use EchoEvent;
+use RedisCache;
+use Throwable;
+use Title;
+use User;
 
 /**
  * Class that manages user-reported profile comments
@@ -63,28 +69,29 @@ class CommentReport {
 	 *
 	 * @access	public
 	 * @param	string	$sortStyle which queue to count
-	 * @param	string	$qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
-	 * @return	integer
+	 * @param	string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
+	 * @return	int
 	 */
-	static public function getCount($sortStyle, $qualifier = null) {
-		$redis = \RedisCache::getClient('cache');
+	public static function getCount($sortStyle, $qualifier = null) {
+		$redis = RedisCache::getClient('cache');
 
 		try {
-			// TODO: alternately query the DB directly if this is not running on the master wiki
+			// @TODO: alternately query the DB directly if this is not running on the master wiki
 			switch ($sortStyle) {
 				case 'byWiki':
-					return $redis->zCard(self::REDIS_KEY_WIKI_INDEX.$qualifier);
+					return $redis->zCard(self::REDIS_KEY_WIKI_INDEX . $qualifier);
 
 				case 'byUser':
-					return $redis->zCard(self::REDIS_KEY_USER_INDEX.$qualifier);
+					return $redis->zCard(self::REDIS_KEY_USER_INDEX . $qualifier);
 
 				case 'byDate':
 				case 'byVolume':
-				default: // date and volume keys should always be the same
+				default:
+					// date and volume keys should always be the same
 					return $redis->zCard(self::REDIS_KEY_VOLUME_INDEX);
 			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		} catch (Throwable $e) {
+			wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 		}
 		return 0;
 	}
@@ -93,8 +100,8 @@ class CommentReport {
 	 * Main retrieval function to get data out of redis or the local db
 	 *
 	 * @param	string	$sortStyle [optional] default byVolume
-	 * @param	integer	$limit [optional] default 10
-	 * @param	integer	$offset [optional] default 0
+	 * @param	int $limit [optional] default 10
+	 * @param	int $offset [optional] default 0
 	 * @return	array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
@@ -108,8 +115,8 @@ class CommentReport {
 	/**
 	 * Retrieve a single report by its unique id
 	 *
-	 * @param	string	report key as retrieved from reportKey()
-	 * @param	bool	[optional] when set to true, will return null if report does not exist in the current wiki
+	 * @param	string $key	report key as retrieved from reportKey()
+	 * @param	bool $onlyLocal	[optional] when set to true, will return null if report does not exist in the current wiki
 	 * @return	obj		CommentReport instance or null if report does not exist
 	 */
 	public static function newFromKey($key, $onlyLocal = false) {
@@ -120,10 +127,10 @@ class CommentReport {
 				return null;
 			}
 			try {
-				$redis = \RedisCache::getClient('cache');
+				$redis = RedisCache::getClient('cache');
 				$report = $redis->hGet(self::REDIS_KEY_REPORTS, $key);
-			} catch (\Throwable $e) {
-				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			} catch (Throwable $e) {
+				wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 				return null;
 			}
 			if ($report !== false) {
@@ -134,7 +141,7 @@ class CommentReport {
 		} else {
 			// report is local
 			list($md5key, $commentId, $timestamp) = explode(':', $key);
-			$db = CP::getDb(DB_SLAVE);
+			$db = CP::getDb(DB_REPLICA);
 			$row = $db->selectRow(
 				'user_board_report_archives',
 				['*'],
@@ -161,28 +168,29 @@ class CommentReport {
 	 * @param	integer	offset
 	 * @return	array	0 or more CommentReport instances
 	 */
-	static private function getReportsRedis($sortStyle, $limit, $offset) {
-		$redis = \RedisCache::getClient('cache');
+	private static function getReportsRedis($sortStyle, $limit, $offset) {
+		$redis = RedisCache::getClient('cache');
 
 		$reports = [];
 
 		try {
 			switch ($sortStyle) {
 				case 'byActionDate':
-					$keys = $redis->zRevRange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit+$offset);
+					$keys = $redis->zRevRange(self::REDIS_KEY_ACTED_INDEX, $offset, $limit + $offset);
 					break;
 
 				case 'byVolume':
 				default:
-					$keys = $redis->zRevRange(self::REDIS_KEY_VOLUME_INDEX, $offset, $limit+$offset);
+					$keys = $redis->zRevRange(self::REDIS_KEY_VOLUME_INDEX, $offset, $limit + $offset);
 			}
 
 			if (count($keys)) {
 				$reports = $redis->hMGet(self::REDIS_KEY_REPORTS, $keys);
-				$reports = array_map(function($rep) { return new self(unserialize($rep)); }, $reports);
+				$reports = array_map(function ($rep) { return new self(unserialize($rep));
+	   }, $reports);
 			}
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		} catch (Throwable $e) {
+			wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 		}
 
 		return $reports;
@@ -197,7 +205,7 @@ class CommentReport {
 	 * @return	array	0 or more CommentReport instances
 	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
-		$db = CP::getDb(DB_SLAVE);
+		$db = CP::getDb(DB_REPLICA);
 		$reports = [];
 		switch ($sortStyle) {
 			case 'byActionDate':
@@ -216,7 +224,7 @@ class CommentReport {
 
 			case 'byVolume':
 			default:
-				// TODO alter scheme to have an incrementing count in the archive table to avoid using a slow count(*) query
+				// @TODO alter scheme to have an incrementing count in the archive table to avoid using a slow count(*) query
 				$subTable = '(select ubr_report_archive_id, count(*) as report_count from user_board_reports group by ubr_report_archive_id) AS ubr';
 				$res = $db->select(
 					[
@@ -253,11 +261,11 @@ class CommentReport {
 	 * Assumes $wgUser is the acting reporter
 	 *
 	 * @access	public
-	 * @param	integer	Comment ID of a local comment.
+	 * @param	int $commentId	Comment ID of a local comment.
 	 * @return	mixed	CommentReport instance that is already saved or null on failure.
 	 */
-	static public function newUserReport($commentId) {
-		$db = CP::getDb(DB_SLAVE);
+	public static function newUserReport($commentId) {
+		$db = CP::getDb(DB_REPLICA);
 		$commentId = intval($commentId);
 		if ($commentId < 1) {
 			return null;
@@ -302,7 +310,7 @@ class CommentReport {
 			return self::newFromRow($reportRow);
 		} else {
 			// add report to existing archive
-			//$report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
+			// $report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
 			return self::newFromRow($reportRow);
 		}
 
@@ -318,8 +326,8 @@ class CommentReport {
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
 
-		$lookup = \CentralIdLookup::factory();
-		$userFrom = \User::newFromId($comment['ub_user_id_from']);
+		$lookup = CentralIdLookup::factory();
+		$userFrom = User::newFromId($comment['ub_user_id_from']);
 		if (!$userFrom) {
 			return false;
 		}
@@ -359,7 +367,7 @@ class CommentReport {
 	 * @param	array	Row from the the user_board_report_archives table.
 	 * @return	object	CommentReport instance
 	 */
-	static private function newFromRow($report) {
+	private static function newFromRow($report) {
 		global $dsSiteKey;
 		$data = [
 			'comment' => [
@@ -387,12 +395,12 @@ class CommentReport {
 	 * @param	integer	The ra_comment_id from the user_board_report_archives table
 	 * @return	array	With sub arrays for each report having keys reporter => global_id, timestamp
 	 */
-	static private function getReportsForId($id) {
-		$db = CP::getDb(DB_SLAVE);
+	private static function getReportsForId($id) {
+		$db = CP::getDb(DB_REPLICA);
 		$res = $db->select(
 			['user_board_reports'],
 			['ubr_reporter_global_id as reporter', 'ubr_reported as timestamp'],
-			['ubr_report_archive_id = '.intval($id)],
+			['ubr_report_archive_id = ' . intval($id)],
 			__METHOD__,
 			[ 'ORDER BY' => 'ubr_reported ASC' ]
 		);
@@ -420,10 +428,10 @@ class CommentReport {
 	 * Is this report key stored in this local wiki database?
 	 *
 	 * @access	public
-	 * @param	string	Report Key
+	 * @param	string	$reportKey Report Key
 	 * @return	boolean	True if report is stored on this wiki.
 	 */
-	static public function keyIsLocal($reportKey) {
+	public static function keyIsLocal($reportKey) {
 		global $dsSiteKey;
 		list($siteKey) = explode(':', $reportKey);
 		return $dsSiteKey == $siteKey;
@@ -462,7 +470,7 @@ class CommentReport {
 	 * @return	boolean	Success
 	 */
 	private function initialRedisInsert() {
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 		$commentKey = $this->reportKey();
 		$date = $this->data['first_reported'];
 
@@ -472,11 +480,11 @@ class CommentReport {
 
 			// add appropriate indexes
 			$redis->zAdd(self::REDIS_KEY_DATE_INDEX, $date, $commentKey);
-			$redis->zAdd(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $date, $commentKey);
-			$redis->zAdd(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $date, $commentKey);
+			$redis->zAdd(self::REDIS_KEY_WIKI_INDEX . $this->data['comment']['origin_wiki'], $date, $commentKey);
+			$redis->zAdd(self::REDIS_KEY_USER_INDEX . $this->data['comment']['author'], $date, $commentKey);
 			$redis->zAdd(self::REDIS_KEY_VOLUME_INDEX, 0, $commentKey);
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+		} catch (Throwable $e) {
+			wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 			return false;
 		}
 		return true;
@@ -489,7 +497,8 @@ class CommentReport {
 	 * @return	string
 	 */
 	public function reportKey() {
-		return sprintf('%s:%s:%s',
+		return sprintf(
+			'%s:%s:%s',
 			$this->data['comment']['origin_wiki'],
 			$this->data['comment']['cid'],
 			$this->data['comment']['last_touched']
@@ -504,11 +513,12 @@ class CommentReport {
 	 * @return	void
 	 */
 	private function addReportFrom($user) {
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 
 		if (!isset($this->id) || !$globalId) {
-			return false; //Can't add to a comment that hasn't been archived yet.
+			// Can't add to a comment that hasn't been archived yet.
+			return false;
 		}
 
 		$newReport = [
@@ -516,7 +526,7 @@ class CommentReport {
 			'timestamp' => time(),
 		];
 
-		//Add new report row to the local database.
+		// Add new report row to the local database.
 		$db = CP::getDb(DB_MASTER);
 		$db->insert(
 			'user_board_reports',
@@ -528,27 +538,27 @@ class CommentReport {
 			__METHOD__
 		);
 
-		\EchoEvent::create([
+		EchoEvent::create([
 			'type' => 'comment-report',
 			'agent' => $user,
-			'title' => \Title::newFromText('Special:CommentModeration'),
+			'title' => Title::newFromText('Special:CommentModeration'),
 			'extra' => [
 				'comment_id' => $this->data['comment']['cid']
 			]
 		]);
 
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 
 		if ($redis !== false) {
 			try {
-				//Increment volume index in Redis.
+				// Increment volume index in Redis.
 				$redis->zIncrBy(self::REDIS_KEY_VOLUME_INDEX, 1, $this->reportKey());
 
-				//Update serialized Redis data.
+				// Update serialized Redis data.
 				$this->data['reports'][] = $newReport;
 				$redis->hSet(self::REDIS_KEY_REPORTS, $this->reportKey(), serialize($this->data));
-			} catch (\Throwable $e) {
-				wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			} catch (Throwable $e) {
+				wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 			}
 		}
 	}
@@ -556,8 +566,8 @@ class CommentReport {
 	/**
 	 * Dismiss or delete a reported comment/
 	 *
-	 * @param	string	Action to take on the reported comment. either 'delete' or 'dismiss'
-	 * @param	mixed	[Optional] User object of the acting user, defaults to $wgUser.
+	 * @param	string $action Action to take on the reported comment. either 'delete' or 'dismiss'
+	 * @param	mixed|null $byUser [Optional] User object of the acting user, defaults to|null $wgUser
 	 * @return	boolean	true if successful
 	 */
 	public function resolve($action, $byUser = null) {
@@ -573,10 +583,10 @@ class CommentReport {
 		if (is_null($byUser)) {
 			$byUser = $wgUser;
 		}
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($byUser, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($byUser, CentralIdLookup::AUDIENCE_RAW);
 
-		//Need a Curse ID to continue;
+		// Need a Curse ID to continue;
 		if (!$globalId) {
 			return false;
 		}
@@ -587,7 +597,7 @@ class CommentReport {
 		$this->data['action_taken_at']	= time();
 
 		// update data stores
-		return ( $action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $byUser) )
+		return ($action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $byUser))
 			&& $this->resolveInDb()
 			&& $this->resolveInRedis();
 	}
@@ -607,7 +617,8 @@ class CommentReport {
 				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by' => $this->data['action_taken_by'],
 				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
-			],[
+			],
+			[
 				'ra_comment_id' => intval($this->data['comment']['cid']),
 				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched'])
 			],
@@ -622,7 +633,7 @@ class CommentReport {
 	 * @return	bool	true
 	 */
 	private function resolveInRedis() {
-		$redis = \RedisCache::getClient('cache');
+		$redis = RedisCache::getClient('cache');
 
 		try {
 			// add key to index for actioned items
@@ -634,10 +645,10 @@ class CommentReport {
 			// remove key from non-actioned item indexes
 			$redis->zRem(self::REDIS_KEY_VOLUME_INDEX, $this->reportKey());
 			$redis->zRem(self::REDIS_KEY_DATE_INDEX, $this->reportKey());
-			$redis->zRem(self::REDIS_KEY_USER_INDEX.$this->data['comment']['author'], $this->reportKey());
-			$redis->zRem(self::REDIS_KEY_WIKI_INDEX.$this->data['comment']['origin_wiki'], $this->reportKey());
-		} catch (\Throwable $e) {
-			wfDebug(__METHOD__.": Caught RedisException - ".$e->getMessage());
+			$redis->zRem(self::REDIS_KEY_USER_INDEX . $this->data['comment']['author'], $this->reportKey());
+			$redis->zRem(self::REDIS_KEY_WIKI_INDEX . $this->data['comment']['origin_wiki'], $this->reportKey());
+		} catch (Throwable $e) {
+			wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
 			return false;
 		}
 

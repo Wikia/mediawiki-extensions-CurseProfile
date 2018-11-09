@@ -9,7 +9,7 @@ use CurseProfile\CommentReport;
  * @covers CommentReport
  */
 class CommentReportTest extends MediaWikiTestCase {
-	function addDBData() {
+	public function addDBData() {
 		$testUsers = [
 			'Commenter' => null,
 			'Commentee' => null,

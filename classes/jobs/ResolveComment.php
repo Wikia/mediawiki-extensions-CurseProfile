@@ -1,17 +1,20 @@
 <?php
 /**
- * A job to asyncronously call the comment api on a remote wiki
+ * A job to asynchronously call the comment api on a remote wiki
  */
 namespace CurseProfile;
 
+use CentralIdLookup;
 use DynamicSettings\Wiki;
+use SyncService\Job;
+use Wikimedia\Rdbms\DBConnectionError;
 
-class ResolveComment extends \SyncService\Job {
+class ResolveComment extends Job {
 	/**
 	 * Look up a wiki by md5key and open a connection to its database
 	 *
 	 * @access	public
-	 * @param	string	MD5 key for the wiki
+	 * @param	string	$dbKey MD5 key for the wiki
 	 * @return	object	Active MW database connection
 	 */
 	public static function getWikiDB($dbKey) {
@@ -22,7 +25,7 @@ class ResolveComment extends \SyncService\Job {
 				return $db;
 			}
 		} catch (DBConnectionError $e) {
-			//Doot doot, just fall down to false below.
+			// Doot doot, just fall down to false below.
 		}
 		return false;
 	}
@@ -39,13 +42,13 @@ class ResolveComment extends \SyncService\Job {
 	public function execute($args = []) {
 		if (!CommentReport::keyIsLocal($args['reportKey'])) {
 			list($md5key, $comment_id, $timestamp) = explode(':', $args['reportKey']);
-			//Get direct DB connection to the origin wiki.
+			// Get direct DB connection to the origin wiki.
 			$db = self::getWikiDb($md5key);
 		} else {
 			$db = null;
 		}
 
-		//Have all curse profile use this db connection for now.
+		// Have all curse profile use this db connection for now.
 		CP::setDb($db);
 
 		$this->outputLine("Resolving reported comment {$args['reportKey']} with action {$args['action']} for admin {$args['byUser']}", time());
@@ -53,11 +56,11 @@ class ResolveComment extends \SyncService\Job {
 		if (!$report) {
 			return 0;
 		}
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 		$user = $lookup->localUserFromCentralId($args['byUser']);
 		$result = $report->resolve($args['action'], $user);
 
-		//Revert back to standard db connections.
+		// Revert back to standard db connections.
 		CP::setDb(null);
 		if ($db) {
 			$db->close();

@@ -6,22 +6,37 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use ApiBase;
+use CentralIdLookup;
+use HydraApiBase;
+use User;
+
 /**
  * Class that allows friendship actions to be performed by AJAX calls.
  */
-class FriendApi extends \HydraApiBase {
+class FriendApi extends HydraApiBase {
 
+	/**
+	 * Get Description
+	 *
+	 * @return string
+	 */
 	public function getDescription() {
 		return 'Allows friending actions to be taken.';
 	}
 
+	/**
+	 * Get param Description
+	 *
+	 * @return array
+	 */
 	public function getParamDescription() {
 		return [
 			'do' => 'The friending action to be taken (send, confirm, ignore, remove)',
@@ -31,14 +46,19 @@ class FriendApi extends \HydraApiBase {
 		];
 	}
 
+	/**
+	 * Get Actions
+	 *
+	 * @return array
+	 */
 	public function getActions() {
 		$basicAction = [
 			'tokenRequired' => true,
 			'postRequired' => true,
 			'params' => [
 				'global_id' => [
-					\ApiBase::PARAM_TYPE => 'string',
-					\ApiBase::PARAM_REQUIRED => true,
+					ApiBase::PARAM_TYPE => 'string',
+					ApiBase::PARAM_REQUIRED => true,
 				],
 			]
 		];
@@ -54,26 +74,36 @@ class FriendApi extends \HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'name' => [
-						\ApiBase::PARAM_TYPE => 'string',
-						\ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
 					]
 				]
 			]
 		];
 	}
 
+	/**
+	 * execute
+	 *
+	 * @return void
+	 */
 	public function execute() {
 		global $wgUser;
 
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($wgUser, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
 
 		$this->f = new Friendship($globalId);
 		parent::execute();
 	}
 
+	/**
+	 * Do Direct Req
+	 *
+	 * @return void
+	 */
 	protected function doDirectreq() {
-		$targetUser = \User::newFromName($this->getMain()->getVal('name'));
+		$targetUser = User::newFromName($this->getMain()->getVal('name'));
 		if (!$targetUser) {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
@@ -82,7 +112,7 @@ class FriendApi extends \HydraApiBase {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($targetUser);
 		if (!$globalId) {
 			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->text(), 'friendrequest-direct-unmerged');
@@ -99,6 +129,11 @@ class FriendApi extends \HydraApiBase {
 		$this->getResult()->addValue(null, 'html', $html);
 	}
 
+	/**
+	 * Do Send
+	 *
+	 * @return void
+	 */
 	protected function doSend() {
 		$this->globalId = $this->getMain()->getVal('global_id');
 		$result = $this->f->sendRequest($this->globalId);
@@ -107,6 +142,11 @@ class FriendApi extends \HydraApiBase {
 		$this->getResult()->addValue(null, 'html', $html);
 	}
 
+	/**
+	 * Do Confirm
+	 *
+	 * @return void
+	 */
 	protected function doConfirm() {
 		$this->globalId = $this->getMain()->getVal('global_id');
 		$result = $this->f->acceptRequest($this->globalId);
@@ -115,6 +155,11 @@ class FriendApi extends \HydraApiBase {
 		$this->getResult()->addValue(null, 'html', $html);
 	}
 
+	/**
+	 * Do Ignore
+	 *
+	 * @return void
+	 */
 	protected function doIgnore() {
 		$this->globalId = $this->getMain()->getVal('global_id');
 		$rel = $this->f->getRelationship($this->globalId);
@@ -125,6 +170,11 @@ class FriendApi extends \HydraApiBase {
 		$this->getResult()->addValue(null, 'result', $result);
 	}
 
+	/**
+	 * Do Remove
+	 *
+	 * @return void
+	 */
 	protected function doRemove() {
 		$this->globalId = $this->getMain()->getVal('global_id');
 		$result = $this->f->removeFriend($this->globalId);

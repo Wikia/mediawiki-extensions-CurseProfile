@@ -6,25 +6,28 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile\MWEcho;
 
+use EchoModelFormatter;
+
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class NotificationFormatter extends \EchoModelFormatter {
-	const MAX_PREVIEW_LEN = 80; // only preview first 80 characters of message (is clipped by substr in CommentBoard)
+class NotificationFormatter extends EchoModelFormatter {
+	// only preview first 80 characters of message (is clipped by substr in CommentBoard)
+	const MAX_PREVIEW_LEN = 80;
 
 	/**
 	 * Turns keywords for payload pieces into actual content.
 	 *
-	 * @param	string	the keyword for a payload
-	 * @param	object	the event object
-	 * @param	user	the user to whom this event will be delivered
+	 * @param	string	$payload the keyword for a payload
+	 * @param	object	$event the event object
+	 * @param	User	$user the user to whom this event will be delivered
 	 * @return	string	the content for the given payload keyword
 	 */
 	protected function formatPayload($payload, $event, $user) {
@@ -46,10 +49,10 @@ class NotificationFormatter extends \EchoModelFormatter {
 	 * Processes parameter keywords into data for a message before rendering a notification
 	 *
 	 * @access	protected
-	 * @param	object	EchoEvent object
-	 * @param	string	Parameter keyword to be given a value
-	 * @param	object	The mediawiki message object in need of this parameter.
-	 * @param	object	The user to whom this notification will be delivered.
+	 * @param	object	$event EchoEvent object
+	 * @param	string	$param Parameter keyword to be given a value
+	 * @param	object	$message The mediawiki message object in need of this parameter.
+	 * @param	object	$user The user to whom this notification will be delivered.
 	 * @return	void	Deliver the appropriate value to the message via ->params() instead of returning a value.
 	 */
 	protected function processParam($event, $param, $message, $user) {
@@ -88,7 +91,6 @@ class NotificationFormatter extends \EchoModelFormatter {
 				break;
 			default:
 				return parent::getLinkParams($event, $user, $destination);
-				break;
 		}
 		return [$target, $query];
 	}

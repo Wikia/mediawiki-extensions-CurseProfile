@@ -6,21 +6,26 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use CentralIdLookup;
+use SpecialPage;
+use TemplateManageFriends;
+use UserNotLoggedIn;
+
 /**
  * Special page that allows one to manage their friends.
  * In addition to listing current friends, shows pending requests, both incoming and outgoing.
  * Also allows for friend requests to be sent directly by name.
  */
-class SpecialManageFriends extends \SpecialPage {
+class SpecialManageFriends extends SpecialPage {
 	public function __construct() {
-		parent::__construct( 'ManageFriends' );
+		parent::__construct('ManageFriends');
 	}
 
 	/**
@@ -33,7 +38,13 @@ class SpecialManageFriends extends \SpecialPage {
 		return 'users';
 	}
 
-	public function execute( $param ) {
+	/**
+	 * Execute
+	 *
+	 * @param array $param
+	 * @return void
+	 */
+	public function execute($param) {
 		$this->setHeaders();
 		$this->outputHeader();
 		$wgRequest = $this->getRequest();
@@ -42,19 +53,19 @@ class SpecialManageFriends extends \SpecialPage {
 		// Fix missing or incorrect username segment in the path
 		$user = $this->getUser();
 		if ($user->isAnon()) {
-			throw new \UserNotLoggedIn('exception-nologinreturn-text', 'exception-nologin', ['Special:ManageFriends']);
+			throw new UserNotLoggedIn('exception-nologinreturn-text', 'exception-nologin', ['Special:ManageFriends']);
 		}
 
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
 		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
-		$templateManageFriends = new \TemplateManageFriends;
+		$templateManageFriends = new TemplateManageFriends;
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 
 		$f = new Friendship($globalId);
 

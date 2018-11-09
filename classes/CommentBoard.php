@@ -6,7 +6,7 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
@@ -14,7 +14,14 @@
 
 namespace CurseProfile;
 
+use CentralIdLookup;
+use Cheevos\Cheevos;
+use Cheevos\CheevosException;
+use Cheevos\CheevosHelper;
+use EchoEvent;
+use Exception;
 use ManualLogEntry;
+use Sanitizer;
 use Title;
 use User;
 
@@ -57,14 +64,14 @@ class CommentBoard {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param	integer	the ID of a user
+	 * @param	int	the ID of a user
 	 */
 	public function __construct($user_id, $type = self::BOARDTYPE_RECENT) {
 		$this->DB = CP::getDb(DB_MASTER);
 		$this->user_id = intval($user_id);
 		$this->type = intval($type);
 		if ($this->user_id < 1) {
-			throw new \Exception('Invalid user ID');
+			throw new Exception('Invalid user ID');
 		}
 	}
 
@@ -75,7 +82,7 @@ class CommentBoard {
 	 * @param   object  [Optional] mw User object doing the viewing (defaults to wgUser)
 	 * @return  string  a single SQL condition entirely enclosed in parenthesis
 	 */
-	static private function visibleClause($asUser = null) {
+	private static function visibleClause($asUser = null) {
 		if (is_null($asUser)) {
 			global $wgUser;
 			$asUser = $wgUser;
@@ -88,21 +95,21 @@ class CommentBoard {
 			return '1=1';
 		} else {
 			$conditions = [];
-			//Everyone sees public messages.
+			// Everyone sees public messages.
 			$conditions[] = 'user_board.ub_type = 0';
-			//See private if you are author or recipient.
+			// See private if you are author or recipient.
 			$conditions[] = sprintf('user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $asUser->getId());
-			//See deleted if you are the author.
+			// See deleted if you are the author.
 			$conditions[] = sprintf('user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $asUser->getId());
-			return '( ('.implode(') OR (', $conditions).') )';
+			return '( (' . implode(') OR (', $conditions) . ') )';
 		}
 	}
 
 	/**
 	 * Returns the total number of top-level comments (or replies to a given comment) that have been left
 	 *
-	 * @param	integer	[Optional] id of a comment (changes from a top-level count to a reply count)
-	 * @param	integer	[Optional] user ID of a user viewing (defaults to wgUser)
+	 * @param	int|null	$inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
+	 * @param	int|null	$asUser [Optional] user ID of a user viewing (defaults to wgUser)
 	 */
 	public function countComments($inReplyTo = null, $asUser = null) {
 		if (is_null($inReplyTo)) {
@@ -111,8 +118,8 @@ class CommentBoard {
 			$inReplyTo = intval($inReplyTo);
 		}
 
-		$DB = CP::getDb(DB_SLAVE);
-		$results = $DB->select(
+		$db = CP::getDb(DB_REPLICA);
+		$results = $db->select(
 			['user_board'],
 			['count(*) as total'],
 			[
@@ -130,26 +137,26 @@ class CommentBoard {
 	/**
 	 * Look up a single comment given a comment id (for display from a permalink)
 	 *
-	 * @param	integer	id of a user board comment
-	 * @param   boolean	[Optional] true by default, if given ID is a reply, will fetch parent comment as well
-	 * @param	integer	[Optional] user ID of user viewing (defaults to wgUser)
-	 * @return  array   An array of comment data in the same format as getComments.
+	 * @param	int	$commentId id of a user board comment
+	 * @param	bool $withParent	[Optional] true by default, if given ID is a reply, will fetch parent comment as well
+	 * @param	int|null	$asUser [Optional] user ID of user viewing (defaults to wgUser)
+	 * @return array An array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
-	static public function getCommentById($commentId, $withParent = true, $asUser = null) {
+	public static function getCommentById($commentId, $withParent = true, $asUser = null) {
 		$commentId = intval($commentId);
 		if ($commentId < 1) {
 			return [];
 		}
 
-		//Look up the target comment.
+		// Look up the target comment.
 		$comment = self::queryCommentById($commentId);
 
 		if (empty($comment)) {
 			return [];
 		}
 
-		//Switch our primary ID a parent comment, if it exists.
+		// Switch our primary ID a parent comment, if it exists.
 		if ($withParent && $comment['ub_in_reply_to']) {
 			$rootId = $comment['ub_in_reply_to'];
 		} else {
@@ -171,10 +178,10 @@ class CommentBoard {
 	 * Get a raw comment from the database by ID.
 	 *
 	 * @access	private
-	 * @param	integer	Comment ID
+	 * @param	int	$commentId Comment ID
 	 * @return	mixed	Database result or false.
 	 */
-	static private function queryCommentById($commentId) {
+	private static function queryCommentById($commentId) {
 		$DB = CP::getDb(DB_MASTER);
 		$result = $DB->select(
 			['user_board'],
@@ -190,17 +197,17 @@ class CommentBoard {
 	 * Generic comment retrieval utility function.  Automatically limits to viewable types.
 	 *
 	 * @access	private
-	 * @param	array	SQL conditions applied to the user_board table query.  Will be merged with existing conditions.
-	 * @param	integer	[Optional] User ID of user viewing. (Defaults to wgUser)
-	 * @param	integer	[Optional] Number of comments to skip when loading more.
-	 * @param	integer	[Optional] Number of top-level items to return.
+	 * @param	array	$conditions SQL conditions applied to the user_board table query.  Will be merged with existing conditions.
+	 * @param	int	$asUser [Optional] User ID of user viewing. (Defaults to wgUser)
+	 * @param	int	$startAt [Optional] Number of comments to skip when loading more.
+	 * @param	int	$limit [Optional] Number of top-level items to return.
 	 * @return	array	comments!
 	 */
 	private function getCommentsWithConditions($conditions, $asUser = null, $startAt = 0, $limit = 100) {
 		if (!is_array($conditions)) {
 			$conditions = [];
 		}
-		//Fetch top level comments.
+		// Fetch top level comments.
 		$results = $this->DB->select(
 			['user_board'],
 			[
@@ -231,22 +238,22 @@ class CommentBoard {
 			return $comments;
 		}
 
-		//Count many replies each comment in this chunk has.
+		// Count many replies each comment in this chunk has.
 		$results = $this->DB->select(
-				['user_board'],
-				[
+   ['user_board'],
+   [
 					'ub_in_reply_to AS ub_id',
 					'COUNT(*) as replies'
 				],
-				[
+   [
 					'ub_in_reply_to' => array_keys($commentIds)
 				],
-				__METHOD__,
-				[
+   __METHOD__,
+   [
 					'GROUP BY'	=> 'ub_in_reply_to'
 				]
-			);
-		//@TODO: fetch replies for all comments in a single DB query?
+  );
+		// @TODO: fetch replies for all comments in a single DB query?
 		while ($row = $results->fetchRow()) {
 			$comments[$commentIds[$row['ub_id']]]['reply_count'] = intval($row['replies']);
 			// retrieve replies if there are any
@@ -262,10 +269,10 @@ class CommentBoard {
 	 * Gets all comments on the board.
 	 *
 	 * @access	public
-	 * @param	integer	[Optional] user ID of user viewing (defaults to wgUser)
-	 * @param	integer	[Optional] number of comments to skip when loading more
-	 * @param	integer	[Optional] number of top-level items to return
-	 * @param	integer	[Optional] maximum age of comments (by number of days)
+	 * @param	int|null	$asUser [Optional] user ID of user viewing (defaults to wgUser)
+	 * @param	int	$startAt [Optional] number of comments to skip when loading more
+	 * @param	int	$limit [Optional] number of top-level items to return
+	 * @param	int	$maxAge [Optional] maximum age of comments (by number of days)
 	 * @return	array	an array of comment data (text and user info)
 	 */
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
@@ -274,7 +281,7 @@ class CommentBoard {
 			'ub_user_id'		=> $this->user_id
 		];
 		if ($maxAge >= 0) {
-			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= '.$this->DB->addQuotes(date('Y-m-d H:i:s', time()-$maxAge*86400));
+			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' . $this->DB->addQuotes(date('Y-m-d H:i:s', time() - $maxAge * 86400));
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
 	}
@@ -283,13 +290,13 @@ class CommentBoard {
 	 * Gets all replies to a given comment
 	 *
 	 * @access	public
-	 * @param	integer	id of a comment that would be replied to
-	 * @param	integer	[Optional] user ID of user viewing (defaults to wgUser)
-	 * @param	integer	[Optional] max number items to return (older replies will be ommitted)
+	 * @param	int	$rootComment id of a comment that would be replied to
+	 * @param	int|null	$asUser [Optional] user ID of user viewing (defaults to wgUser)
+	 * @param	int	$limit [Optional] max number items to return (older replies will be ommitted)
 	 * @return	array	array of reply data
 	 */
 	public function getReplies($rootComment, $asUser = null, $limit = 5) {
-		//Fetch comments.
+		// Fetch comments.
 		$options = [
 			'ORDER BY'	=> 'ub_date DESC'
 		];
@@ -322,16 +329,16 @@ class CommentBoard {
 	 * Checks if a user should be able to view a specific comment
 	 *
 	 * @access	public
-	 * @param   mixed   int id of comment to check, or array row from user_board table
-	 * @param   object  [Optional] mw User object, defaults to $wgUser
-	 * @return  bool
+	 * @param	mixed	$commentId int id of comment to check, or array row from user_board table
+	 * @param	object|null	$user [Optional] mw User object, defaults to|null $wgUser
+	 * @return bool
 	 */
 	public static function canView($commentId, $user = null) {
 		if (is_null($user)) {
 			global $wgUser;
 			$user = $wgUser;
 		}
-		//Early check for admin status.
+		// Early check for admin status.
 		if ($user->isAllowed('profile-moderate')) {
 			return true;
 		}
@@ -342,7 +349,7 @@ class CommentBoard {
 			$comment = self::queryCommentById($commentId);
 		}
 
-		//PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
+		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
 		return $comment['ub_type'] == self::PUBLIC_MESSAGE
 			|| ($comment['ub_type'] == self::PRIVATE_MESSAGE && $comment['ub_user_id'] == $user->getId() && $comment['ub_user_id_from'] == $user->getId())
 			|| ($comment['ub_type'] == self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId());
@@ -352,11 +359,11 @@ class CommentBoard {
 	 * Checks if a user has permissions to leave a comment.
 	 *
 	 * @access	public
-	 * @param	object	Integer user ID or User object who owns the potential board.
-	 * @param	object	[Optional] User object for comment author, defaults to $wgUser.
+	 * @param	object	$toUser int user ID or User object who owns the potential board.
+	 * @param	object|null	$fromUser [Optional] User object for comment author, defaults to|null $wgUser
 	 * @return	boolean	Can Comment
 	 */
-	static public function canComment($toUser, $fromUser = null) {
+	public static function canComment($toUser, $fromUser = null) {
 		global $wgCPEditsToComment, $wgEmailAuthentication;
 
 		if (is_numeric($toUser)) {
@@ -372,28 +379,28 @@ class CommentBoard {
 
 		$editCount = $fromUser->getEditCount();
 
-		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !\Sanitizer::validateEmail($fromUser->getEmail())));
+		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($fromUser->getEmail())));
 
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($fromUser, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
 
 		if ($globalId > 0) {
 			try {
-				$stats = \Cheevos\Cheevos::getStatProgress(
+				$stats = Cheevos::getStatProgress(
 					[
 						'user_id'	=> $globalId,
 						'global'	=> true,
 						'stat'		=> 'article_edit'
 					]
 				);
-				$stats = \Cheevos\CheevosHelper::makeNiceStatProgressArray($stats);
+				$stats = CheevosHelper::makeNiceStatProgressArray($stats);
 				$editCount = (isset($stats[$globalId]['article_edit']['count']) && $stats[$globalId]['article_edit']['count'] > $editCount ? $stats[$globalId]['article_edit']['count'] : $editCount);
-			} catch (\Cheevos\CheevosException $e) {
+			} catch (CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting article_edit count.");
 			}
 		}
 
-		//User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
+		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
 		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (($editCount >= $wgCPEditsToComment && !$toUser->isBlocked()) || $fromUser->isAllowed('block'));
 	}
 
@@ -401,10 +408,10 @@ class CommentBoard {
 	 * Add a public comment to the board
 	 *
 	 * @access	public
-	 * @param	string	Comment Text
-	 * @param	integer	[Optional] User ID of user posting (defaults to wgUser)
-	 * @param	integer	[Optional] ID of a board post that this will be in reply to
-	 * @return	integer	ID of the newly created comment, or 0 for failure
+	 * @param	string	$commentText Comment Text
+	 * @param	int|null	$fromUser [Optional] User ID of user posting (defaults to wgUser)
+	 * @param	int|null	$inReplyTo [Optional] ID of a board post that this will be in reply to
+	 * @return	int	ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
@@ -444,7 +451,7 @@ class CommentBoard {
 				'ub_user_name' => $toUser->getName(),
 				'ub_message' => $commentText,
 				'ub_type' => self::PUBLIC_MESSAGE,
-				'ub_date' => date( 'Y-m-d H:i:s' ),
+				'ub_date' => date('Y-m-d H:i:s'),
 			],
 			__METHOD__
 		);
@@ -477,7 +484,7 @@ class CommentBoard {
 
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 			if ($toUser->getId() != $fromUser->getId()) {
-				\EchoEvent::create([
+				EchoEvent::create([
 					'type' => 'comment',
 					'agent' => $fromUser,
 					'title' => $toUserTitle,
@@ -490,7 +497,7 @@ class CommentBoard {
 				]);
 			}
 			if ($inReplyTo > 0 && $parentCommenter->getId()) {
-				\EchoEvent::create([
+				EchoEvent::create([
 					'type' => 'comment-reply',
 					'agent' => $fromUser,
 					'title' => $toUserTitle,
@@ -503,8 +510,8 @@ class CommentBoard {
 				]);
 			}
 
-			//Insert an entry into the Log.
-			$log = new ManualLogEntry('curseprofile', 'comment-'.$action);
+			// Insert an entry into the Log.
+			$log = new ManualLogEntry('curseprofile', 'comment-' . $action);
 			$log->setPerformer($fromUser);
 			$log->setTarget($toUserTitle);
 			$log->setComment(null);
@@ -523,8 +530,8 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to reply to a comment
 	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	mixed	$commentId int id of comment to check, or array row from user_board table
+	 * @param	object|null $user	[Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canReply($commentId, $user = null) {
@@ -550,8 +557,8 @@ class CommentBoard {
 	/**
 	 * Replaces the text content of a comment. Permissions are not checked. Use canEdit() to check.
 	 *
-	 * @param	integer	id of a user board comment
-	 * @param	string	new text to use for the comment
+	 * @param	int	$commentId id of a user board comment
+	 * @param	string $message new text to use for the comment
 	 * @return	bool	true if successful
 	 */
 	public static function editComment($commentId, $message) {
@@ -563,7 +570,7 @@ class CommentBoard {
 		// Preparing stuff for the Log Entry
 		$comment = self::getCommentById($commentId);
 		$toUser = User::newFromId($comment[0]['ub_user_id']);
-		$title = \Title::newFromURL('UserProfile:'.$toUser->getName());
+		$title = Title::newFromURL('UserProfile:' . $toUser->getName());
 		$fromUser = $wgUser;
 
 		$log = new ManualLogEntry('curseprofile', 'comment-edited');
@@ -582,7 +589,7 @@ class CommentBoard {
 			'user_board',
 			[
 				'ub_message' => $message,
-				'ub_edited' => date( 'Y-m-d H:i:s' ),
+				'ub_edited' => date('Y-m-d H:i:s'),
 			],
 			['ub_id' => $commentId],
 			__METHOD__
@@ -592,8 +599,8 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to edit a comment
 	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	mixed $commentId int id of comment to check, or array row from user_board table
+	 * @param	object|null $user [Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canEdit($commentId, $user = null) {
@@ -616,20 +623,20 @@ class CommentBoard {
 	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
-	 * @param	integer	ID of the comment to remove.
-	 * @param	integer	[Optional] User object of the admin acting, defaults to $wgUser.
-	 * @param	string	[Optional] Timestamp in the format of date('Y-m-d H:i:s').
-	 * @return	mixed	$db->update() return or false on error.
+	 * @param	int	$commentId ID of the comment to remove.
+	 * @param	int|null	$user [Optional] User object of the admin acting, defaults to|null $wgUser
+	 * @param	string|null $time	[Optional] Timestamp in the format of date('Y-m-d H:i:s').
+	 * @return	mixed	$db->update return or false on error.
 	 */
 	public static function removeComment($commentId, $user = null, $time = null) {
-		if (!($user instanceof User)) {
+		if (!($user instanceof \User)) {
 			global $wgUser;
 
 			$user = $wgUser;
 		}
 
-		$lookup = \CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, \CentralIdLookup::AUDIENCE_RAW);
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 
 		if (!$globalId) {
 			return false;
@@ -671,8 +678,8 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to remove a comment
 	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	mixed $commentId int id of comment to check, or array row from user_board table
+	 * @param	object|null $user	[Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canRemove($commentId, $user = null) {
@@ -689,18 +696,17 @@ class CommentBoard {
 
 		// user must not be blocked, comment must either be authored by current user or on user's profile
 		return $comment['ub_type'] != self::DELETED_MESSAGE && !$user->isBlocked() &&
-			( $comment['ub_user_id'] == $user->getId()
+			($comment['ub_user_id'] == $user->getId()
 				|| (isset($comment['ub_user_from_id']) && intval($comment['ub_user_from_id']) === $user->getId())
-				|| $user->isAllowed('profile-moderate') );
+				|| $user->isAllowed('profile-moderate'));
 	}
 
 	/**
 	 * Restore a comment to the board. Permissions are not checked. Use canRemove() to check.
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
-	 * @param	integer	id of a comment to remove
-	 * @param	integer	[Optional] curse ID or User instance of the admin acting, defaults to $wgUser
-	 * @return	stuff	whatever DB->update() returns
+	 * @param	int	$commentId id of a comment to remove
+	 * @return	mixed	whatever DB->update() returns
 	 */
 	public static function restoreComment($commentId) {
 		$db = CP::getDb(DB_MASTER);
@@ -711,15 +717,15 @@ class CommentBoard {
 				'ub_admin_acted' => null,
 				'ub_admin_acted_at' => null,
 			],
-			[ 'ub_id='.intval($commentId) ]
+			[ 'ub_id=' . intval($commentId) ]
 		);
 	}
 
 	/**
 	 * Checks if a user has permissions to restore a deleted comment
 	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	mixed $commentId	int id of comment to check, or array row from user_board table
+	 * @param	object|null $user	[Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canRestore($commentId, $user = null) {
@@ -736,28 +742,28 @@ class CommentBoard {
 
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $comment['ub_type'] == self::DELETED_MESSAGE &&
-			( $user->isAllowed('profile-moderate')
-				|| $comment['ub_user_id'] == $user->getId() && $comment['ub_admin_acted'] == $user->getId() );
+			($user->isAllowed('profile-moderate')
+				|| $comment['ub_user_id'] == $user->getId() && $comment['ub_admin_acted'] == $user->getId());
 	}
 
 	/**
 	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
 	 *
-	 * @param	integer	id of a comment to remove
-	 * @return	stuff	whatever DB->update() returns
+	 * @param	int	$commentId id of a comment to remove
+	 * @return	mixed	whatever DB->update() returns
 	 */
 	public static function purgeComment($commentId) {
 		$db = CP::getDb(DB_MASTER);
 		return $db->delete(
 			'user_board',
-			[ 'ub_id ='.intval($commentId) ]
+			[ 'ub_id =' . intval($commentId) ]
 		);
 	}
 
 	/**
 	 * Checks if a user has permissions to permanently comments
 	 *
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	object|null $user [Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canPurge($user = null) {
@@ -775,7 +781,7 @@ class CommentBoard {
 	/**
 	 * Send a comment to the moderation queue. Does not check permissions.
 	 *
-	 * @param	integer	id of the comment to report
+	 * @param	int	$commentId id of the comment to report
 	 * @return	mixed	CommentReport instance or null for failure
 	 */
 	public static function reportComment($commentId) {
@@ -787,8 +793,8 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to report a comment
 	 *
-	 * @param	mixed	int id of comment to check, or array row from user_board table
-	 * @param	obj		[Optional] mw User object, defaults to $wgUser
+	 * @param	mixed	$commentId int id of comment to check, or array row from user_board table
+	 * @param	object|null	$user [Optional] mw User object, defaults to|null $wgUser
 	 * @return	bool
 	 */
 	public static function canReport($commentId, $user = null) {
@@ -811,7 +817,7 @@ class CommentBoard {
 	 * Filter text through abuse filters.
 	 *
 	 * @access	private
-	 * @param	string	Text to check against abuse filters.
+	 * @param	string	$text Text to check against abuse filters.
 	 * @return	boolean Passed abuse filters.
 	 */
 	private function checkAbuseFilters($text) {

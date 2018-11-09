@@ -6,12 +6,17 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
+
+use CentralIdLookup;
+use Cheevos\Cheevos;
+use Cheevos\CheevosException;
+use EchoEvent;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
@@ -32,7 +37,7 @@ class Friendship {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param	integer	curse ID of a user
+	 * @param	int	$globalId curse ID of a user
 	 */
 	public function __construct($globalId) {
 		$this->globalId = intval($globalId);
@@ -41,20 +46,20 @@ class Friendship {
 	/**
 	 * Check the relationship status between two users.
 	 *
-	 * @param	integer	curse ID of a user
-	 * @return	integer	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
+	 * @param	int	$toUser curse ID of a user
+	 * @return	int	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
 	public function getRelationship($toUser) {
 		if ($this->globalId < 1) {
 			return -1;
 		}
 		try {
-			$status = \Cheevos\Cheevos::getFriendStatus($this->globalId, $toUser);
+			$status = Cheevos::getFriendStatus($this->globalId, $toUser);
 			if ($status['status']) {
 				return $status['status'];
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return -1;
 	}
@@ -62,7 +67,7 @@ class Friendship {
 	/**
 	 * Returns the array of curse IDs for this or another user's friends
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->globalId)
+	 * @param	int|null $user optional curse ID of a user (default|null $this->globalId
 	 * @return	array	curse IDs of friends
 	 */
 	public function getFriends($user = null) {
@@ -75,12 +80,12 @@ class Friendship {
 		}
 
 		try {
-			$friends = \Cheevos\Cheevos::getFriends($user);
+			$friends = Cheevos::getFriends($user);
 			if ($friends['friends']) {
 				return $friends['friends'];
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return [];
 	}
@@ -88,11 +93,11 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @param	integer	optional curse ID of a user (default $this->globalId)
-	 * @return	integer	a number of friends
+	 * @param	int|null	$user optional curse ID of a user (default|null $this->globalId
+	 * @return	int	a number of friends
 	 */
 	public function getFriendCount($user = null) {
-		// my god look how efficiant this is
+		// my god look how efficient this is
 		$friends = $this->getFriends($user);
 		return count($friends);
 	}
@@ -108,12 +113,12 @@ class Friendship {
 			return [];
 		}
 		try {
-			$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+			$friends = Cheevos::getFriends($this->globalId);
 			if ($friends['incoming_requests']) {
 				return $friends['incoming_requests'];
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return [];
 	}
@@ -128,12 +133,12 @@ class Friendship {
 			return [];
 		}
 		try {
-			$friends = \Cheevos\Cheevos::getFriends($this->globalId);
+			$friends = Cheevos::getFriends($this->globalId);
 			if ($friends['outgoing_requests']) {
 				return $friends['outgoing_requests'];
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return [];
 	}
@@ -142,36 +147,37 @@ class Friendship {
 	 * Sends a friend request to a given user
 	 *
 	 * @access	public
-	 * @param	integer	Global ID of the user to friend.
+	 * @param	int	$toGlobalId Global ID of the user to friend.
 	 * @return	boolean	True on success, False on failure.
 	 */
 	public function sendRequest($toGlobalId) {
 		global $wgUser;
 
 		if ($wgUser->isBlocked()) {
-			return ['error'=>'friendrequest-blocked'];
+			return ['error' => 'friendrequest-blocked'];
 		}
 
 		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
-			return ['error'=>'friendrequest-already-friends'];;
+			return ['error' => 'friendrequest-already-friends'];
+;
 		}
 
 		try {
-			$makeFriend = \Cheevos\Cheevos::createFriendRequest($this->globalId, $toGlobalId);
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+			$makeFriend = Cheevos::createFriendRequest($this->globalId, $toGlobalId);
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
 		}
 
 		$toGlobalId = intval($toGlobalId);
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 		$toLocalUser = $lookup->localUserFromCentralId($toGlobalId);
 
 		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
 			return false;
 		}
 
-		\EchoEvent::create([
+		EchoEvent::create([
 			'type' => 'friendship',
 			'agent' => $wgUser,
 			'title' => $wgUser->getUserPage(),
@@ -189,7 +195,7 @@ class Friendship {
 	 * Accepts a pending request
 	 *
 	 * @access	public
-	 * @param	integer	curse ID of a user
+	 * @param	int $toGlobalId	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
@@ -197,12 +203,12 @@ class Friendship {
 			return -1;
 		}
 		try {
-			$res = \Cheevos\Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
+			$res = Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
 			if ($res['message'] == "success") {
 				return true;
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return false;
 	}
@@ -211,7 +217,7 @@ class Friendship {
 	 * Ignores and dismisses a pending request
 	 *
 	 * @access	public
-	 * @param	integer	curse ID of a user
+	 * @param	int $toGlobalId	curse ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function ignoreRequest($toGlobalId) {
@@ -219,12 +225,12 @@ class Friendship {
 			return -1;
 		}
 		try {
-			$res = \Cheevos\Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
+			$res = Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
 			if ($res['message'] == "success") {
 				return true;
 			}
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
 		return false;
 	}
@@ -232,7 +238,7 @@ class Friendship {
 	/**
 	 * Removes a friend relationship, or cancels a pending request
 	 *
-	 * @param	integer	global ID of a user
+	 * @param	int $toUser	global ID of a user
 	 * @return	bool	true on success, false on failure
 	 */
 	public function removeFriend($toUser) {
@@ -254,9 +260,9 @@ class Friendship {
 		$globalId = $toUser;
 
 		try {
-			\Cheevos\Cheevos::cancelFriendRequest($this->globalId, $globalId);
-		} catch (\Cheevos\CheevosException $e) {
-			wfDebug(__METHOD__.": Caught CheevosException - ".$e->getMessage());
+			Cheevos::cancelFriendRequest($this->globalId, $globalId);
+		} catch (CheevosException $e) {
+			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
 		}
 

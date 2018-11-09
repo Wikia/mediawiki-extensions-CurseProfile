@@ -6,7 +6,7 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
@@ -15,12 +15,13 @@
 namespace CurseProfile;
 
 use DynamicSettings\Environment;
+use HydraCore\SpecialPage;
 use PermissionsError;
 use RedisCache;
 use RedisException;
 use TemplateProfileStats;
 
-class SpecialProfileStats extends \HydraCore\SpecialPage {
+class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Constructor
 	 *
@@ -35,9 +36,10 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 	 * Main Executor
 	 *
 	 * @access	public
+	 * @param string $path unused
 	 * @return	void	[Outputs to screen]
 	 */
-	public function execute( $path ) {
+	public function execute($path) {
 		if (!Environment::isMasterWiki()) {
 			throw new PermissionsError('cp-master-only');
 		}
@@ -46,7 +48,7 @@ class SpecialProfileStats extends \HydraCore\SpecialPage {
 
 		$redis = RedisCache::getClient('cache');
 
-		//Data built by StatsRecache job, refer to its contents for data format.
+		// Data built by StatsRecache job, refer to its contents for data format.
 		try {
 			$profileStats = $redis->hGetAll('profilestats');
 		} catch (RedisException $e) {

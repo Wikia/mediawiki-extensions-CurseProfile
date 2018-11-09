@@ -6,17 +6,27 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2013 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
+use Linker;
+use Title;
+
 /**
  * A class to manage displaying a list of recent activity on a user profile
  */
 class RecentActivity {
+	/**
+	 * handle parser hook call
+	 *
+	 * @param object &$parser
+	 * @param string $user_id
+	 * @return mixed
+	 */
 	public static function parserHook(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
@@ -28,20 +38,20 @@ class RecentActivity {
 			return wfMessage('emptyactivity')->plain();
 		}
 
-		$HTML = '
+		$html = '
 		<ul>';
 		foreach ($activity as $rev) {
-			$title = \Title::newFromID($rev['rev_page']);
+			$title = Title::newFromID($rev['rev_page']);
 			if ($title) {
 				$verb = $rev['rev_parent_id'] ? wfMessage('profileactivity-edited') : wfMessage('profileactivity-created');
-				$HTML .= '<li>'.$verb.' '.\Linker::link($title).' '.self::diffHistLinks($title, $rev).' '.CP::timeTag($rev['rev_timestamp']).'</li>';
+				$html .= '<li>' . $verb . ' ' . Linker::link($title) . ' ' . self::diffHistLinks($title, $rev) . ' ' . CP::timeTag($rev['rev_timestamp']) . '</li>';
 			}
 		}
-		$HTML .= '
+		$html .= '
 		</ul>';
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true,
 		];
 	}
@@ -49,14 +59,16 @@ class RecentActivity {
 	/**
 	 * Generates html for a link group like: (diff | hist)
 	 *
-	 * @param object	mw Title object of the page
-	 * @param arary		row from the revision table that should be diffed
+	 * @param Title $title	mw Title object of the page
+	 * @param array $rev row from the revision table that should be diffed
+	 *
+	 * @return string
 	 */
 	public static function diffHistLinks($title, $rev) {
-		$HTML = \Linker::link($title, 'diff', [], ['diff'=>$rev['rev_id']]);
-		$HTML .= ' | ';
-		$HTML .= \Linker::link($title, 'hist', [], ['action'=>'history']);
-		return '('.$HTML.')';
+		$html = Linker::link($title, 'diff', [], ['diff' => $rev['rev_id']]);
+		$html .= ' | ';
+		$html .= Linker::link($title, 'hist', [], ['action' => 'history']);
+		return '(' . $html . ')';
 	}
 
 	/**

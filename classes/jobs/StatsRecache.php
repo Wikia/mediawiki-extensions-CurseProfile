@@ -6,14 +6,21 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class StatsRecache extends \SyncService\Job {
+use DynamicSettings\Wiki;
+use Exception;
+use MediaWiki\MediaWikiServices;
+use Redis;
+use RedisCache;
+use SyncService\Job;
+
+class StatsRecache extends Job {
 	static public $forceSingleInstance = true;
 
 	/**
@@ -43,14 +50,14 @@ class StatsRecache extends \SyncService\Job {
 	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
 	 */
 	private function populateLastPref() {
-		$redis = \RedisCache::getClient('cache');
-		$sites = \DynamicSettings\Wiki::loadAll();
+		$redis = RedisCache::getClient('cache');
+		$sites = Wiki::loadAll();
 		foreach ($sites as $siteKey => $wiki) {
 			$dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
 			$wikiKeys[] = $wiki->getSiteKey();
 		}
-		//Add the master into the lists so it gets processed over.
-		$dbs['master'] = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB('master');
+		// Add the master into the lists so it gets processed over.
+		$dbs['master'] = MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB('master');
 		$wikis['master'] = 'Master Wiki';
 
 		unset($sites);
@@ -58,8 +65,8 @@ class StatsRecache extends \SyncService\Job {
 		foreach ($wikiKeys as $dbKey) {
 			try {
 				$db = $dbs[$dbKey]->getConnection(DB_MASTER);
-			} catch (\Exception $e) {
-				$this->outputLine(__METHOD__." - Unable to connect to database.", time());
+			} catch (Exception $e) {
+				$this->outputLine(__METHOD__ . " - Unable to connect to database.", time());
 				continue;
 			}
 
@@ -113,28 +120,28 @@ class StatsRecache extends \SyncService\Job {
 	 * }
 	 */
 	public function execute($args = []) {
-		$redisPrefix = $this->redis->getOption(\Redis::OPT_PREFIX);
-		//self::populateLastPref();
+		$redisPrefix = $this->redis->getOption(Redis::OPT_PREFIX);
+		// self::populateLastPref();
 
 		$profileFields = ProfileData::getValidEditFields();
 		$profileFields[] = 'profile-pref';
 		$profileFields[] = 'comment-pref';
 		$profileFields[] = 'users-tallied';
-		$this->redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
+		$this->redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
 		$this->redis->del('profilestats');
 		$this->redis->del('profilestats:favoritewikis');
 
-		//General profile statistics.
+		// General profile statistics.
 		$position = null;
 		$script = "local optionsKeys = ARGV
-local fields = {'".implode("', '", $profileFields)."'}
+local fields = {'" . implode("', '", $profileFields) . "'}
 local stats = {}
 local favoriteWikis = {}
 for index, field in ipairs(fields) do
 	stats[index] = 0
 end
 for i, k in ipairs(optionsKeys) do
-	local prefs = redis.call('hmget', k, '".implode("', '", $profileFields)."')
+	local prefs = redis.call('hmget', k, '" . implode("', '", $profileFields) . "')
 	for index, content in ipairs(prefs) do
 		if (fields[index] == 'users-tallied') then
 			stats[index] = stats[index] + 1
@@ -165,13 +172,13 @@ for index, wiki in ipairs(favoriteWikis) do
 end
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
-		while ($keys = $this->redis->scan($position, $redisPrefix.'useroptions:*', 1000)) {
+		while ($keys = $this->redis->scan($position, $redisPrefix . 'useroptions:*', 1000)) {
 			if (!empty($keys)) {
 				$this->redis->evalSha($scriptSha, $keys);
 			}
 		}
 
-		//Friendship.
+		// Friendship.
 		$position = null;
 		$script = "local friendships = ARGV
 local hasFriend = 0
@@ -201,7 +208,7 @@ end
 redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 ";
 		$scriptSha = $this->redis->script('LOAD', $script);
-		while ($keys = $this->redis->scan($position, $redisPrefix.'friendlist:*', 1000)) {
+		while ($keys = $this->redis->scan($position, $redisPrefix . 'friendlist:*', 1000)) {
 			if (!empty($keys)) {
 				$this->redis->evalSha($scriptSha, $keys);
 			}
@@ -210,13 +217,13 @@ redis.call('hset', '{$redisPrefix}profilestats', 'average-friends', average)
 		$this->redis->hSet('profilestats', 'last_run_time', time());
 
 		$profileStats = $this->redis->hGetAll('profilestats');
-		$statsd = \MediaWiki\MediaWikiServices::getInstance()->getStatsdDataFactory();
+		$statsd = MediaWikiServices::getInstance()->getStatsdDataFactory();
 		foreach ($profileStats as $field => $count) {
 			if ($field == 'last_run_time') {
 				continue;
 			}
 
-			$statsd->gauge('userprofiles.'.$field, $count);
+			$statsd->gauge('userprofiles.' . $field, $count);
 		}
 	}
 }

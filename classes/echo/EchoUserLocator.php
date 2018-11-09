@@ -5,7 +5,7 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2017 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
@@ -13,18 +13,18 @@
 
 namespace CurseProfile\MWEcho;
 
+use EchoEvent;
+use User;
+
 class EchoUserLocator {
 	/**
 	 * Locate users to notify for an event.
 	 *
 	 * @access	public
-	 * @param	string	Task Performed
+	 * @param	string	$event Task Performed
 	 * @return	array	Array of User IDs => User objects.
 	 */
-	static public function getAdmins(\EchoEvent $event) {
-		$config = \ConfigFactory::getDefaultInstance()->makeConfig('main');
-		$commentModGroup = $config->get('CPCommentModGroup');
-
+	public static function getAdmins(EchoEvent $event) {
 		$db = wfGetDB(DB_MASTER);
 
 		$result = $db->select(
@@ -44,7 +44,7 @@ class EchoUserLocator {
 
 		$users = [];
 		while ($row = $result->fetchObject()) {
-			$user = \User::newFromRow($row);
+			$user = User::newFromRow($row);
 			if (!empty($user) && $user->getId() > 0) {
 				$users[$user->getId()] = $user;
 			}

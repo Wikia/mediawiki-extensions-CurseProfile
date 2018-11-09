@@ -136,7 +136,7 @@ function CurseProfile($) {
 					action: 'profile',
 					do: 'getRawField',
 					field: field,
-					userId: $profile.data('userid'),
+					user_id: $profile.data('user_id'),
 					format: 'json',
 					formatversion: 2,
 					token: mw.user.tokens.get('csrfToken')
@@ -191,7 +191,7 @@ function CurseProfile($) {
 						action: 'profile',
 						do: 'getRawField',
 						field: fields[x],
-						userId: $profile.data('userid'),
+						user_id: $profile.data('user_id'),
 						format: 'json',
 						formatversion: 2,
 						token: mw.user.tokens.get('csrfToken')
@@ -245,7 +245,7 @@ function CurseProfile($) {
 						action: 'profile',
 						do: 'editField',
 						field: field,
-						userId: $profile.data('userid'),
+						user_id: $profile.data('user_id'),
 						text: profile.editForms.find('textarea').val(),
 						format: 'json',
 						formatversion: 2,
@@ -282,7 +282,7 @@ function CurseProfile($) {
 						action: 'profile',
 						do: 'editSocialFields',
 						data: data,
-						userId: $profile.data('userid'),
+						user_id: $profile.data('user_id'),
 						format: 'json',
 						formatversion: 2,
 						token: mw.user.tokens.get('csrfToken')

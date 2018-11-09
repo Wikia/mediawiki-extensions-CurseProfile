@@ -6,15 +6,18 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
-require_once(dirname(dirname(dirname(__DIR__)))."/maintenance/Maintenance.php");
 
-class StatsRecacheCron extends \Maintenance {
+use Maintenance;
+
+require_once dirname(dirname(dirname(__DIR__))) . "/maintenance/Maintenance.php";
+
+class StatsRecacheCron extends Maintenance {
 	/**
 	 * Main Executor
 	 *
@@ -27,4 +30,4 @@ class StatsRecacheCron extends \Maintenance {
 }
 
 $maintClass = 'CurseProfile\StatsRecacheCron';
-require_once(RUN_MAINTENANCE_IF_MAIN);
+require_once RUN_MAINTENANCE_IF_MAIN;

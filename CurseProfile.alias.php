@@ -5,7 +5,7 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *

@@ -6,17 +6,20 @@
  *
  * @author		Alexia E. Smith
  * @copyright	(c) 2016 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile\MWEcho;
 
+use EchoEventPresentationModel;
+use SpecialPage;
+
 /**
  * Class that formats notifications for profile comments and friend requests
  */
-class FriendshipPresentationModel extends \EchoEventPresentationModel {
+class FriendshipPresentationModel extends EchoEventPresentationModel {
 	/**
 	 * Get a message object and add the performer's name as
 	 * a parameter. It is expected that subclasses will override
@@ -26,9 +29,7 @@ class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	 * @return Message
 	 */
 	public function getHeaderMessage() {
-		$extra = $this->event->getExtra();
-		$message = $this->getMessageWithAgent( $this->getHeaderMessageKey() );
-		//$message->params([$extra['task'], $extra['timestamp'], $extra['misc']['display_name']]);
+		$message = $this->getMessageWithAgent($this->getHeaderMessageKey());
 		return $message;
 	}
 
@@ -51,7 +52,7 @@ class FriendshipPresentationModel extends \EchoEventPresentationModel {
 	 */
 	public function getPrimaryLink() {
 		return [
-			'url' => \SpecialPage::getTitleFor('ManageFriends')->getFullUrl(),
+			'url' => SpecialPage::getTitleFor('ManageFriends')->getFullUrl(),
 			'label' => $this->msg('notification-link-text-view-friendship')->text(),
 		];
 	}
@@ -77,4 +78,3 @@ class FriendshipPresentationModel extends \EchoEventPresentationModel {
 		return [];
 	}
 }
-

@@ -6,24 +6,29 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 namespace CurseProfile;
 
-class SpecialCommentBoard extends \UnlistedSpecialPage {
+use HydraCore;
+use TemplateCommentBoard;
+use UnlistedSpecialPage;
+use User;
+
+class SpecialCommentBoard extends UnlistedSpecialPage {
 	public function __construct() {
-		parent::__construct( 'CommentBoard' );
+		parent::__construct('CommentBoard');
 	}
 
 	/**
 	 * Show the special page
 	 *
-	 * @param $params Mixed: parameter(s) passed to the page or null
+	 * @param string $path Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute( $path ) {
+	public function execute($path) {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$this->setHeaders();
@@ -36,7 +41,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
 		list($user_id, $user_name) = explode('/', $path);
-		$user = \User::newFromId($user_id);
+		$user = User::newFromId($user_id);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('commentboard-invalid');
@@ -46,9 +51,10 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 
 		// Fix missing or incorrect username segment in the path
 		if ($user->getTitleKey() != $user_name) {
-			$fixedPath = '/Special:CommentBoard/'.$user_id.'/'.$user->getTitleKey();
-			if (!empty($_SERVER['QUERY_STRING'])) { // don't destroy any extra params
-				$fixedPath .= '?'.$_SERVER['QUERY_STRING'];
+			$fixedPath = '/Special:CommentBoard/' . $user_id . '/' . $user->getTitleKey();
+			if (!empty($_SERVER['QUERY_STRING'])) {
+				// don't destroy any extra params
+				$fixedPath .= '?' . $_SERVER['QUERY_STRING'];
 			}
 			$wgOut->redirect($fixedPath);
 			return;
@@ -59,7 +65,7 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
 		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles', 'ext.hydraCore.pagination.styles']);
 		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
-		$templateCommentBoard = new \TemplateCommentBoard;
+		$templateCommentBoard = new TemplateCommentBoard;
 
 		$wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
@@ -72,10 +78,8 @@ class SpecialCommentBoard extends \UnlistedSpecialPage {
 		}
 
 		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
-		$pagination = \HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
 		$wgOut->addHTML($templateCommentBoard->comments($comments, $user_id, $pagination));
-
-		return;
 	}
 }

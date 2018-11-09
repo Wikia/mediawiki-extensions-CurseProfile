@@ -6,16 +6,17 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2015 Curse Inc.
- * @license		All Rights Reserved
+ * @license		Proprietary
  * @package		CurseProfile
  * @link		http://www.curse.com/
  *
 **/
 
+use CurseProfile\CommentReport;
 use CurseProfile\CP;
 use CurseProfile\ProfilePage;
-use CurseProfile\CommentReport;
 use DynamicSettings\Environment;
+use DynamicSettings\Wiki;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -23,7 +24,7 @@ class TemplateCommentModeration {
 
 	/**
 	 * Renders the group and sort "tabs" at the top of the CommentModeration page
-	 * @param currentStyle string indicating the current sort style
+	 * @param currentStyle $currentStyle string indicating the current sort style
 	 * @return string HTML fragment
 	 */
 	public function sortStyleSelector($currentStyle) {
@@ -42,9 +43,9 @@ class TemplateCommentModeration {
 			}
 			$params = [];
 			if (isset($sort[1])) {
-				$title = \SpecialPage::getTitleFor('CommentModeration');
+				$title = SpecialPage::getTitleFor('CommentModeration');
 			} else {
-				$title = \SpecialPage::getTitleFor('CommentModeration/'.$key);
+				$title = SpecialPage::getTitleFor('CommentModeration/' . $key);
 			}
 			$params['href'] = $title->getLocalUrl();
 			if ($currentStyle == $key) {
@@ -53,47 +54,47 @@ class TemplateCommentModeration {
 			$html .= Html::element('a', $params, $sort[0]);
 		}
 
-		return '<p>'.wfMessage('commentmoderation-view')->text().': '.$html.'</p>';
+		return '<p>' . wfMessage('commentmoderation-view')->text() . ': ' . $html . '</p>';
 	}
 
 	/**
 	 * Renders the main body of the CommentModeration special page
 	 *
 	 * @access public
-	 * @param	array	CommentReport instances.
+	 * @param	array	$reports CommentReport instances.
 	 * @return	string	HTML fragment
 	 */
 	public function renderComments($reports) {
 		$html = '
 				<div id="commentmoderation" class="comments">';
 
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 
 		foreach ($reports as $report) {
 			$rep = $report->data;
 			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
 			if ($author) { // handle failures where central ID doesn't exist on local wiki
 				$html .= '
-					<div class="report-item" data-key="'.$report->reportKey().'">';
+					<div class="report-item" data-key="' . $report->reportKey() . '">';
 
 				$html .= Html::rawElement('p', [], $this->itemLine($rep));
 				$html .= '
 						<div class="reported-comment">
 							<div class="commentdisplay">
-								<div class="avatar">'.ProfilePage::userAvatar($nothing, 48, $author->getEmail(), $author->getName())[0].'</div>
-								<div><div class="right">'.$this->permalink($rep).'</div>'.CP::userLink($author).'</div>
-								<div class="commentbody">'.htmlspecialchars($rep['comment']['text']).'</div>
+								<div class="avatar">' . ProfilePage::userAvatar(null, 48, $author->getEmail(), $author->getName())[0] . '</div>
+								<div><div class="right">' . $this->permalink($rep) . '</div>' . CP::userLink($author) . '</div>
+								<div class="commentbody">' . htmlspecialchars($rep['comment']['text']) . '</div>
 							</div>';
 
 				if ($report->data['action_taken'] == CommentReport::ACTION_NONE) {
 					$html .= '
 							<div class="moderation-actions">
-								<div class="actions"><a class="del">'.wfMessage('commentmoderation-delete')->text().'</a> <a class="dis">'.wfMessage('commentmoderation-dismiss')->text().'</a></div>
+								<div class="actions"><a class="del">' . wfMessage('commentmoderation-delete')->text() . '</a> <a class="dis">' . wfMessage('commentmoderation-dismiss')->text() . '</a></div>
 								<div class="confirm"><a></a></div>
 							</div>';
 				} else {
 					$html .= '
-							<div class="moderation-actions">'.$this->actionTaken($report).'</div>';
+							<div class="moderation-actions">' . $this->actionTaken($report) . '</div>';
 				}
 
 				$html .= '
@@ -111,7 +112,7 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 		$user = $lookup->localUserFromCentralId($rep->data['action_taken_by']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
@@ -122,7 +123,7 @@ class TemplateCommentModeration {
 			$action = 'del';
 			break;
 		}
-		return Html::rawElement('span', ['class'=>'action-taken '.$action], wfMessage('report-actiontaken-'.$action, $user->getName())->text().' '.CP::timeTag($rep->data['action_taken_at']));
+		return Html::rawElement('span', ['class' => 'action-taken ' . $action], wfMessage('report-actiontaken-' . $action, $user->getName())->text() . ' ' . CP::timeTag($rep->data['action_taken_at']));
 	}
 
 	/**
@@ -150,15 +151,14 @@ class TemplateCommentModeration {
 	private function reporterIcons($reports) {
 		$html = '';
 		$iter = 0;
-		$lookup = \CentralIdLookup::factory();
+		$lookup = CentralIdLookup::factory();
 		foreach ($reports as $rep) {
 			$reporter = $lookup->localUserFromCentralId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
-			$html .= \Html::rawElement(
-				'a', [
-					'href' => $reporter->getUserPage()->getLinkURL()
-				],
-				ProfilePage::userAvatar($nothing, 24, $reporter->getEmail(), $reporter->getName(), "title='$title'")[0]
+			$html .= Html::rawElement(
+				'a',
+				['href' => $reporter->getUserPage()->getLinkURL()],
+				ProfilePage::userAvatar(null, 24, $reporter->getEmail(), $reporter->getName(), "title='$title'")[0]
 			);
 			$iter += 1;
 			if ($iter >= self::MAX_REPORTER_AVATARS) {
@@ -177,20 +177,20 @@ class TemplateCommentModeration {
 	 */
 	private function permalink($rep) {
 		if (Environment::isMasterWiki()) {
-			$wiki = \DynamicSettings\Wiki::loadFromHash($rep['comment']['origin_wiki']);
+			$wiki = Wiki::loadFromHash($rep['comment']['origin_wiki']);
 			if ($rep['comment']['origin_wiki'] == 'master') {
 				global $wgSitename;
 				$wikiName = $wgSitename;
-				$url = \SpecialPage::getTitleFor('CommentModeration/'.$rep['comment']['cid'])->getFullUrl();
+				$url = SpecialPage::getTitleFor('CommentModeration/' . $rep['comment']['cid'])->getFullUrl();
 			} elseif ($wiki !== false) {
 				$domain = $wiki->getDomains()->getDomain();
 				$wikiName = $wiki->getNameForDisplay();
 				if (!isset($domain) || !isset($wikiName)) {
 					return '';
 				}
-				$url = wfExpandUrl('https://'.$domain.'/Special:CommentPermalink/'.$rep['comment']['cid']);
+				$url = wfExpandUrl('https://' . $domain . '/Special:CommentPermalink/' . $rep['comment']['cid']);
 			}
-			return 'content as posted '.Html::rawElement('a', ['href' => $url], CP::timeTag($rep['comment']['last_touched']).' on '.$wikiName);
+			return 'content as posted ' . Html::rawElement('a', ['href' => $url], CP::timeTag($rep['comment']['last_touched']) . ' on ' . $wikiName);
 		} else {
 			return CP::timeTag($rep['comment']['last_touched']);
 		}
