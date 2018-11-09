@@ -50,7 +50,9 @@ class Hooks {
 	public static function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
 
-		define('NS_USER_PROFILE', 202);
+		if (!defined('NS_USER_PROFILE')) {
+			define('NS_USER_PROFILE', 202);
+		}
 		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
 		$wgEchoNotificationIcons['gratitude'] = [
