@@ -62,9 +62,6 @@ class ResolveComment extends Job {
 
 		// Revert back to standard db connections.
 		CP::setDb(null);
-		if ($db) {
-			$db->close();
-		}
 
 		if ($result) {
 			return 0;

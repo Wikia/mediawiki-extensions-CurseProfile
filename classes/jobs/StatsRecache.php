@@ -89,8 +89,6 @@ class StatsRecache extends Job {
 			while ($row = $results->fetchRow()) {
 				$redis->hSet('profilestats:lastpref', $row['global_id'], $row['up_value']);
 			}
-
-			$db->close();
 		}
 	}
 
