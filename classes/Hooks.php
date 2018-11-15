@@ -377,7 +377,7 @@ class Hooks {
 	 * @return	boolean	true
 	 */
 	public static function onLoadExtensionSchemaUpdates($updater) {
-		$extDir = __DIR__;
+		$extDir = __DIR__ . '/../';
 
 		// Add tables that may exist for previous users of SocialProfile.
 		$updater->addExtensionUpdate(['addTable', 'user_board', "{$extDir}/install/sql/table_user_board.sql", true]);
