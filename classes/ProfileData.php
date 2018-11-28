@@ -711,6 +711,10 @@ class ProfileData {
 	 * @return bool
 	 */
 	public function getProfileTypePreference() {
+		// override preference for non existent user
+		if ($this->user_id == 0) {
+			return false;
+		}
 		return $this->user->getIntOption('profile-pref');
 	}
 
@@ -719,6 +723,10 @@ class ProfileData {
 	 * @return bool
 	 */
 	public function getCommentTypePreference() {
+		// override preference for non existent user
+		if ($this->user_id == 0) {
+			return false;
+		}
 		return $this->user->getIntOption('comment-pref');
 	}
 }

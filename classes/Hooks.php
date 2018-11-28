@@ -210,11 +210,7 @@ class Hooks {
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 
 		if (!self::$profilePage->getUser()->getId()) {
-			$username = $title->getText();
-			$wgOut->wrapWikiMsg(
-				"<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
-				['cp-user-does-not-exist', wfEscapeWikiText($username)]
-			);
+			$article = new NoProfilePage($title);
 			return false;
 		}
 
@@ -271,7 +267,7 @@ class Hooks {
 		}
 
 		// Warn visitors about user's preference
-		if ($wgRequest->getVal('profile') == "no") {
+		if ($wgRequest->getVal('profile') == "no" && $preferProfile) {
 			$username = $title->getText();
 			$wgOut->wrapWikiMsg(
 				"<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",

@@ -245,7 +245,8 @@
 	"count": "Count",
 	"last_incremented": "Last Incremented",
 	"invalid_profile_field": "Invalid profile field.",
-	"cp-user-does-not-exist":"This user \"$1\" does not exist.",
+	"cp-user-does-not-exist": "User account \"$1\" is not registered.",
+	"cp-enhanced-profile-unavailable": "The Enhanced Profile feature is not available.",
 	"cp-user-prefers-profile-user":"This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]].",
 	"cp-user-prefers-profile-talk":"This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]]. They may not respond to comments added here."
 }

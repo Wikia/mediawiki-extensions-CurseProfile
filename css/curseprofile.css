@@ -334,6 +334,10 @@ ul.friends {
 	min-width: 300px;
 }
 
+#profile-user-fields > div {
+	min-height: 27px;
+}
+
 @media screen and (min-width: 1260px) {
 	.section.friends ul.friends {
 		-moz-columns: 2;

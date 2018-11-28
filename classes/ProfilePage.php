@@ -846,7 +846,7 @@ class ProfilePage extends Article {
 				<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
 				{{#groups:}}
 			</div>
-			<div>
+			<div id="profile-user-fields">
 				<div id="profile-location" data-field="location">{{#profilefield:location}}</div>
 				{{#profilelinks:}}
 			</div>

@@ -54,6 +54,7 @@
 		"CurseProfile\\Hooks": "classes/Hooks.php",
 		"CurseProfile\\CP": "classes/CP.php",
 		"CurseProfile\\ProfileApi": "classes/ProfileApi.php",
+		"CurseProfile\\NoProfilePage": "classes/NoProfilePage.php",
 		"CurseProfile\\ProfilePage": "classes/ProfilePage.php",
 		"CurseProfile\\ProfileData": "classes/ProfileData.php",
 		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
