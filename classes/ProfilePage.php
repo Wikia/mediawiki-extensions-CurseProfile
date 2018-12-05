@@ -110,13 +110,8 @@ class ProfilePage extends Article {
 			$this->setContext($context);
 		}
 		$this->actionIsView = Action::getActionName($this->getContext()) == 'view';
-		$userName = $title->getText();
-		if (strpos($userName, '/') > 0) {
-			$userNames = explode('/', $title->getText());
-			$userName = array_shift($userNames);
-		}
-		$this->userName = User::getCanonicalName($userName);
-		$this->user = User::newFromName($userName);
+		$this->userName = Hooks::resolveUsername($title);
+		$this->user = User::newFromName($this->userName);
 		if ($this->user) {
 			$this->user->load();
 			$this->user_id = $this->user->getID();
@@ -282,7 +277,7 @@ class ProfilePage extends Article {
 	public function customizeNavBar(&$links, $title) {
 		// Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages
 		// since the context is switched without performing a HTTP redirect.
-		$userName = $title->getText();
+		$userName = Hooks::resolveUsername($title);
 
 		if ($userName === false) {
 			if ($this->isProfilePage($title)) {

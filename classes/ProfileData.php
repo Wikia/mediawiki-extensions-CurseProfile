@@ -182,7 +182,7 @@ class ProfileData {
 			$args['profile'] = 'no';
 		}
 
-		return $this->getFullURL($title, $args);
+		return $this->getFullURL($title->getBaseTitle(), $args);
 	}
 
 	/**
@@ -197,7 +197,7 @@ class ProfileData {
 			$args['profile'] = 'no';
 		}
 
-		return $this->getFullURL($title, $args);
+		return $this->getFullURL($title->getBaseTitle(), $args);
 	}
 
 	/**
@@ -464,11 +464,11 @@ class ProfileData {
 	public static function validateExternalProfile($service, $test) {
 		$service = strtolower($service);
 
-		if (isset(self::$externalProfiles[$service])) {
-			$patterns = self::$externalProfiles[$service];
-		} else {
+		if (!isset(self::$externalProfiles[$service])) {
 			return false;
 		}
+
+		$patterns = self::$externalProfiles[$service];
 
 		foreach ($patterns as $pattern) {
 			$result = preg_match("#" . str_replace('#', '\#', $pattern) . "#", $test, $matches);

@@ -248,8 +248,12 @@ class Hooks {
 	private static function renderUserPages(&$title) {
 		global $wgRequest, $wgOut;
 
+		// Check if we are on a base page
+		$username = self::resolveUsername($title);
+		$basepage = ($title->getText() == $username);
+
 		// Make sure we are in the right namespace
-		if (!in_array($title->getNamespace(), [NS_USER, NS_USER_TALK])) {
+		if (!in_array($title->getNamespace(), [NS_USER, NS_USER_TALK]) || !$basepage) {
 			return true;
 		}
 
@@ -268,7 +272,6 @@ class Hooks {
 
 		// Warn visitors about user's preference
 		if ($wgRequest->getVal('profile') == "no" && $preferProfile) {
-			$username = $title->getText();
 			$wgOut->wrapWikiMsg(
 				"<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
 				[$key, wfEscapeWikiText($username)]
@@ -499,6 +502,23 @@ class Hooks {
 			ProfileData::processPreferenceSave($user, $options);
 		}
 		return true;
+	}
+
+	/**
+	 * Get a username from title
+	 *
+	 * @param Title $title
+	 * @return string
+	 */
+	public static function resolveUsername($title) {
+		$username = $title->getText();
+		if (strpos($username, '/') > 0) {
+			$username = explode('/', $username);
+			$username = array_shift($username);
+			$username = User::getCanonicalName($username);
+		}
+
+		return $username;
 	}
 
 	/**
