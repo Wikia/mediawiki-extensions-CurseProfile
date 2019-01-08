@@ -287,10 +287,9 @@ class ProfilePage extends Article {
 			return;
 		}
 
-		$subPage = $title->isSubPage() ? '/' . $title->getSubpageText() : '';
 		$profileTitle = $this->isProfilePage($title) ? $title : Title::makeTitle(NS_USER_PROFILE, $userName);
-		$userPageTitle = $this->isUserPage($title) ? $title : Title::makeTitle(NS_USER, $userName . $subPage);
-		$userTalkPageTitle = $this->isUserTalkPage($title) ? $title : Title::makeTitle(NS_USER_TALK, $userName . $subPage);
+		$userPageTitle = $this->isUserPage($title) ? $title : Title::makeTitle(NS_USER, $title->getPartialURL());
+		$userTalkPageTitle = $this->isUserTalkPage($title) ? $title : Title::makeTitle(NS_USER_TALK, $title->getPartialURL());
 
 		$links['namespaces'] = [];
 
