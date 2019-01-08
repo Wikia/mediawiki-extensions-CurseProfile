@@ -182,7 +182,7 @@ class ProfileData {
 			$args['profile'] = 'no';
 		}
 
-		return $this->getFullURL($title->getBaseTitle(), $args);
+		return $this->getFullURL($title, $args);
 	}
 
 	/**
@@ -197,7 +197,7 @@ class ProfileData {
 			$args['profile'] = 'no';
 		}
 
-		return $this->getFullURL($title->getBaseTitle(), $args);
+		return $this->getFullURL($title, $args);
 	}
 
 	/**

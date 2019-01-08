@@ -515,7 +515,8 @@ class Hooks {
 		if (strpos($username, '/') > 0) {
 			$username = explode('/', $username);
 			$username = array_shift($username);
-			$username = User::getCanonicalName($username);
+			$canonical = User::getCanonicalName($username);
+			$username = $canonical ? $canonical : $username;
 		}
 
 		return $username;
