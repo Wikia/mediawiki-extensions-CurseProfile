@@ -15,7 +15,7 @@ namespace CurseProfile;
 
 use Maintenance;
 
-require_once dirname(dirname(dirname(__DIR__))) . "/maintenance/Maintenance.php";
+require_once dirname(__DIR__, 3) . "/maintenance/Maintenance.php";
 
 class StatsRecacheCron extends Maintenance {
 	/**
