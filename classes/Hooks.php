@@ -280,6 +280,7 @@ class Hooks {
 
 		return true;
 	}
+
 	/**
 	 * Check for request variables that indicate the need to show warnings.
 	 *
