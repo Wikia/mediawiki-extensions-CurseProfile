@@ -259,6 +259,7 @@ class Hooks {
 
 		list($preferProfile, $key) = self::getProfilePreference($title);
 
+		// Only redirect if we dont have "?profile=no" and they prefer the profile.
 		if ($wgRequest->getVal('profile') !== "no" &&
 			$preferProfile &&
 			self::$profilePage->isActionView() &&
@@ -266,12 +267,11 @@ class Hooks {
 			empty($wgRequest->getVal('oldid')) &&
 			empty($wgRequest->getVal('diff'))
 		) {
-			// Only redirect if we dont have "?profile=no" and they prefer the profile.
 			return $wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 		}
 
 		// Warn visitors about user's preference
-		if ($wgRequest->getVal('profile') == "no" && $preferProfile) {
+		if (self::shouldWarn($wgRequest) && $preferProfile) {
 			$wgOut->wrapWikiMsg(
 				"<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
 				[$key, wfEscapeWikiText($username)]
@@ -279,6 +279,19 @@ class Hooks {
 		}
 
 		return true;
+	}
+	/**
+	 * Check for request variables that indicate the need to show warnings.
+	 *
+	 * @param object $request Global $wgRequest object
+	 * @return bool
+	 */
+	private static function shouldWarn($request) {
+		return (
+			$request->getVal('profile') == 'no' ||
+			$request->getVal('veaction') == 'edit' ||
+			$request->getVal('action') == 'edit'
+		);
 	}
 
 	/**
