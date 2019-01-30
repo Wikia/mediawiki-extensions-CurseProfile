@@ -1,6 +1,8 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"eduaddad"
+		]
 	},
 	"aboutme": "Sobre Mim",
 	"aboutmehelp": "Wikitexto está disponível para a formatação.",

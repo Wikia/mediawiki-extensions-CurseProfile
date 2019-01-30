@@ -1,6 +1,8 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"eduaddad"
+		]
 	},
 	"aboutme": "O mnie",
 	"aboutmehelp": "Pole to może zostać sformatowane używając Wikikodu.",

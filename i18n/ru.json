@@ -1,6 +1,8 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"eduaddad"
+		]
 	},
 	"aboutme": "Обо мне",
 	"aboutmehelp": "Викитекст доступен для форматирования.",
