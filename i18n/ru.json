@@ -38,6 +38,6 @@
 	"userprofiletab": "Профиль",
 	"wikisedited": "Кол-во ред. вики",
 	"totalpatrols": "Проверенных",
-	"totalfriends": "Друзья&lt;br&gt;([[Special:Friends/$1|{{#ifeq: $1 | $2 | Редактировать список друзей\n | Просмотреть всех }}]])",
+	"totalfriends": "Друзья",
 	"totaledits": "Правок"
 }
