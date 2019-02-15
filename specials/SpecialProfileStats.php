@@ -6,9 +6,9 @@
  *
  * @author		Noah Manneschmidt
  * @copyright	(c) 2014 Curse Inc.
- * @license		Proprietary
+ * @license		GNU General Public License v2.0 or later
  * @package		CurseProfile
- * @link		http://www.curse.com/
+ * @link		https://gitlab.com/hydrawiki
  *
 **/
 
