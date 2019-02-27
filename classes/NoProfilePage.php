@@ -25,6 +25,7 @@ class NoProfilePage extends Article {
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
+		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$outputString = $this->getOutput();
 		$output->addHTML($outputString);
 	}
