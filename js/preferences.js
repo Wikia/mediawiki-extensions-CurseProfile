@@ -58,6 +58,7 @@ $(function(){
 			var selected = $(event.target).val();
 			if (typeof wikiresponse[selected] !== 'undefined' && wikiresponse[selected] !== "") {
 				favwiki.val(wikiresponse[selected]);
+				$("#prefcontrol").prop("disabled",false);
 			}
 		}
 	});
