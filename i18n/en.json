@@ -248,5 +248,6 @@
 	"cp-user-does-not-exist": "User account \"$1\" is not registered.",
 	"cp-enhanced-profile-unavailable": "The Enhanced Profile feature is not available.",
 	"cp-user-prefers-profile-user":"This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]].",
-	"cp-user-prefers-profile-talk":"This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]]. They may not respond to comments added here."
+	"cp-user-prefers-profile-talk":"This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]]. They may not respond to comments added here.",
+	"apihelp-comment-summary":"Allows commenting actions to be taken."
 }
