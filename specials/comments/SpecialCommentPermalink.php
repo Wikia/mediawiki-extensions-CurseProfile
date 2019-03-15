@@ -34,7 +34,7 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		// checks if comment exists and if wgUser can view it
 		$comment = CommentBoard::getCommentById($commentId);
 		if (empty($comment)) {
-			$wgOut->setPageTitle('commentboard-invalid-title');
+			$wgOut->setPageTitle(wfMessage('commentboard-invalid-title')->plain());
 			$wgOut->addWikiMsg('commentboard-invalid');
 			$wgOut->setStatusCode(404);
 			return;
