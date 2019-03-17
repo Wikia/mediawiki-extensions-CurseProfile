@@ -579,7 +579,7 @@ class CommentBoard {
 		$log->setComment(null);
 		$log->setParameters(
 			[
-				'4:comment_id' => $newCommentId
+				'4:comment_id' => $commentId
 			]
 		);
 		$logId = $log->insert();
