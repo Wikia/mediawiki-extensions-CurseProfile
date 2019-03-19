@@ -115,6 +115,7 @@ class ProfilePage extends Article {
 		if ($this->user) {
 			$this->user->load();
 			$this->user_id = $this->user->getID();
+			$this->getContext()->getSkin()->setRelevantUser($this->getUser());
 		} else {
 			$this->user = User::newFromId(0);
 			$this->user_id = 0;

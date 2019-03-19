@@ -141,8 +141,7 @@
 				"css/curseprofile.css"
 			],
 			"scripts": [
-				"js/curseprofile.js",
-				"js/modifysidebar.js"
+				"js/curseprofile.js"
 			],
 			"dependencies": [
 				"ext.curseprofile.comments.scripts",
@@ -156,7 +155,6 @@
 				"cancel",
 				"contributions-title",
 				"email-auth-required",
-				"emailuser",
 				"facebooklinkplaceholder",
 				"googlelinkplaceholder",
 				"invalid_profile_field",
@@ -177,8 +175,6 @@
 				"redditlinkplaceholder",
 				"save",
 				"steamlinkplaceholder",
-				"tool-link-emailuser",
-				"tooltip-t-contributions",
 				"twitchlinkplaceholder",
 				"twitterlinkplaceholder",
 				"userrights",
