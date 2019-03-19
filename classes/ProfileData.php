@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -29,19 +29,19 @@ use User;
  */
 class ProfileData {
 	/**
-	 * @var		integer
+	 * @var integer
 	 */
 	protected $user_id;
 
 	/**
-	 * @var		object
+	 * @var object
 	 */
 	protected $user;
 
 	/**
 	 * Basic profile fields.
 	 *
-	 * @var		array
+	 * @var array
 	 */
 	static private $basicProfileFields = [
 		'profile-aboutme',
@@ -52,7 +52,7 @@ class ProfileData {
 	/**
 	 * External Profile Fields
 	 *
-	 * @var		array
+	 * @var array
 	 */
 	static private $externalProfileFields = [
 		'profile-link-facebook',
@@ -69,7 +69,7 @@ class ProfileData {
 	/**
 	 * Validation matrixes for external profiles.
 	 *
-	 * @var		array
+	 * @var array
 	 */
 	static private $externalProfiles = [
 		'facebook'	=> [
@@ -121,6 +121,7 @@ class ProfileData {
 
 	/**
 	 * Create a new ProfileData instance
+	 *
 	 * @param User $user local user ID or User instance
 	 */
 	public function __construct($user) {
@@ -140,8 +141,8 @@ class ProfileData {
 	/**
 	 * Return basic plus external profile fields.
 	 *
-	 * @access	public
-	 * @return	array	Edit Profile Fields
+	 * @access public
+	 * @return array	Edit Profile Fields
 	 */
 	public static function getValidEditFields() {
 		return array_merge(self::$basicProfileFields, self::$externalProfileFields);
@@ -150,10 +151,10 @@ class ProfileData {
 	/**
 	 * Get an URL to an external profile.
 	 *
-	 * @access	public
-	 * @param	string	$service Service Name
-	 * @param	string	$text Text Replacement/User Name
-	 * @return	string	URL to the external profile.
+	 * @access public
+	 * @param  string $service Service Name
+	 * @param  string $text    Text Replacement/User Name
+	 * @return string	URL to the external profile.
 	 */
 	public static function getExternalProfileLink($service, $text) {
 		return sprintf(self::$externalProfiles[$service]['link'], urlencode($text));
@@ -162,8 +163,8 @@ class ProfileData {
 	/**
 	 * Returns the canonical URL path to a user's profile.
 	 *
-	 * @access	public
-	 * @return	string
+	 * @access public
+	 * @return string
 	 */
 	public function getProfilePageUrl() {
 		$title = Title::newFromText('UserProfile:' . $this->user->getTitleKey());
@@ -173,7 +174,7 @@ class ProfileData {
 	/**
 	 * Get the url for the User page based on preferences
 	 *
-	 * @param Title $title
+	 * @param  Title $title
 	 * @return string
 	 */
 	public function getUserPageUrl($title) {
@@ -188,7 +189,7 @@ class ProfileData {
 	/**
 	 * Get the url for the User Talk Page based on preferences
 	 *
-	 * @param Title $title
+	 * @param  Title $title
 	 * @return string
 	 */
 	public function getTalkPageUrl($title) {
@@ -203,8 +204,8 @@ class ProfileData {
 	/**
 	 * Get the full url from Title with the provided arguments
 	 *
-	 * @param Title $title
-	 * @param array $args
+	 * @param  Title $title
+	 * @param  array $args
 	 * @return string
 	 */
 	private function getFullURL($title, $args) {
@@ -218,9 +219,9 @@ class ProfileData {
 	/**
 	 * Inserts curse profile fields into the user preferences form.
 	 *
-	 * @access	public
-	 * @param	array	&$preferences Data for HTMLForm to generate the Special:Preferences form
-	 * @return	void
+	 * @access public
+	 * @param  array &$preferences Data for HTMLForm to generate the Special:Preferences form
+	 * @return void
 	 */
 	public static function insertProfilePrefs(&$preferences) {
 		global $wgUser;
@@ -305,9 +306,9 @@ class ProfileData {
 	/**
 	 * Adds default values for preferences added by curse profile
 	 *
-	 * @access	public
-	 * @param	array &$defaultOptions Default Values
-	 * @return	null
+	 * @access public
+	 * @param  array &$defaultOptions Default Values
+	 * @return null
 	 */
 	public static function insertProfilePrefsDefaults(&$defaultOptions) {
 		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
@@ -330,10 +331,10 @@ class ProfileData {
 	/**
 	 * Runs when the user saves their preferences.
 	 *
-	 * @access	public
-	 * @param	User	$user User
-	 * @param	array	&$preferences User Preferences
-	 * @return	null
+	 * @access public
+	 * @param  User  $user         User
+	 * @param  array &$preferences User Preferences
+	 * @return null
 	 */
 	public static function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
@@ -384,9 +385,9 @@ class ProfileData {
 	/**
 	 * Can the given user edit this profile profile?
 	 *
-	 * @access	public
-	 * @param	object	$performer User, the performer that needs to make changes.
-	 * @return	mixed	Boolean true if allowed, otherwise error message string to display.
+	 * @access public
+	 * @param  object $performer User, the performer that needs to make changes.
+	 * @return mixed	Boolean true if allowed, otherwise error message string to display.
 	 */
 	public function canEdit($performer) {
 		global $wgEmailAuthentication;
@@ -416,9 +417,9 @@ class ProfileData {
 	/**
 	 * Get a the profile field text.
 	 *
-	 * @access	public
-	 * @param	string	$field Field Name - Examples: aboutme, location, link_twitch
-	 * @return	string
+	 * @access public
+	 * @param  string $field Field Name - Examples: aboutme, location, link_twitch
+	 * @return string
 	 */
 	public function getField($field) {
 		$field = 'profile-' . $field;
@@ -431,11 +432,11 @@ class ProfileData {
 	/**
 	 * Set a profile field.
 	 *
-	 * @access	public
-	 * @param	string	$field Field Name - Examples: aboutme, location, link_twitch
-	 * @param	string	$text the new text for the user's aboutme
-	 * @param	object|null	$performer [Optional] User who performed the action.  Null to use the current user.
-	 * @return	void
+	 * @access public
+	 * @param  string      $field     Field Name - Examples: aboutme, location, link_twitch
+	 * @param  string      $text      the new text for the user's aboutme
+	 * @param  object|null $performer [Optional] User who performed the action.  Null to use the current user.
+	 * @return void
 	 */
 	public function setField($field, $text, $performer = null) {
 		$field = 'profile-' . $field;
@@ -456,10 +457,10 @@ class ProfileData {
 	/**
 	 * Extracts the username from a profile link.
 	 *
-	 * @access	public
-	 * @param	string	$service Name of service to validate.
-	 * @param	string	$test Raw text to test for an URL or user name to extract.
-	 * @return	mixed	False or validated string value.
+	 * @access public
+	 * @param  string $service Name of service to validate.
+	 * @param  string $test    Raw text to test for an URL or user name to extract.
+	 * @return mixed	False or validated string value.
 	 */
 	public static function validateExternalProfile($service, $test) {
 		$service = strtolower($service);
@@ -483,9 +484,9 @@ class ProfileData {
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
-	 * @access	public
-	 * @param	string	$field Field name to retrieve.
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @access public
+	 * @param  string $field Field name to retrieve.
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function getFieldHtml($field) {
 		global $wgOut, $wgUser;
@@ -502,7 +503,7 @@ class ProfileData {
 				[
 					'class'	=> 'rightfloat profileedit',
 					'href'	=> '#',
-					'title' =>	wfMessage('editfield-' . $field . '-tooltip')->plain()
+					'title' => wfMessage('editfield-' . $field . '-tooltip')->plain()
 				],
 				HydraCore::awesomeIcon('pencil-alt')
 			) . $fieldHtml;
@@ -514,8 +515,8 @@ class ProfileData {
 	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
-	 * @access	public
-	 * @return	mixed	Array with HTML string at index 0 or an HTML string.
+	 * @access public
+	 * @return mixed	Array with HTML string at index 0 or an HTML string.
 	 */
 	public function getProfileLinksHtml() {
 		global $wgUser;
@@ -533,7 +534,7 @@ class ProfileData {
 				[
 					'class'	=> 'rightfloat socialedit',
 					'href'	=> '#',
-					'title' =>	wfMessage('editfield-social-tooltip')->plain()
+					'title' => wfMessage('editfield-social-tooltip')->plain()
 				],
 				HydraCore::awesomeIcon('pencil-alt')
 			);
@@ -553,8 +554,8 @@ class ProfileData {
 	/**
 	 * Check whether we are viewing the profile of the logged-in user
 	 *
-	 * @access	public
-	 * @return	bool
+	 * @access public
+	 * @return bool
 	 */
 	public function isViewingSelf() {
 		global $wgUser;
@@ -565,12 +566,12 @@ class ProfileData {
 	/**
 	 * Log a profile change.
 	 *
-	 * @access	public
-	 * @param	string	$section Section string of the profile.  Example: profile-aboutme
-	 * @param	string	$comment Comment for the log, usually the text of the change.
-	 * @param	object	$target User targeted for the action.
-	 * @param	object	$performer User who performed the action.  Null to use the current user.
-	 * @return	void
+	 * @access public
+	 * @param  string $section   Section string of the profile.  Example: profile-aboutme
+	 * @param  string $comment   Comment for the log, usually the text of the change.
+	 * @param  object $target    User targeted for the action.
+	 * @param  object $performer User who performed the action.  Null to use the current user.
+	 * @return void
 	 */
 	public static function logProfileChange($section, $comment, User $target, User $performer) {
 		if (strlen($comment) > 140) {
@@ -594,8 +595,8 @@ class ProfileData {
 	/**
 	 * Returns all the user's location profile data
 	 *
-	 * @access	public
-	 * @return	array	Possibly including key: location
+	 * @access public
+	 * @return array	Possibly including key: location
 	 */
 	public function getLocation() {
 		$profile = [
@@ -607,8 +608,8 @@ class ProfileData {
 	/**
 	 * Returns all the user's external social profiles.
 	 *
-	 * @access	public
-	 * @return	array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
+	 * @access public
+	 * @return array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
 	 */
 	public function getExternalProfiles() {
 		foreach (self::$externalProfiles as $service => $data) {
@@ -619,6 +620,7 @@ class ProfileData {
 
 	/**
 	 * Returns the md5_key for the wiki the user has selected as a favorite
+	 *
 	 * @return string
 	 */
 	public function getFavoriteWikiHash() {
@@ -641,9 +643,9 @@ class ProfileData {
 	/**
 	 * Get information about wiki sites from Redis for searching.
 	 *
-	 * @access	public
-	 * @param string $search Search Term
-	 * @return	array	Search Results
+	 * @access public
+	 * @param  string $search Search Term
+	 * @return array	Search Results
 	 */
 	public static function getWikiSitesSearch($search) {
 		$redis = RedisCache::getClient('cache');
@@ -672,9 +674,9 @@ class ProfileData {
 	/**
 	 * Returns the decoded wiki data available in redis
 	 *
-	 * @access	public
-	 * @param	string|array|null $siteKey md5 key for wanted site, or array of keys.
-	 * @return	array	Wiki data arrays.
+	 * @access public
+	 * @param  string|array|null $siteKey md5 key for wanted site, or array of keys.
+	 * @return array	Wiki data arrays.
 	 */
 	public static function getWikiSites($siteKey = null) {
 		$redis = RedisCache::getClient('cache');
@@ -708,6 +710,7 @@ class ProfileData {
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
+	 *
 	 * @return bool
 	 */
 	public function getProfileTypePreference() {
@@ -720,6 +723,7 @@ class ProfileData {
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
+	 *
 	 * @return bool
 	 */
 	public function getCommentTypePreference() {

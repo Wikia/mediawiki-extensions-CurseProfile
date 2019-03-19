@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use Action;
@@ -39,38 +39,37 @@ use User;
  * Holds the primary logic over how and when a profile page is displayed
  */
 class ProfilePage extends Article {
-
 	/**
-	 * @var		string
+	 * @var string
 	 */
 	protected $userName;
 
 	/**
-	 * @var		integer
+	 * @var integer
 	 */
 	protected $user_id;
 
 	/**
-	 * @var		object	User instance
+	 * @var object	User instance
 	 */
 	protected $user;
 
 	/**
-	 * @var		object	ProfileData instance
+	 * @var object	ProfileData instance
 	 */
 	protected $profile;
 
 	/**
 	 * Whether or not the current page being rendered is with action=view.
 	 *
-	 * @var		boolean
+	 * @var boolean
 	 */
 	private $actionIsView;
 
 	/**
 	 * An array of groups to be excluded from display on profiles
 	 *
-	 * @var		array
+	 * @var array
 	 */
 	private $hiddenGroups = [
 		'*',
@@ -85,24 +84,24 @@ class ProfilePage extends Article {
 	/**
 	 * Whether or not we're on a mobile view.
 	 *
-	 * @var		boolean
+	 * @var boolean
 	 */
 	private $mobile;
 
 	/**
 	 * Namespaces that CurseProfile operates inside.
 	 *
-	 * @var		array
+	 * @var array
 	 */
 	static private $userNamespaces = [NS_USER, NS_USER_TALK, NS_USER_PROFILE];
 
 	/**
 	 * Main Constructor
 	 *
-	 * @access	public
-	 * @param	Title $title
-	 * @param	IContextSource|null $context
-	 * @return	void
+	 * @access public
+	 * @param  Title               $title
+	 * @param  IContextSource|null $context
+	 * @return void
 	 */
 	public function __construct($title, $context = null) {
 		parent::__construct($title);
@@ -128,10 +127,10 @@ class ProfilePage extends Article {
 	 * Create a new instance from a page title.  This is the preferred entry point since it handles
 	 * if the title is in an usable namespace.
 	 *
-	 * @access	public
-	 * @param	Title $title
-	 * @param	IContextSource|null $context
-	 * @return	mixed	New self or false for a bad title.
+	 * @access public
+	 * @param  Title               $title
+	 * @param  IContextSource|null $context
+	 * @return mixed	New self or false for a bad title.
 	 */
 	public static function newFromTitle($title, IContextSource $context = null) {
 		if (in_array($title->getNamespace(), self::$userNamespaces)) {
@@ -162,10 +161,10 @@ class ProfilePage extends Article {
 	/**
 	 * Return the User object for this profile.
 	 *
-	 * @param mixed $audience
+	 * @param mixed     $audience
 	 * @param User|null $user
 	 *
-	 * @return	object	User
+	 * @return object	User
 	 */
 	public function getUser($audience = Revision::FOR_PUBLIC, User $user = null) {
 		return $this->user;
@@ -174,7 +173,7 @@ class ProfilePage extends Article {
 	/**
 	 * Return the User object for who created this profile.(The user, technically.)
 	 *
-	 * @param mixed $audience
+	 * @param mixed     $audience
 	 * @param User|null $user
 	 *
 	 * @return User
@@ -186,8 +185,8 @@ class ProfilePage extends Article {
 	/**
 	 * Shortcut method to retrieving the user's profile page preference
 	 *
-	 * @access	public
-	 * @return	boolean	True if profile page is preferred, false if wiki is preferred.
+	 * @access public
+	 * @return boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
 	public function isProfilePreferred() {
 		return $this->profile->getProfileTypePreference();
@@ -196,8 +195,8 @@ class ProfilePage extends Article {
 	/**
 	 * Shortcut method to retrieving the user's comment page preference
 	 *
-	 * @access	public
-	 * @return	boolean	True if profile comment page is preferred, false if wiki is preferred.
+	 * @access public
+	 * @return boolean	True if profile comment page is preferred, false if wiki is preferred.
 	 */
 	public function isCommentsPreferred() {
 		return $this->profile->getCommentTypePreference();
@@ -207,9 +206,9 @@ class ProfilePage extends Article {
 	 * True if we are not on a subpage, and if we are in the basic User namespace,
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
-	 * @access	public
-	 * @param	Title|null $title object to check instead of the assumed.
-	 * @return	bool
+	 * @access public
+	 * @param  Title|null $title object to check instead of the assumed.
+	 * @return bool
 	 */
 	public function isUserPage($title = null) {
 		if ($title === null) {
@@ -221,9 +220,9 @@ class ProfilePage extends Article {
 	/**
 	 * True if we are viewing a user_talk namespace page.
 	 *
-	 * @access	public
-	 * @param	Title|null $title [Optional] Title object to check instead of the assumed.
-	 * @return	bool
+	 * @access public
+	 * @param  Title|null $title [Optional] Title object to check instead of the assumed.
+	 * @return bool
 	 */
 	public function isUserTalkPage($title = null) {
 		if ($title === null) {
@@ -235,9 +234,9 @@ class ProfilePage extends Article {
 	/**
 	 * True if we need to render the user's profile page.
 	 *
-	 * @access	public
-	 * @param	Title|null $title [Optional] Title object to check instead of the assumed.
-	 * @return	bool
+	 * @access public
+	 * @param  Title|null $title [Optional] Title object to check instead of the assumed.
+	 * @return bool
 	 */
 	public function isProfilePage($title = null) {
 		if ($title === null) {
@@ -249,8 +248,8 @@ class ProfilePage extends Article {
 	/**
 	 * Is the action for this page 'view'?
 	 *
-	 * @access	public
-	 * @return	bool
+	 * @access public
+	 * @return bool
 	 */
 	public function isActionView() {
 		return $this->actionIsView;
@@ -259,8 +258,8 @@ class ProfilePage extends Article {
 	/**
 	 * Returns the title object for the user's page in the UserProfile namespace
 	 *
-	 * @access	public
-	 * @return	Title instance
+	 * @access public
+	 * @return Title instance
 	 */
 	public function getUserProfileTitle() {
 		return Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
@@ -269,10 +268,10 @@ class ProfilePage extends Article {
 	/**
 	 * Adjusts the links in the primary action bar on profile pages and user wiki pages.
 	 *
-	 * @access	public
-	 * @param	array	&$links Structured info on what links will appear on the rendered page.
-	 * @param	Title $title Title of the page the user is on in the User or User_talk namespace.
-	 * @return	void
+	 * @access public
+	 * @param  array &$links Structured info on what links will appear on the rendered page.
+	 * @param  Title $title  Title of the page the user is on in the User or User_talk namespace.
+	 * @return void
 	 */
 	public function customizeNavBar(&$links, $title) {
 		// Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages
@@ -351,12 +350,12 @@ class ProfilePage extends Article {
 	/**
 	 * Prints a gravatar image tag for a user
 	 *
-	 * @param	null	$parser - Not Used but passed by MW
-	 * @param	int	$size the square size of the avatar to display
-	 * @param	string $email user's email address
-	 * @param	string	$userName the user's username
-	 * @param	string	$attributeString additional html attributes to include in the IMG tag
-	 * @return	string	the HTML fragment containing a IMG tag
+	 * @param  null   $parser          - Not Used but passed by MW
+	 * @param  int    $size            the square size of the avatar to display
+	 * @param  string $email           user's email address
+	 * @param  string $userName        the user's username
+	 * @param  string $attributeString additional html attributes to include in the IMG tag
+	 * @return string	the HTML fragment containing a IMG tag
 	 */
 	public static function userAvatar($parser, $size, $email, $userName, $attributeString = '') {
 		$size = intval($size);
@@ -370,8 +369,8 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the groups to which a user belongs
 	 *
-	 * @param	Parser	&$parser parser reference
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @param  Parser &$parser parser reference
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function groupList(&$parser) {
 		global $wgUser;
@@ -410,8 +409,8 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's location.
 	 *
-	 * @param	Parser &$parser	parser reference
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @param  Parser &$parser parser reference
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function location(&$parser) {
 		$location = $this->profile->getLocation();
@@ -425,10 +424,10 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
-	 * @access	public
-	 * @param	Parser &$parser	Parser reference.
-	 * @param	string	$field Field name to retrieve.
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @access public
+	 * @param  Parser &$parser Parser reference.
+	 * @param  string $field   Field name to retrieve.
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function fieldBlock(&$parser, $field) {
 		return [
@@ -440,9 +439,9 @@ class ProfilePage extends Article {
 	/**
 	 * Generate Profile Links HTML
 	 *
-	 * @access	public
-	 * @param	array	$profileLinks Profile Links
-	 * @return	string	HTML
+	 * @access public
+	 * @param  array $profileLinks Profile Links
+	 * @return string	HTML
 	 */
 	public static function generateProfileLinks($profileLinks) {
 		$html = '<ul class="profilelinks">';
@@ -466,8 +465,8 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
-	 * @param	Parser|null	&$parser parser reference
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @param  Parser|null &$parser parser reference
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function profileLinks(&$parser = null) {
 		return [
@@ -479,8 +478,8 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
 	 *
-	 * @param	Parser	&$parser parser reference
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @param  Parser &$parser parser reference
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function favoriteWiki(&$parser) {
 		$wiki = $this->profile->getFavoriteWiki();
@@ -511,7 +510,7 @@ class ProfilePage extends Article {
 	 * Performs the work for the parser tag that displays user statistics.
 	 * The numbers themselves are pulled from the Cheevos API.
 	 *
-	 * @return	string	generated HTML fragment
+	 * @return string	generated HTML fragment
 	 */
 	public function userStats() {
 		global $dsSiteKey;
@@ -598,8 +597,8 @@ class ProfilePage extends Article {
 	/**
 	 * Recursive function for parsing out and stringifying the stats array above
 	 *
-	 * @param	mixed	$input arrays will generate a new list, other values will be directly returned
-	 * @return	string	html DL fragment or $input if it is not an array
+	 * @param  mixed $input arrays will generate a new list, other values will be directly returned
+	 * @return string	html DL fragment or $input if it is not an array
 	 */
 	public function generateStatsDL($input) {
 		global $wgUser;
@@ -641,10 +640,10 @@ class ProfilePage extends Article {
 	/**
 	 * Display the icons of the recent achievements the user has earned, for the sidebar
 	 *
-	 * @param	Parser	&$parser parser reference
-	 * @param	string	$type type of query. one of: local, master (default)
-	 * @param	int	$limit maximum number to display
-	 * @return	array
+	 * @param  Parser &$parser parser reference
+	 * @param  string $type    type of query. one of: local, master (default)
+	 * @param  int    $limit   maximum number to display
+	 * @return array
 	 */
 	public function recentAchievements(&$parser, $type = 'special', $limit = 0) {
 		global $dsSiteKey;
@@ -737,8 +736,8 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
 	 *
-	 * @param	object	&$parser parser reference
-	 * @return	mixed	array with HTML string at index 0 or an HTML string
+	 * @param  object &$parser parser reference
+	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel(&$parser) {
 		$lookup = CentralIdLookup::factory();
@@ -783,9 +782,9 @@ class ProfilePage extends Article {
 	/**
 	 * Parser hook function that inserts either an "edit profile" button or a "add/remove friend" button
 	 *
-	 * @access	public
-	 * @param	Parser	&$parser
-	 * @return	array	with html as the first element
+	 * @access public
+	 * @param  Parser &$parser
+	 * @return array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
 		$html = FriendDisplay::addFriendButton($this->user_id);
@@ -810,7 +809,7 @@ class ProfilePage extends Article {
 	/**
 	 * Defines the HTML structure of the profile page.
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	protected function profileLayout() {
 		global $wgUser;
@@ -896,7 +895,7 @@ __NOINDEX__
 	/**
 	 * Defines the HTML structure of the profile page for mobile devices.
 	 *
-	 * @return	string
+	 * @return string
 	 */
 	protected function mobileProfileLayout() {
 		global $wgUser;

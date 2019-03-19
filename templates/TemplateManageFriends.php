@@ -4,12 +4,11 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
  **/
 
 use CurseProfile\FriendDisplay;
@@ -18,19 +17,19 @@ class TemplateManageFriends {
 	/**
 	 * Output HTML
 	 *
-	 * @var		string
+	 * @var string
 	 */
 	private $HTML;
 
 	/**
 	 * Displays a list of friends.
 	 *
-	 * @access	public
-	 * @param	array	$friends Raw friend IDs.
-	 * @param	string	$pagination Pagination HTML
-	 * @param	int	$itemsPerPage Items Per Page
-	 * @param	int	$start Start Offset
-	 * @return	void
+	 * @access public
+	 * @param  array  $friends      Raw friend IDs.
+	 * @param  string $pagination   Pagination HTML
+	 * @param  int    $itemsPerPage Items Per Page
+	 * @param  int    $start        Start Offset
+	 * @return void
 	 */
 	public function display($friends, $pagination, $itemsPerPage, $start) {
 		$this->HTML = '<h2>' . wfMessage('friends') . '</h2>';
@@ -47,13 +46,13 @@ class TemplateManageFriends {
 	/**
 	 * Displays a management page for friends
 	 *
-	 * @access	public
-	 * @param	array	$friends array of current friends Curse IDs
-	 * @param	array	$received array of received friend requests (curse IDs as keys)
-	 * @param	array	$sent array of curse ids to whom friend requests are pending
-	 * @param	int	$itemsPerPage Items Per Page
-	 * @param	int	$start Start Offset
-	 * @return	string	Built HTML
+	 * @access public
+	 * @param  array $friends      array of current friends Curse IDs
+	 * @param  array $received     array of received friend requests (curse IDs as keys)
+	 * @param  array $sent         array of curse ids to whom friend requests are pending
+	 * @param  int   $itemsPerPage Items Per Page
+	 * @param  int   $start        Start Offset
+	 * @return string	Built HTML
 	 */
 	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
 		$this->HTML = '';

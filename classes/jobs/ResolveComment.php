@@ -2,6 +2,7 @@
 /**
  * A job to asynchronously call the comment api on a remote wiki
  */
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -13,9 +14,9 @@ class ResolveComment extends Job {
 	/**
 	 * Look up a wiki by md5key and open a connection to its database
 	 *
-	 * @access	public
-	 * @param	string	$dbKey MD5 key for the wiki
-	 * @return	object	Active MW database connection
+	 * @access public
+	 * @param  string $dbKey MD5 key for the wiki
+	 * @return object	Active MW database connection
 	 */
 	public static function getWikiDB($dbKey) {
 		try {
@@ -33,11 +34,11 @@ class ResolveComment extends Job {
 	/**
 	 * Resolve a reported comment by deleting the comment or ignoring it by marking the report dismissed
 	 *
-	 * @param	array	Params for this job with string keys:
+	 * @param  array	Params for this job with string keys:
 	 *   reportKey: unique key identifying the reported comment
 	 *   action: 'dismiss' or 'delete'
 	 *   byUser: curse ID of admin acting
-	 * @return	integer	return code
+	 * @return integer	return code
 	 */
 	public function execute($args = []) {
 		if (!CommentReport::keyIsLocal($args['reportKey'])) {

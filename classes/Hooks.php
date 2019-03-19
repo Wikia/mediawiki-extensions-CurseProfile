@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use DynamicSettings\Environment;
@@ -28,24 +28,24 @@ class Hooks {
 	/**
 	 * Reference to ProfilePage object
 	 *
-	 * @access	private
-	 * @var		object	CurseProfile\ProfilePage
+	 * @access private
+	 * @var    object	CurseProfile\ProfilePage
 	 */
 	static private $profilePage = false;
 
 	/**
 	 * Reference to the title originally parsed from this request.
 	 *
-	 * @access	private
-	 * @var		object	Title
+	 * @access private
+	 * @var    object	Title
 	 */
 	static private $title = null;
 
 	/**
 	 * Setup extra namespaces during MediaWiki setup process.
 	 *
-	 * @access	public
-	 * @return	boolean	True
+	 * @access public
+	 * @return boolean	True
 	 */
 	public static function onRegistration() {
 		global $wgEchoNotificationIcons, $wgExtraNamespaces;
@@ -64,9 +64,9 @@ class Hooks {
 	/**
 	 * Set parser hooks for the profile pages.
 	 *
-	 * @access	public
-	 * @param	Parser &$parser
-	 * @return	boolean	True
+	 * @access public
+	 * @param  Parser &$parser
+	 * @return boolean	True
 	 */
 	public static function onParserFirstCall(&$parser) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
@@ -93,12 +93,12 @@ class Hooks {
 	/**
 	 * Handle setting up profile page handlers.
 	 *
-	 * @param Title &$title
-	 * @param Article &$article
-	 * @param object &$output
-	 * @param User &$user
-	 * @param object $request
-	 * @param object $mediaWiki
+	 * @param  Title   &$title
+	 * @param  Article &$article
+	 * @param  object  &$output
+	 * @param  User    &$user
+	 * @param  object  $request
+	 * @param  object  $mediaWiki
 	 * @return void
 	 */
 	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
@@ -114,9 +114,9 @@ class Hooks {
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
 	 *
-	 * @access	public
-	 * @param	object	$destArticle Destination Article
-	 * @return	void
+	 * @access public
+	 * @param  object $destArticle Destination Article
+	 * @return void
 	 */
 	public static function onArticleViewRedirect($destArticle) {
 		if (self::$title !== null && !self::$title->equals($destArticle->getTitle())) {
@@ -130,10 +130,10 @@ class Hooks {
 	/**
 	 * Hide NS_USER_PROFILE from Special:WantedPages.
 	 *
-	 * @access	public
-	 * @param mixed &$wantedPages
-	 * @param mixed &$query
-	 * @return	boolean	True
+	 * @access public
+	 * @param  mixed &$wantedPages
+	 * @param  mixed &$query
+	 * @return boolean	True
 	 */
 	public static function onWantedPagesGetQueryInfo(&$wantedPages, &$query) {
 		if (isset($query['conds'])) {
@@ -150,13 +150,13 @@ class Hooks {
 	/**
 	 * Make links to user pages known (not red) when that user opts for a profile page
 	 *
-	 * @param mixed $dummy
-	 * @param mixed $target
-	 * @param mixed &$html
-	 * @param mixed &$customAttribs
-	 * @param mixed &$query
-	 * @param mixed &$options
-	 * @param mixed &$ret
+	 * @param  mixed $dummy
+	 * @param  mixed $target
+	 * @param  mixed &$html
+	 * @param  mixed &$customAttribs
+	 * @param  mixed &$query
+	 * @param  mixed &$options
+	 * @param  mixed &$ret
 	 * @return void
 	 */
 	public static function onLinkBegin($dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret) {
@@ -176,8 +176,8 @@ class Hooks {
 	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
 	 *
-	 * @param Title &$title
-	 * @param Article &$article
+	 * @param  Title   &$title
+	 * @param  Article &$article
 	 * @return bool
 	 */
 	public static function onArticleFromTitle(Title &$title, &$article) {
@@ -195,8 +195,8 @@ class Hooks {
 	/**
 	 * handle output of the profile page
 	 *
-	 * @param Title $title
-	 * @param Article $article
+	 * @param  Title   $title
+	 * @param  Article $article
 	 * @return bool
 	 */
 	private static function renderProfile(&$title, &$article) {
@@ -222,7 +222,7 @@ class Hooks {
 	/**
 	 * Get the correct preference based on namespace
 	 *
-	 * @param Title $title
+	 * @param  Title $title
 	 * @return array
 	 */
 	private static function getProfilePreference(&$title) {
@@ -242,7 +242,7 @@ class Hooks {
 	/**
 	 * handle the user and talk page
 	 *
-	 * @param Title $title
+	 * @param  Title $title
 	 * @return bool
 	 */
 	private static function renderUserPages(&$title) {
@@ -284,7 +284,7 @@ class Hooks {
 	/**
 	 * Check for request variables that indicate the need to show warnings.
 	 *
-	 * @param object $request Global $wgRequest object
+	 * @param  object $request Global $wgRequest object
 	 * @return bool
 	 */
 	private static function shouldWarn($request) {
@@ -298,10 +298,10 @@ class Hooks {
 	/**
 	 * Handle adding profile=no to redirects after articles are created or edited in the NS_USER and NS_USER_TALK namespaces.
 	 *
-	 * @access	public
-	 * @param	EditPage	$editpage EditPage
-	 * @param	WebRequest	$request WebRequest
-	 * @return	boolean	True
+	 * @access public
+	 * @param  EditPage   $editpage EditPage
+	 * @param  WebRequest $request  WebRequest
+	 * @return boolean	True
 	 */
 	public static function onEditPageImportFormData(EditPage $editpage, WebRequest $request) {
 		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
@@ -313,10 +313,10 @@ class Hooks {
 	/**
 	 * Adds links to the navigation tabs.
 	 *
-	 * @access	public
-	 * @param	object	$skin SkinTemplate
-	 * @param	array	&$links Link Descriptors
-	 * @return	boolean	True
+	 * @access public
+	 * @param  object $skin   SkinTemplate
+	 * @param  array  &$links Link Descriptors
+	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
 		if (self::$profilePage !== false) {
@@ -328,11 +328,11 @@ class Hooks {
 	/**
 	 * Customize subpage links to use profile=no as needed.
 	 *
-	 * @access	public
-	 * @param	string	&$subpages Subpages HTML
-	 * @param	object	$skinTemplate SkinTemplate
-	 * @param	object	$output Output
-	 * @return	boolean	True
+	 * @access public
+	 * @param  string &$subpages    Subpages HTML
+	 * @param  object $skinTemplate SkinTemplate
+	 * @param  object $output       Output
+	 * @return boolean	True
 	 */
 	public static function onSkinSubPageSubtitle(&$subpages, $skinTemplate, $output) {
 		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
@@ -385,9 +385,9 @@ class Hooks {
 	/**
 	 * Setups and Modifies Database Information
 	 *
-	 * @access	public
-	 * @param	object	$updater DatabaseUpdater Object
-	 * @return	boolean	true
+	 * @access public
+	 * @param  object $updater DatabaseUpdater Object
+	 * @return boolean	true
 	 */
 	public static function onLoadExtensionSchemaUpdates($updater) {
 		$extDir = dirname(__DIR__);
@@ -424,9 +424,9 @@ class Hooks {
 	/**
 	 * Add unit tests to the mediawiki test framework
 	 *
-	 * @access	public
-	 * @param	array	&$files
-	 * @return	boolean	true
+	 * @access public
+	 * @param  array &$files
+	 * @return boolean	true
 	 */
 	public static function onUnitTestsList(&$files) {
 		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
@@ -437,9 +437,9 @@ class Hooks {
 	/**
 	 * Register the canonical names for custom namespaces.
 	 *
-	 * @access	public
-	 * @param	array	&$list namespace numbers mapped to corresponding canonical names
-	 * @return	boolean	true
+	 * @access public
+	 * @param  array &$list namespace numbers mapped to corresponding canonical names
+	 * @return boolean	true
 	 */
 	public static function onCanonicalNamespaces(&$list) {
 		$list[NS_USER_PROFILE] = 'UserProfile';
@@ -449,10 +449,10 @@ class Hooks {
 	/**
 	 * Add extra preferences
 	 *
-	 * @access	public
-	 * @param	object	$user User whose preferences are being modified
-	 * @param	array	&$preferences Preferences description object, to be fed to an HTMLForm
-	 * @return	boolean	true
+	 * @access public
+	 * @param  object $user         User whose preferences are being modified
+	 * @param  array  &$preferences Preferences description object, to be fed to an HTMLForm
+	 * @return boolean	true
 	 */
 	public static function onGetPreferences($user, &$preferences) {
 		ProfileData::insertProfilePrefs($preferences);
@@ -462,12 +462,12 @@ class Hooks {
 	/**
 	 * Function Documentation
 	 *
-	 * @access	public
-	 * @param	array $formData array of user submitted data
-	 * @param	object $form PreferencesForm object, also a ContextSource
-	 * @param	object $user User object with preferences to be saved set
-	 * @param	bool &$result boolean indicating success
-	 * @return	boolean	True
+	 * @access public
+	 * @param  array  $formData array of user submitted data
+	 * @param  object $form     PreferencesForm object, also a ContextSource
+	 * @param  object $user     User object with preferences to be saved set
+	 * @param  bool   &$result  boolean indicating success
+	 * @return boolean	True
 	 */
 	public static function onPreferencesFormPreSave($formData, $form, $user, &$result) {
 		$untouchedUser = User::newFromId($user->getId());
@@ -494,9 +494,9 @@ class Hooks {
 	/**
 	 * Add extra preferences defaults
 	 *
-	 * @access	public
-	 * @param	array	&$defaultOptions mapping of preference to default value
-	 * @return	boolean	true
+	 * @access public
+	 * @param  array &$defaultOptions mapping of preference to default value
+	 * @return boolean	true
 	 */
 	public static function onUserGetDefaultOptions(&$defaultOptions) {
 		ProfileData::insertProfilePrefsDefaults($defaultOptions);
@@ -506,10 +506,10 @@ class Hooks {
 	/**
 	 * Save preferences.
 	 *
-	 * @access	public
-	 * @param	User	$user User whose preferences are being modified.
-	 * @param	array	&$options Preferences description object, to be fed to an HTMLForm.
-	 * @return	boolean	True
+	 * @access public
+	 * @param  User  $user     User whose preferences are being modified.
+	 * @param  array &$options Preferences description object, to be fed to an HTMLForm.
+	 * @return boolean	True
 	 */
 	public static function onUserSaveOptions(User $user, array &$options) {
 		if ($user && $user->getId()) {
@@ -521,7 +521,7 @@ class Hooks {
 	/**
 	 * Get a username from title
 	 *
-	 * @param Title $title
+	 * @param  Title $title
 	 * @return string
 	 */
 	public static function resolveUsername($title) {
@@ -539,11 +539,11 @@ class Hooks {
 	/**
 	 * Add this extension's Echo notifications.
 	 *
-	 * @access	public
-	 * @param	array	&$wgEchoNotifications in Extension:Echo.
-	 * @param	array	&$wgEchoNotificationCategories in Extension:Echo.
-	 * @param	array	&$wgEchoNotificationIcons in Extension:Echo.
-	 * @return	boolean	True
+	 * @access public
+	 * @param  array &$wgEchoNotifications          in Extension:Echo.
+	 * @param  array &$wgEchoNotificationCategories in Extension:Echo.
+	 * @param  array &$wgEchoNotificationIcons      in Extension:Echo.
+	 * @return boolean	True
 	 */
 	public static function onBeforeCreateEchoEvent(&$wgEchoNotifications, &$wgEchoNotificationCategories, &$wgEchoNotificationIcons) {
 		$wgEchoNotificationCategories['profile-friendship'] = [
@@ -652,10 +652,10 @@ class Hooks {
 	/**
 	 * Add CurseProfile CSS to Mobile Skin
 	 *
-	 * @access	public
-	 * @param	object	$skin SkinTemplate Object
-	 * @param	array	&$modules Array of Modules to Modify
-	 * @return	bool True
+	 * @access public
+	 * @param  object $skin     SkinTemplate Object
+	 * @param  array  &$modules Array of Modules to Modify
+	 * @return bool True
 	 */
 	public static function onSkinMinervaDefaultModules($skin, &$modules) {
 		if (self::$profilePage instanceof \CurseProfile\ProfilePage && self::$profilePage->isProfilePage()) {

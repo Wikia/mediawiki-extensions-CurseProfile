@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile\MWEcho;
 
 use EchoModelFormatter;
@@ -25,10 +25,10 @@ class NotificationFormatter extends EchoModelFormatter {
 	/**
 	 * Turns keywords for payload pieces into actual content.
 	 *
-	 * @param	string	$payload the keyword for a payload
-	 * @param	object	$event the event object
-	 * @param	User	$user the user to whom this event will be delivered
-	 * @return	string	the content for the given payload keyword
+	 * @param  string $payload the keyword for a payload
+	 * @param  object $event   the event object
+	 * @param  User   $user    the user to whom this event will be delivered
+	 * @return string	the content for the given payload keyword
 	 */
 	protected function formatPayload($payload, $event, $user) {
 		switch ($payload) {
@@ -48,12 +48,12 @@ class NotificationFormatter extends EchoModelFormatter {
 	/**
 	 * Processes parameter keywords into data for a message before rendering a notification
 	 *
-	 * @access	protected
-	 * @param	object	$event EchoEvent object
-	 * @param	string	$param Parameter keyword to be given a value
-	 * @param	object	$message The mediawiki message object in need of this parameter.
-	 * @param	object	$user The user to whom this notification will be delivered.
-	 * @return	void	Deliver the appropriate value to the message via ->params() instead of returning a value.
+	 * @access protected
+	 * @param  object $event   EchoEvent object
+	 * @param  string $param   Parameter keyword to be given a value
+	 * @param  object $message The mediawiki message object in need of this parameter.
+	 * @param  object $user    The user to whom this notification will be delivered.
+	 * @return void	Deliver the appropriate value to the message via ->params() instead of returning a value.
 	 */
 	protected function processParam($event, $param, $message, $user) {
 		$extra = $event->getExtra();
@@ -73,11 +73,11 @@ class NotificationFormatter extends EchoModelFormatter {
 	/**
 	 * Helper function for getLink().
 	 *
-	 * @access	public
-	 * @param	object	EchoEvent $event
-	 * @param	object	User $user The user receiving the notification
-	 * @param	string	$destination The destination type for the link, e.g. 'agent'
-	 * @return	array	Including target and query parameters. Note that target can be either a Title or a full url.
+	 * @access public
+	 * @param  object	EchoEvent $event
+	 * @param  object  User       $user        The user receiving the notification
+	 * @param  string             $destination The destination type for the link, e.g. 'agent'
+	 * @return array	Including target and query parameters. Note that target can be either a Title or a full url.
 	 */
 	protected function getLinkParams($event, $user, $destination) {
 		$target = null;

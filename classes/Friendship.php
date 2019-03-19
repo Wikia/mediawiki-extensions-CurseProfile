@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -37,7 +37,7 @@ class Friendship {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param	int	$globalId curse ID of a user
+	 * @param int $globalId curse ID of a user
 	 */
 	public function __construct($globalId) {
 		$this->globalId = intval($globalId);
@@ -46,8 +46,8 @@ class Friendship {
 	/**
 	 * Check the relationship status between two users.
 	 *
-	 * @param	int	$toUser curse ID of a user
-	 * @return	int	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
+	 * @param  int $toUser curse ID of a user
+	 * @return int	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
 	public function getRelationship($toUser) {
 		if ($this->globalId < 1) {
@@ -67,8 +67,8 @@ class Friendship {
 	/**
 	 * Returns the array of curse IDs for this or another user's friends
 	 *
-	 * @param	int|null $user optional curse ID of a user (default|null $this->globalId
-	 * @return	array	curse IDs of friends
+	 * @param  int|null $user optional curse ID of a user (default|null $this->globalId
+	 * @return array	curse IDs of friends
 	 */
 	public function getFriends($user = null) {
 		if ($this->globalId < 1) {
@@ -93,8 +93,8 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @param	int|null	$user optional curse ID of a user (default|null $this->globalId
-	 * @return	int	a number of friends
+	 * @param  int|null $user optional curse ID of a user (default|null $this->globalId
+	 * @return int	a number of friends
 	 */
 	public function getFriendCount($user = null) {
 		// my god look how efficient this is
@@ -105,7 +105,7 @@ class Friendship {
 	/**
 	 * Returns the array of pending friend requests that have sent this user
 	 *
-	 * @return	array	keys are curse IDs of potential friends,
+	 * @return array	keys are curse IDs of potential friends,
 	 *     values are json strings with additional data (currently empty)
 	 */
 	public function getReceivedRequests() {
@@ -126,7 +126,7 @@ class Friendship {
 	/**
 	 * Returns the array of pending friend requests that have been sent by this user
 	 *
-	 * @return	array	values are curse IDs
+	 * @return array	values are curse IDs
 	 */
 	public function getSentRequests() {
 		if ($this->globalId < 1) {
@@ -146,9 +146,9 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @access	public
-	 * @param	int	$toGlobalId Global ID of the user to friend.
-	 * @return	boolean	True on success, False on failure.
+	 * @access public
+	 * @param  int $toGlobalId Global ID of the user to friend.
+	 * @return boolean	True on success, False on failure.
 	 */
 	public function sendRequest($toGlobalId) {
 		global $wgUser;
@@ -159,7 +159,7 @@ class Friendship {
 
 		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
 			return ['error' => 'friendrequest-already-friends'];
-;
+			;
 		}
 
 		try {
@@ -194,9 +194,9 @@ class Friendship {
 	/**
 	 * Accepts a pending request
 	 *
-	 * @access	public
-	 * @param	int $toGlobalId	curse ID of a user
-	 * @return	bool	true on success, false on failure
+	 * @access public
+	 * @param  int $toGlobalId curse ID of a user
+	 * @return bool	true on success, false on failure
 	 */
 	public function acceptRequest($toGlobalId) {
 		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
@@ -216,9 +216,9 @@ class Friendship {
 	/**
 	 * Ignores and dismisses a pending request
 	 *
-	 * @access	public
-	 * @param	int $toGlobalId	curse ID of a user
-	 * @return	bool	true on success, false on failure
+	 * @access public
+	 * @param  int $toGlobalId curse ID of a user
+	 * @return bool	true on success, false on failure
 	 */
 	public function ignoreRequest($toGlobalId) {
 		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
@@ -238,8 +238,8 @@ class Friendship {
 	/**
 	 * Removes a friend relationship, or cancels a pending request
 	 *
-	 * @param	int $toUser	global ID of a user
-	 * @return	bool	true on success, false on failure
+	 * @param  int $toUser global ID of a user
+	 * @return bool	true on success, false on failure
 	 */
 	public function removeFriend($toUser) {
 		$toUser = intval($toUser);

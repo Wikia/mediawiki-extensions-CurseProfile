@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use Linker;
@@ -23,8 +23,8 @@ class RecentActivity {
 	/**
 	 * handle parser hook call
 	 *
-	 * @param object &$parser
-	 * @param string $user_id
+	 * @param  object &$parser
+	 * @param  string $user_id
 	 * @return mixed
 	 */
 	public static function parserHook(&$parser, $user_id = '') {
@@ -59,8 +59,8 @@ class RecentActivity {
 	/**
 	 * Generates html for a link group like: (diff | hist)
 	 *
-	 * @param Title $title	mw Title object of the page
-	 * @param array $rev row from the revision table that should be diffed
+	 * @param Title $title mw Title object of the page
+	 * @param array $rev   row from the revision table that should be diffed
 	 *
 	 * @return string
 	 */

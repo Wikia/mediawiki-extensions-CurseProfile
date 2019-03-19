@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -28,8 +28,8 @@ class SpecialFriends extends UnlistedSpecialPage {
 	/**
 	 * Main Constructor
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function __construct() {
 		parent::__construct('Friends');
@@ -38,8 +38,8 @@ class SpecialFriends extends UnlistedSpecialPage {
 	/**
 	 * Show the special page
 	 *
-	 * @access	public
-	 * @param	string	$path - Mixed: parameter(s) passed to the page or null.
+	 * @access public
+	 * @param  string $path - Mixed: parameter(s) passed to the page or null.
 	 */
 	public function execute($path) {
 		$wgRequest = $this->getRequest();

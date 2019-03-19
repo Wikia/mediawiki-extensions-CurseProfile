@@ -4,12 +4,11 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
  **/
 
 use CurseProfile\CommentDisplay;
@@ -19,17 +18,17 @@ class TemplateCommentBoard {
 	/**
 	 * Output HTML
 	 *
-	 * @var		string
+	 * @var string
 	 */
 	private $HTML;
 
 	/**
 	 * Header for comments archive board
 	 *
-	 * @access	public
-	 * @param	object	$user user reference
-	 * @param	string	$title text title of the page
-	 * @return	string	Built HTML
+	 * @access public
+	 * @param  object $user  user reference
+	 * @param  string $title text title of the page
+	 * @return string	Built HTML
 	 */
 	public function header($user, $title) {
 		return '<p>' .
@@ -40,8 +39,8 @@ class TemplateCommentBoard {
 	/**
 	 * Header for single comment permalink page
 	 *
-	 * @param object $user
-	 * @param string $title
+	 * @param  object $user
+	 * @param  string $title
 	 * @return string
 	 */
 	public function permalinkHeader($user, $title) {
@@ -55,11 +54,11 @@ class TemplateCommentBoard {
 	/**
 	 * Comments display
 	 *
-	 * @access	public
-	 * @param	array	$comments array of comments
-	 * @param	int	$user_id id of user to whom this comment list belongs
-	 * @param	string	$pagination [optional] built HTML fragment for pagination
-	 * @return	string	Built HTML
+	 * @access public
+	 * @param  array  $comments   array of comments
+	 * @param  int    $user_id    id of user to whom this comment list belongs
+	 * @param  string $pagination [optional] built HTML fragment for pagination
+	 * @return string	Built HTML
 	 */
 	public function comments($comments, $user_id, $pagination = '') {
 		$this->HTML = '';

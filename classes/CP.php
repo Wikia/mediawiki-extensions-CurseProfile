@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use Linker;
@@ -23,7 +23,8 @@ use User;
 class CP {
 	/**
 	 * The db connection override for comment reporting actions
-	 * @var		object	mw DB connection
+	 *
+	 * @var object	mw DB connection
 	 */
 	private static $db;
 
@@ -31,7 +32,7 @@ class CP {
 	 * Overrides the MW db connections used by CurseProfile objects.
 	 * Useful for operating on child wikis from master wiki context.
 	 *
-	 * @param	object	$db mw DB connection
+	 * @param object $db mw DB connection
 	 */
 	public static function setDb($db) {
 		self::$db = $db;
@@ -40,8 +41,8 @@ class CP {
 	/**
 	 * Returns a db connection to use
 	 *
-	 * @param	int	$id mw db id (DB_MASTER or DB_SLAVE)
-	 * @return	object	mw db connection
+	 * @param  int $id mw db id (DB_MASTER or DB_SLAVE)
+	 * @return object	mw db connection
 	 */
 	public static function getDb($id) {
 		if (isset(self::$db)) {
@@ -53,8 +54,9 @@ class CP {
 	/**
 	 * Creates a time tag that can be converted to a dynamic relative time
 	 * after adding timeago.yarp.com to the page
-	 * @param string $timestamp
-	 * @param bool $mobile
+	 *
+	 * @param  string $timestamp
+	 * @param  bool   $mobile
 	 * @return string
 	 */
 	public static function timeTag($timestamp, $mobile = false) {
@@ -76,9 +78,9 @@ class CP {
 	/**
 	 * Returns an HTML string linking to the user page with the given ID
 	 *
-	 * @param	mixed	$user user id or user object
-	 * @param	string	$class classes to add, if defined
-	 * @return	string	html anchor tag fragment
+	 * @param  mixed  $user  user id or user object
+	 * @param  string $class classes to add, if defined
+	 * @return string	html anchor tag fragment
 	 */
 	public static function userLink($user, $class = false) {
 		if ($user instanceof \User) {
@@ -97,8 +99,8 @@ class CP {
 	/**
 	 * Returns a string URL to a png image for a gamepedia wiki
 	 *
-	 * @param	string	$md5 md5 site key
-	 * @return	string	url path to image
+	 * @param  string $md5 md5 site key
+	 * @return string	url path to image
 	 */
 	public static function getWikiImageByHash($md5) {
 		// TODO: write a separate file (loaded directly by the browser) to replace this function

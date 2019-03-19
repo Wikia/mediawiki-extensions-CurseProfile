@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -24,10 +24,10 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param	int	$user_id user id or curse id of the profile page being viewed
-	 * @param	array &$links	reference to the links array into which the links will be inserted
-	 * @param	bool $isGlobalId determines the function of the first arg
-	 * @return	void
+	 * @param  int   $user_id    user id or curse id of the profile page being viewed
+	 * @param  array &$links     reference to the links array into which the links will be inserted
+	 * @param  bool  $isGlobalId determines the function of the first arg
+	 * @return void
 	 */
 	public static function addFriendLink($user_id = '', &$links, $isGlobalId = false) {
 		global $wgUser;
@@ -106,9 +106,9 @@ class FriendDisplay {
 	}
 
 	/**
-	 * @param	int	$user_id user id or curse id of the user on which the buttons will act
-	 * @param	bool $isGlobalId determines the function of the previous arg
-	 * @return	string	html button stuff
+	 * @param  int  $user_id    user id or curse id of the user on which the buttons will act
+	 * @param  bool $isGlobalId determines the function of the previous arg
+	 * @return string	html button stuff
 	 */
 	public static function friendButtons($user_id = '', $isGlobalId = false) {
 		// reuse logic from the other function
@@ -141,8 +141,8 @@ class FriendDisplay {
 	/**
 	 * Adds a Friend Button
 	 *
-	 * @param string $user_id
-	 * @param bool $isGlobalId
+	 * @param  string $user_id
+	 * @param  bool   $isGlobalId
 	 * @return string
 	 */
 	public static function addFriendButton($user_id = '', $isGlobalId = false) {
@@ -152,10 +152,10 @@ class FriendDisplay {
 	/**
 	 * Get the user's friend count based on their local user ID.
 	 *
-	 * @access	public
-	 * @param	Parser $parser - Not used, but the parser will pass it regardless.
-	 * @param	int	$user_id Local User ID
-	 * @return	int	Number of friends.
+	 * @access public
+	 * @param  Parser $parser  - Not used, but the parser will pass it regardless.
+	 * @param  int    $user_id Local User ID
+	 * @return int	Number of friends.
 	 */
 	public static function count($parser, $user_id) {
 		$targetUser = User::newFromId($user_id);
@@ -176,10 +176,10 @@ class FriendDisplay {
 	/**
 	 * Get the user's friends based on their local user ID.
 	 *
-	 * @access	public
-	 * @param	Parser &$parser - Not used, but the parser will pass it regardless.
-	 * @param	int	$user_id Local User ID
-	 * @return	array	Parser compatible HTML array.
+	 * @access public
+	 * @param  Parser &$parser - Not used, but the parser will pass it regardless.
+	 * @param  int    $user_id Local User ID
+	 * @return array	Parser compatible HTML array.
 	 */
 	public static function friendList(&$parser, $user_id) {
 		$targetUser = User::newFromId($user_id);
@@ -209,12 +209,12 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param	array	$globalIds [Optional] Global IDs
-	 * @param	bool	$manageButtons [Optional] signature: callback( $global_id $userObj) returns string
-	 * @param	int $limit [Optional] Number of results to limit.
-	 * @param	int $offset [Optional] Offset to start from.
-	 * @param	bool $sortByActivity [Optional] Sort by user activity instead of name.
-	 * @return	string	HTML UL List
+	 * @param  array $globalIds      [Optional] Global IDs
+	 * @param  bool  $manageButtons  [Optional] signature: callback( $global_id $userObj) returns string
+	 * @param  int   $limit          [Optional] Number of results to limit.
+	 * @param  int   $offset         [Optional] Offset to start from.
+	 * @param  bool  $sortByActivity [Optional] Sort by user activity instead of name.
+	 * @return string	HTML UL List
 	 */
 	public static function listFromArray($globalIds = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$db = CP::getDb(DB_MASTER);

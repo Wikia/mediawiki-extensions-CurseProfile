@@ -4,12 +4,11 @@
  * Curse Profile
  * Display stats on the adoption rate of CurseProfile across hydra
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
 
 namespace CurseProfile;
@@ -25,8 +24,8 @@ class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Constructor
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function __construct() {
 		parent::__construct('ProfileStats', 'profile-stats');
@@ -35,9 +34,9 @@ class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Executor
 	 *
-	 * @access	public
-	 * @param string $path unused
-	 * @return	void	[Outputs to screen]
+	 * @access public
+	 * @param  string $path unused
+	 * @return void	[Outputs to screen]
 	 */
 	public function execute($path) {
 		if (!Environment::isMasterWiki()) {

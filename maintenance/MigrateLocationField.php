@@ -3,12 +3,11 @@
  * Curse Inc.
  * Curse Profile
  *
- * @author		Alexia E. Smith
- * @copyright	(c) 2017 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Alexia E. Smith
+ * @copyright (c) 2017 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
 
 require_once __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -17,8 +16,8 @@ class MigrateLocationField extends Maintenance {
 	/**
 	 * Constructor
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -28,8 +27,8 @@ class MigrateLocationField extends Maintenance {
 	/**
 	 * Migrate Location Fields
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function execute() {
 		$redis = RedisCache::getClient('cache');

@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2015 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2015 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use HydraCore;
@@ -27,8 +27,8 @@ class SpecialCommentModeration extends SpecialPage {
 	/**
 	 * Return the group name for this special page.
 	 *
-	 * @access	protected
-	 * @return	string
+	 * @access protected
+	 * @return string
 	 */
 	protected function getGroupName() {
 		return 'users';

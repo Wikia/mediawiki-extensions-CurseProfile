@@ -3,8 +3,8 @@ use CurseProfile\CommentBoard;
 use CurseProfile\CommentReport;
 
 /**
- * @group CurseProfile
- * @group Database
+ * @group  CurseProfile
+ * @group  Database
  *            ^--------- requests database access for these tests
  * @covers CommentReport
  */
@@ -29,6 +29,7 @@ class CommentReportTest extends MediaWikiTestCase {
 	}
 
 	protected $commenter, $commentee, $commentBoard;
+
 	protected function setUp() {
 		parent::setUp();
 		$this->commenter = User::newFromName('Commenter');

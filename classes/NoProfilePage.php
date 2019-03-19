@@ -1,16 +1,14 @@
 <?php
-
 /**
  * Curse Inc.
  * Curse Profile
  * Dummy Page for Invalid Users.
  *
- * @author		Samuel Hilson
- * @copyright	(c) 2018 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Samuel Hilson
+ * @copyright (c) 2018 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
  **/
 
 namespace CurseProfile;

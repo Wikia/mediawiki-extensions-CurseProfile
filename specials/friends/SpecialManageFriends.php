@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -31,8 +31,8 @@ class SpecialManageFriends extends SpecialPage {
 	/**
 	 * Return the group name for this special page.
 	 *
-	 * @access	protected
-	 * @return	string
+	 * @access protected
+	 * @return string
 	 */
 	protected function getGroupName() {
 		return 'users';
@@ -41,7 +41,7 @@ class SpecialManageFriends extends SpecialPage {
 	/**
 	 * Execute
 	 *
-	 * @param array $param
+	 * @param  array $param
 	 * @return void
 	 */
 	public function execute($param) {

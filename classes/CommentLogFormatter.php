@@ -4,12 +4,11 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Tim Aldridge
- * @copyright	(c) 2015 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Tim Aldridge
+ * @copyright (c) 2015 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
  **/
 
 namespace CurseProfile;
@@ -25,8 +24,8 @@ class CommentLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for comments.
 	 *
-	 * @access	public
-	 * @return	array	Extract and parsed parameters.
+	 * @access public
+	 * @return array	Extract and parsed parameters.
 	 */
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();

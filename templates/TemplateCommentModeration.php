@@ -4,12 +4,11 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2015 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2015 Curse Inc.
+ * @license   GNU General Public License v2.0 or later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
 
 use CurseProfile\CommentReport;
@@ -24,7 +23,8 @@ class TemplateCommentModeration {
 
 	/**
 	 * Renders the group and sort "tabs" at the top of the CommentModeration page
-	 * @param currentStyle $currentStyle string indicating the current sort style
+	 *
+	 * @param  currentStyle $currentStyle string indicating the current sort style
 	 * @return string HTML fragment
 	 */
 	public function sortStyleSelector($currentStyle) {
@@ -61,8 +61,8 @@ class TemplateCommentModeration {
 	 * Renders the main body of the CommentModeration special page
 	 *
 	 * @access public
-	 * @param	array	$reports CommentReport instances.
-	 * @return	string	HTML fragment
+	 * @param  array $reports CommentReport instances.
+	 * @return string	HTML fragment
 	 */
 	public function renderComments($reports) {
 		$html = '
@@ -116,11 +116,11 @@ class TemplateCommentModeration {
 		$user = $lookup->localUserFromCentralId($rep->data['action_taken_by']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
-			$action = 'dis';
+				$action = 'dis';
 			break;
 
 			case CommentReport::ACTION_DELETE:
-			$action = 'del';
+				$action = 'del';
 			break;
 		}
 		return Html::rawElement('span', ['class' => 'action-taken ' . $action], wfMessage('report-actiontaken-' . $action, $user->getName())->text() . ' ' . CP::timeTag($rep->data['action_taken_at']));
@@ -145,8 +145,8 @@ class TemplateCommentModeration {
 	 * Creates the small user icons indicating who has reported a comment
 	 *
 	 * @access private
-	 * @param	array	Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
-	 * @return	string	HTML fragment
+	 * @param  array	Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
+	 * @return string	HTML fragment
 	 */
 	private function reporterIcons($reports) {
 		$html = '';
@@ -172,8 +172,8 @@ class TemplateCommentModeration {
 	 * Returns a permalink to a comment on its origin wiki.
 	 *
 	 * @access private
-	 * @param	object	CommentReport instance
-	 * @return	string	HTML fragment
+	 * @param  object	CommentReport instance
+	 * @return string	HTML fragment
 	 */
 	private function permalink($rep) {
 		if (Environment::isMasterWiki()) {
