@@ -6,7 +6,7 @@
  *
  * @author    Samuel Hilson
  * @copyright (c) 2018 Curse Inc.
- * @license   GNU General Public License v2.0 or later
+ * @license   GPL-2.0-or-later
  * @package   CurseProfile
  * @link      https://gitlab.com/hydrawiki
  **/

@@ -3,10 +3,10 @@
  * CurseProfile
  * Profile Stats Templates
  *
+ * @package   CurseProfile
  * @author    Alexia E. Smith
  * @copyright (c) 2017 Curse Inc.
- * @license   GNU General Public License v2.0 or later
- * @package   CurseProfile
+ * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
  **/
 

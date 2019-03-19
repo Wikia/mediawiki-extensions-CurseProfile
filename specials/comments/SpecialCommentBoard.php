@@ -4,10 +4,10 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
+ * @package   CurseProfile
  * @author    Noah Manneschmidt
  * @copyright (c) 2014 Curse Inc.
- * @license   GNU General Public License v2.0 or later
- * @package   CurseProfile
+ * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
 **/
 
