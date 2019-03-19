@@ -18,7 +18,7 @@
 	"exception-nologinreturn-text": "Please [{{fullurl:Special:UserLogin|returnto=$1}} log in] to be able to access this page or action.",
 	"friendrequestsend-prompt": "Confirm your friend request to $1",
 	"friendrequestconfirm-prompt": "Would you like to confirm the friend request from $1?",
-	"friendrequestignore-prompt": "Would you like to ingore the friend request from  $1?",
+	"friendrequestignore-prompt": "Would you like to ignore the friend request from $1?",
 	"friendrequestremove-prompt": "Would you like to remove $1 from your friends?",
 	"friendrequestsend-error": "There was an error sending your request",
 	"friendrequestconfirm-error": "There was an error confirming the request",
