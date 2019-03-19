@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Alexia E. Smith
- * @copyright	(c) 2016 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @author    Alexia E. Smith
+ * @copyright (c) 2016 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @package   CurseProfile
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile\MWEcho;
 
 use EchoEventPresentationModel;
@@ -25,7 +25,7 @@ class FriendshipPresentationModel extends EchoEventPresentationModel {
 	 * a parameter. It is expected that subclasses will override
 	 * this.
 	 *
-	 * @access	public
+	 * @access public
 	 * @return Message
 	 */
 	public function getHeaderMessage() {
@@ -36,8 +36,8 @@ class FriendshipPresentationModel extends EchoEventPresentationModel {
 	/**
 	 * Return the icon used for this notification.
 	 *
-	 * @access	public
-	 * @return	string	The symbolic icon name as defined in $wgEchoNotificationIcons
+	 * @access public
+	 * @return string	The symbolic icon name as defined in $wgEchoNotificationIcons
 	 */
 	public function getIconType() {
 		return 'gratitude';
@@ -46,7 +46,7 @@ class FriendshipPresentationModel extends EchoEventPresentationModel {
 	/**
 	 * Array of primary link details, with possibly-relative URL & label.
 	 *
-	 * @access	public
+	 * @access public
 	 * @return array|bool Array of link data, or false for no link:
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
@@ -61,7 +61,7 @@ class FriendshipPresentationModel extends EchoEventPresentationModel {
 	 * Array of secondary link details, including possibly-relative URLs, label,
 	 * description & icon name.
 	 *
-	 * @access	public
+	 * @access public
 	 * @return array Array of links in the format of:
 	 *               [['url' => (string) url,
 	 *                 'label' => (string) link text (non-escaped),

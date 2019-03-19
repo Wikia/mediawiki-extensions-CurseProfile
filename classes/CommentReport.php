@@ -4,12 +4,11 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2015 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2015 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
 
 namespace CurseProfile;
@@ -56,9 +55,9 @@ class CommentReport {
 	/**
 	 * Constructor used by static methods to create instances of this class.
 	 *
-	 * @access	private
-	 * @param	array	$data a mostly filled out data set (see newFromRow)
-	 * @return	void
+	 * @access private
+	 * @param  array $data a mostly filled out data set (see newFromRow)
+	 * @return void
 	 */
 	private function __construct($data) {
 		$this->data = $data;
@@ -67,10 +66,10 @@ class CommentReport {
 	/**
 	 * Gets the total count of how many comments are in a given queue
 	 *
-	 * @access	public
-	 * @param	string	$sortStyle which queue to count
-	 * @param	string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
-	 * @return	int
+	 * @access public
+	 * @param  string      $sortStyle which queue to count
+	 * @param  string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
+	 * @return int
 	 */
 	public static function getCount($sortStyle, $qualifier = null) {
 		$redis = RedisCache::getClient('cache');
@@ -99,10 +98,10 @@ class CommentReport {
 	/**
 	 * Main retrieval function to get data out of redis or the local db
 	 *
-	 * @param	string	$sortStyle [optional] default byVolume
-	 * @param	int $limit [optional] default 10
-	 * @param	int $offset [optional] default 0
-	 * @return	array
+	 * @param  string $sortStyle [optional] default byVolume
+	 * @param  int    $limit     [optional] default 10
+	 * @param  int    $offset    [optional] default 0
+	 * @return array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
 		if (Environment::isMasterWiki()) {
@@ -115,9 +114,9 @@ class CommentReport {
 	/**
 	 * Retrieve a single report by its unique id
 	 *
-	 * @param	string $key	report key as retrieved from reportKey()
-	 * @param	bool $onlyLocal	[optional] when set to true, will return null if report does not exist in the current wiki
-	 * @return	obj		CommentReport instance or null if report does not exist
+	 * @param  string $key       report key as retrieved from reportKey()
+	 * @param  bool   $onlyLocal [optional] when set to true, will return null if report does not exist in the current wiki
+	 * @return obj		CommentReport instance or null if report does not exist
 	 */
 	public static function newFromKey($key, $onlyLocal = false) {
 		global $dsSiteKey;
@@ -162,11 +161,11 @@ class CommentReport {
 	/**
 	 * Queries redis data store for reports
 	 *
-	 * @access	private
-	 * @param	string	sort style
-	 * @param	integer	max number of reports to return
-	 * @param	integer	offset
-	 * @return	array	0 or more CommentReport instances
+	 * @access private
+	 * @param  string	sort style
+	 * @param  integer	max number of reports to return
+	 * @param  integer	offset
+	 * @return array	0 or more CommentReport instances
 	 */
 	private static function getReportsRedis($sortStyle, $limit, $offset) {
 		$redis = RedisCache::getClient('cache');
@@ -187,7 +186,7 @@ class CommentReport {
 			if (count($keys)) {
 				$reports = $redis->hMGet(self::REDIS_KEY_REPORTS, $keys);
 				$reports = array_map(function ($rep) { return new self(unserialize($rep));
-	   }, $reports);
+				}, $reports);
 			}
 		} catch (Throwable $e) {
 			wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
@@ -199,10 +198,10 @@ class CommentReport {
 	/**
 	 * Queries the local db for reports
 	 *
-	 * @param	string	sort style
-	 * @param	integer	max number of reports to return
-	 * @param	integer	offset
-	 * @return	array	0 or more CommentReport instances
+	 * @param  string	sort style
+	 * @param  integer	max number of reports to return
+	 * @param  integer	offset
+	 * @return array	0 or more CommentReport instances
 	 */
 	private static function getReportsDb($sortStyle, $limit, $offset) {
 		$db = CP::getDb(DB_REPLICA);
@@ -260,9 +259,9 @@ class CommentReport {
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
-	 * @access	public
-	 * @param	int $commentId	Comment ID of a local comment.
-	 * @return	mixed	CommentReport instance that is already saved or null on failure.
+	 * @access public
+	 * @param  int $commentId Comment ID of a local comment.
+	 * @return mixed	CommentReport instance that is already saved or null on failure.
 	 */
 	public static function newUserReport($commentId) {
 		$db = CP::getDb(DB_REPLICA);
@@ -320,8 +319,8 @@ class CommentReport {
 	/**
 	 * Archive the contents of a comment into a new report
 	 *
-	 * @param	array	comment row from the user_board DB table
-	 * @return	object		CommentReport instance
+	 * @param  array	comment row from the user_board DB table
+	 * @return object		CommentReport instance
 	 */
 	private static function createWithArchive($comment) {
 		global $wgUser, $dsSiteKey;
@@ -363,9 +362,9 @@ class CommentReport {
 	/**
 	 * Creates a new comment report object from a DB row.
 	 *
-	 * @access	private
-	 * @param	array	Row from the the user_board_report_archives table.
-	 * @return	object	CommentReport instance
+	 * @access private
+	 * @param  array	Row from the the user_board_report_archives table.
+	 * @return object	CommentReport instance
 	 */
 	private static function newFromRow($report) {
 		global $dsSiteKey;
@@ -391,9 +390,9 @@ class CommentReport {
 	/**
 	 * Loads individual user reports for a given comment report.
 	 *
-	 * @access	private
-	 * @param	integer	The ra_comment_id from the user_board_report_archives table
-	 * @return	array	With sub arrays for each report having keys reporter => global_id, timestamp
+	 * @access private
+	 * @param  integer	The ra_comment_id from the user_board_report_archives table
+	 * @return array	With sub arrays for each report having keys reporter => global_id, timestamp
 	 */
 	private static function getReportsForId($id) {
 		$db = CP::getDb(DB_REPLICA);
@@ -402,7 +401,7 @@ class CommentReport {
 			['ubr_reporter_global_id as reporter', 'ubr_reported as timestamp'],
 			['ubr_report_archive_id = ' . intval($id)],
 			__METHOD__,
-			[ 'ORDER BY' => 'ubr_reported ASC' ]
+			['ORDER BY' => 'ubr_reported ASC']
 		);
 		$reports = [];
 		foreach ($res as $row) {
@@ -416,8 +415,8 @@ class CommentReport {
 	/**
 	 * Is this report stored in this local wiki database?
 	 *
-	 * @access	public
-	 * @return	boolean	True if report is stored on this wiki.
+	 * @access public
+	 * @return boolean	True if report is stored on this wiki.
 	 */
 	public function isLocal() {
 		global $dsSiteKey;
@@ -427,9 +426,9 @@ class CommentReport {
 	/**
 	 * Is this report key stored in this local wiki database?
 	 *
-	 * @access	public
-	 * @param	string	$reportKey Report Key
-	 * @return	boolean	True if report is stored on this wiki.
+	 * @access public
+	 * @param  string $reportKey Report Key
+	 * @return boolean	True if report is stored on this wiki.
 	 */
 	public static function keyIsLocal($reportKey) {
 		global $dsSiteKey;
@@ -440,8 +439,8 @@ class CommentReport {
 	/**
 	 * Insert a new report into the local database.
 	 *
-	 * @access	private
-	 * @return	void
+	 * @access private
+	 * @return void
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
@@ -466,8 +465,8 @@ class CommentReport {
 	/**
 	 * Insert a new report into redis with indexes
 	 *
-	 * @access	private
-	 * @return	boolean	Success
+	 * @access private
+	 * @return boolean	Success
 	 */
 	private function initialRedisInsert() {
 		$redis = RedisCache::getClient('cache');
@@ -493,8 +492,8 @@ class CommentReport {
 	/**
 	 * Get the unique key identifying this reported comment in redis
 	 *
-	 * @access	public
-	 * @return	string
+	 * @access public
+	 * @return string
 	 */
 	public function reportKey() {
 		return sprintf(
@@ -508,9 +507,9 @@ class CommentReport {
 	/**
 	 * Add a new report to comment that has already been archived.
 	 *
-	 * @access	private
-	 * @param	object	The User reporting this comment
-	 * @return	void
+	 * @access private
+	 * @param  object	The User reporting this comment
+	 * @return void
 	 */
 	private function addReportFrom($user) {
 		$lookup = CentralIdLookup::factory();
@@ -566,9 +565,9 @@ class CommentReport {
 	/**
 	 * Dismiss or delete a reported comment/
 	 *
-	 * @param	string $action Action to take on the reported comment. either 'delete' or 'dismiss'
-	 * @param	mixed|null $byUser [Optional] User object of the acting user, defaults to|null $wgUser
-	 * @return	boolean	true if successful
+	 * @param  string     $action Action to take on the reported comment. either 'delete' or 'dismiss'
+	 * @param  mixed|null $byUser [Optional] User object of the acting user, defaults to|null $wgUser
+	 * @return boolean	true if successful
 	 */
 	public function resolve($action, $byUser = null) {
 		global $wgUser;
@@ -605,7 +604,7 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in the local database
 	 *
-	 * @return	bool	success
+	 * @return bool	success
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
@@ -630,7 +629,7 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in redis
 	 *
-	 * @return	bool	true
+	 * @return bool	true
 	 */
 	private function resolveInRedis() {
 		$redis = RedisCache::getClient('cache');

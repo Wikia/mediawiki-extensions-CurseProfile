@@ -8,12 +8,12 @@ class StatsDLExposer extends ProfilePage {
 }
 
 /**
- * @group CurseProfile
+ * @group  CurseProfile
  * @covers CurseProfile\ProfilePage
  */
 class GenerateStatsDLTest extends MediaWikiTestCase {
-
 	protected $stats;
+
 	protected function setUp() {
 		parent::setUp();
 		$this->stats = new StatsDLExposer;

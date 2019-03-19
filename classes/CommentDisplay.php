@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use CentralIdLookup;
@@ -29,9 +29,9 @@ class CommentDisplay {
 	/**
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
-	 * @param	object	&$parser parser instance
-	 * @param	int	$user_id id of the user whose recent comments should be displayed
-	 * @return	array	with html at index 0
+	 * @param  object &$parser parser instance
+	 * @param  int    $user_id id of the user whose recent comments should be displayed
+	 * @return array	with html at index 0
 	 */
 	public static function comments(&$parser, $user_id = '') {
 		$user_id = intval($user_id);
@@ -59,9 +59,9 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param	int	$user_id ID of the user whose comment board will receive a new comment via this form
-	 * @param	bool $hidden	If true, the form will have an added class to be hidden by css/
-	 * @return	string	html fragment or empty string
+	 * @param  int  $user_id ID of the user whose comment board will receive a new comment via this form
+	 * @param  bool $hidden  If true, the form will have an added class to be hidden by css/
+	 * @return string	html fragment or empty string
 	 */
 	public static function newCommentForm($user_id, $hidden = false) {
 		global $wgUser;
@@ -90,9 +90,9 @@ class CommentDisplay {
 	/**
 	 * Returns html display for a single profile comment
 	 *
-	 * @param	array	$comment structured comment data as returned by CommentBoard
-	 * @param	int	$highlight [optional] id of a comment to highlight from among those displayed
-	 * @return	string	html for display
+	 * @param  array $comment   structured comment data as returned by CommentBoard
+	 * @param  int   $highlight [optional] id of a comment to highlight from among those displayed
+	 * @return string	html for display
 	 */
 	public static function singleComment($comment, $highlight = false) {
 		global $wgOut, $wgUser;
@@ -103,15 +103,15 @@ class CommentDisplay {
 		$type = '';
 		switch ($comment['ub_type']) {
 			case CommentBoard::PRIVATE_MESSAGE:
-			$type = 'private';
+				$type = 'private';
 			break;
 
 			case CommentBoard::DELETED_MESSAGE:
-			$type = 'deleted';
+				$type = 'deleted';
 			break;
 
 			case CommentBoard::PUBLIC_MESSAGE:
-			$type = 'public';
+				$type = 'public';
 			break;
 		}
 
@@ -150,26 +150,26 @@ class CommentDisplay {
 					' . self::sanitizeComment($comment['ub_message']) . '
 				</div>
 			</div>';
-			if (isset($comment['replies'])) {
-				$HTML .= '<div class="replyset">';
+		if (isset($comment['replies'])) {
+			$HTML .= '<div class="replyset">';
 
-				// perhaps there are more replies not yet loaded
-				if ($comment['reply_count'] > count($comment['replies'])) {
-					if (!isset($repliesTooltip)) {
-						$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
-					}
-					// force parsing this message because MW won't replace plurals as expected
-					// due to this all happening inside the wfMessage()->parse() call that
-					// generates the entire profile
-					$viewReplies = Parser::stripOuterParagraph($wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped()));
-					$HTML .= "<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='{$repliesTooltip}'>{$viewReplies}</button>";
+			// perhaps there are more replies not yet loaded
+			if ($comment['reply_count'] > count($comment['replies'])) {
+				if (!isset($repliesTooltip)) {
+					$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
 				}
-
-				foreach ($comment['replies'] as $reply) {
-					$HTML .= self::singleComment($reply, $highlight);
-				}
-				$HTML .= '</div>';
+				// force parsing this message because MW won't replace plurals as expected
+				// due to this all happening inside the wfMessage()->parse() call that
+				// generates the entire profile
+				$viewReplies = Parser::stripOuterParagraph($wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped()));
+				$HTML .= "<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
+
+			foreach ($comment['replies'] as $reply) {
+				$HTML .= self::singleComment($reply, $highlight);
+			}
+			$HTML .= '</div>';
+		}
 		$HTML .= '
 		</div>';
 		return $HTML;
@@ -177,8 +177,9 @@ class CommentDisplay {
 
 	/**
 	 * Returns extra info visible only to admins on who and when admin action was taken on a comment
-	 * @param	array	$comment comment data
-	 * @return	string	html fragment
+	 *
+	 * @param  array $comment comment data
+	 * @return string	html fragment
 	 */
 	private static function adminAction($comment) {
 		$lookup = CentralIdLookup::factory();
@@ -193,8 +194,8 @@ class CommentDisplay {
 	/**
 	 * Returns a <time> tag with a comment's post date or last edited date
 	 *
-	 * @param	array	$comment comment data
-	 * @return	string	html fragment
+	 * @param  array $comment comment data
+	 * @return string	html fragment
 	 */
 	private static function timestamp($comment) {
 		if (is_null($comment['ub_edited'])) {
@@ -207,8 +208,8 @@ class CommentDisplay {
 	/**
 	 * Returns a <time> tag with a comment's post date or last edited date for mobile.
 	 *
-	 * @param	array	$comment comment data
-	 * @return	string	html fragment
+	 * @param  array $comment comment data
+	 * @return string	html fragment
 	 */
 	private static function mobileTimestamp($comment) {
 		if (is_null($comment['ub_edited'])) {
@@ -221,9 +222,9 @@ class CommentDisplay {
 	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
-	 * @param	int	$user_id the id of the user the parent comment belongs to
-	 * @param	int	$commentId the id of the comment for which replies need to be loaded
-	 * @return	string	html for display
+	 * @param  int $user_id   the id of the user the parent comment belongs to
+	 * @param  int $commentId the id of the comment for which replies need to be loaded
+	 * @return string	html for display
 	 */
 	public static function repliesTo($user_id, $commentId) {
 		$user_id = intval($user_id);
@@ -249,9 +250,9 @@ class CommentDisplay {
 	/**
 	 * Sanitizes a comment for display in HTML.
 	 *
-	 * @access	public
-	 * @param	string	$comment Comment as typed by user.
-	 * @return	string	Comment sanitized for usage in HTML.
+	 * @access public
+	 * @param  string $comment Comment as typed by user.
+	 * @return string	Comment sanitized for usage in HTML.
 	 */
 	public static function sanitizeComment($comment) {
 		global $wgOut;

@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use ApiBase;
@@ -242,7 +242,7 @@ class CommentApi extends HydraApiBase {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
 			// however there didn't seem to be an easy way to add a section rather than editing the entire content
 			$params = new DerivativeRequest(
-    $this->getRequest(),
+				$this->getRequest(),
 				[
 					'title' => 'User_talk:' . $user->getName(),
 					'action' => 'edit',
@@ -354,8 +354,8 @@ class CommentApi extends HydraApiBase {
 	/**
 	 * Resolve Report API End Point
 	 *
-	 * @access	public
-	 * @return	boolean	Success
+	 * @access public
+	 * @return boolean	Success
 	 */
 	public function doResolveReport() {
 		$lookup = CentralIdLookup::factory();

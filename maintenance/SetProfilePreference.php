@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2013 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2013 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use Maintenance;
@@ -26,8 +26,8 @@ class SetProfilePreference extends Maintenance {
 	/**
 	 * Constructor
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -55,8 +55,8 @@ class SetProfilePreference extends Maintenance {
 		foreach ($res as $row) {
 			$this->output("Inserting preference row for user ID " . $row->user_id . "\n");
 			$db->insert(
-    'user_properties',
-    [
+				'user_properties',
+				[
 					'up_user' => $row->user_id,
 					'up_property' => 'profile-pref',
 					'up_value' => $onOrOff,

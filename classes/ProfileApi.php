@@ -4,13 +4,13 @@
  * Curse Profile
  * A modular, multi-featured user profile system.
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2015 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2015 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use ApiBase;
@@ -24,8 +24,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Return description of this API module.
 	 *
-	 * @access	public
-	 * @return	string	Description
+	 * @access public
+	 * @return string	Description
 	 */
 	public function getDescription() {
 		return 'Allows basic profile data actions to be modified.';
@@ -34,8 +34,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Return description of valid parameters for API actions.
 	 *
-	 * @access	public
-	 * @return	array	API Actions
+	 * @access public
+	 * @return array	API Actions
 	 */
 	public function getParamDescription() {
 		return array_merge(
@@ -49,8 +49,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Allowed API actions.
 	 *
-	 * @access	public
-	 * @return	array	API Actions
+	 * @access public
+	 * @return array	API Actions
 	 */
 	public function getActions() {
 		return [
@@ -127,6 +127,7 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Return a list of wikis (and data about them) from a search string.
+	 *
 	 * @return void
 	 */
 	public function doGetWikisByString() {
@@ -147,6 +148,7 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Return wiki data
+	 *
 	 * @return void
 	 */
 	public function doGetWiki() {
@@ -172,8 +174,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Add the raw about me text into the API response.
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function doGetRawField() {
 		if ($this->getUser()->getId() === $this->getRequest()->getInt('user_id') || $this->getUser()->isAllowed('profile-moderate')) {
@@ -194,8 +196,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Perform an edit on general profile fields.
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function doEditField() {
 		$field = strtolower($this->getRequest()->getText('field'));
@@ -226,8 +228,8 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Perform an edit on the about me section with multiple fields.
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function doEditSocialFields() {
 		$odata = $this->getRequest()->getText('data');

@@ -4,13 +4,13 @@
  * Curse Profile
  * Display stats on the adoption rate of CurseProfile across hydra
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use Maintenance;
@@ -21,8 +21,8 @@ class StatsRecacheCron extends Maintenance {
 	/**
 	 * Main Executor
 	 *
-	 * @access	public
-	 * @return	void
+	 * @access public
+	 * @return void
 	 */
 	public function execute() {
 		StatsRecache::run([], false);

@@ -4,13 +4,13 @@
  * Curse Profile
  * Allows deferred loading of logo images for gamepedia wikis
  *
- * @author		Noah Manneschmidt
- * @copyright	(c) 2014 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Noah Manneschmidt
+ * @copyright (c) 2014 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
+
 namespace CurseProfile;
 
 use HydraCore;
@@ -24,7 +24,7 @@ class SpecialWikiImageRedirect extends UnlistedSpecialPage {
 	/**
 	 * Execute
 	 *
-	 * @param string $path
+	 * @param  string $path
 	 * @return void
 	 */
 	public function execute($path) {

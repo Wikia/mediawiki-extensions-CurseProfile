@@ -3,12 +3,11 @@
  * CurseProfile
  * Profile Stats Templates
  *
- * @author		Alexia E. Smith
- * @copyright	(c) 2017 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Alexia E. Smith
+ * @copyright (c) 2017 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
  **/
 
 use DynamicSettings\Wiki;
@@ -17,10 +16,10 @@ class TemplateProfileStats {
 	/**
 	 * Profile Stats Statistics
 	 *
-	 * @access	public
-	 * @param	array	$statistics Statistics
-	 * @param	array	$favoriteWikis Favorite Wikis
-	 * @return	string	HTML
+	 * @access public
+	 * @param  array $statistics    Statistics
+	 * @param  array $favoriteWikis Favorite Wikis
+	 * @return string	HTML
 	 */
 	public static function statisticsPage($statistics, $favoriteWikis) {
 		$html = wfMessage('profilestats_last_run_time', (isset($statistics['last_run_time']) && $statistics['last_run_time'] > 0 ? wfTimestamp(TS_DB, intval($statistics['last_run_time'])) : wfMessage('last_run_never')))->escaped();
@@ -79,8 +78,9 @@ class TemplateProfileStats {
 
 	/**
 	 * Returns a printable wiki name for a wiki key
-	 * @param	string	md5 key for a wiki
-	 * @param	string	human-readable name and language of the wiki
+	 *
+	 * @param string	md5 key for a wiki
+	 * @param string	human-readable name and language of the wiki
 	 */
 	private static function wikiNameFromHash($siteKey) {
 		$wiki = Wiki::loadFromHash($siteKey);

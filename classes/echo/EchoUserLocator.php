@@ -3,12 +3,11 @@
  * Curse Inc.
  * Curse Profile
  *
- * @author		Alexia E. Smith
- * @copyright	(c) 2017 Curse Inc.
- * @license		GNU General Public License v2.0 or later
- * @package		CurseProfile
- * @link		https://gitlab.com/hydrawiki
- *
+ * @package   CurseProfile
+ * @author    Alexia E. Smith
+ * @copyright (c) 2017 Curse Inc.
+ * @license   GPL-2.0-or-later
+ * @link      https://gitlab.com/hydrawiki
 **/
 
 namespace CurseProfile\MWEcho;
@@ -20,9 +19,9 @@ class EchoUserLocator {
 	/**
 	 * Locate users to notify for an event.
 	 *
-	 * @access	public
-	 * @param	string	$event Task Performed
-	 * @return	array	Array of User IDs => User objects.
+	 * @access public
+	 * @param  string $event Task Performed
+	 * @return array	Array of User IDs => User objects.
 	 */
 	public static function getAdmins(EchoEvent $event) {
 		$db = wfGetDB(DB_MASTER);
