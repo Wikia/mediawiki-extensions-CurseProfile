@@ -134,7 +134,7 @@ class CommentDisplay {
 		$HTML .= '
 					<div class="right">'
 				. ($comment['ub_admin_acted'] ? self::adminAction($comment) . ', ' : '')
-				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'])->getLinkURL()], self::timestamp($comment)) . ' '
+				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'], 'comment' . $comment['ub_id'])->getLinkURL()], self::timestamp($comment)) . ' '
 				. (CommentBoard::canReply($comment) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], HydraCore::awesomeIcon('reply')) . ' ' : '')
 				. (CommentBoard::canEdit($comment) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
 				. (CommentBoard::canRemove($comment) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], HydraCore::awesomeIcon('trash')) : '')
