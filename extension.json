@@ -210,9 +210,6 @@
 				"jquery.ui.autocomplete"
 			],
 			"position": "top",
-			"messages": [
-				"profile-preference-global"
-			],
 			"targets": [
 				"desktop",
 				"mobile"
