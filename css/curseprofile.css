@@ -148,7 +148,8 @@ div.mainavatar {
 	}
 
 	.grouptags li.edit {
-		background-color: #EEE;
+		background-color: #999;
+		background-color: rgba(128, 128, 128, 0.5);
 	}
 
 
