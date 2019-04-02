@@ -21,7 +21,8 @@
 				.on('click', 'a.remove', commentBoard.removeComment)
 				.on('click', 'a.restore', commentBoard.restoreComment)
 				.on('click', 'a.purge', commentBoard.purgeComment)
-				.on('click', 'a.report', commentBoard.reportComment);
+				.on('click', 'a.report', commentBoard.reportComment)
+				.on('keydown', '.commentdisplay .entryform textarea', commentBoard.ctrlEnter);
 
 			// Auto-size comment field
 			autosize($('.commentdisplay .entryform textarea'));
@@ -310,6 +311,13 @@
 				$this.show();
 				console.dir(resp);
 			});
+		},
+		
+		ctrlEnter: function(e) {
+			if (e.keyCode === 13 && e.ctrlKey) {
+				$(this).attr('disabled', true).closest('form').submit();
+				e.preventDefault();
+			}
 		}
 	};
 
