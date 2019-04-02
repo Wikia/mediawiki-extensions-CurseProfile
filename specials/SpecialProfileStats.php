@@ -40,7 +40,7 @@ class SpecialProfileStats extends SpecialPage {
 	 */
 	public function execute($path) {
 		if (!Environment::isMasterWiki()) {
-			throw new PermissionsError('cp-master-only');
+			throw new PermissionsError(null, ['cp-master-only']);
 		}
 		$this->setHeaders();
 		$this->checkPermissions();

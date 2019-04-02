@@ -250,5 +250,8 @@
 	"cp-user-prefers-profile-user": "This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]].",
 	"cp-user-prefers-profile-talk": "This user \"$1\" prefers to use the [[{{ns:UserProfile}}:$1|enhanced profile]]. They may not respond to comments added here.",
 	"apihelp-comment-summary": "Allows commenting actions to be taken.",
-	"apihelp-profile-summary": "Allows basic profile data actions to be modified."
+	"apihelp-profile-summary": "Allows basic profile data actions to be modified.",
+	"right-profile-moderate": "Moderate user profiles",
+	"right-profile-purgecomments": "Purge comments on user profiles",
+	"right-profile-stats": "View profile statistics"
 }
