@@ -271,7 +271,7 @@ class Hooks {
 		}
 
 		// Warn visitors about user's preference
-		if (self::shouldWarn($wgRequest) && $preferProfile) {
+		if (self::shouldWarn($wgRequest) && $preferProfile && !$title->isRedirect()) {
 			$wgOut->wrapWikiMsg(
 				"<div class=\"mw-userpage-userdoesnotexist error\">\n$1\n</div>",
 				[$key, wfEscapeWikiText($username)]
