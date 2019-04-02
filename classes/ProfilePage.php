@@ -396,7 +396,8 @@ class ProfilePage extends Article {
 			}
 		}
 		// Check the rights of the person viewing this page.
-		if ($wgUser->isAllowed('userrights')) {
+		$cGroups = $wgUser->changeableGroups();
+		if (!empty($cGroups['add']) || !empty($cGroups['remove'])) {
 			$html .= "<li class=\"edit\">" . Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), HydraCore::awesomeIcon('pencil-alt')) . "</li>";
 		}
 		$html .= '</ul>';
