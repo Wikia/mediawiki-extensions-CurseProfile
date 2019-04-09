@@ -749,9 +749,32 @@ class CommentBoard {
 	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
 	 *
 	 * @param  int $commentId id of a comment to remove
-	 * @return mixed	whatever DB->update() returns
+	 * @return mixed	whatever DB->delete() returns
 	 */
 	public static function purgeComment($commentId) {
+		global $wgUser;
+
+		$user = $wgUser;
+
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+
+		if (!$globalId) {
+			return false;
+		}
+		
+		// Preparing stuff for the Log Entry
+		$comment = self::getCommentById($commentId);
+		$toUser = User::newFromId($comment[0]['ub_user_id']);
+		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+
+		$log = new ManualLogEntry('curseprofile', 'comment-deleted');
+		$log->setPerformer($user);
+		$log->setTarget($title);
+		$log->setComment(null);
+		$logId = $log->insert();
+		$log->publish($logId);
+		
 		$db = CP::getDb(DB_MASTER);
 		return $db->delete(
 			'user_board',
