@@ -288,8 +288,8 @@ class ProfilePage extends Article {
 		}
 
 		$profileTitle = $this->isProfilePage($title) ? $title : Title::makeTitle(NS_USER_PROFILE, $userName);
-		$userPageTitle = $this->isUserPage($title) ? $title : Title::makeTitle(NS_USER, $title->getPartialURL());
-		$userTalkPageTitle = $this->isUserTalkPage($title) ? $title : Title::makeTitle(NS_USER_TALK, $title->getPartialURL());
+		$userPageTitle = $this->isUserPage($title) ? $title : Title::makeTitle(NS_USER, $title->getDBKey());
+		$userTalkPageTitle = $this->isUserTalkPage($title) ? $title : Title::makeTitle(NS_USER_TALK, $title->getDBKey());
 
 		$links['namespaces'] = [];
 
