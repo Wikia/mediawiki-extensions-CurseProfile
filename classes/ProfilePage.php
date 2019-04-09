@@ -837,7 +837,7 @@ class ProfilePage extends Article {
 <div class="curseprofile" data-user_id="' . $this->user->getID() . '">
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
-			<div class="mainavatar">{{#avatar: 96 | ' . $this->user->getEmail() . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->user->getEmail()) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="headline">
 				<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
 				{{#groups:}}
@@ -908,7 +908,7 @@ __NOINDEX__
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
 		<div class="userinfo section">
-			<div class="mainavatar">{{#avatar: 96 | ' . $this->user->getEmail() . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->user->getEmail()) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="usericons rightfloat">
 				<div class="score">{{#Points:' . $this->user->getName() . '|1|global|badged}}</div>
 				{{#profilelinks:}}
