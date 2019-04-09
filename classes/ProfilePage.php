@@ -384,7 +384,7 @@ class ProfilePage extends Article {
 		$specialListUsersTitle = SpecialPage::getTitleFor('ListUsers');
 		$html = '<ul class="grouptags">';
 		foreach ($groups as $group) {
-			if (in_array($group, $this->hiddenGroups)) {
+			if (in_array($group, $this->hiddenGroups) || ($group == "sysop" && in_array("wiki_guardian", $groups))) {
 				continue;
 			}
 			$groupMessage = new Message('group-' . $group);
