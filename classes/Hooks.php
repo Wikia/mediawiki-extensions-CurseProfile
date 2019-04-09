@@ -667,4 +667,20 @@ class Hooks {
 
 		return true;
 	}
+
+	/**
+	 * Prevent UserProfile pages from being shown as movable
+	 *
+	 * @access public
+	 * @param  Integer $index	The index of the namespace being checked
+ 	 * @param  Boolean &$result	Whether MediaWiki currently thinks this namespace is movable
+	 * @return bool
+	 */
+	public static function onNamespaceIsMovable($index, &$result) {
+		if ($index == NS_USER_PROFILE) {
+			$result = false;
+		}
+
+		return true;
+	}
 }

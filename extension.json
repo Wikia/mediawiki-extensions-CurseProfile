@@ -335,6 +335,7 @@
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
 		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
 		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
+		"NamespaceIsMovable": "CurseProfile\\Hooks::onNamespaceIsMovable",
 		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
 		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
 		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
