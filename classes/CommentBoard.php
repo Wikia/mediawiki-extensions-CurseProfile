@@ -808,8 +808,8 @@ class CommentBoard {
 			$comment = self::queryCommentById($commentId);
 		}
 
-		// user must be logged-in to report, comment must be public (not deleted), and no point in reporting if user can remove it themselves
-		return !$user->isAnon() && !$user->isAllowed('profile-moderate') && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
+		// user must be logged-in to report and comment must be public (not deleted)
+		return !$user->isAnon() && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
 	}
 
 	/**
