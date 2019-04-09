@@ -315,7 +315,8 @@
 		
 		ctrlEnter: function(e) {
 			if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
-				$(this).attr('disabled', true).closest('form').submit();
+				$(this).closest('form').submit();
+				$(this).attr('disabled', true);
 				e.preventDefault();
 			}
 		}
