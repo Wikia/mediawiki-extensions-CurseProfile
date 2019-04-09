@@ -56,7 +56,6 @@ class ProfileData {
 	 */
 	static private $externalProfileFields = [
 		'profile-link-facebook',
-		'profile-link-google',
 		'profile-link-psn',
 		'profile-link-reddit',
 		'profile-link-steam',
@@ -76,11 +75,6 @@ class ProfileData {
 			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
 			'user'	=> '^([\w\.]+)$',
 			'link'	=> 'https://www.facebook.com/%s'
-		],
-		'google'	=> [
-			'url'	=> '^https?://(?:www\.|plus\.)google.com/(\+\w+)(?:/.*?)?$',
-			'user'	=> '^(\+\w+)$',
-			'link'	=> 'https://plus.google.com/%s'
 		],
 		'psn'	=> [
 			'url'	=> '^https?://(?:www\.)?psnprofiles\.com/(\w+?)/?$',
@@ -609,7 +603,7 @@ class ProfileData {
 	 * Returns all the user's external social profiles.
 	 *
 	 * @access public
-	 * @return array	Possibly including keys: Twitter, Facebook, Google, Reddit, Steam, VK, XBL, PSN
+	 * @return array	Possibly including keys: Twitter, Facebook, Reddit, Steam, VK, XBL, PSN
 	 */
 	public function getExternalProfiles() {
 		foreach (self::$externalProfiles as $service => $data) {
