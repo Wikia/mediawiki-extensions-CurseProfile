@@ -161,7 +161,7 @@ class Hooks {
 	 */
 	public static function onLinkBegin($dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret) {
 		// only process user namespace links
-		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE])) {
+		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
 
