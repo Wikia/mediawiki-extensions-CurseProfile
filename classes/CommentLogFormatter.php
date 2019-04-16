@@ -32,9 +32,9 @@ class CommentLogFormatter extends LogFormatter {
 
 		// 4:comment_id
 		if (!empty($parameters[3])) {
-			$parameters[3] = ['raw' => Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $parameters[3], 'comment' . $parameters[3])->getLinkURL()], 'comment')];
+			$parameters[3] = ['raw' => Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $parameters[3], 'comment' . $parameters[3])->getLinkURL()], wfMessage('logentry-curseprofile-comment')->text())];
 		} else {
-			$parameters[3] = 'comment';
+			$parameters[3] = wfMessage('logentry-curseprofile-comment')->text();
 		}
 
 		return $parameters;

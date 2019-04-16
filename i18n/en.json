@@ -229,6 +229,7 @@
 	"cp-mobile-groups": "Groups",
 	"curseprofile_log_name": "Profile log",
 	"curseprofile_log_description": "User profile changes, comments, and moderation.",
+	"logentry-curseprofile-comment": "comment",
 	"logentry-curseprofile-comment-created": "$1 left a $4 on $3's profile",
 	"logentry-curseprofile-comment-replied": "$1 replied to a $4 on $3's profile.",
 	"logentry-curseprofile-comment-edited": "$1 edited a $4 on $3's profile.",
