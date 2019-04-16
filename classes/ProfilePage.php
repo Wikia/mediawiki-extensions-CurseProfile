@@ -935,9 +935,11 @@ __NOINDEX__
 		<h1>' . wfMessage('cp-recentactivitysection') . '</h1>
 		<p>[[Special:Contributions/' . $this->user->getName() . '|' . wfMessage('contributions')->text() . ']]</p>
 		{{#recentactivity: ' . $this->user->getID() . '}}
-		<h1>' . wfMessage('cp-recentcommentssection') . '</h1>
-		<p>[[Special:CommentBoard/' . $this->user->getID() . '/' . $this->user->getTitleKey() . '|' . wfMessage('commentarchivelink') . ']]</p>
-		{{#comments: ' . $this->user->getID() . '}}
+		<div class="comments section">
+		    <h1>' . wfMessage('cp-recentcommentssection') . '</h1>
+		    <p>[[Special:CommentBoard/' . $this->user->getID() . '/' . $this->user->getTitleKey() . '|' . wfMessage('commentarchivelink') . ']]</p>
+		    {{#comments: ' . $this->user->getID() . '}}
+		</div>
 	{{#if: ' . ($this->user->isBlocked() ? 'true' : '') . ' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
