@@ -683,23 +683,4 @@ class Hooks {
 
 		return true;
 	}
-
-	/**
-	 * Prevent UserProfile pages from having any MW action performed besides "view"
-	 *
-	 * @access public
-	 * @param Title &$title Reference to the title in question
-	 * @param User &$user Reference to the current user
-	 * @param string $action Action concerning the title in question
-	 * @param boolean &$result Whether MediaWiki currently thinks the action may be performed
-	 * @return boolean
-	 */
-	public static function onUserCan(&$title, &$user, $action, &$result) {
-		if ($title->getNamespace() == NS_USER_PROFILE && $action !== 'view') {
-			$result = false;
-			return false;
-		}
-
-		return true;
-	}
 }
