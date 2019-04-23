@@ -229,6 +229,7 @@
 	"commentmoderation-view": "查看",
 	"cp-mobile-aboutme": "自我介绍",
 	"cp-mobile-groups": "用户组",
+	"logentry-curseprofile-comment": "留言",
 	"curseprofile_log_name": "用户资料日志",
 	"curseprofile_log_description": "用户资料更改、评论和审核的日志。",
 	"logentry-curseprofile-comment-created": "$1在$3的资料页上留下了一条$4。",
