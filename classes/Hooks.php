@@ -683,4 +683,24 @@ class Hooks {
 
 		return true;
 	}
+	
+	/**
+	 * Prevent UserProfile pages from being edited
+	 *
+	 * @access public
+	 * @param	Title	&$title		Reference to the title in question
+ 	 * @param	User	&$user		Reference to the current user
+ 	 * @param	string	$action		Action concerning the title in question
+ 	 * @param	bool	&$result	Whether MediaWiki currently thinks the action may be performed
+	 * @return bool
+	 */
+	public static function onUserCan(&$title, &$user, $action, &$result) {
+		if ($title->getNamespace() == NS_USER_PROFILE && $action === 'edit') {
+			$result = false;
+			return false;
+		}
+
+		return true;
+	}
+
 }

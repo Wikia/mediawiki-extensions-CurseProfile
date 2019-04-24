@@ -342,6 +342,7 @@
 		"SkinSubPageSubtitle": "CurseProfile\\Hooks::onSkinSubPageSubtitle",
 		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
+		"userCan": "CurseProfile\\Hooks::onUserCan",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
 		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
 		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
