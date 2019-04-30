@@ -54,6 +54,17 @@ class ProfileApi extends HydraApiBase {
 	 */
 	public function getActions() {
 		return [
+			'getPublicProfile' => [
+				'tokenRequired' => false,
+				'postRequired' => false,
+				'params' => [
+					'user_name' => [
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_MIN => 1,
+						ApiBase::PARAM_REQUIRED => true,
+					]
+				]
+			],
 			'getRawField' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
@@ -169,6 +180,31 @@ class ProfileApi extends HydraApiBase {
 			$this->getResult()->addValue(null, 'message', 'no result found for hash ' . $hash);
 			$this->getResult()->addValue(null, 'data', []);
 		}
+	}
+
+	/**
+	 * Add the public info from a user profile by username
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function doGetPublicProfile() {
+		$userName = $this->getRequest()->getVal('user_name');
+		$user = \User::newFromName($userName);
+		$userId = $user->getId();
+		if (!$userId) {
+			$this->getResult()->addValue(null, 'result', 'failure');
+			$this->getResult()->addValue(null, 'errormsg', 'Invalid user.');
+			return;
+		}
+		$profileData = new ProfileData($userId);
+		$validFields = $profileData::getValidEditFields();
+		$userFields = ['username' => $userName];
+		foreach ($validFields as $field) {
+			$field = str_replace('profile-', '', $field);
+			$userFields[$field] = $profileData->getField($field);
+		}
+		$this->getResult()->addValue(null, 'profile', $userFields);
 	}
 
 	/**
