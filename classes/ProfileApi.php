@@ -189,15 +189,14 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetPublicProfile() {
-		$userName = $this->getRequest()->getVal('user_name');
+		$userName = $this->getRequest()->getText('user_name');
 		$user = \User::newFromName($userName);
-		$userId = $user->getId();
-		if (!$userId) {
+		if (!$user || !$user->getId()) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', 'Invalid user.');
 			return;
 		}
-		$profileData = new ProfileData($userId);
+		$profileData = new ProfileData($user->getId());
 		$validFields = $profileData::getValidEditFields();
 		$userFields = ['username' => $userName];
 		foreach ($validFields as $field) {
