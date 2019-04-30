@@ -55,6 +55,7 @@ class ProfileData {
 	 * @var array
 	 */
 	static private $externalProfileFields = [
+		'profile-link-discord',
 		'profile-link-facebook',
 		'profile-link-psn',
 		'profile-link-reddit',
@@ -71,6 +72,11 @@ class ProfileData {
 	 * @var array
 	 */
 	static private $externalProfiles = [
+		'discord'	=> [
+			'url'	=> '#',
+			'user'	=> '^(\w+?)$',
+			'link'	=> '#'
+		],
 		'facebook'	=> [
 			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
 			'user'	=> '^([\w\.]+)$',
