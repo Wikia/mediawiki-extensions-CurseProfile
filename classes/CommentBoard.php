@@ -762,7 +762,7 @@ class CommentBoard {
 		if (!$globalId) {
 			return false;
 		}
-		
+
 		// Preparing stuff for the Log Entry
 		$comment = self::getCommentById($commentId);
 		$toUser = User::newFromId($comment[0]['ub_user_id']);
@@ -774,7 +774,7 @@ class CommentBoard {
 		$log->setComment(null);
 		$logId = $log->insert();
 		$log->publish($logId);
-		
+
 		$db = CP::getDb(DB_MASTER);
 		return $db->delete(
 			'user_board',

@@ -456,7 +456,7 @@ class ProfilePage extends Article {
 						$item .= "<a href=\"javascript:;\" onClick=\"$('.profilelinks .Discord .discordinfo, .profilelinks .discord .discordinfo ').toggle()\"> </a>";
 						$item .= "<div class=\"discordinfo\">" . wfMessage('profile-discord-name')->text() . ": <div>{$escapedText}</div></div>";
 					} else {
-						$item .= Html::element('a', ['alt'=>'','href' => ProfileData::getExternalProfileLink($service, $text), 'target' => '_blank']);
+						$item .= Html::element('a', ['alt' => '','href' => ProfileData::getExternalProfileLink($service, $text), 'target' => '_blank']);
 					}
 					$item .= '</li>';
 					$html .= $item;
