@@ -673,7 +673,7 @@ class Hooks {
 	 *
 	 * @access public
 	 * @param  Integer $index	The index of the namespace being checked
- 	 * @param  Boolean &$result	Whether MediaWiki currently thinks this namespace is movable
+	 * @param  Boolean &$result	Whether MediaWiki currently thinks this namespace is movable
 	 * @return bool
 	 */
 	public static function onNamespaceIsMovable($index, &$result) {
@@ -683,15 +683,15 @@ class Hooks {
 
 		return true;
 	}
-	
+
 	/**
 	 * Prevent UserProfile pages from being edited
 	 *
 	 * @access public
-	 * @param	Title	&$title		Reference to the title in question
- 	 * @param	User	&$user		Reference to the current user
- 	 * @param	string	$action		Action concerning the title in question
- 	 * @param	bool	&$result	Whether MediaWiki currently thinks the action may be performed
+	 * @param  Title  &$title  Reference to the title in question
+	 * @param  User   &$user   Reference to the current user
+	 * @param  string $action  Action concerning the title in question
+	 * @param  bool   &$result Whether MediaWiki currently thinks the action may be performed
 	 * @return bool
 	 */
 	public static function onUserCan(&$title, &$user, $action, &$result) {
@@ -702,5 +702,4 @@ class Hooks {
 
 		return true;
 	}
-
 }
