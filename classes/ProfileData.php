@@ -73,7 +73,7 @@ class ProfileData {
 	 */
 	static private $externalProfiles = [
 		'discord'	=> [
-			'user'	=> '^(\w+#\d{4,6})$',
+			'user'	=> '^([^@#:]{2,32}#\d{4,6})$',
 			'link'	=> '#'
 		],
 		'facebook'	=> [
