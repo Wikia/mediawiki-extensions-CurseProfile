@@ -450,11 +450,11 @@ class ProfilePage extends Article {
 		if (count($profileLinks)) {
 			foreach ($profileLinks as $service => $text) {
 				if (!empty($text)) {
-					$item = "<li class='{$service}' title='{$service}: {$text}'>";
-					$html .= "<!-- {$service} $text -->";
+					$escapedText = htmlspecialchars($text, ENT_QUOTES | ENT_HTML5);
+					$item = "<li class='{$service}' title='{$service}: {$escapedText}'>";
 					if ($service == "discord") {
 						$item .= "<a href=\"javascript:;\" onClick=\"$('.profilelinks .Discord .discordinfo, .profilelinks .discord .discordinfo ').toggle()\"> </a>";
-						$item .= "<div class=\"discordinfo\">" . wfMessage('profile-discord-name')->text() . ": <div>{$text}</div></div>";
+						$item .= "<div class=\"discordinfo\">" . wfMessage('profile-discord-name')->text() . ": <div>{$escapedText}</div></div>";
 					} else {
 						$item .= Html::element('a', ['alt'=>'','href' => ProfileData::getExternalProfileLink($service, $text), 'target' => '_blank']);
 					}
