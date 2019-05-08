@@ -60,8 +60,6 @@ class SpecialProfileStats extends SpecialPage {
 			$favoriteWikis = [];
 		}
 
-		$this->output->addModuleStyles('ext.curseprofile.profilestats.styles');
-		$this->output->addModules('ext.curseprofile.profilestats.scripts');
 		$this->output->addHTML(TemplateProfileStats::statisticsPage($profileStats, $favoriteWikis));
 	}
 }
