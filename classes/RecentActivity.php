@@ -15,6 +15,7 @@ namespace CurseProfile;
 
 use Linker;
 use Title;
+use User;
 
 /**
  * A class to manage displaying a list of recent activity on a user profile
@@ -35,7 +36,9 @@ class RecentActivity {
 		$activity = self::fetchRecentRevisions($user_id);
 
 		if (count($activity) == 0) {
-			return wfMessage('emptyactivity')->plain();
+			$user = User::newFromId($user_id);
+			$user->load();
+			return wfMessage('emptyactivity')->params($user->getName())->plain();
 		}
 
 		$html = '
