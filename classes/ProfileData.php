@@ -55,6 +55,7 @@ class ProfileData {
 	 * @var array
 	 */
 	static private $externalProfileFields = [
+		'profile-link-battlenet',
 		'profile-link-discord',
 		'profile-link-facebook',
 		'profile-link-psn',
@@ -72,9 +73,11 @@ class ProfileData {
 	 * @var array
 	 */
 	static private $externalProfiles = [
+		'battlenet'	=> [
+			'user'	=> '^(\w{3,12}#\d{3,6})$'
+		],
 		'discord'	=> [
-			'user'	=> '^([^@#:]{2,32}#\d{4,6})$',
-			'link'	=> '#'
+			'user'	=> '^([^@#:]{2,32}#\d{4,6})$'
 		],
 		'facebook'	=> [
 			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
@@ -153,9 +156,12 @@ class ProfileData {
 	 * @access public
 	 * @param  string $service Service Name
 	 * @param  string $text    Text Replacement/User Name
-	 * @return string	URL to the external profile.
+	 * @return string|boolean	URL to the external profile or false.
 	 */
 	public static function getExternalProfileLink($service, $text) {
+		if (!isset((self::$externalProfiles[$service]['link']))) {
+			return false;
+		}
 		return sprintf(self::$externalProfiles[$service]['link'], urlencode($text));
 	}
 

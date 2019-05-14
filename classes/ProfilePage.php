@@ -451,13 +451,9 @@ class ProfilePage extends Article {
 			foreach ($profileLinks as $service => $text) {
 				if (!empty($text)) {
 					$escapedText = htmlspecialchars($text, ENT_QUOTES | ENT_HTML5);
+					$profileLink = ProfileData::getExternalProfileLink($service, $text);
 					$item = "<li class='{$service}' title='{$service}: {$escapedText}'>";
-					if ($service == "discord") {
-						$item .= "<a href=\"javascript:;\" onClick=\"$('.profilelinks .Discord .discordinfo, .profilelinks .discord .discordinfo ').toggle()\"> </a>";
-						$item .= "<div class=\"discordinfo\">" . wfMessage('profile-discord-name')->text() . ": <div>{$escapedText}</div></div>";
-					} else {
-						$item .= Html::element('a', ['alt' => '','href' => ProfileData::getExternalProfileLink($service, $text), 'target' => '_blank']);
-					}
+					$item .= self::generateProfileTooltipHTML($service, $escapedText, $profileLink);
 					$item .= '</li>';
 					$html .= $item;
 				}
@@ -465,6 +461,25 @@ class ProfilePage extends Article {
 		}
 		$html .= '</ul>';
 		return $html;
+	}
+
+	/**
+	 * Creates the HTML for profile links that have a tooltip
+	 *
+	 * @param  String Service name
+	 * @return String HTML string
+	 */
+	private static function generateProfileTooltipHTML($serviceName, $escapedText, $profileLink) {
+		$item = "";
+
+		if ($profileLink === false) {
+			$item .= "<a class='profile-icon'></a>";
+			$item .= "<div class=\"profile-icon-tooltip\">" . wfMessage('profile-' . $serviceName . '-name')->text() . ": <div class=\"profile-text\">{$escapedText}</div><button data-profile-text=\"$escapedText\"><i class=\"far fa-copy\"></i></button></div>";
+		} else {
+			$item = Html::element('a', ['alt' => '','href' => $profileLink, 'target' => '_blank']);
+		}
+
+		return $item;
 	}
 
 	/**

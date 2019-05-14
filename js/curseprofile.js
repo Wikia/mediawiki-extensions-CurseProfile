@@ -1,4 +1,4 @@
-function CurseProfile($) {
+  function CurseProfile($) {
 	'use strict';
 	this.init = function () {
 
@@ -30,6 +30,31 @@ function CurseProfile($) {
 				});
 		});
 		friendship.init();
+
+		$('.profile-icon-tooltip button').on('click touch', function(event) {
+			var $temp = $("<input>");
+			$("body").append($temp);
+			$temp.val($(this).data('profile-text')).select();
+			document.execCommand("copy");
+			$temp.remove();
+		});
+
+		$('.profile-icon').on('click touch', function(event) {
+			$('.profile-icon-tooltip').hide();
+			$(this).siblings('.profile-icon-tooltip').show();
+		});
+
+		$(document).on('click touch', function(event) {
+			if (!$(event.target).parents().addBack().is('.profile-icon')) {
+				$('.profile-icon-tooltip').hide();
+			}
+		});
+
+		$('.profile-icon-tooltip').on('click touch', function(event) {
+			event.stopPropagation();
+		});
+
+		
 	};
 
 	/**

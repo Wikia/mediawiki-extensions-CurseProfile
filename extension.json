@@ -137,6 +137,7 @@
 			],
 			"position": "top",
 			"messages": [
+				"battlenetlinkplaceholder",
 				"block",
 				"cancel",
 				"contributions-title",
@@ -147,6 +148,7 @@
 				"log",
 				"no-perm-profile-moderate",
 				"profile-blocked",
+				"profile-link-battlenet",
 				"profile-link-discord",
 				"profile-link-facebook",
 				"profile-link-google",
