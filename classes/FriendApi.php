@@ -114,12 +114,12 @@ class FriendApi extends HydraApiBase {
 		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($targetUser);
 		if (!$globalId) {
-			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->text(), 'friendrequest-direct-unmerged');
+			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->params($targetUser->getName())->text(), 'friendrequest-direct-unmerged');
 		}
 
 		$result = $this->f->sendRequest($globalId);
 		if (is_array($result) && isset($result['error'])) {
-			$this->dieUsage(wfMessage($result['error'])->text(), $result['error']);
+			$this->dieUsage(wfMessage($result['error'])->params($targetUser->getName())->text(), $result['error']);
 		} elseif (!$result) {
 			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}
