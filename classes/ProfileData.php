@@ -500,7 +500,7 @@ class ProfileData {
 
 		if ($this->canEdit($wgUser) === true) {
 			if (empty($fieldHtml)) {
-				$fieldHtml = Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod'))->params($this->user->getName())->plain());
+				$fieldHtml = Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod'))->params($this->user->getName())->text());
 			}
 
 			$fieldHtml = Html::rawElement(
@@ -508,7 +508,7 @@ class ProfileData {
 				[
 					'class'	=> 'rightfloat profileedit',
 					'href'	=> '#',
-					'title' => wfMessage('editfield-' . $field . '-tooltip')->params($this->user->getName())->plain()
+					'title' => wfMessage('editfield-' . $field . '-tooltip')->params($this->user->getName())->text()
 				],
 				HydraCore::awesomeIcon('pencil-alt')
 			) . $fieldHtml;
@@ -532,7 +532,7 @@ class ProfileData {
 
 		if ($this->canEdit($wgUser) === true) {
 			if (!count($profileLinks)) {
-				$html .= "" . Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->params($this->user->getName())->plain()) . "";
+				$html .= "" . Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->params($this->user->getName())->text()) . "";
 			}
 			$html .= "" . Html::rawElement(
 				'a',
