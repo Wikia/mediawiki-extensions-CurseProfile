@@ -38,7 +38,7 @@ class RecentActivity {
 		if (count($activity) == 0) {
 			$user = User::newFromId($user_id);
 			$user->load();
-			return wfMessage('emptyactivity')->params($user->getName())->plain();
+			return wfMessage('emptyactivity')->params($user->getName())->text();
 		}
 
 		$html = '
