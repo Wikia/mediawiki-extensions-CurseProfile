@@ -42,6 +42,7 @@
 		$('.profile-icon').on('click touch', function(event) {
 			$('.profile-icon-tooltip').hide();
 			$(this).siblings('.profile-icon-tooltip').show();
+			$(this).siblings('.profile-icon-tooltip').css('display', 'grid');
 		});
 
 		$(document).on('click touch', function(event) {

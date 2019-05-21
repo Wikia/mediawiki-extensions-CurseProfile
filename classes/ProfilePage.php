@@ -474,7 +474,7 @@ class ProfilePage extends Article {
 
 		if ($profileLink === false) {
 			$item .= "<a class='profile-icon'></a>";
-			$item .= "<div class=\"profile-icon-tooltip\">" . wfMessage('profile-' . $serviceName . '-name')->text() . ": <div class=\"profile-text\">{$escapedText}</div><button data-profile-text=\"$escapedText\"><i class=\"far fa-copy\"></i></button></div>";
+			$item .= "<div class=\"profile-icon-tooltip\"><div class=\"profile-tooltip-service\">" . wfMessage('profile-' . $serviceName . '-name')->text() . ": </div><div class=\"profile-text\">{$escapedText}</div><button data-profile-text=\"$escapedText\"><i class=\"far fa-copy\"></i></button></div>";
 		} else {
 			$item = Html::element('a', ['alt' => '','href' => $profileLink, 'target' => '_blank']);
 		}

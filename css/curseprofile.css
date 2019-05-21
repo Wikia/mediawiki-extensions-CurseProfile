@@ -249,16 +249,14 @@ div.mainavatar {
 	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAMAAACelLz8AAABgFBMVEUFWoUFVX4Atf4EbaIAneoGTXEEZZUA2v8DerYGUnkKGSUDd7IAsP8Arv8IOlUFXIgLCQ0HSmwHQmEJKDoChsYINU4JJjkCgsIAv/8EbpoHPlwIPFgKIjEAo/EJMUYIQF4KJTUAz/8KIS4Aw/8Auf8CfLoLDhQDeLMJMkkLEhkAmeMFapwFZJMCjNACi8sHTG4DdK0KHSoGTnQMBgkKFh8MBQYJNlEJLEALCAsAu/8QAAADdq8DfbkLDBAApPIA0/8Aou4AqvwEbJ8EaJoMAgQApfgFV4ADjcEArvcEZpgChcMMCAoGU3wEeq8Axv8GVnwDcagEc6kDa58GWX4Ald4CgL4Ayf8BoOQHSGkHR2sHN1EAm+kAn+0AitAAovQINksLEBYBiMkCiMgCiMoAqfMLFBsDcKcEcaAEcKQGSW8HRl0A1v8AnOUCjdAFYY4BjtEAtPkBjtMCj8cFXIgFXowAzP8AwP8GSWwCmdUBk9oBi84IRlwMAAANAAALDRL///9B/bx8AAAAgHRSTlP/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ADgFS2cAAAG7SURBVCjPddJpV9pAFAZgUMAakTOhEJAiINqBqKXKJAKR0S7Y2lZL9721e+1iN+x+3+lfb0KMpfV4P+XMk0zOvfcN/T60QsEDV0SKK7f+I/eENA2yb2qQlOIwZu/nID3hzQHiDKiMj2fT8D4TlhaQUuxSw3j44N7omuYap4Rh++S+h+LMz1MxxwmlAKKyLrz/ecQ6yAwfjYfSG+cmX9aryFWJ94k1tXL+RtiMLKdLmhVeOFLbhEvKJXNJj9Y/LVw5vbsbS5qwzafrm0LwPmnKRmXjxcqFpblnkRPbqQbiT8A8kkxK9FK4dtMB5esfpivVsTG7T16T9uJxOvbDbkrw+W5r6iLhcUACt3OdWYOgDSWNxPLXDLf3iCM6dAaZ9045exZzoHdTMUifbBUxTo4WeoXpV06065RWRq4GhPAj4Js+cXnC0bI7O/Hn25bwL5Roz+Tyd1urtU5j8noxumV5PfuDotqX1q2Rdun1r3gP3hQl35uhhP5xvf25K76v6mD+NlWwFFosI/m2dX5Y0L74q+SSyDbfbKEw7+9ZDQZAcQFidKfY2Q/H39j0Q8ESFvs3NgFyIUx5IIcH6w/Aie6KH8KNPgAAAABJRU5ErkJggg==');
 }
 
-.profilelinks .profile-icon-tooltip .profile-text {
-	float: left;
-}
-
-.profilelinks .profile-icon-tooltip button {
-	float: right;
+.profilelinks .profile-tooltip-service {
+	grid-column: span 2;
 }
 
 .profilelinks .profile-icon-tooltip {
 	display: none;
+	column-gap: 7px;
+	grid-template-columns: 1fr 1fr;
 	background-color: black;
 	min-width: 120px;
 	color: #fff;
