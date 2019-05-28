@@ -239,6 +239,8 @@
 	"commentmoderation-delete": "Löschen",
 	"commentmoderation-dismiss": "Verwerfen",
 	"commentmoderation-view": "Ansehen",
+	"commentmoderation-byvolume": "Offene Meldungen",
+	"commentmoderation-byactiondate": "Moderations-Logbuch",
 	"cp-mobile-aboutme": "Über mich",
 	"cp-mobile-groups": "Gruppen",
 	"curseprofile_log_name": "Profil-Logbuch",
