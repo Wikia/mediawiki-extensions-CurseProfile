@@ -50,7 +50,7 @@
 	"totaledits": "Edições",
 	"action-profilestats": "Visualizar estatísticas CurseProfile",
 	"avataralt": "Avatar para $1",
-	"comment-pref": "Comentários aprimorados"
+	"comment-pref": "Comentários aprimorados",
 	"cp-achievementssection-all": "([[Special:Achievements/$1|Ver tudo]])",
 	"globalrank": "Gamepedia Rank<br>([[Special:WikiPoints/global|Classificação]])",
 	"totalfriends-mobile": "Amigos",
@@ -83,7 +83,7 @@
 	"profilepref-wiki": "Usar uma página de usuário padrão wiki",
 	"reportlink-tooltip": "Denunciar este comentário",
 	"purgelink-tooltip": "Apagar permanentemente este comentário",
-    "editfield-aboutme-tooltip": "Edite a seção sobre mim deste usuário",
+	"editfield-aboutme-tooltip": "Edite a seção \"sobre mim\" deste usuário",
 	"editfield-location-tooltip": "Editar a localização deste usuário",
 	"log-profile-aboutme": "Seção sobre mim",
 	"log-profile-link-battlenet": "Conta do Battle.net",
@@ -98,5 +98,4 @@
 	"log-profile-link-vk": "Conta VK",
 	"log-profile-link-xbl": "Etiqueta do jogador do Xbox Live",
 	"log-profile-location": "localização"
-
 }
