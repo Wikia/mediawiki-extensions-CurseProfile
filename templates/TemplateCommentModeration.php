@@ -29,11 +29,11 @@ class TemplateCommentModeration {
 	 */
 	public function sortStyleSelector($currentStyle) {
 		$styles = [
-			'byVolume' => ['By Volume of Reports', 'default'],
+			'byVolume' => ['commentmoderation-byvolume', 'default'],
 			// 'byWiki' => ['By Origin Wiki'],
 			// 'byUser' => ['By Reported User'],
 			// 'byDate' => ['Most Recent Reports First'],
-			'byActionDate' => ['Moderation Log'],
+			'byActionDate' => ['commentmoderation-byactiondate'],
 		];
 		$html = '';
 
@@ -51,7 +51,7 @@ class TemplateCommentModeration {
 			if ($currentStyle == $key) {
 				$params['style'] = 'font-weight: bold;';
 			}
-			$html .= Html::element('a', $params, $sort[0]);
+			$html .= Html::element('a', $params, wfMessage($sort[0])->text());
 		}
 
 		return '<p>' . wfMessage('commentmoderation-view')->text() . ': ' . $html . '</p>';
