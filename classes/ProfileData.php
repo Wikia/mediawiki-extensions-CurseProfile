@@ -96,7 +96,7 @@ class ProfileData {
 		],
 		'steam'	=> [
 			'url'	=> '^https?://(?:www\.)?steamcommunity\.com/id/([\w-]+?)/?$',
-			'user'	=> '^([\w\.]+)$',
+			'user'	=> '^([\w-]+?)$',
 			'link'	=> 'https://steamcommunity.com/id/%s'
 		],
 		'twitch'	=> [
