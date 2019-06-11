@@ -101,7 +101,7 @@
 	"prefs-location": "Location",
 	"prefs-profiles": "Other Profiles",
 	"avatar": "Avatar",
-	"avatar-help": "Gamepedia uses Gravatar to display an avatar based on your email address. Visit [https://www.gravatar.com/ gravatar.com] to change your avatar.",
+	"avatar-help": "Gamepedia uses Gravatar to display an avatar based on your email address. Visit [https://www.gravatar.com/ gravatar.com] to change your avatar. Please note that the avatar must be rated \"G\" or it will not appear.",
 	"commentplaceholder": "Leave a comment",
 	"commentreplyplaceholder": "Leave a reply",
 	"directfriendreqplaceholder": "Enter a username",
