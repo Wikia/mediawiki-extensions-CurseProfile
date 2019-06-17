@@ -355,7 +355,13 @@
 				"user-interest-profile-comment": {
 					"importance": 8
 				},
-				"user-interest-profile-comment-reply": {
+				"user-interest-profile-comment-reply-self-self": {
+					"importance": 8
+				},
+				"user-interest-profile-comment-reply-self-other": {
+					"importance": 8
+				},
+				"user-interest-profile-comment-reply-other-self": {
 					"importance": 8
 				},
 				"user-moderation-profile-comment-report": {

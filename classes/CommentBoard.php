@@ -19,7 +19,9 @@ use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
 use Exception;
 use ManualLogEntry;
+use Reverb\Notification\NotificationBroadcast;
 use Sanitizer;
+use SpecialPage;
 use Title;
 use User;
 
@@ -481,55 +483,98 @@ class CommentBoard {
 			}
 
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+			$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getFullURL();
+			$userNote = substr($commentText, 0, 80);
 			if ($toUser->getId() != $fromUser->getId()) {
-				$broadcast = NotificationBroadcast::newSingle(
-					'user-interest-profile-comment',
-					$fromUser,
-					$toUser,
-					[
-						'url' => SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getLinkURL(), //$toUserTitle->getFullURL(),
-						'message' => [
+				if ($inReplyTo > 0) {
+					if (!$parentCommenter->equals($toUser)) {
+						// We have to make two notifications.  One for the profile owner and one for the parent commenter.
+						$broadcast = NotificationBroadcast::newSingle(
+							'user-interest-profile-comment-reply-other-self',
+							$fromUser,
+							$toUser,
 							[
-								'user_note',
-								substr($commentText, 0, 80)
-							],
-							[
-								1,
-								$newCommentId
-							],
-							[
-								2,
-								$toUserTitle->getFullText()
+								'url' => $commentPermanentLink,
+								'message' => [
+									[
+										'user_note',
+										$userNote
+									],
+									[
+										1,
+										$fromUser->getName()
+									],
+									[
+										2,
+										$toUser->getName()
+									],
+									[
+										3,
+										$parentCommenter->getName()
+									]
+								]
+							]
+						);
+						if ($broadcast) {
+							$broadcast->transmit();
+						}
+					}
+					$broadcast = NotificationBroadcast::newSingle(
+						'user-interest-profile-comment-reply-self-'.($parentCommenter->equals($toUser) ? 'self' : 'other'),
+						$fromUser,
+						$parentCommenter,
+						[
+							'url' => $commentPermanentLink,
+							'message' => [
+								[
+									'user_note',
+									$userNote
+								],
+								[
+									1,
+									$fromUser->getName()
+								],
+								[
+									2,
+									$toUser->getName()
+								],
+								[
+									3,
+									$parentCommenter->getName()
+								]
 							]
 						]
-					]
-				);
-				$broadcast->transmit();
-			}
-			if ($inReplyTo > 0 && $parentCommenter->getId()) {
-				$broadcast = NotificationBroadcast::newSingle(
-					'user-interest-profile-comment',
-					$fromUser,
-					$toUser,
-					[
-						'url' => SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getLinkURL(), //$toUserTitle->getFullURL(),
-						'message' => [
-							[
-								'user_note',
-								substr($commentText, 0, 80)
-							],
-							[
-								1,
-								$newCommentId
-							],
-							[
-								2,
-								$toUserTitle->getFullText()
+					);
+					if ($broadcast) {
+						$broadcast->transmit();
+					}
+				} else {
+					$broadcast = NotificationBroadcast::newSingle(
+						'user-interest-profile-comment',
+						$fromUser,
+						$toUser,
+						[
+							'url' => $commentPermanentLink,
+							'message' => [
+								[
+									'user_note',
+									$userNote
+								],
+								[
+									1,
+									$fromUser->getName()
+								],
+								[
+									2,
+									$toUserTitle->getFullText()
+								]
 							]
 						]
-					]
-				);
-				$broadcast->transmit();
+					);
+					if ($broadcast) {
+						$broadcast->transmit();
+					}
+				}
 			}
 
 			// Insert an entry into the Log.
