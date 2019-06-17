@@ -520,7 +520,7 @@ class CommentBoard {
 						}
 					}
 					$broadcast = NotificationBroadcast::newSingle(
-						'user-interest-profile-comment-reply-self-'.($parentCommenter->equals($toUser) ? 'self' : 'other'),
+						'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($toUser) ? 'self' : 'other'),
 						$fromUser,
 						$parentCommenter,
 						[

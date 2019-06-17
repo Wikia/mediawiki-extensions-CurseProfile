@@ -16,6 +16,7 @@ namespace CurseProfile;
 use CentralIdLookup;
 use DynamicSettings\Environment;
 use RedisCache;
+use Reverb\Notification\NotificationBroadcast;
 use Throwable;
 use Title;
 use User;
@@ -507,12 +508,12 @@ class CommentReport {
 	 * Add a new report to comment that has already been archived.
 	 *
 	 * @access private
-	 * @param  object	The User reporting this comment
+	 * @param  object $fromUser The User reporting this comment
 	 * @return void
 	 */
-	private function addReportFrom($user) {
+	private function addReportFrom($fromUser) {
 		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
 
 		if (!isset($this->id) || !$globalId) {
 			// Can't add to a comment that hasn't been archived yet.
@@ -536,14 +537,27 @@ class CommentReport {
 			__METHOD__
 		);
 
-		EchoEvent::create([
-			'type' => 'comment-report',
-			'agent' => $user,
-			'title' => Title::newFromText('Special:CommentModeration'),
-			'extra' => [
-				'comment_id' => $this->data['comment']['cid']
+		$broadcast = NotificationBroadcast::newSingle(
+			'user-moderation-profile-comment-report',
+			$fromUser,
+			$toLocalUser,
+			[
+				'url' => Title::newFromText('Special:CommentModeration')->getFullURL(),
+				'message' => [
+					[
+						'user_note',
+						''
+					],
+					[
+						1,
+						$fromUser->getName()
+					]
+				]
 			]
-		]);
+		);
+		if ($broadcast) {
+			$broadcast->transmit();
+		}
 
 		$redis = RedisCache::getClient('cache');
 
