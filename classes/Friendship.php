@@ -16,7 +16,6 @@ namespace CurseProfile;
 use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
-use EchoEvent;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
