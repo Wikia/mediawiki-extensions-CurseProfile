@@ -15,7 +15,6 @@ namespace CurseProfile;
 
 use CentralIdLookup;
 use DynamicSettings\Environment;
-use EchoEvent;
 use RedisCache;
 use Throwable;
 use Title;

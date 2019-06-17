@@ -17,7 +17,6 @@ use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
-use EchoEvent;
 use Exception;
 use ManualLogEntry;
 use Sanitizer;
@@ -483,30 +482,54 @@ class CommentBoard {
 
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 			if ($toUser->getId() != $fromUser->getId()) {
-				EchoEvent::create([
-					'type' => 'comment',
-					'agent' => $fromUser,
-					'title' => $toUserTitle,
-					'extra' => [
-						'user' => $toUser,
-						'target_user_id' => $toUser->getId(),
-						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
-						'comment_id' => $newCommentId,
+				$broadcast = NotificationBroadcast::newSingle(
+					'user-interest-profile-comment',
+					$fromUser,
+					$toUser,
+					[
+						'url' => SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getLinkURL(), //$toUserTitle->getFullURL(),
+						'message' => [
+							[
+								'user_note',
+								substr($commentText, 0, 80)
+							],
+							[
+								1,
+								$newCommentId
+							],
+							[
+								2,
+								$toUserTitle->getFullText()
+							]
+						]
 					]
-				]);
+				);
+				$broadcast->transmit();
 			}
 			if ($inReplyTo > 0 && $parentCommenter->getId()) {
-				EchoEvent::create([
-					'type' => 'comment-reply',
-					'agent' => $fromUser,
-					'title' => $toUserTitle,
-					'extra' => [
-						'user' => $parentCommenter,
-						'target_user_id' => $parentCommenter->getId(),
-						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
-						'comment_id' => $newCommentId,
+				$broadcast = NotificationBroadcast::newSingle(
+					'user-interest-profile-comment',
+					$fromUser,
+					$toUser,
+					[
+						'url' => SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getLinkURL(), //$toUserTitle->getFullURL(),
+						'message' => [
+							[
+								'user_note',
+								substr($commentText, 0, 80)
+							],
+							[
+								1,
+								$newCommentId
+							],
+							[
+								2,
+								$toUserTitle->getFullText()
+							]
+						]
 					]
-				]);
+				);
+				$broadcast->transmit();
 			}
 
 			// Insert an entry into the Log.
