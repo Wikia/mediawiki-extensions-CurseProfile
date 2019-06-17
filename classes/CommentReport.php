@@ -542,7 +542,7 @@ class CommentReport {
 			$fromUser,
 			$toLocalUser,
 			[
-				'url' => Title::newFromText('Special:CommentModeration')->getFullURL(),
+				'url' => SpecialPage::getTitleFor('CommentModeration')->getFullURL(),
 				'message' => [
 					[
 						'user_note',
