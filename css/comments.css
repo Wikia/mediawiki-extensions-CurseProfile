@@ -53,6 +53,7 @@
 
 .commentbody {
 	margin-left:54px;
+	overflow-wrap: break-word;
 }
 
 .curseprofile .overlay {
