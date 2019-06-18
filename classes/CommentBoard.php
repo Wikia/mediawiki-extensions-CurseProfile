@@ -17,10 +17,11 @@ use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
-use EchoEvent;
 use Exception;
 use ManualLogEntry;
+use Reverb\Notification\NotificationBroadcast;
 use Sanitizer;
+use SpecialPage;
 use Title;
 use User;
 
@@ -482,31 +483,98 @@ class CommentBoard {
 			}
 
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+			$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getFullURL();
+			$userNote = substr($commentText, 0, 80);
 			if ($toUser->getId() != $fromUser->getId()) {
-				EchoEvent::create([
-					'type' => 'comment',
-					'agent' => $fromUser,
-					'title' => $toUserTitle,
-					'extra' => [
-						'user' => $toUser,
-						'target_user_id' => $toUser->getId(),
-						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
-						'comment_id' => $newCommentId,
-					]
-				]);
-			}
-			if ($inReplyTo > 0 && $parentCommenter->getId()) {
-				EchoEvent::create([
-					'type' => 'comment-reply',
-					'agent' => $fromUser,
-					'title' => $toUserTitle,
-					'extra' => [
-						'user' => $parentCommenter,
-						'target_user_id' => $parentCommenter->getId(),
-						'comment_text' => substr($commentText, 0, MWEcho\NotificationFormatter::MAX_PREVIEW_LEN),
-						'comment_id' => $newCommentId,
-					]
-				]);
+				if ($inReplyTo > 0) {
+					if (!$parentCommenter->equals($toUser)) {
+						// We have to make two notifications.  One for the profile owner and one for the parent commenter.
+						$broadcast = NotificationBroadcast::newSingle(
+							'user-interest-profile-comment-reply-other-self',
+							$fromUser,
+							$toUser,
+							[
+								'url' => $commentPermanentLink,
+								'message' => [
+									[
+										'user_note',
+										$userNote
+									],
+									[
+										1,
+										$fromUser->getName()
+									],
+									[
+										2,
+										$toUser->getName()
+									],
+									[
+										3,
+										$parentCommenter->getName()
+									]
+								]
+							]
+						);
+						if ($broadcast) {
+							$broadcast->transmit();
+						}
+					}
+					$broadcast = NotificationBroadcast::newSingle(
+						'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($toUser) ? 'self' : 'other'),
+						$fromUser,
+						$parentCommenter,
+						[
+							'url' => $commentPermanentLink,
+							'message' => [
+								[
+									'user_note',
+									$userNote
+								],
+								[
+									1,
+									$fromUser->getName()
+								],
+								[
+									2,
+									$toUser->getName()
+								],
+								[
+									3,
+									$parentCommenter->getName()
+								]
+							]
+						]
+					);
+					if ($broadcast) {
+						$broadcast->transmit();
+					}
+				} else {
+					$broadcast = NotificationBroadcast::newSingle(
+						'user-interest-profile-comment',
+						$fromUser,
+						$toUser,
+						[
+							'url' => $commentPermanentLink,
+							'message' => [
+								[
+									'user_note',
+									$userNote
+								],
+								[
+									1,
+									$fromUser->getName()
+								],
+								[
+									2,
+									$toUserTitle->getFullText()
+								]
+							]
+						]
+					);
+					if ($broadcast) {
+						$broadcast->transmit();
+					}
+				}
 			}
 
 			// Insert an entry into the Log.

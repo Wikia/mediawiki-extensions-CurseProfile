@@ -16,7 +16,7 @@ namespace CurseProfile;
 use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
-use EchoEvent;
+use Reverb\Notification\NotificationBroadcast;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
@@ -186,6 +186,28 @@ class Friendship {
 				'target_user_id' => $toLocalUser->getId()
 			]
 		]);
+
+		$broadcast = NotificationBroadcast::newSingle(
+			'user-interest-profile-friendship',
+			$wgUser,
+			$toLocalUser,
+			[
+				'url' => SpecialPage::getTitleFor('ManageFriends')->getFullURL(),
+				'message' => [
+					[
+						'user_note',
+						$userNote
+					],
+					[
+						1,
+						$fromUser->getName()
+					]
+				]
+			]
+		);
+		if ($broadcast) {
+			$broadcast->transmit();
+		}
 
 		wfRunHooks('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
 		return true;

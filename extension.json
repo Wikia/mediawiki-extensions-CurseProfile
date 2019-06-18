@@ -13,9 +13,9 @@
 		"extensions": {
 			"Cheevos": ">= 1.0.0",
 			"DynamicSettings": ">= 3.0.0",
-			"Echo": "*",
 			"HydraAuth": "*",
 			"HydraCore": ">= 3.0.0",
+			"Reverb": "*",
 			"SyncService": ">= 2.0.0"
 		}
 	},
@@ -81,10 +81,6 @@
 		"CurseProfile\\CommentReport": "classes/CommentReport.php",
 		"CurseProfile\\CommentDisplay": "classes/CommentDisplay.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
-		"CurseProfile\\MWEcho\\CommentPresentationModel": "classes/echo/CommentPresentationModel.php",
-		"CurseProfile\\MWEcho\\EchoUserLocator": "classes/echo/EchoUserLocator.php",
-		"CurseProfile\\MWEcho\\FriendshipPresentationModel": "classes/echo/FriendshipPresentationModel.php",
-		"CurseProfile\\MWEcho\\NotificationFormatter": "classes/echo/NotificationFormatter.php",
 		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
 		"CurseProfile\\CommentLogFormatter": "classes/CommentLogFormatter.php",
 		"CurseProfile\\ProfileLogFormatter": "classes/ProfileLogFormatter.php",
@@ -317,7 +313,6 @@
 	"Hooks": {
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
 		"ArticleViewRedirect": "CurseProfile\\Hooks::onArticleViewRedirect",
-		"BeforeCreateEchoEvent": "CurseProfile\\Hooks::onBeforeCreateEchoEvent",
 		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
 		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
@@ -354,6 +349,29 @@
 			"path": false,
 			"descriptionmsg": "curseprofile-config-cpcommentmodgroup",
 			"public": false
+		},
+		"ReverbNotifications": {
+			"value": {
+				"user-interest-profile-comment": {
+					"importance": 8
+				},
+				"user-interest-profile-comment-reply-self-self": {
+					"importance": 8
+				},
+				"user-interest-profile-comment-reply-self-other": {
+					"importance": 8
+				},
+				"user-interest-profile-comment-reply-other-self": {
+					"importance": 8
+				},
+				"user-moderation-profile-comment-report": {
+					"importance": 1
+				},
+				"user-interest-profile-friendship": {
+					"importance": 5
+				}
+			},
+			"merge_strategy": "array_plus_2d"
 		},
 		"SyncServices": {
 			"value": {
