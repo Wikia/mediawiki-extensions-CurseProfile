@@ -354,7 +354,7 @@ class ProfilePage extends Article {
 	 * @param  string $email User's email address
 	 * @return string		md5 hash of the email address
 	 */
-	public static function emailToMD5Hash($email) {
+	private static function emailToMD5Hash($email) {
 		return md5(strtolower(trim($email)));
 	}
 
@@ -374,7 +374,7 @@ class ProfilePage extends Article {
 
 		// Determine if we have a hash or an email address that needs to be hashed
 		if (strlen($email) != 32 && !ctype_xdigit($email)) {
-			$email = md5(strtolower(trim($email)));
+			$email = self::emailToMD5Hash($email);
 		}
 
 		return [
@@ -871,7 +871,7 @@ class ProfilePage extends Article {
 <div class="curseprofile" data-user_id="' . $this->user->getID() . '">
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="headline">
 				<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
 				{{#groups:}}
@@ -942,7 +942,7 @@ __NOINDEX__
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
 		<div class="userinfo section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="usericons rightfloat">
 				<div class="score">{{#Points:' . $this->user->getName() . '|1|global|badged}}</div>
 				{{#profilelinks:}}
