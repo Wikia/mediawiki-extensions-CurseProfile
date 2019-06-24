@@ -485,8 +485,8 @@ class CommentBoard {
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 			$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getFullURL();
 			$userNote = substr($commentText, 0, 80);
-			if ($toUser->getId() != $fromUser->getId()) {
-				if ($inReplyTo > 0) {
+			if ($inReplyTo > 0) {
+				if ($toUser->getId() != $fromUser->getId()) {
 					if (!$parentCommenter->equals($toUser)) {
 						// We have to make two notifications.  One for the profile owner and one for the parent commenter.
 						$broadcast = NotificationBroadcast::newSingle(
@@ -545,35 +545,35 @@ class CommentBoard {
 							]
 						]
 					);
-					if ($broadcast) {
-						$broadcast->transmit();
-					}
-				} else {
-					$broadcast = NotificationBroadcast::newSingle(
-						'user-interest-profile-comment',
-						$fromUser,
-						$toUser,
-						[
-							'url' => $commentPermanentLink,
-							'message' => [
-								[
-									'user_note',
-									$userNote
-								],
-								[
-									1,
-									$fromUser->getName()
-								],
-								[
-									2,
-									$toUserTitle->getFullText()
-								]
+				}
+				if ($broadcast) {
+					$broadcast->transmit();
+				}
+			} else {
+				$broadcast = NotificationBroadcast::newSingle(
+					'user-interest-profile-comment',
+					$fromUser,
+					$toUser,
+					[
+						'url' => $commentPermanentLink,
+						'message' => [
+							[
+								'user_note',
+								$userNote
+							],
+							[
+								1,
+								$fromUser->getName()
+							],
+							[
+								2,
+								$toUserTitle->getFullText()
 							]
 						]
-					);
-					if ($broadcast) {
-						$broadcast->transmit();
-					}
+					]
+				);
+				if ($broadcast) {
+					$broadcast->transmit();
 				}
 			}
 
