@@ -16,6 +16,7 @@ namespace CurseProfile;
 use ApiBase;
 use CentralIdLookup;
 use HydraApiBase;
+use RequestContext;
 use User;
 
 /**
@@ -82,16 +83,15 @@ class FriendApi extends HydraApiBase {
 	}
 
 	/**
-	 * execute
+	 * Execute
 	 *
 	 * @return void
 	 */
 	public function execute() {
-		global $wgUser;
+		$wgUser = RequestContext::getMain()->getUser();
 
 		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
-
 		$this->f = new Friendship($globalId);
 		parent::execute();
 	}
@@ -102,6 +102,8 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doDirectreq() {
+		$wgUser = RequestContext::getMain()->getUser();
+
 		$targetUser = User::newFromName($this->getMain()->getVal('name'));
 		if (!$targetUser) {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
@@ -114,12 +116,12 @@ class FriendApi extends HydraApiBase {
 		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($targetUser);
 		if (!$globalId) {
-			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->params($targetUser->getName())->text(), 'friendrequest-direct-unmerged');
+			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->params($targetUser->getName(), $wgUser->getName())->text(), 'friendrequest-direct-unmerged');
 		}
 
 		$result = $this->f->sendRequest($globalId);
 		if (is_array($result) && isset($result['error'])) {
-			$this->dieUsage(wfMessage($result['error'])->params($targetUser->getName())->text(), $result['error']);
+			$this->dieUsage(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName())->text(), $result['error']);
 		} elseif (!$result) {
 			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}

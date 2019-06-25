@@ -14,6 +14,7 @@
 namespace CurseProfile;
 
 use Linker;
+use RequestContext;
 use Title;
 use User;
 
@@ -22,23 +23,23 @@ use User;
  */
 class RecentActivity {
 	/**
-	 * handle parser hook call
+	 * Handle parser hook call
 	 *
 	 * @param  object &$parser
 	 * @param  string $user_id
 	 * @return mixed
 	 */
 	public static function parserHook(&$parser, $user_id = '') {
+		$wgUser = RequestContext::getMain()->getUser();
 		$user_id = intval($user_id);
 		if ($user_id < 1) {
 			return 'Invalid user ID given';
 		}
 		$activity = self::fetchRecentRevisions($user_id);
-
 		if (count($activity) == 0) {
 			$user = User::newFromId($user_id);
 			$user->load();
-			return wfMessage('emptyactivity')->params($user->getName())->text();
+			return wfMessage('emptyactivity')->params($user->getName(), $wgUser->getName())->text();
 		}
 
 		$html = '
@@ -46,7 +47,7 @@ class RecentActivity {
 		foreach ($activity as $rev) {
 			$title = Title::newFromID($rev['rev_page']);
 			if ($title) {
-				$verb = $rev['rev_parent_id'] ? wfMessage('profileactivity-edited') : wfMessage('profileactivity-created');
+				$verb = $rev['rev_parent_id'] ? wfMessage('profileactivity-edited')->params($wgUser->getName()) : wfMessage('profileactivity-created')->params($wgUser->getName());
 				$html .= '<li>' . $verb . ' ' . Linker::link($title) . ' ' . self::diffHistLinks($title, $rev) . ' ' . CP::timeTag($rev['rev_timestamp']) . '</li>';
 			}
 		}

@@ -20,6 +20,7 @@ use ManualLogEntry;
 use MWException;
 use Redis;
 use RedisCache;
+use RequestContext;
 use Throwable;
 use Title;
 use User;
@@ -494,13 +495,14 @@ class ProfileData {
 	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function getFieldHtml($field) {
-		global $wgOut, $wgUser;
+		global $wgOut;
+		$wgUser = RequestContext::getMain()->getUser();
 
 		$fieldHtml = $wgOut->parse($this->getField($field));
 
 		if ($this->canEdit($wgUser) === true) {
 			if (empty($fieldHtml)) {
-				$fieldHtml = Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod'))->params($this->user->getName())->text());
+				$fieldHtml = Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod'))->params($this->user->getName(), $wgUser->getName())->text());
 			}
 
 			$fieldHtml = Html::rawElement(
@@ -524,15 +526,14 @@ class ProfileData {
 	 * @return mixed	Array with HTML string at index 0 or an HTML string.
 	 */
 	public function getProfileLinksHtml() {
-		global $wgUser;
+		$wgUser = RequestContext::getMain()->getUser();
 
 		$profileLinks = $this->getExternalProfiles();
 
 		$html = "";
-
 		if ($this->canEdit($wgUser) === true) {
 			if (!count($profileLinks)) {
-				$html .= "" . Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->params($this->user->getName())->text()) . "";
+				$html .= "" . Html::element('em', [], wfMessage(($this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod'))->params($this->user->getName(), $wgUser->getName())->text()) . "";
 			}
 			$html .= "" . Html::rawElement(
 				'a',

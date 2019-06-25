@@ -16,6 +16,7 @@ namespace CurseProfile;
 use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
+use RequestContext;
 use Reverb\Notification\NotificationBroadcast;
 
 /**
@@ -151,15 +152,20 @@ class Friendship {
 	 * @return boolean	True on success, False on failure.
 	 */
 	public function sendRequest($toGlobalId) {
-		global $wgUser;
+		$wgUser = RequestContext::getMain()->getUser();
 
 		if ($wgUser->isBlocked()) {
 			return ['error' => 'friendrequest-blocked'];
 		}
 
-		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
+		$relationShip = $this->getRelationship($toGlobalId);
+
+		if ($relationShip == -1) {
+			return ['error' => 'friendrequest-status-unavailable'];
+		}
+
+		if ($relationShip !== self::STRANGERS) {
 			return ['error' => 'friendrequest-already-friends'];
-			;
 		}
 
 		try {
@@ -176,16 +182,6 @@ class Friendship {
 		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
 			return false;
 		}
-
-		EchoEvent::create([
-			'type' => 'friendship',
-			'agent' => $wgUser,
-			'title' => $wgUser->getUserPage(),
-			'extra' => [
-				'user' => $toLocalUser,
-				'target_user_id' => $toLocalUser->getId()
-			]
-		]);
 
 		$broadcast = NotificationBroadcast::newSingle(
 			'user-interest-profile-friendship',
