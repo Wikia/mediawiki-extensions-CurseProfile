@@ -431,6 +431,7 @@ class CommentBoard {
 			return false;
 		}
 
+		$parentCommenter = null;
 		if (is_null($inReplyTo)) {
 			$inReplyTo = 0;
 		} else {
@@ -482,9 +483,17 @@ class CommentBoard {
 				wfRunHooks('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
 			}
 
+			$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
 			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+			$parentCommenterTitle = null;
+			if ($parentCommenter) {
+				$parentCommenterTitle = Title::makeTitle(NS_USER_PROFILE, $parentCommenter->getName());
+			}
+
 			$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $newCommentId, 'comment' . $newCommentId)->getFullURL();
+
 			$userNote = substr($commentText, 0, 80);
+
 			if ($inReplyTo > 0) {
 				if ($toUser->getId() != $fromUser->getId()) {
 					if (!$parentCommenter->equals($toUser)) {
@@ -511,6 +520,18 @@ class CommentBoard {
 									[
 										3,
 										$parentCommenter->getName()
+									],
+									[
+										4,
+										$fromUserTitle->getFullURL()
+									],
+									[
+										5,
+										$toUserTitle->getFullURL()
+									],
+									[
+										6,
+										$parentCommenterTitle->getFullURL()
 									]
 								]
 							]
@@ -519,33 +540,45 @@ class CommentBoard {
 							$broadcast->transmit();
 						}
 					}
-					$broadcast = NotificationBroadcast::newSingle(
-						'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($toUser) ? 'self' : 'other'),
-						$fromUser,
-						$parentCommenter,
-						[
-							'url' => $commentPermanentLink,
-							'message' => [
-								[
-									'user_note',
-									$userNote
-								],
-								[
-									1,
-									$fromUser->getName()
-								],
-								[
-									2,
-									$toUser->getName()
-								],
-								[
-									3,
-									$parentCommenter->getName()
-								]
+				}
+				$broadcast = NotificationBroadcast::newSingle(
+					'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($toUser) ? 'self' : 'other'),
+					$fromUser,
+					$parentCommenter,
+					[
+						'url' => $commentPermanentLink,
+						'message' => [
+							[
+								'user_note',
+								$userNote
+							],
+							[
+								1,
+								$fromUser->getName()
+							],
+							[
+								2,
+								$toUser->getName()
+							],
+							[
+								3,
+								$parentCommenter->getName()
+							],
+							[
+								4,
+								$fromUserTitle->getFullURL()
+							],
+							[
+								5,
+								$toUserTitle->getFullURL()
+							],
+							[
+								6,
+								$parentCommenterTitle->getFullURL()
 							]
 						]
-					);
-				}
+					]
+				);
 				if ($broadcast) {
 					$broadcast->transmit();
 				}
@@ -568,6 +601,10 @@ class CommentBoard {
 							[
 								2,
 								$toUserTitle->getFullText()
+							],
+							[
+								3,
+								$toUserTitle->getFullURL()
 							]
 						]
 					]
