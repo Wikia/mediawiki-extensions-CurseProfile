@@ -29,6 +29,7 @@
 	"friendrequest-direct-unmerged": "This user cannot be added as a friend because they have not merged their Curse account",
 	"friendrequest-already-friends": "You are already friends, or already have an active friend request with this user.",
 	"friendrequest-blocked": "Your account is blocked",
+	"friendrequest-status-unavailable": "The friendship status is unavailable, try again later.",
 	"friendrequestsend": "Add Friend",
 	"friendrequestcancel": "Cancel Friend Request",
 	"ignorefriend-response": "Ignore",
