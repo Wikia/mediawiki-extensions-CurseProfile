@@ -150,7 +150,8 @@ class ProfilePage extends Article {
 		$output->setArticleFlag(false);
 
 		$layout = ($this->mobile ? $this->mobileProfileLayout() : $this->profileLayout());
-		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
+		$userStats = $this->userStats();
+		$layout = str_replace('<USERSTATS>', $userStats, $layout);
 
 		$outputString = MessageCache::singleton()->parse($layout, $this->getTitle());
 		if ($outputString instanceof \ParserOutput) {
