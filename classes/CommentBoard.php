@@ -605,6 +605,10 @@ class CommentBoard {
 							[
 								3,
 								$toUserTitle->getFullURL()
+							],
+							[
+								4,
+								$fromUserTitle->getFullURL()
 							]
 						]
 					]
