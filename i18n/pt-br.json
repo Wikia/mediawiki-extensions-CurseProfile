@@ -98,7 +98,7 @@
 	"log-profile-link-vk": "Conta VK",
 	"log-profile-link-xbl": "Etiqueta do jogador do Xbox Live",
 	"log-profile-location": "localização",
-		"prefs-reverb-user-moderation": "Moderação do usuário",
+	"prefs-reverb-user-moderation": "Moderação do usuário",
 	"reverb-pref-title-user-interest-profile-comment": "Comentário do perfil",
 	"reverb-pref-title-user-interest-profile-comment-reply-self-self": "Resposta de comentário de perfil para você",
 	"reverb-pref-title-user-interest-profile-comment-reply-self-other": "Resposta de comentário de perfil de você para outro",
@@ -111,5 +111,4 @@
 	"reverb-pref-tooltip-user-interest-profile-comment-reply-other-self": "Alguém deixou uma resposta a um comentário em um perfil.",
 	"reverb-pref-tooltip-user-interest-profile-friendship": "Alguém está solicitando ser amigo do usuário.",
 	"reverb-pref-tooltip-user-moderation-profile-comment-report": "Um comentário no perfil de alguém foi reportado."
-
 }
