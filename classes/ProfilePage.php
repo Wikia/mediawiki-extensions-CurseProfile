@@ -148,6 +148,7 @@ class ProfilePage extends Article {
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$output->setArticleFlag(false);
+		$output->setRobotPolicy("noindex,nofollow");
 
 		$layout = ($this->mobile ? $this->mobileProfileLayout() : $this->profileLayout());
 		$userStats = $this->userStats();
