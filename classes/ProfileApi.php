@@ -285,7 +285,7 @@ class ProfileApi extends HydraApiBase {
 
 		try {
 			foreach ($data as $field => $text) {
-				$text = ProfileData::validateExternalProfile(str_replace('link-', '', $field), $text);
+				$text = ProfileData::validateExternalProfile(str_replace('link-', '', $field), trim($text));
 				if ($text === false) {
 					$text = '';
 				}
