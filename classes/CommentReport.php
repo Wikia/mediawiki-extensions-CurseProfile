@@ -515,6 +515,7 @@ class CommentReport {
 	private function addReportFrom($fromUser) {
 		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
+		$commentAuthor = $lookup->localUserFromCentralId($this->data['comment']['author']);
 
 		if (!isset($this->id) || !$globalId) {
 			// Can't add to a comment that hasn't been archived yet.
@@ -545,12 +546,15 @@ class CommentReport {
 				$toLocalUsers[] = $user;
 			}
 		}
+
+		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
+		$canonicalUrl = SpecialPage::getTitleFor('CommentModeration/'.$this->data['comment']['cid'])->getFullURL();
 		$broadcast = NotificationBroadcast::newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
 			$toLocalUsers,
 			[
-				'url' => SpecialPage::getTitleFor('CommentModeration')->getFullURL(),
+				'url' => $canonicalUrl,
 				'message' => [
 					[
 						'user_note',
@@ -558,7 +562,19 @@ class CommentReport {
 					],
 					[
 						1,
+						$fromUserTitle->getFullURL()
+					],
+					[
+						2,
 						$fromUser->getName()
+					],
+					[
+						3,
+						$canonicalUrl
+					],
+					[
+						4,
+						$commentAuthor->getName()
 					]
 				]
 			]
