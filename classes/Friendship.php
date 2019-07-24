@@ -18,6 +18,7 @@ use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use RequestContext;
 use Reverb\Notification\NotificationBroadcast;
+use SpecialPage;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
@@ -183,12 +184,14 @@ class Friendship {
 			return false;
 		}
 
+		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $wgUser->getName());
+		$canonicalUrl = SpecialPage::getTitleFor('ManageFriends')->getFullURL();
 		$broadcast = NotificationBroadcast::newSingle(
 			'user-interest-profile-friendship',
 			$wgUser,
 			$toLocalUser,
 			[
-				'url' => SpecialPage::getTitleFor('ManageFriends')->getFullURL(),
+				'url' => $canonicalUrl,
 				'message' => [
 					[
 						'user_note',
@@ -197,6 +200,14 @@ class Friendship {
 					[
 						1,
 						$fromUser->getName()
+					],
+					[
+						2,
+						$fromUserTitle->getFullURL()
+					],
+					[
+						3,
+						$canonicalUrl
 					]
 				]
 			]
