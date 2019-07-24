@@ -548,7 +548,7 @@ class CommentReport {
 		}
 
 		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
-		$canonicalUrl = SpecialPage::getTitleFor('CommentModeration/'.$this->data['comment']['cid'])->getFullURL();
+		$canonicalUrl = SpecialPage::getTitleFor('CommentModeration/' . $this->data['comment']['cid'])->getFullURL();
 		$broadcast = NotificationBroadcast::newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
