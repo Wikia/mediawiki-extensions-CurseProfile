@@ -382,4 +382,13 @@ class CommentApi extends HydraApiBase {
 		}
 		return true;
 	}
+
+	/**
+	 * Indicates whether this module requires write mode
+	 *
+	 * @return boolean
+	 */
+	public function isWriteMode() {
+		return true;
+	}
 }

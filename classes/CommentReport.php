@@ -17,6 +17,7 @@ use CentralIdLookup;
 use DynamicSettings\Environment;
 use RedisCache;
 use Reverb\Notification\NotificationBroadcast;
+use SpecialPage;
 use Throwable;
 use Title;
 use User;
@@ -537,10 +538,17 @@ class CommentReport {
 			__METHOD__
 		);
 
-		$broadcast = NotificationBroadcast::newSingle(
+		$toLocalUsers = [];
+		$toLocalUsersObject = User::findUsersByGroup(['sysop']);
+		foreach ($toLocalUsersObject as $user) {
+			if ($user) {
+				$toLocalUsers[] = $user;
+			}
+		}
+		$broadcast = NotificationBroadcast::newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
-			$toLocalUser,
+			$toLocalUsers,
 			[
 				'url' => SpecialPage::getTitleFor('CommentModeration')->getFullURL(),
 				'message' => [
