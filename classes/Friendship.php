@@ -19,6 +19,7 @@ use Cheevos\CheevosException;
 use RequestContext;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;
+use Title;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
@@ -195,11 +196,11 @@ class Friendship {
 				'message' => [
 					[
 						'user_note',
-						$userNote
+						''
 					],
 					[
 						1,
-						$fromUser->getName()
+						$wgUser->getName()
 					],
 					[
 						2,
