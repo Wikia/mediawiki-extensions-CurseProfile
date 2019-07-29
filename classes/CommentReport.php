@@ -15,8 +15,9 @@ namespace CurseProfile;
 
 use CentralIdLookup;
 use DynamicSettings\Environment;
-use EchoEvent;
 use RedisCache;
+use Reverb\Notification\NotificationBroadcast;
+use SpecialPage;
 use Throwable;
 use Title;
 use User;
@@ -508,12 +509,13 @@ class CommentReport {
 	 * Add a new report to comment that has already been archived.
 	 *
 	 * @access private
-	 * @param  object	The User reporting this comment
+	 * @param  object $fromUser The User reporting this comment
 	 * @return void
 	 */
-	private function addReportFrom($user) {
+	private function addReportFrom($fromUser) {
 		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
+		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
+		$commentAuthor = $lookup->localUserFromCentralId($this->data['comment']['author']);
 
 		if (!isset($this->id) || !$globalId) {
 			// Can't add to a comment that hasn't been archived yet.
@@ -537,14 +539,49 @@ class CommentReport {
 			__METHOD__
 		);
 
-		EchoEvent::create([
-			'type' => 'comment-report',
-			'agent' => $user,
-			'title' => Title::newFromText('Special:CommentModeration'),
-			'extra' => [
-				'comment_id' => $this->data['comment']['cid']
+		$toLocalUsers = [];
+		$toLocalUsersObject = User::findUsersByGroup(['sysop']);
+		foreach ($toLocalUsersObject as $user) {
+			if ($user) {
+				$toLocalUsers[] = $user;
+			}
+		}
+
+		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
+		$canonicalUrl = SpecialPage::getTitleFor('CommentModeration/' . $this->data['comment']['cid'])->getFullURL();
+		$broadcast = NotificationBroadcast::newMulti(
+			'user-moderation-profile-comment-report',
+			$fromUser,
+			$toLocalUsers,
+			[
+				'url' => $canonicalUrl,
+				'message' => [
+					[
+						'user_note',
+						''
+					],
+					[
+						1,
+						$fromUserTitle->getFullURL()
+					],
+					[
+						2,
+						$fromUser->getName()
+					],
+					[
+						3,
+						$canonicalUrl
+					],
+					[
+						4,
+						$commentAuthor->getName()
+					]
+				]
 			]
-		]);
+		);
+		if ($broadcast) {
+			$broadcast->transmit();
+		}
 
 		$redis = RedisCache::getClient('cache');
 

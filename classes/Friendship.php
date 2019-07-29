@@ -16,7 +16,10 @@ namespace CurseProfile;
 use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
-use EchoEvent;
+use RequestContext;
+use Reverb\Notification\NotificationBroadcast;
+use SpecialPage;
+use Title;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a curse ID.
@@ -151,15 +154,20 @@ class Friendship {
 	 * @return boolean	True on success, False on failure.
 	 */
 	public function sendRequest($toGlobalId) {
-		global $wgUser;
+		$wgUser = RequestContext::getMain()->getUser();
 
 		if ($wgUser->isBlocked()) {
 			return ['error' => 'friendrequest-blocked'];
 		}
 
-		if ($this->getRelationship($toGlobalId) != self::STRANGERS) {
+		$relationShip = $this->getRelationship($toGlobalId);
+
+		if ($relationShip == -1) {
+			return ['error' => 'friendrequest-status-unavailable'];
+		}
+
+		if ($relationShip !== self::STRANGERS) {
 			return ['error' => 'friendrequest-already-friends'];
-			;
 		}
 
 		try {
@@ -177,15 +185,37 @@ class Friendship {
 			return false;
 		}
 
-		EchoEvent::create([
-			'type' => 'friendship',
-			'agent' => $wgUser,
-			'title' => $wgUser->getUserPage(),
-			'extra' => [
-				'user' => $toLocalUser,
-				'target_user_id' => $toLocalUser->getId()
+		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $wgUser->getName());
+		$canonicalUrl = SpecialPage::getTitleFor('ManageFriends')->getFullURL();
+		$broadcast = NotificationBroadcast::newSingle(
+			'user-interest-profile-friendship',
+			$wgUser,
+			$toLocalUser,
+			[
+				'url' => $canonicalUrl,
+				'message' => [
+					[
+						'user_note',
+						''
+					],
+					[
+						1,
+						$wgUser->getName()
+					],
+					[
+						2,
+						$fromUserTitle->getFullURL()
+					],
+					[
+						3,
+						$canonicalUrl
+					]
+				]
 			]
-		]);
+		);
+		if ($broadcast) {
+			$broadcast->transmit();
+		}
 
 		wfRunHooks('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
 		return true;

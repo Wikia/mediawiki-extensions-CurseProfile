@@ -148,9 +148,11 @@ class ProfilePage extends Article {
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle($this->getTitle()->getPrefixedText());
 		$output->setArticleFlag(false);
+		$output->setRobotPolicy("noindex,nofollow");
 
 		$layout = ($this->mobile ? $this->mobileProfileLayout() : $this->profileLayout());
-		$layout = str_replace('<USERSTATS>', $this->userStats(), $layout);
+		$userStats = $this->userStats();
+		$layout = str_replace('<USERSTATS>', $userStats, $layout);
 
 		$outputString = MessageCache::singleton()->parse($layout, $this->getTitle());
 		if ($outputString instanceof \ParserOutput) {
@@ -349,11 +351,21 @@ class ProfilePage extends Article {
 	}
 
 	/**
+	 * Gets an md5 hash for gravatar URLs
+	 *
+	 * @param  string $email User's email address
+	 * @return string		md5 hash of the email address
+	 */
+	private static function emailToMD5Hash($email) {
+		return md5(strtolower(trim($email)));
+	}
+
+	/**
 	 * Prints a gravatar image tag for a user
 	 *
 	 * @param  null   $parser          - Not Used but passed by MW
 	 * @param  int    $size            the square size of the avatar to display
-	 * @param  string $email           user's email address
+	 * @param  string $email	       email Address OR md5 Hash of user's email address
 	 * @param  string $userName        the user's username
 	 * @param  string $attributeString additional html attributes to include in the IMG tag
 	 * @return string	the HTML fragment containing a IMG tag
@@ -361,8 +373,14 @@ class ProfilePage extends Article {
 	public static function userAvatar($parser, $size, $email, $userName, $attributeString = '') {
 		$size = intval($size);
 		$userName = htmlspecialchars($userName, ENT_QUOTES);
+
+		// Determine if we have a hash or an email address that needs to be hashed
+		if (strlen($email) != 32 && !ctype_xdigit($email)) {
+			$email = self::emailToMD5Hash($email);
+		}
+
 		return [
-			"<img src='//www.gravatar.com/avatar/" . md5(strtolower(trim($email))) . "?d=mm&amp;s=$size' height='$size' width='$size' alt='" . wfMessage('avataralt', $userName)->escaped() . "' $attributeString />",
+			"<img src='//www.gravatar.com/avatar/" . $email . "?d=mm&amp;s=$size' height='$size' width='$size' alt='" . wfMessage('avataralt', $userName)->escaped() . "' $attributeString />",
 			'isHTML' => true,
 		];
 	}
@@ -855,7 +873,7 @@ class ProfilePage extends Article {
 <div class="curseprofile" data-user_id="' . $this->user->getID() . '">
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->user->getEmail()) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="headline">
 				<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
 				{{#groups:}}
@@ -926,7 +944,7 @@ __NOINDEX__
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
 		<div class="userinfo section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : $this->user->getEmail()) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="usericons rightfloat">
 				<div class="score">{{#Points:' . $this->user->getName() . '|1|global|badged}}</div>
 				{{#profilelinks:}}

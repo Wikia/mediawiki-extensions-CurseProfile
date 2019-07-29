@@ -14,7 +14,6 @@
 namespace CurseProfile;
 
 use DynamicSettings\Environment;
-use EchoAttributeManager;
 use EditPage;
 use Linker;
 use MWNamespace;
@@ -48,16 +47,13 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onRegistration() {
-		global $wgEchoNotificationIcons, $wgExtraNamespaces;
+		global $wgExtraNamespaces;
 
 		if (!defined('NS_USER_PROFILE')) {
 			define('NS_USER_PROFILE', 202);
 		}
 		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
 
-		$wgEchoNotificationIcons['gratitude'] = [
-			'path' => "CurseProfile/img/notifications/Gratitude.png"
-		];
 		return true;
 	}
 
@@ -534,119 +530,6 @@ class Hooks {
 		}
 
 		return $username;
-	}
-
-	/**
-	 * Add this extension's Echo notifications.
-	 *
-	 * @access public
-	 * @param  array &$wgEchoNotifications          in Extension:Echo.
-	 * @param  array &$wgEchoNotificationCategories in Extension:Echo.
-	 * @param  array &$wgEchoNotificationIcons      in Extension:Echo.
-	 * @return boolean	True
-	 */
-	public static function onBeforeCreateEchoEvent(&$wgEchoNotifications, &$wgEchoNotificationCategories, &$wgEchoNotificationIcons) {
-		$wgEchoNotificationCategories['profile-friendship'] = [
-			'tooltip' => 'echo-pref-tooltip-profile-friendship',
-			'priority' => 3,
-		];
-		$wgEchoNotificationCategories['profile-comment'] = [
-			'tooltip' => 'echo-pref-tooltip-profile-comment',
-			'priority' => 4,
-		];
-		$wgEchoNotificationCategories['profile-report'] = [
-			'tooltip' => 'echo-pref-tooltip-profile-comment-report',
-			'priority' => 5,
-		];
-
-		$wgEchoNotifications['friendship'] = [
-			'primary-link' => [
-				'message' => 'notification-link-text-view-friendship',
-				'destination' => 'managefriends'
-			],
-			'category' => 'profile-friendship',
-			'group' => 'interactive',
-			'icon' => 'gratitude',
-			'presentation-model' => 'CurseProfile\MWEcho\FriendshipPresentationModel',
-			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-friendship',
-			'title-params' => ['agent', 'user'],
-			'email-subject-message' => 'notification-friendship-email-subject',
-			'email-subject-params' => ['agent', 'user'],
-			'email-body-batch-message' => 'notification-friendship-email-body',
-			'email-body-batch-params' => ['agent', 'user'],
-			'email-body-batch-bundle-message' => 'notification-friendship-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
-			]
-		];
-		$wgEchoNotifications['comment'] = [
-			'primary-link' => [
-				'message' => 'notification-link-text-view-comment',
-				'destination' => 'profile'
-			],
-			'category' => 'profile-comment',
-			'group' => 'interactive',
-			'icon' => 'mention',
-			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
-			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-comment',
-			'title-params' => ['agent', 'user'],
-			'email-subject-message' => 'notification-comment-email-subject',
-			'email-subject-params' => ['agent', 'user'],
-			'email-body-batch-message' => 'notification-comment-email-body',
-			'email-body-batch-params' => ['agent', 'user', 'comment_id', 'comment'],
-			'email-body-batch-bundle-message' => 'notification-comment-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
-			]
-		];
-		$wgEchoNotifications['comment-reply'] = [
-			'primary-link' => [
-				'message' => 'notification-link-text-view-comment',
-				'destination' => 'profile'
-			],
-			'category' => 'profile-comment',
-			'group' => 'interactive',
-			'icon' => 'mention',
-			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
-			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-comment-reply',
-			'title-params' => ['agent', 'user'],
-			'email-subject-message' => 'notification-comment-reply-email-subject',
-			'email-subject-params' => ['agent', 'user'],
-			'email-body-batch-message' => 'notification-comment-reply-email-body',
-			'email-body-batch-params' => ['agent', 'user', 'comment_id', 'comment'],
-			'email-body-batch-bundle-message' => 'notification-comment-reply-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count'],
-			'user-locators' => [
-				['EchoUserLocator::locateFromEventExtra', ['target_user_id']]
-			]
-		];
-		$wgEchoNotifications['comment-report'] = [
-			'primary-link' => [
-				'message' => 'notification-link-text-view-comment',
-				'destination' => 'profile'
-			],
-			'category' => 'profile-report',
-			'group' => 'interactive',
-			'icon' => 'mention',
-			'presentation-model' => 'CurseProfile\MWEcho\CommentPresentationModel',
-			'formatter-class' => 'CurseProfile\MWEcho\NotificationFormatter',
-			'title-message' => 'notification-header-comment-report',
-			'title-params' => ['agent', 'user', 'comment_id'],
-			'email-subject-message' => 'notification-comment-report-email-subject',
-			'email-subject-params' => ['agent', 'user', 'comment_id'],
-			'email-body-batch-message' => 'notification-comment-report-email-body',
-			'email-body-batch-params' => ['agent', 'user', 'comment_id'],
-			'email-body-batch-bundle-message' => 'notification-comment-report-email-batch-body',
-			'email-body-batch-bundle-params' => ['agent', 'user', 'agent-other-display', 'agent-other-count', 'comment_id'],
-			EchoAttributeManager::ATTR_LOCATORS => ['CurseProfile\MWEcho\EchoUserLocator::getAdmins']
-		];
-
-		return true;
 	}
 
 	/**
