@@ -310,8 +310,13 @@ ul.friends {
 .friends li {
 	white-space: nowrap;
 	word-wrap: break-word;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
+.friends li .gamepedia_pro_user::before {
+	display: none;
+}
 
 /* manage friends special page */
 
