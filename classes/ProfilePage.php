@@ -640,6 +640,8 @@ class ProfilePage extends Article {
 	 */
 	public function generateStatsDL($input) {
 		global $wgUser;
+		$lang = $this->getContext()->getSkin()->getLanguage();
+
 		if (is_array($input)) {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
@@ -666,7 +668,7 @@ class ProfilePage extends Article {
 		} else {
 			// just a simple value
 			if (is_numeric($input)) {
-				return number_format($input);
+				return $lang->formatNum($input);
 			} elseif (is_null($input)) {
 				return '0';
 			} else {
