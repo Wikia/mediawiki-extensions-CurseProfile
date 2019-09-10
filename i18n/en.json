@@ -267,6 +267,7 @@
 	"right-profile-moderate": "Moderate user profiles",
 	"right-profile-purgecomments": "Purge comments on user profiles",
 	"right-profile-stats": "View profile statistics",
+	"grant-curseprofile": "Moderate user profiles and comments",
 	"prefs-reverb-user-moderation": "User Moderation",
 	"special-sidebar-user-interest-profile-comment": "Profile Comment",
 	"special-sidebar-user-moderation-profile-comment-report": "Reported Profile Comment",
