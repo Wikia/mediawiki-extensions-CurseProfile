@@ -30,6 +30,12 @@
 			"profile-purgecomments": true
 		}
 	},
+	"GrantPermissions": {
+		"curseprofile": {
+			"profile-moderate": true,
+			"profile-purgecomments": true
+		}
+	},
 	"SpecialPages": {
 		"ManageFriends": "CurseProfile\\SpecialManageFriends",
 		"Friends": "CurseProfile\\SpecialFriends",
