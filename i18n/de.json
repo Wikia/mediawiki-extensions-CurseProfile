@@ -267,5 +267,6 @@
 	"apihelp-profile-summary": "Ermöglicht die Änderung grundlegender Profildatenaktionen.",
 	"right-profile-moderate": "Benutzerprofile moderieren",
 	"right-profile-purgecomments": "Kommentare auf dem Benutzerprofil löschen",
-	"right-profile-stats": "Profilstatistiken ansehen"
+	"right-profile-stats": "Profilstatistiken ansehen",
+	"grant-curseprofile": "Benutzerprofile und Kommentare moderieren"
 }
