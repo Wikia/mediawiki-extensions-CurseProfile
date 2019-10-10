@@ -478,9 +478,9 @@ class CommentBoard {
 				$action = 'replied';
 			}
 
-			wfRunHooks('CurseProfileAddComment', [$fromUser, $toUser, $inReplyTo, $commentText]);
+			Hooks::run('CurseProfileAddComment', [$fromUser, $toUser, $inReplyTo, $commentText]);
 			if ($inReplyTo) {
-				wfRunHooks('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
+				Hooks::run('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
 			}
 
 			$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());

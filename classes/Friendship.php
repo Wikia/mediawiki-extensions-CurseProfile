@@ -217,7 +217,7 @@ class Friendship {
 			$broadcast->transmit();
 		}
 
-		wfRunHooks('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
+		Hooks::run('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
 		return true;
 	}
 
@@ -296,7 +296,7 @@ class Friendship {
 			return false;
 		}
 
-		wfRunHooks('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
+		Hooks::run('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
 
 		return true;
 	}

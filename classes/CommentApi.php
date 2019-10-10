@@ -228,7 +228,7 @@ class CommentApi extends HydraApiBase {
 			$lookup = CentralIdLookup::factory();
 			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
 			if ($user->isAnon()) {
-				return $this->dieUsageMsg(['comment-invaliduser']);
+				return $this->dieWithError(['comment-invaliduser']);
 			}
 		}
 		$text = $this->getMain()->getVal('text');
@@ -305,7 +305,7 @@ class CommentApi extends HydraApiBase {
 			global $wgOut;
 			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
 		} else {
-			$this->dieUsageMsg(['comment-invalidaction']);
+			$this->dieWithError(['comment-invalidaction']);
 		}
 	}
 
@@ -316,7 +316,7 @@ class CommentApi extends HydraApiBase {
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
-			return $this->dieUsageMsg(['comment-invalidaction']);
+			return $this->dieWithError(['comment-invalidaction']);
 		}
 	}
 
@@ -327,7 +327,7 @@ class CommentApi extends HydraApiBase {
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
-			return $this->dieUsageMsg(['comment-invalidaction']);
+			return $this->dieWithError(['comment-invalidaction']);
 		}
 	}
 
@@ -337,7 +337,7 @@ class CommentApi extends HydraApiBase {
 			CommentBoard::purgeComment($commentId);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
-			return $this->dieUsageMsg(['comment-invalidaction']);
+			return $this->dieWithError(['comment-invalidaction']);
 		}
 	}
 
@@ -347,7 +347,7 @@ class CommentApi extends HydraApiBase {
 			$result = CommentBoard::reportComment($commentId);
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {
-			return $this->dieUsageMsg(['comment-invalidaction']);
+			return $this->dieWithError(['comment-invalidaction']);
 		}
 	}
 

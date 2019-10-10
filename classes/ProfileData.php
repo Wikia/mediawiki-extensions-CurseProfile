@@ -371,7 +371,7 @@ class ProfileData {
 		// run hooks on profile preferences (mostly for achievements)
 		foreach (self::getValidEditFields() as $field) {
 			if (!empty($preferences[$field])) {
-				wfRunHooks('CurseProfileEdited', [$user, $field, $preferences[$field]]);
+				Hooks::run('CurseProfileEdited', [$user, $field, $preferences[$field]]);
 			}
 		}
 
