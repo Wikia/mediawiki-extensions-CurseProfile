@@ -268,5 +268,6 @@
 	"right-profile-moderate": "Benutzerprofile moderieren",
 	"right-profile-purgecomments": "Kommentare auf dem Benutzerprofil löschen",
 	"right-profile-stats": "Profilstatistiken ansehen",
-	"grant-curseprofile": "Benutzerprofile und Kommentare moderieren"
+	"grant-curseprofile": "Benutzerprofile und Kommentare moderieren",
+	"curseProfile.css": "/* CSS an dieser Stelle wirkt sich nur auf Profil-Seiten aus */"
 }
