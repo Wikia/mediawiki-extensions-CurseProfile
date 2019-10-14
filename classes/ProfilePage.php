@@ -77,8 +77,7 @@ class ProfilePage extends Article {
 		'autoconfirmed',
 		'checkuser',
 		'hydra_admin',
-		'widget_editor',
-		'wiki_manager'
+		'widget_editor'
 	];
 
 	/**
