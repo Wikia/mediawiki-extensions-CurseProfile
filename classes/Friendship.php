@@ -16,6 +16,7 @@ namespace CurseProfile;
 use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
+use Hooks;
 use RequestContext;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;

@@ -18,6 +18,7 @@ use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
 use Exception;
+use Hooks;
 use ManualLogEntry;
 use Reverb\Notification\NotificationBroadcast;
 use Sanitizer;
