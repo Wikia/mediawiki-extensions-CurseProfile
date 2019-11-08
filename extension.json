@@ -323,7 +323,7 @@
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
 		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
-		"LinkBegin": "CurseProfile\\Hooks::onLinkBegin",
+		"HtmlPageLinkRendererEnd": "CurseProfile\\Hooks::onHtmlPageLinkRendererEnd",
 		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
 		"NamespaceIsMovable": "CurseProfile\\Hooks::onNamespaceIsMovable",
 		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",

@@ -16,7 +16,10 @@ namespace CurseProfile;
 use DynamicSettings\Environment;
 use EditPage;
 use Linker;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Linker\LinkTarget;
 use MWNamespace;
+use HTML;
 use SpecialPage;
 use Status;
 use Title;
@@ -144,28 +147,37 @@ class Hooks {
 	}
 
 	/**
-	 * Make links to user pages known (not red) when that user opts for a profile page
+	 * Make links to user pages known when that user opts for a profile page
 	 *
-	 * @param  mixed $dummy
-	 * @param  mixed $target
-	 * @param  mixed &$html
-	 * @param  mixed &$customAttribs
-	 * @param  mixed &$query
-	 * @param  mixed &$options
-	 * @param  mixed &$ret
-	 * @return void
+	 * @param LinkRenderer $linkRenderer
+	 * @param LinkTarget   $target
+	 * @param bool         $isKnown
+	 * @param string       $text
+	 * @param array        $attribs
+	 * @param mixed        $ret
+	 *
+	 * @return bool
 	 */
-	public static function onLinkBegin($dummy, $target, &$html, &$customAttribs, &$query, &$options, &$ret) {
+	public static function onHtmlPageLinkRendererEnd(LinkRenderer $linkRenderer, LinkTarget $target, $isKnown, &$text, &$attribs, &$ret) {
 		// only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
 
-		// remove existing broken option
-		$options = array_diff($options, ['broken']);
-		// force link to be known
-		$options[] = 'known';
-
+		// fix link if using enhanced profile
+		self::$profilePage = ProfilePage::newFromTitle($target);
+		if (self::$profilePage->isProfilePreferred()) {
+			$ret = HTML::rawElement(
+				'a',
+				[
+					'href' => $target->getFullUrl(),
+					'class' => str_replace('new', 'known', $attribs['class']),
+					'title' => 'UserProfile:' . $target->getText()
+				],
+				$target->getText()
+			);
+			return false;
+		}
 		return true;
 	}
 
