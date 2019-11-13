@@ -19,7 +19,6 @@ use Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MWNamespace;
-use HTML;
 use SpecialPage;
 use Status;
 use Title;
@@ -158,25 +157,24 @@ class Hooks {
 	 *
 	 * @return bool
 	 */
-	public static function onHtmlPageLinkRendererEnd(LinkRenderer $linkRenderer, LinkTarget $target, $isKnown, &$text, &$attribs, &$ret) {
+	public static function onHtmlPageLinkRendererEnd(
+		LinkRenderer $linkRenderer,
+		LinkTarget $target,
+		$isKnown,
+		&$text,
+		&$attribs,
+		&$ret
+	) {
 		// only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
-
 		// fix link if using enhanced profile
 		self::$profilePage = ProfilePage::newFromTitle($target);
 		if (self::$profilePage->isProfilePreferred()) {
-			$ret = HTML::rawElement(
-				'a',
-				[
-					'href' => $target->getFullUrl(),
-					'class' => str_replace('new', 'known', $attribs['class']),
-					'title' => 'UserProfile:' . $target->getText()
-				],
-				$target->getText()
-			);
-			return false;
+			$attribs['href'] = $target->getFullUrl();
+			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
+			$attribs['title'] = 'UserProfile:' . $target->getText();
 		}
 		return true;
 	}
