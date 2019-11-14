@@ -24,42 +24,6 @@ use HydraApiBase;
  */
 class CommentApi extends HydraApiBase {
 	/**
-	 * Get Description
-	 *
-	 * @return string
-	 */
-	public function getDescription() {
-		return 'Allows commenting actions to be taken.';
-	}
-
-	/**
-	 * Get Param Description
-	 *
-	 * @return array
-	 */
-	public function getParamDescription() {
-		return array_merge(parent::getParamDescription(), [
-			// getRaw, edit, remove, and restore
-			'comment_id' => 'The the ID of a comment which is being acted upon. Required for remove actions.',
-
-			// resolveReport
-			'reportKey' => 'The unique report key identifying an instance of a comment. "{sitemd5key}:{comment_id}:{edit_timestamp}"',
-			'byUser' => 'The curse ID of the acting user. Defaults to the user currently logged in.',
-			'withAction' => 'One of "delete" or "dismiss".',
-
-			// add
-			'global_id' => 'The id for a user on whose board a comment will be added',
-			'user_id' => 'The optional id for a user on whose board a comment will be added.  global_id is ignored when this is present.',
-			'text' => 'The content of the comment to be added',
-			'inReplyTo' => 'An OPTIONAL id of a comment that the new comment will reply to',
-
-			// addToDefault
-			// all the params for add plus:
-			'title' => 'The headline to use when posting a new section to the user\'s talk page',
-		]);
-	}
-
-	/**
 	 * Get Actions
 	 *
 	 * @return array

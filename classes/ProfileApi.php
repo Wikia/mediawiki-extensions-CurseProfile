@@ -22,31 +22,6 @@ use MWException;
  */
 class ProfileApi extends HydraApiBase {
 	/**
-	 * Return description of this API module.
-	 *
-	 * @access public
-	 * @return string	Description
-	 */
-	public function getDescription() {
-		return 'Allows basic profile data actions to be modified.';
-	}
-
-	/**
-	 * Return description of valid parameters for API actions.
-	 *
-	 * @access public
-	 * @return array	API Actions
-	 */
-	public function getParamDescription() {
-		return array_merge(
-			parent::getParamDescription(),
-			[
-				'user_id' => 'The local id for a user.',
-			]
-		);
-	}
-
-	/**
 	 * Allowed API actions.
 	 *
 	 * @access public

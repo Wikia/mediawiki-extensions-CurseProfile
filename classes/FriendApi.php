@@ -24,29 +24,6 @@ use User;
  */
 class FriendApi extends HydraApiBase {
 	/**
-	 * Get Description
-	 *
-	 * @return string
-	 */
-	public function getDescription() {
-		return 'Allows friending actions to be taken.';
-	}
-
-	/**
-	 * Get param Description
-	 *
-	 * @return array
-	 */
-	public function getParamDescription() {
-		return [
-			'do' => 'The friending action to be taken (send, confirm, ignore, remove)',
-			'global_id' => 'The user upon which the action should be taken',
-			'name' => 'The username to be added as a friend',
-			'token' => 'The edit token for the requesting user',
-		];
-	}
-
-	/**
 	 * Get Actions
 	 *
 	 * @return array
