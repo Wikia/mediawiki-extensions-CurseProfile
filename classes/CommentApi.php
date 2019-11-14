@@ -94,6 +94,10 @@ class CommentApi extends HydraApiBase {
 						ApiBase::PARAM_TYPE => 'integer',
 						ApiBase::PARAM_REQUIRED => true,
 					],
+					'reason' => [
+						ApiBase::PARAM_TYPE => 'string',
+						ApiBase::PARAM_REQUIRED => true,
+					]
 				],
 			],
 
@@ -297,8 +301,9 @@ class CommentApi extends HydraApiBase {
 
 	public function doPurge() {
 		$commentId = $this->getMain()->getVal('comment_id');
+		$reason = $this->getMain()->getVal('reason');
 		if ($commentId && CommentBoard::canPurge()) {
-			CommentBoard::purgeComment($commentId);
+			CommentBoard::purgeComment($commentId, $reason);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
 			return $this->dieWithError(['comment-invalidaction']);

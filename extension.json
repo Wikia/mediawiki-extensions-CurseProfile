@@ -60,6 +60,7 @@
 		"curseprofile/comment-replied": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-edited": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/comment-deleted": "\\CurseProfile\\CommentLogFormatter",
+		"curseprofile/comment-purged": "\\CurseProfile\\CommentLogFormatter",
 		"curseprofile/profile-edited": "\\CurseProfile\\ProfileLogFormatter"
 	},
 	"MessagesDirs": {
