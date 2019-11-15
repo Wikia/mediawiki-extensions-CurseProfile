@@ -255,8 +255,36 @@ class CommentDisplay {
 	 * @return string	Comment sanitized for usage in HTML.
 	 */
 	public static function sanitizeComment($comment) {
-		global $wgOut;
+		global $wgOut, $wgParser;
 
-		return $wgOut->parse(str_replace(['&lt;nowiki&gt;', '&lt;pre&gt;', '&lt;/nowiki&gt;', '&lt;/pre&gt;'], ['<nowiki>', '<pre>', '</nowiki>', '</pre>'], htmlentities($comment, ENT_QUOTES)));
+		$popts = $wgOut->parserOptions();
+		$oldIncludeSize = $popts->setMaxIncludeSize(0);
+
+		$parserOutput = $wgParser->getFreshParser()->parse(
+			str_replace(
+				[
+					'&lt;nowiki&gt;',
+					'&lt;pre&gt;',
+					'&lt;/nowiki&gt;',
+					'&lt;/pre&gt;',
+					'&#039;',
+					'&#034;'
+				],
+				[
+					'<nowiki>',
+					'<pre>',
+					'</nowiki>',
+					'</pre>',
+					"'",
+					'"'
+				],
+				htmlentities($comment, ENT_QUOTES)
+			),
+			$wgOut->getTitle(),
+			$popts
+		);
+
+		$popts->setMaxIncludeSize($oldIncludeSize);
+		return $parserOutput->getText();
 	}
 }
