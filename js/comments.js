@@ -266,14 +266,21 @@
 		purgeComment: function(e) {
 			var $this = $(this), $comment = $this.closest('.commentdisplay');
 			e.preventDefault();
-			if (!window.confirm(mw.message('purge-prompt', $comment.find('a.commentUser').first().text()).text())) {
-				return;
+			// get a reason for comment deletion
+			do {
+				var reason = window.prompt(mw.message('purge-prompt').text());
+			} while (reason !== null && reason === "")
+
+			// if cancelled just return
+			if (!reason) {
+				return true;
 			}
 			$this.hide();
 			(new mw.Api()).post({
 				action: 'comment',
 				do: 'purge',
 				comment_id: $comment.data('id'),
+				reason: reason,
 				format: 'json',
 				formatversion: 2,
 				token: mw.user.tokens.get('csrfToken')
@@ -312,7 +319,7 @@
 				console.dir(resp);
 			});
 		},
-		
+
 		ctrlEnter: function(e) {
 			if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
 				$(this).siblings('.submit').eq(0).click();

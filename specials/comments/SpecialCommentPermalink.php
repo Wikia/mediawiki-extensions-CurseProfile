@@ -26,6 +26,8 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 	 * Show the special page
 	 *
 	 * @param string $commentId extra string added to the page request path (/Special:CommentPermalink/12345) -> "12345"
+	 *
+	 * @return void
 	 */
 	public function execute($commentId) {
 		$wgOut = $this->getOutput();
@@ -33,6 +35,21 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 
 		// checks if comment exists and if wgUser can view it
 		$comment = CommentBoard::getCommentById($commentId);
+
+		if (!$comment) {
+			$purged = CommentBoard::getPurgedCommentById($commentId);
+			if ($purged) {
+				$user = User::newFromId($purged['ubpa_user_id']);
+				$user->load();
+				$admin_user = User::newFromId($purged['ubpa_admin_id']);
+				$admin_user->load();
+				$wgOut->setPageTitle(wfMessage('commentboard-purged-title', $user->getName())->plain());
+				$wgOut->addWikiMsg('commentboard-purged', $purged['ubpa_reason'], $admin_user->getName(), (new ProfileData($admin_user))->getProfilePageUrl());
+				$wgOut->setStatusCode(404);
+				return;
+			}
+		}
+
 		if (empty($comment)) {
 			$wgOut->setPageTitle(wfMessage('commentboard-invalid-title')->plain());
 			$wgOut->addWikiMsg('commentboard-invalid');

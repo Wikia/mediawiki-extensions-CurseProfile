@@ -29,23 +29,20 @@ class Hooks {
 	/**
 	 * Reference to ProfilePage object
 	 *
-	 * @access private
-	 * @var    object	CurseProfile\ProfilePage
+	 * @var object	CurseProfile\ProfilePage
 	 */
 	static private $profilePage = false;
 
 	/**
 	 * Reference to the title originally parsed from this request.
 	 *
-	 * @access private
-	 * @var    object	Title
+	 * @var object	Title
 	 */
 	static private $title = null;
 
 	/**
 	 * Setup extra namespaces during MediaWiki setup process.
 	 *
-	 * @access public
 	 * @return boolean	True
 	 */
 	public static function onRegistration() {
@@ -62,8 +59,8 @@ class Hooks {
 	/**
 	 * Set parser hooks for the profile pages.
 	 *
-	 * @access public
-	 * @param  Parser &$parser
+	 * @param Parser $parser
+	 *
 	 * @return boolean	True
 	 */
 	public static function onParserFirstCall(&$parser) {
@@ -91,12 +88,13 @@ class Hooks {
 	/**
 	 * Handle setting up profile page handlers.
 	 *
-	 * @param  Title   &$title
-	 * @param  Article &$article
-	 * @param  object  &$output
-	 * @param  User    &$user
-	 * @param  object  $request
-	 * @param  object  $mediaWiki
+	 * @param Title   $title
+	 * @param Article $article
+	 * @param object  $output
+	 * @param User    $user
+	 * @param object  $request
+	 * @param object  $mediaWiki
+	 *
 	 * @return void
 	 */
 	public static function onBeforeInitialize(&$title, &$article, &$output, &$user, $request, $mediaWiki) {
@@ -112,8 +110,8 @@ class Hooks {
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
 	 *
-	 * @access public
-	 * @param  object $destArticle Destination Article
+	 * @param object $destArticle Destination Article
+	 *
 	 * @return void
 	 */
 	public static function onArticleViewRedirect($destArticle) {
@@ -128,9 +126,9 @@ class Hooks {
 	/**
 	 * Hide NS_USER_PROFILE from Special:WantedPages.
 	 *
-	 * @access public
-	 * @param  mixed &$wantedPages
-	 * @param  mixed &$query
+	 * @param mixed $wantedPages
+	 * @param mixed $query
+	 *
 	 * @return boolean	True
 	 */
 	public static function onWantedPagesGetQueryInfo(&$wantedPages, &$query) {
@@ -182,8 +180,9 @@ class Hooks {
 	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
 	 *
-	 * @param  Title   &$title
-	 * @param  Article &$article
+	 * @param Title   $title
+	 * @param Article $article
+	 *
 	 * @return bool
 	 */
 	public static function onArticleFromTitle(Title &$title, &$article) {
@@ -199,10 +198,11 @@ class Hooks {
 	}
 
 	/**
-	 * handle output of the profile page
+	 * Handle output of the profile page
 	 *
-	 * @param  Title   $title
-	 * @param  Article $article
+	 * @param Title   $title
+	 * @param Article $article
+	 *
 	 * @return bool
 	 */
 	private static function renderProfile(&$title, &$article) {
@@ -228,7 +228,8 @@ class Hooks {
 	/**
 	 * Get the correct preference based on namespace
 	 *
-	 * @param  Title $title
+	 * @param Title $title
+	 *
 	 * @return array
 	 */
 	private static function getProfilePreference(&$title) {
@@ -246,9 +247,10 @@ class Hooks {
 	}
 
 	/**
-	 * handle the user and talk page
+	 * Handle the user and talk page
 	 *
-	 * @param  Title $title
+	 * @param Title $title
+	 *
 	 * @return bool
 	 */
 	private static function renderUserPages(&$title) {
@@ -290,7 +292,8 @@ class Hooks {
 	/**
 	 * Check for request variables that indicate the need to show warnings.
 	 *
-	 * @param  object $request Global $wgRequest object
+	 * @param object $request Global $wgRequest object
+	 *
 	 * @return bool
 	 */
 	private static function shouldWarn($request) {
@@ -302,11 +305,12 @@ class Hooks {
 	}
 
 	/**
-	 * Handle adding profile=no to redirects after articles are created or edited in the NS_USER and NS_USER_TALK namespaces.
+	 * Handle adding profile=no to redirects after articles are created or edited in
+	 * the NS_USER and NS_USER_TALK namespaces.
 	 *
-	 * @access public
-	 * @param  EditPage   $editpage EditPage
-	 * @param  WebRequest $request  WebRequest
+	 * @param EditPage   $editpage EditPage
+	 * @param WebRequest $request  WebRequest
+	 *
 	 * @return boolean	True
 	 */
 	public static function onEditPageImportFormData(EditPage $editpage, WebRequest $request) {
@@ -319,9 +323,9 @@ class Hooks {
 	/**
 	 * Adds links to the navigation tabs.
 	 *
-	 * @access public
-	 * @param  object $skin   SkinTemplate
-	 * @param  array  &$links Link Descriptors
+	 * @param object $skin  SkinTemplate
+	 * @param array  $links Link Descriptors
+	 *
 	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
@@ -334,10 +338,10 @@ class Hooks {
 	/**
 	 * Customize subpage links to use profile=no as needed.
 	 *
-	 * @access public
-	 * @param  string &$subpages    Subpages HTML
-	 * @param  object $skinTemplate SkinTemplate
-	 * @param  object $output       Output
+	 * @param string $subpages     Subpages HTML
+	 * @param object $skinTemplate SkinTemplate
+	 * @param object $output       Output
+	 *
 	 * @return boolean	True
 	 */
 	public static function onSkinSubPageSubtitle(&$subpages, $skinTemplate, $output) {
@@ -391,8 +395,8 @@ class Hooks {
 	/**
 	 * Setups and Modifies Database Information
 	 *
-	 * @access public
-	 * @param  object $updater DatabaseUpdater Object
+	 * @param object $updater DatabaseUpdater Object
+	 *
 	 * @return boolean	true
 	 */
 	public static function onLoadExtensionSchemaUpdates($updater) {
@@ -424,14 +428,16 @@ class Hooks {
 			$updater->addExtensionUpdate(['addTable', 'user_relationship_request', "{$extDir}/install/sql/table_user_relationship_request.sql", true]);
 		}
 
+		$updater->addExtensionUpdate(['addTable', 'user_board_purge_archive', "{$extDir}/install/sql/table_user_board_purge_archive.sql", true]);
+
 		return true;
 	}
 
 	/**
 	 * Add unit tests to the mediawiki test framework
 	 *
-	 * @access public
-	 * @param  array &$files
+	 * @param array $files
+	 *
 	 * @return boolean	true
 	 */
 	public static function onUnitTestsList(&$files) {
@@ -443,8 +449,8 @@ class Hooks {
 	/**
 	 * Register the canonical names for custom namespaces.
 	 *
-	 * @access public
-	 * @param  array &$list namespace numbers mapped to corresponding canonical names
+	 * @param array $list namespace numbers mapped to corresponding canonical names
+	 *
 	 * @return boolean	true
 	 */
 	public static function onCanonicalNamespaces(&$list) {
@@ -455,9 +461,9 @@ class Hooks {
 	/**
 	 * Add extra preferences
 	 *
-	 * @access public
-	 * @param  object $user         User whose preferences are being modified
-	 * @param  array  &$preferences Preferences description object, to be fed to an HTMLForm
+	 * @param object $user        User whose preferences are being modified
+	 * @param array  $preferences Preferences description object, to be fed to an HTMLForm
+	 *
 	 * @return boolean	true
 	 */
 	public static function onGetPreferences($user, &$preferences) {
@@ -468,11 +474,11 @@ class Hooks {
 	/**
 	 * Function Documentation
 	 *
-	 * @access public
-	 * @param  array  $formData array of user submitted data
-	 * @param  object $form     PreferencesForm object, also a ContextSource
-	 * @param  object $user     User object with preferences to be saved set
-	 * @param  bool   &$result  boolean indicating success
+	 * @param array  $formData array of user submitted data
+	 * @param object $form     PreferencesForm object, also a ContextSource
+	 * @param object $user     User object with preferences to be saved set
+	 * @param bool   $result   boolean indicating success
+	 *
 	 * @return boolean	True
 	 */
 	public static function onPreferencesFormPreSave($formData, $form, $user, &$result) {
@@ -500,8 +506,8 @@ class Hooks {
 	/**
 	 * Add extra preferences defaults
 	 *
-	 * @access public
-	 * @param  array &$defaultOptions mapping of preference to default value
+	 * @param array $defaultOptions mapping of preference to default value
+	 *
 	 * @return boolean	true
 	 */
 	public static function onUserGetDefaultOptions(&$defaultOptions) {
@@ -512,9 +518,9 @@ class Hooks {
 	/**
 	 * Save preferences.
 	 *
-	 * @access public
-	 * @param  User  $user     User whose preferences are being modified.
-	 * @param  array &$options Preferences description object, to be fed to an HTMLForm.
+	 * @param User  $user    User whose preferences are being modified.
+	 * @param array $options Preferences description object, to be fed to an HTMLForm.
+	 *
 	 * @return boolean	True
 	 */
 	public static function onUserSaveOptions(User $user, array &$options) {
@@ -527,7 +533,8 @@ class Hooks {
 	/**
 	 * Get a username from title
 	 *
-	 * @param  Title $title
+	 * @param Title $title
+	 *
 	 * @return string
 	 */
 	public static function resolveUsername($title) {
@@ -545,9 +552,9 @@ class Hooks {
 	/**
 	 * Add CurseProfile CSS to Mobile Skin
 	 *
-	 * @access public
-	 * @param  object $skin     SkinTemplate Object
-	 * @param  array  &$modules Array of Modules to Modify
+	 * @param object $skin    SkinTemplate Object
+	 * @param array  $modules Array of Modules to Modify
+	 *
 	 * @return bool True
 	 */
 	public static function onSkinMinervaDefaultModules($skin, &$modules) {
@@ -564,9 +571,9 @@ class Hooks {
 	/**
 	 * Prevent UserProfile pages from being shown as movable
 	 *
-	 * @access public
-	 * @param  Integer $index	The index of the namespace being checked
-	 * @param  Boolean &$result	Whether MediaWiki currently thinks this namespace is movable
+	 * @param Integer $index  The index of the namespace being checked
+	 * @param Boolean $result Whether MediaWiki currently thinks this namespace is movable
+	 *
 	 * @return bool
 	 */
 	public static function onNamespaceIsMovable($index, &$result) {
@@ -580,11 +587,11 @@ class Hooks {
 	/**
 	 * Prevent UserProfile pages from being edited
 	 *
-	 * @access public
-	 * @param  Title  &$title  Reference to the title in question
-	 * @param  User   &$user   Reference to the current user
-	 * @param  string $action  Action concerning the title in question
-	 * @param  bool   &$result Whether MediaWiki currently thinks the action may be performed
+	 * @param Title  $title  Reference to the title in question
+	 * @param User   $user   Reference to the current user
+	 * @param string $action Action concerning the title in question
+	 * @param bool   $result Whether MediaWiki currently thinks the action may be performed
+	 *
 	 * @return bool
 	 */
 	public static function onUserCan(&$title, &$user, $action, &$result) {
