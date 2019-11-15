@@ -260,7 +260,29 @@ class CommentDisplay {
 		$popts = $wgOut->parserOptions();
 		$oldIncludeSize = $popts->setMaxIncludeSize(0);
 
-		$parserOutput = $wgParser->getFreshParser()->parse(str_replace(['&lt;nowiki&gt;', '&lt;pre&gt;', '&lt;/nowiki&gt;', '&lt;/pre&gt;', '&#039;&#039;&#039;', '&#039;&#039;'], ['<nowiki>', '<pre>', '</nowiki>', '</pre>', '\'\'\'', '\'\''], htmlentities($comment, ENT_QUOTES)), $wgOut->getTitle(), $popts);
+		$parserOutput = $wgParser->getFreshParser()->parse(
+			str_replace(
+				[
+					'&lt;nowiki&gt;',
+					'&lt;pre&gt;',
+					'&lt;/nowiki&gt;',
+					'&lt;/pre&gt;',
+					'&#039;',
+					'&#034;'
+				],
+				[
+					'<nowiki>',
+					'<pre>',
+					'</nowiki>',
+					'</pre>',
+					"'",
+					'"'
+				],
+				htmlentities($comment, ENT_QUOTES)
+			),
+			$wgOut->getTitle(),
+			$popts
+		);
 
 		$popts->setMaxIncludeSize($oldIncludeSize);
 		return $parserOutput->getText();
