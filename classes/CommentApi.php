@@ -266,8 +266,7 @@ class CommentApi extends HydraApiBase {
 			$res = CommentBoard::editComment($commentId, $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
-			global $wgOut;
-			$this->getResult()->addValue(null, 'parsedContent', $wgOut->parse($text));
+			$this->getResult()->addValue(null, 'parsedContent', CommentDisplay::sanitizeComment($text));
 		} else {
 			$this->dieWithError(['comment-invalidaction']);
 		}
