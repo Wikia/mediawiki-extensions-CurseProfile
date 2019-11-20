@@ -569,7 +569,7 @@ class CommentBoard {
 									],
 									[
 										5,
-										$commentPermanentLink
+										$toUserTitle->getFullURL()
 									],
 									[
 										6,
@@ -612,7 +612,7 @@ class CommentBoard {
 							],
 							[
 								5,
-								$commentPermanentLink
+								$toUserTitle->getFullURL()
 							],
 							[
 								6,
@@ -646,7 +646,7 @@ class CommentBoard {
 							],
 							[
 								3,
-								$commentPermanentLink
+								$toUserTitle->getFullURL()
 							],
 							[
 								4,
