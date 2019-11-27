@@ -329,7 +329,9 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
-		if (self::$profilePage !== false) {
+
+		// Only modify the navbar if we are on a user, user talk, or profile page
+		if (self::$profilePage !== false && in_array(self::$title->getNamespace(), [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
 			self::$profilePage->customizeNavBar($links, $skin->getContext()->getTitle());
 		}
 		return true;
