@@ -167,9 +167,16 @@ class Hooks {
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
-		// fix link if using enhanced profile
-		self::$profilePage = ProfilePage::newFromTitle($target);
-		if (self::$profilePage->isProfilePreferred()) {
+		// override user links based on enhanced user profile preference
+		$profilePage = ProfilePage::newFromTitle($target);
+		if ($profilePage->isProfilePreferred()) {
+			$prefix = strtok($attribs['title'], ':');
+			$attribs['href'] = $target->getFullUrl();
+			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
+			$attribs['title'] = $prefix . ':' . $target->getText();
+		}
+		// override enhanced profile links if preference is standard
+		if (!$profilePage->isProfilePreferred() && $target->getNamespace() === NS_USER_PROFILE) {
 			$attribs['href'] = $target->getFullUrl();
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
