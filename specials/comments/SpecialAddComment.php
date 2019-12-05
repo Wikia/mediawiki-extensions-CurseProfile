@@ -26,7 +26,7 @@ class SpecialAddComment extends UnlistedSpecialPage {
 	 *
 	 * @param string $toUser Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute($toUser) {
+	public function execute($toUserId) {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$wgUser = $wgOut->getUser();
@@ -35,7 +35,7 @@ class SpecialAddComment extends UnlistedSpecialPage {
 		$redirectToComment = false;
 
 		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
-			$board = new CommentBoard($toUser);
+			$board = new CommentBoard(User::newFromId($toUserId));
 			$newCommentId = $board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));
 		}
 

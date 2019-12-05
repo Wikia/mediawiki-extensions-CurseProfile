@@ -13,8 +13,8 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use Html;
+use Parser;
 use User;
 
 /**
@@ -24,8 +24,8 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param  int   $userId    User ID of the profile page being viewed
-	 * @param  array &$links     reference to the links array into which the links will be inserted
+	 * @param  int   $userId User ID of the profile page being viewed
+	 * @param  array &$links reference to the links array into which the links will be inserted
 	 * @return void
 	 */
 	public static function addFriendLink(int $userId, array &$links) {
@@ -93,7 +93,7 @@ class FriendDisplay {
 	/**
 	 * Friend Button Stuff
 	 *
-	 * @param  int  $userId    user id or curse id of the user on which the buttons will act
+	 * @param  int $userId user id or curse id of the user on which the buttons will act
 	 * @return string HTML button stuff
 	 */
 	public static function friendButtons(int $userId) {
@@ -139,7 +139,7 @@ class FriendDisplay {
 	 * Get the user's friend count based on their local user ID.
 	 *
 	 * @access public
-	 * @param  Parser $parser  - Not used, but the parser will pass it regardless.
+	 * @param  Parser $parser - Not used, but the parser will pass it regardless.
 	 * @param  int    $userId Local User ID
 	 * @return int	Number of friends.
 	 */
@@ -155,7 +155,7 @@ class FriendDisplay {
 	 *
 	 * @access public
 	 * @param  Parser &$parser - Not used, but the parser will pass it regardless.
-	 * @param  int    $userId Local User ID
+	 * @param  int    $userId  Local User ID
 	 * @return array	Parser compatible HTML array.
 	 */
 	public static function friendList(Parser &$parser, int $userId) {
@@ -174,7 +174,7 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param  array $userIds      [Optional] User IDs
+	 * @param  array $userIds        [Optional] User IDs
 	 * @param  bool  $manageButtons  [Optional] signature: callback($userObj) returns string
 	 * @param  int   $limit          [Optional] Number of results to limit.
 	 * @param  int   $offset         [Optional] Offset to start from.

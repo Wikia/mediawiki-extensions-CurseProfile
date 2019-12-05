@@ -690,7 +690,7 @@ class ProfileData {
 		if ($redis === false) {
 			return [];
 		}
-		if (is_null($siteKey)) {
+		if ($siteKey === null) {
 			$sites = $redis->sMembers('dynamicsettings:siteHashes');
 		} else {
 			if (!is_array($siteKey)) {

@@ -65,11 +65,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function execute() {
-		$wgUser = RequestContext::getMain()->getUser();
-
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
-		$this->f = new Friendship($globalId);
+		$this->f = new Friendship($this->getUser()->getId());
 		parent::execute();
 	}
 

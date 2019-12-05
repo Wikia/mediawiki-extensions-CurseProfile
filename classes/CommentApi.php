@@ -191,7 +191,7 @@ class CommentApi extends HydraApiBase {
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
 		if ($user->getIntOption('comment-pref')) {
-			$board = new CommentBoard($user->getId());
+			$board = new CommentBoard($user);
 			$commentSuccess = $board->addComment($text, null, $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 		} else {
@@ -223,12 +223,12 @@ class CommentApi extends HydraApiBase {
 		if (!$toUser || !$toUser->isAnon()) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				return;
-			}
 		}
+
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
-		$board = new CommentBoard($toUser->getId());
+		$board = new CommentBoard($toUser);
 		$commentSuccess = $board->addComment($text, null, $inreply);
 
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
@@ -310,9 +310,7 @@ class CommentApi extends HydraApiBase {
 	 * @return boolean	Success
 	 */
 	public function doResolveReport() {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), CentralIdLookup::AUDIENCE_RAW);
-		if (!$globalId) {
+		if (!$this->getUser()->isLoggedIn()) {
 			return false;
 		}
 
@@ -320,7 +318,7 @@ class CommentApi extends HydraApiBase {
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getMain()->getVal('byUser', $globalId),
+			'byUser' => $this->getMain()->getInt('byUser', $user->getId()),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki

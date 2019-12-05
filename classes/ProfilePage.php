@@ -668,7 +668,7 @@ class ProfilePage extends Article {
 			// just a simple value
 			if (is_numeric($input)) {
 				return $lang->formatNum($input);
-			} elseif (is_null($input)) {
+			} elseif ($input === null) {
 				return '0';
 			} else {
 				return $input;

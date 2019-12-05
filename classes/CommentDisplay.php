@@ -30,20 +30,20 @@ class CommentDisplay {
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
 	 * @param  object &$parser parser instance
-	 * @param  int    $user_id id of the user whose recent comments should be displayed
+	 * @param  int    $userId id of the user whose recent comments should be displayed
 	 * @return array	with html at index 0
 	 */
-	public static function comments(&$parser, $user_id = '') {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
+	public static function comments(&$parser, int $userId = null) {
+		$userId = intval($userId);
+		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 
 		$HTML = '';
 
-		$HTML .= self::newCommentForm($user_id, false);
+		$HTML .= self::newCommentForm($userId, false);
 
-		$board = new CommentBoard($user_id);
+		$board = new CommentBoard(User::newFromId($userId));
 		$comments = $board->getComments();
 
 		foreach ($comments as $comment) {
@@ -59,18 +59,18 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param  int  $user_id ID of the user whose comment board will receive a new comment via this form
+	 * @param  int  $userId ID of the user whose comment board will receive a new comment via this form
 	 * @param  bool $hidden  If true, the form will have an added class to be hidden by css/
 	 * @return string	html fragment or empty string
 	 */
-	public static function newCommentForm($user_id, $hidden = false) {
+	public static function newCommentForm($userId, $hidden = false) {
 		global $wgUser;
 
-		$targetUser = User::newFromId($user_id);
+		$targetUser = User::newFromId($userId);
 		if (CommentBoard::canComment($targetUser)) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			$page = Title::newFromText("Special:AddComment/" . $user_id);
+			$page = Title::newFromText("Special:AddComment/" . $userId);
 			return '
 			<div class="commentdisplay add-comment' . ($hidden ? ' hidden' : '') . '">
 				<div class="avatar">' . ProfilePage::userAvatar(null, 48, $wgUser->getEmail(), $wgUser->getName())[0] . '</div>
@@ -198,7 +198,7 @@ class CommentDisplay {
 	 * @return string	html fragment
 	 */
 	private static function timestamp($comment) {
-		if (is_null($comment['ub_edited'])) {
+		if ($comment['ub_edited'] === null) {
 			return wfMessage('cp-commentposted')->text() . ' ' . CP::timeTag($comment['ub_date']);
 		} else {
 			return wfMessage('cp-commentedited')->text() . ' ' . CP::timeTag($comment['ub_edited']);
@@ -212,7 +212,7 @@ class CommentDisplay {
 	 * @return string	html fragment
 	 */
 	private static function mobileTimestamp($comment) {
-		if (is_null($comment['ub_edited'])) {
+		if ($comment['ub_edited'] === null) {
 			return CP::timeTag($comment['ub_date'], true);
 		} else {
 			return CP::timeTag($comment['ub_edited'], true);
@@ -222,18 +222,17 @@ class CommentDisplay {
 	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
-	 * @param  int $user_id   the id of the user the parent comment belongs to
+	 * @param  int $userId   the id of the user the parent comment belongs to
 	 * @param  int $commentId the id of the comment for which replies need to be loaded
 	 * @return string	html for display
 	 */
-	public static function repliesTo($user_id, $commentId) {
-		$user_id = intval($user_id);
-		if ($user_id < 1) {
+	public static function repliesTo(int $userId, int $commentId) {
+		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 		$HTML = '';
 
-		$board = new CommentBoard($user_id);
+		$board = new CommentBoard(User::newFromId($userId));
 		$comments = $board->getReplies($commentId, null, -1);
 
 		if (empty($comments)) {

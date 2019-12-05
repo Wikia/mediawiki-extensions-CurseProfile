@@ -616,7 +616,7 @@ class CommentReport {
 			return false;
 		}
 
-		if (is_null($byUser)) {
+		if ($byUser === null) {
 			$byUser = $wgUser;
 		}
 		$lookup = CentralIdLookup::factory();

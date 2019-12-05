@@ -31,11 +31,11 @@ use User;
  */
 class CommentBoard {
 	/**
-	 * The id of the user to whom this comment board belongs to
+	 * The User object to whom this comment board belongs to
 	 *
-	 *	@var int $user_id
+	 *	@var User $user
 	 */
-	private $user_id;
+	private $owner;
 
 	// maximum character length of a single comment
 	const MAX_LENGTH = 5000;
@@ -73,18 +73,15 @@ class CommentBoard {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param int    $user_id the ID of a user
+	 * @param User    $owner The owner of this board.
 	 * @param string $type
 	 *
 	 * @throws Exception
 	 */
-	public function __construct(int $user_id, $type = self::BOARDTYPE_RECENT) {
+	public function __construct(User $owner, $type = self::BOARDTYPE_RECENT) {
 		$this->DB = CP::getDb(DB_MASTER);
-		$this->user_id = intval($user_id);
+		$this->owner = $owner;
 		$this->type = intval($type);
-		if ($this->user_id < 1) {
-			throw new Exception('Invalid user ID');
-		}
 	}
 
 	/**
@@ -95,7 +92,7 @@ class CommentBoard {
 	 * @return string  a single SQL condition entirely enclosed in parenthesis
 	 */
 	private static function visibleClause(?User $asUser = null) {
-		if (is_null($asUser)) {
+		if ($asUser === null) {
 			global $wgUser;
 			$asUser = $wgUser;
 		} else {
@@ -120,7 +117,7 @@ class CommentBoard {
 	/**
 	 * Returns the total number of top-level comments (or replies to a given comment) that have been left
 	 *
-	 * @param int $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
+	 * @param int       $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
 	 * @param User|null $asUser    [Optional] user ID of a user viewing (defaults to wgUser)
 	 *
 	 * @return int
@@ -135,7 +132,7 @@ class CommentBoard {
 			[
 				self::visibleClause($asUser),
 				'ub_in_reply_to'	=> $inReplyTo,
-				'ub_user_id'		=> $this->user_id
+				'ub_user_id'		=> $this->owner->getId()
 			],
 			__METHOD__
 		);
@@ -316,7 +313,7 @@ class CommentBoard {
 	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
 		$searchConditions = [
 			'ub_in_reply_to'	=> 0,
-			'ub_user_id'		=> $this->user_id
+			'ub_user_id'		=> $this->owner->getId()
 		];
 		if ($maxAge >= 0) {
 			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' . $this->DB->addQuotes(date('Y-m-d H:i:s', time() - $maxAge * 86400));
@@ -349,7 +346,7 @@ class CommentBoard {
 			[
 				self::visibleClause($asUser),
 				'ub_in_reply_to'	=> $rootComment,
-				'ub_user_id'		=> $this->user_id
+				'ub_user_id'		=> $this->owner->getId()
 			],
 			__METHOD__,
 			$options
@@ -372,7 +369,7 @@ class CommentBoard {
 	 * @return bool
 	 */
 	public static function canView($commentId, $user = null) {
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
@@ -396,21 +393,18 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to leave a comment.
 	 *
-	 * @param object      $toUser   int user ID or User object who owns the potential board.
-	 * @param object|null $fromUser [Optional] User object for comment author, defaults to|null $wgUser
+	 * @param User      $toUser   User object who owns the potential board.
+	 * @param object|null $fromUser [Optional] User object for comment author, defaults to $wgUser.
 	 *
 	 * @return boolean	Can Comment
 	 */
-	public static function canComment($toUser, $fromUser = null) {
-		global $wgCPEditsToComment, $wgEmailAuthentication;
+	public static function canComment(User $toUser, ?User $fromUser = null) {
+		global $wgCPEditsToComment, $wgEmailAuthentication, $wgUser;
 
-		if (is_numeric($toUser)) {
-			$toUser = User::newFromId($toUser);
-		}
-		if (empty($toUser)) {
+		if ($toUser->isAnon()) {
 			return false;
 		}
-		if (is_null($fromUser)) {
+		if ($fromUser === null) {
 			global $wgUser;
 			$fromUser = $wgUser;
 		}
@@ -419,20 +413,17 @@ class CommentBoard {
 
 		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($fromUser->getEmail())));
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
-
-		if ($globalId > 0) {
+		if ($fromUser->getId()) {
 			try {
 				$stats = Cheevos::getStatProgress(
 					[
-						'user_id'	=> $globalId,
+						'user_id'	=> $fromUser->getId(),
 						'global'	=> true,
 						'stat'		=> 'article_edit'
 					]
 				);
 				$stats = CheevosHelper::makeNiceStatProgressArray($stats);
-				$editCount = (isset($stats[$globalId]['article_edit']['count']) && $stats[$globalId]['article_edit']['count'] > $editCount ? $stats[$globalId]['article_edit']['count'] : $editCount);
+				$editCount = (isset($stats[$fromUser->getId()]['article_edit']['count']) && $stats[$fromUser->getId()]['article_edit']['count'] > $editCount ? $stats[$fromUser->getId()]['article_edit']['count'] : $editCount);
 			} catch (CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting article_edit count.");
 			}
@@ -451,29 +442,26 @@ class CommentBoard {
 	 *
 	 * @return int	ID of the newly created comment, or 0 for failure
 	 */
-	public function addComment($commentText, $fromUser = null, $inReplyTo = null) {
+	public function addComment(string $commentText, int $fromUser = 0, int $inReplyTo = 0) {
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
 		}
 		$dbw = CP::getDb(DB_MASTER);
 
-		$toUser = User::newFromId($this->user_id);
-		if (is_null($fromUser)) {
+		if (!$fromUser) {
 			global $wgUser;
 			$fromUser = $wgUser;
 		} else {
-			$fromUser = User::newFromId(intval($fromUser));
+			$fromUser = User::newFromId($fromUser);
 		}
-		if (!self::canComment($toUser, $fromUser)) {
+
+		if (!self::canComment($this->owner, $fromUser)) {
 			return false;
 		}
 
 		$parentCommenter = null;
-		if (is_null($inReplyTo)) {
-			$inReplyTo = 0;
-		} else {
-			$inReplyTo = intval($inReplyTo);
+		if ($inReplyTo) {
 			$parentComment = self::queryCommentById($inReplyTo);
 			if (isset($parentComment['ub_user_id_from'])) {
 				$parentCommenter = User::newFromId($parentComment['ub_user_id_from']);
@@ -486,8 +474,8 @@ class CommentBoard {
 				'ub_in_reply_to' => $inReplyTo,
 				'ub_user_id_from' => $fromUser->getId(),
 				'ub_user_name_from' => $fromUser->getName(),
-				'ub_user_id' => $this->user_id,
-				'ub_user_name' => $toUser->getName(),
+				'ub_user_id' => $this->owner->getId(),
+				'ub_user_name' => $this->owner->getName(),
 				'ub_message' => $commentText,
 				'ub_type' => self::PUBLIC_MESSAGE,
 				'ub_date' => date('Y-m-d H:i:s'),
@@ -516,13 +504,13 @@ class CommentBoard {
 				$action = 'replied';
 			}
 
-			Hooks::run('CurseProfileAddComment', [$fromUser, $toUser, $inReplyTo, $commentText]);
+			Hooks::run('CurseProfileAddComment', [$fromUser, $this->owner, $inReplyTo, $commentText]);
 			if ($inReplyTo) {
-				Hooks::run('CurseProfileAddCommentReply', [$fromUser, $toUser, $inReplyTo, $commentText]);
+				Hooks::run('CurseProfileAddCommentReply', [$fromUser, $this->owner, $inReplyTo, $commentText]);
 			}
 
 			$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
-			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+			$toUserTitle = Title::makeTitle(NS_USER_PROFILE, $this->owner->getName());
 			$parentCommenterTitle = null;
 			if ($parentCommenter) {
 				$parentCommenterTitle = Title::makeTitle(NS_USER_PROFILE, $parentCommenter->getName());
@@ -533,13 +521,13 @@ class CommentBoard {
 			$userNote = substr($commentText, 0, 80);
 
 			if ($inReplyTo > 0) {
-				if ($toUser->getId() != $fromUser->getId()) {
-					if (!$parentCommenter->equals($toUser)) {
+				if ($this->owner->getId() != $fromUser->getId()) {
+					if (!$parentCommenter->equals($this->owner)) {
 						// We have to make two notifications.  One for the profile owner and one for the parent commenter.
 						$broadcast = NotificationBroadcast::newSingle(
 							'user-interest-profile-comment-reply-other-self',
 							$fromUser,
-							$toUser,
+							$this->owner,
 							[
 								'url' => $commentPermanentLink,
 								'message' => [
@@ -553,7 +541,7 @@ class CommentBoard {
 									],
 									[
 										2,
-										$toUser->getName()
+										$this->owner->getName()
 									],
 									[
 										3,
@@ -580,7 +568,7 @@ class CommentBoard {
 					}
 				}
 				$broadcast = NotificationBroadcast::newSingle(
-					'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($toUser) ? 'self' : 'other'),
+					'user-interest-profile-comment-reply-self-' . ($parentCommenter->equals($this->owner) ? 'self' : 'other'),
 					$fromUser,
 					$parentCommenter,
 					[
@@ -596,7 +584,7 @@ class CommentBoard {
 							],
 							[
 								2,
-								$toUser->getName()
+								$this->owner->getName()
 							],
 							[
 								3,
@@ -624,7 +612,7 @@ class CommentBoard {
 				$broadcast = NotificationBroadcast::newSingle(
 					'user-interest-profile-comment',
 					$fromUser,
-					$toUser,
+					$this->owner,
 					[
 						'url' => $commentPermanentLink,
 						'message' => [
@@ -677,14 +665,14 @@ class CommentBoard {
 	 * Checks if a user has permissions to reply to a comment
 	 *
 	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
-	 * @param object|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param User|null $user      [Optional] mw User object, defaults to|null $wgUser
 	 *
 	 * @return bool
 	 */
-	public static function canReply($commentId, $user = null) {
+	public static function canReply(int $commentId, ?User $user = null) {
 		global $wgCPEditsToComment;
 
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
@@ -709,7 +697,7 @@ class CommentBoard {
 	 *
 	 * @return bool	true if successful
 	 */
-	public static function editComment($commentId, $message) {
+	public static function editComment(int $commentId, string $message) {
 		global $wgUser;
 
 		$DB = CP::getDb(DB_MASTER);
@@ -747,13 +735,13 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to edit a comment
 	 *
-	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
-	 * @param object|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param int|array       $commentId int id of comment to check, or array row from user_board table
+	 * @param User|null $user      [Optional] mw User object, defaults to|null $wgUser
 	 *
 	 * @return bool
 	 */
-	public static function canEdit($commentId, $user = null) {
-		if (is_null($user)) {
+	public static function canEdit($commentId, ?User $user = null) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
@@ -778,18 +766,11 @@ class CommentBoard {
 	 *
 	 * @return mixed	$db->update return or false on error.
 	 */
-	public static function removeComment($commentId, $user = null, $time = null) {
-		if (!($user instanceof \User)) {
+	public static function removeComment(int $commentId, ?User $user = null, ?string $time = null) {
+		if (!($user instanceof User)) {
 			global $wgUser;
 
 			$user = $wgUser;
-		}
-
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
-
-		if (!$globalId) {
-			return false;
 		}
 
 		if (!$time) {
@@ -834,7 +815,7 @@ class CommentBoard {
 	 * @return bool
 	 */
 	public static function canRemove($commentId, $user = null) {
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
@@ -882,7 +863,7 @@ class CommentBoard {
 	 * @return bool
 	 */
 	public static function canRestore($commentId, $user = null) {
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
@@ -985,7 +966,7 @@ class CommentBoard {
 	 * @return bool
 	 */
 	public static function canPurge($user = null) {
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		} elseif (!is_a($user, 'User')) {
@@ -1018,7 +999,7 @@ class CommentBoard {
 	 * @return bool
 	 */
 	public static function canReport($commentId, $user = null) {
-		if (is_null($user)) {
+		if ($user === null) {
 			global $wgUser;
 			$user = $wgUser;
 		}
