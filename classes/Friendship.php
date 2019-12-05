@@ -134,8 +134,9 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @param  integer $toUserId User ID of the user to friend.
-	 * @return boolean	True on success, False on failure.
+	 * @param integer $toUserId User ID of a user.
+	 *
+	 * @return boolean True on success, False on failure.
 	 */
 	public function sendRequest(int $toUserId) {
 		$toUser = User::newFromId($toUserId);
@@ -202,11 +203,11 @@ class Friendship {
 	}
 
 	/**
-	 * Accepts a pending request
+	 * Accepts a pending request.
 	 *
-	 * @param integer $toUserId user ID of a user
+	 * @param integer $toUserId User ID of a user.
 	 *
-	 * @return boolean	true on success, false on failure
+	 * @return boolean True on success, False on failure.
 	 */
 	public function acceptRequest(int $toUserId) {
 		if ($this->user->getId() === $toUserId || $toUserId < 1) {
@@ -225,11 +226,11 @@ class Friendship {
 	}
 
 	/**
-	 * Ignores and dismisses a pending request
+	 * Ignores and dismisses a pending request.
 	 *
-	 * @param integer $toUserId user ID of a user
+	 * @param integer $toUserId User ID of a user.
 	 *
-	 * @return boolean True on success, false on failure.
+	 * @return boolean True on success, False on failure.
 	 */
 	public function ignoreRequest(int $toUserId) {
 		if ($this->user->getId() === $toUserId || $toUserId < 1) {
@@ -248,11 +249,11 @@ class Friendship {
 	}
 
 	/**
-	 * Removes a friend relationship, or cancels a pending request
+	 * Removes a friend relationship or cancels a pending request.
 	 *
-	 * @param integer $toUserId global ID of a user
+	 * @param integer $toUserId User ID of a user.
 	 *
-	 * @return boolean true on success, false on failure
+	 * @return boolean True on success, False on failure.
 	 */
 	public function removeFriend(int $toUserId) {
 		if ($this->user->getId() === $toUserId || $toUserId < 1) {

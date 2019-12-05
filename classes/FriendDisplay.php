@@ -29,8 +29,6 @@ class FriendDisplay {
 	 * @return void
 	 */
 	public static function addFriendLink(int $userId, array &$links) {
-		global $wgUser;
-
 		$user = User::newFromId($userId);
 		if (!$user || $user->isAnon()) {
 			return;
@@ -138,8 +136,8 @@ class FriendDisplay {
 	/**
 	 * Get the user's friend count based on their local user ID.
 	 *
-	 * @param  Parser|null $parser - Not used, but the parser will pass it regardless.
-	 * @param  integer     $userId Local User ID
+	 * @param Parser|null $parser - Not used, but the parser will pass it regardless.
+	 * @param integer     $userId Local User ID
 	 *
 	 * @return integer	Number of friends.
 	 */
@@ -183,7 +181,7 @@ class FriendDisplay {
 	}
 
 	/**
-	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
+	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
 	 * @param  array   $userIds        [Optional] User IDs
 	 * @param  bool    $manageButtons  [Optional] signature: callback($userObj) returns string

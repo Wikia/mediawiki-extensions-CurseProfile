@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use HydraCore;
 use TemplateManageFriends;
 use Title;

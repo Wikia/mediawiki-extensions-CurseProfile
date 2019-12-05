@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use SpecialPage;
 use TemplateManageFriends;
 use UserNotLoggedIn;
