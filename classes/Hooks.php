@@ -153,7 +153,7 @@ class Hooks {
 	 * @param array        $attribs
 	 * @param mixed        $ret
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onHtmlPageLinkRendererEnd(
 		LinkRenderer $linkRenderer,
@@ -190,7 +190,7 @@ class Hooks {
 	 * @param Title   $title
 	 * @param Article $article
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onArticleFromTitle(Title &$title, &$article) {
 		if (!self::$profilePage) {
@@ -210,7 +210,7 @@ class Hooks {
 	 * @param Title   $title
 	 * @param Article $article
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function renderProfile(&$title, &$article) {
 		global $wgOut;
@@ -258,7 +258,7 @@ class Hooks {
 	 *
 	 * @param Title $title
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function renderUserPages(&$title) {
 		global $wgRequest, $wgOut;
@@ -301,7 +301,7 @@ class Hooks {
 	 *
 	 * @param object $request Global $wgRequest object
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function shouldWarn($request) {
 		return (
@@ -582,7 +582,7 @@ class Hooks {
 	 * @param Integer $index  The index of the namespace being checked
 	 * @param Boolean $result Whether MediaWiki currently thinks this namespace is movable
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onNamespaceIsMovable($index, &$result) {
 		if ($index == NS_USER_PROFILE) {
@@ -600,7 +600,7 @@ class Hooks {
 	 * @param string $action Action concerning the title in question
 	 * @param bool   $result Whether MediaWiki currently thinks the action may be performed
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onUserCan(&$title, &$user, $action, &$result) {
 		if ($title->getNamespace() == NS_USER_PROFILE && $action === 'edit') {

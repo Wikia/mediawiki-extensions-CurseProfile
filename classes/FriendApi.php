@@ -64,7 +64,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function execute() {
-		$this->f = new Friendship($this->getUser()->getId());
+		$this->f = new Friendship($this->getUser());
 		parent::execute();
 	}
 

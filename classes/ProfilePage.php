@@ -97,7 +97,6 @@ class ProfilePage extends Article {
 	/**
 	 * Main Constructor
 	 *
-	 * @access public
 	 * @param  Title               $title
 	 * @param  IContextSource|null $context
 	 * @return void
@@ -127,7 +126,6 @@ class ProfilePage extends Article {
 	 * Create a new instance from a page title.  This is the preferred entry point since it handles
 	 * if the title is in an usable namespace.
 	 *
-	 * @access public
 	 * @param  Title               $title
 	 * @param  IContextSource|null $context
 	 * @return mixed	New self or false for a bad title.
@@ -187,7 +185,6 @@ class ProfilePage extends Article {
 	/**
 	 * Shortcut method to retrieving the user's profile page preference
 	 *
-	 * @access public
 	 * @return boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
 	public function isProfilePreferred() {
@@ -197,7 +194,6 @@ class ProfilePage extends Article {
 	/**
 	 * Shortcut method to retrieving the user's comment page preference
 	 *
-	 * @access public
 	 * @return boolean	True if profile comment page is preferred, false if wiki is preferred.
 	 */
 	public function isCommentsPreferred() {
@@ -208,9 +204,8 @@ class ProfilePage extends Article {
 	 * True if we are not on a subpage, and if we are in the basic User namespace,
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
-	 * @access public
 	 * @param  Title|null $title object to check instead of the assumed.
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isUserPage($title = null) {
 		if ($title === null) {
@@ -222,9 +217,8 @@ class ProfilePage extends Article {
 	/**
 	 * True if we are viewing a user_talk namespace page.
 	 *
-	 * @access public
 	 * @param  Title|null $title [Optional] Title object to check instead of the assumed.
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isUserTalkPage($title = null) {
 		if ($title === null) {
@@ -236,9 +230,8 @@ class ProfilePage extends Article {
 	/**
 	 * True if we need to render the user's profile page.
 	 *
-	 * @access public
 	 * @param  Title|null $title [Optional] Title object to check instead of the assumed.
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isProfilePage($title = null) {
 		if ($title === null) {
@@ -250,8 +243,7 @@ class ProfilePage extends Article {
 	/**
 	 * Is the action for this page 'view'?
 	 *
-	 * @access public
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isActionView() {
 		return $this->actionIsView;
@@ -260,7 +252,6 @@ class ProfilePage extends Article {
 	/**
 	 * Returns the title object for the user's page in the UserProfile namespace
 	 *
-	 * @access public
 	 * @return Title instance
 	 */
 	public function getUserProfileTitle() {
@@ -270,7 +261,6 @@ class ProfilePage extends Article {
 	/**
 	 * Adjusts the links in the primary action bar on profile pages and user wiki pages.
 	 *
-	 * @access public
 	 * @param  array &$links Structured info on what links will appear on the rendered page.
 	 * @param  Title $title  Title of the page the user is on in the User or User_talk namespace.
 	 * @return void
@@ -362,11 +352,11 @@ class ProfilePage extends Article {
 	/**
 	 * Prints a gravatar image tag for a user
 	 *
-	 * @param  null   $parser          - Not Used but passed by MW
-	 * @param  int    $size            the square size of the avatar to display
-	 * @param  string $email	       email Address OR md5 Hash of user's email address
-	 * @param  string $userName        the user's username
-	 * @param  string $attributeString additional html attributes to include in the IMG tag
+	 * @param  null    $parser          - Not Used but passed by MW
+	 * @param  integer $size            the square size of the avatar to display
+	 * @param  string  $email           email Address OR md5 Hash of user's email address
+	 * @param  string  $userName        the user's username
+	 * @param  string  $attributeString additional html attributes to include in the IMG tag
 	 * @return string	the HTML fragment containing a IMG tag
 	 */
 	public static function userAvatar($parser, $size, $email, $userName, $attributeString = '') {
@@ -443,7 +433,6 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
-	 * @access public
 	 * @param  Parser &$parser Parser reference.
 	 * @param  string $field   Field name to retrieve.
 	 * @return mixed	array with HTML string at index 0 or an HTML string
@@ -458,7 +447,6 @@ class ProfilePage extends Article {
 	/**
 	 * Generate Profile Links HTML
 	 *
-	 * @access public
 	 * @param  array $profileLinks Profile Links
 	 * @return string	HTML
 	 */
@@ -679,9 +667,9 @@ class ProfilePage extends Article {
 	/**
 	 * Display the icons of the recent achievements the user has earned, for the sidebar
 	 *
-	 * @param  Parser &$parser parser reference
-	 * @param  string $type    type of query. one of: local, master (default)
-	 * @param  int    $limit   maximum number to display
+	 * @param  Parser  &$parser parser reference
+	 * @param  string  $type    type of query. one of: local, master (default)
+	 * @param  integer $limit   maximum number to display
 	 * @return array
 	 */
 	public function recentAchievements(&$parser, $type = 'special', $limit = 0) {
@@ -821,7 +809,6 @@ class ProfilePage extends Article {
 	/**
 	 * Parser hook function that inserts either an "edit profile" button or a "add/remove friend" button
 	 *
-	 * @access public
 	 * @param  Parser &$parser
 	 * @return array	with html as the first element
 	 */

@@ -305,7 +305,6 @@ class CommentApi extends HydraApiBase {
 	/**
 	 * Resolve Report API End Point
 	 *
-	 * @access public
 	 * @return boolean	Success
 	 */
 	public function doResolveReport() {

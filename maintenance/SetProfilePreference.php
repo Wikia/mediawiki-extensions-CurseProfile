@@ -26,7 +26,6 @@ class SetProfilePreference extends Maintenance {
 	/**
 	 * Constructor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {

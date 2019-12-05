@@ -19,7 +19,6 @@ class MigrateFriendsToCheevos extends Maintenance {
 	/**
 	 * Constructor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
@@ -30,7 +29,6 @@ class MigrateFriendsToCheevos extends Maintenance {
 	/**
 	 * Migrate Location Fields
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function execute() {

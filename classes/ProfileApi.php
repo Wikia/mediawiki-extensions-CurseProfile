@@ -24,7 +24,6 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Allowed API actions.
 	 *
-	 * @access public
 	 * @return array	API Actions
 	 */
 	public function getActions() {
@@ -160,7 +159,6 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Add the public info from a user profile by username
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function doGetPublicProfile() {
@@ -184,7 +182,6 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Add the raw about me text into the API response.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function doGetRawField() {
@@ -206,7 +203,6 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Perform an edit on general profile fields.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function doEditField() {
@@ -238,7 +234,6 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Perform an edit on the about me section with multiple fields.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function doEditSocialFields() {

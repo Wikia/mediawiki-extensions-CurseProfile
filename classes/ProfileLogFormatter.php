@@ -22,7 +22,6 @@ class ProfileLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for profile edits.
 	 *
-	 * @access public
 	 * @return array	Extract and parsed parameters.
 	 */
 	protected function getMessageParameters() {

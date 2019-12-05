@@ -145,7 +145,6 @@ class ProfileData {
 	/**
 	 * Return basic plus external profile fields.
 	 *
-	 * @access public
 	 * @return array	Edit Profile Fields
 	 */
 	public static function getValidEditFields() {
@@ -155,7 +154,6 @@ class ProfileData {
 	/**
 	 * Get an URL to an external profile.
 	 *
-	 * @access public
 	 * @param  string $service Service Name
 	 * @param  string $text    Text Replacement/User Name
 	 * @return string|boolean	URL to the external profile or false.
@@ -170,7 +168,6 @@ class ProfileData {
 	/**
 	 * Returns the canonical URL path to a user's profile.
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function getProfilePageUrl() {
@@ -226,7 +223,6 @@ class ProfileData {
 	/**
 	 * Inserts curse profile fields into the user preferences form.
 	 *
-	 * @access public
 	 * @param  array &$preferences Data for HTMLForm to generate the Special:Preferences form
 	 * @return void
 	 */
@@ -313,7 +309,6 @@ class ProfileData {
 	/**
 	 * Adds default values for preferences added by curse profile
 	 *
-	 * @access public
 	 * @param  array &$defaultOptions Default Values
 	 * @return null
 	 */
@@ -338,7 +333,6 @@ class ProfileData {
 	/**
 	 * Runs when the user saves their preferences.
 	 *
-	 * @access public
 	 * @param  User  $user         User
 	 * @param  array &$preferences User Preferences
 	 * @return null
@@ -392,7 +386,6 @@ class ProfileData {
 	/**
 	 * Can the given user edit this profile profile?
 	 *
-	 * @access public
 	 * @param  object $performer User, the performer that needs to make changes.
 	 * @return mixed	Boolean true if allowed, otherwise error message string to display.
 	 */
@@ -424,7 +417,6 @@ class ProfileData {
 	/**
 	 * Get a the profile field text.
 	 *
-	 * @access public
 	 * @param  string $field Field Name - Examples: aboutme, location, link_twitch
 	 * @return string
 	 */
@@ -439,7 +431,6 @@ class ProfileData {
 	/**
 	 * Set a profile field.
 	 *
-	 * @access public
 	 * @param  string      $field     Field Name - Examples: aboutme, location, link_twitch
 	 * @param  string      $text      the new text for the user's aboutme
 	 * @param  object|null $performer [Optional] User who performed the action.  Null to use the current user.
@@ -464,7 +455,6 @@ class ProfileData {
 	/**
 	 * Extracts the username from a profile link.
 	 *
-	 * @access public
 	 * @param  string $service Name of service to validate.
 	 * @param  string $test    Raw text to test for an URL or user name to extract.
 	 * @return mixed	False or validated string value.
@@ -491,7 +481,6 @@ class ProfileData {
 	/**
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
-	 * @access public
 	 * @param  string $field Field name to retrieve.
 	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
@@ -523,7 +512,6 @@ class ProfileData {
 	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
-	 * @access public
 	 * @return mixed	Array with HTML string at index 0 or an HTML string.
 	 */
 	public function getProfileLinksHtml() {
@@ -561,8 +549,7 @@ class ProfileData {
 	/**
 	 * Check whether we are viewing the profile of the logged-in user
 	 *
-	 * @access public
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isViewingSelf() {
 		global $wgUser;
@@ -573,7 +560,6 @@ class ProfileData {
 	/**
 	 * Log a profile change.
 	 *
-	 * @access public
 	 * @param  string $section   Section string of the profile.  Example: profile-aboutme
 	 * @param  string $comment   Comment for the log, usually the text of the change.
 	 * @param  object $target    User targeted for the action.
@@ -602,7 +588,6 @@ class ProfileData {
 	/**
 	 * Returns all the user's location profile data
 	 *
-	 * @access public
 	 * @return array	Possibly including key: location
 	 */
 	public function getLocation() {
@@ -615,7 +600,6 @@ class ProfileData {
 	/**
 	 * Returns all the user's external social profiles.
 	 *
-	 * @access public
 	 * @return array	Possibly including keys: Twitter, Facebook, Reddit, Steam, VK, XBL, PSN
 	 */
 	public function getExternalProfiles() {
@@ -650,7 +634,6 @@ class ProfileData {
 	/**
 	 * Get information about wiki sites from Redis for searching.
 	 *
-	 * @access public
 	 * @param  string $search Search Term
 	 * @return array	Search Results
 	 */
@@ -681,7 +664,6 @@ class ProfileData {
 	/**
 	 * Returns the decoded wiki data available in redis
 	 *
-	 * @access public
 	 * @param  string|array|null $siteKey md5 key for wanted site, or array of keys.
 	 * @return array	Wiki data arrays.
 	 */
@@ -718,7 +700,7 @@ class ProfileData {
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public function getProfileTypePreference() {
 		// override preference for non existent user
@@ -731,7 +713,7 @@ class ProfileData {
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public function getCommentTypePreference() {
 		// override preference for non existent user

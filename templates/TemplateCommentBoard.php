@@ -25,7 +25,6 @@ class TemplateCommentBoard {
 	/**
 	 * Header for comments archive board
 	 *
-	 * @access public
 	 * @param  object $user  user reference
 	 * @param  string $title text title of the page
 	 * @return string	Built HTML
@@ -54,10 +53,9 @@ class TemplateCommentBoard {
 	/**
 	 * Comments display
 	 *
-	 * @access public
-	 * @param  array  $comments   array of comments
-	 * @param  int    $user_id    id of user to whom this comment list belongs
-	 * @param  string $pagination [optional] built HTML fragment for pagination
+	 * @param  array   $comments   array of comments
+	 * @param  integer $user_id    id of user to whom this comment list belongs
+	 * @param  string  $pagination [optional] built HTML fragment for pagination
 	 * @return string	Built HTML
 	 */
 	public function comments($comments, $user_id, $pagination = '') {

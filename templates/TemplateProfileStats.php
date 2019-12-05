@@ -16,7 +16,6 @@ class TemplateProfileStats {
 	/**
 	 * Profile Stats Statistics
 	 *
-	 * @access public
 	 * @param  array $statistics    Statistics
 	 * @param  array $favoriteWikis Favorite Wikis
 	 * @return string	HTML

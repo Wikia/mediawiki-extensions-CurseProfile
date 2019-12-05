@@ -29,8 +29,8 @@ class CommentDisplay {
 	/**
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
-	 * @param  object &$parser parser instance
-	 * @param  int    $userId  id of the user whose recent comments should be displayed
+	 * @param  object  &$parser parser instance
+	 * @param  integer $userId  id of the user whose recent comments should be displayed
 	 * @return array	with html at index 0
 	 */
 	public static function comments(&$parser, int $userId = null) {
@@ -59,8 +59,8 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param  int  $userId ID of the user whose comment board will receive a new comment via this form
-	 * @param  bool $hidden If true, the form will have an added class to be hidden by css/
+	 * @param  integer $userId ID of the user whose comment board will receive a new comment via this form
+	 * @param  bool    $hidden If true, the form will have an added class to be hidden by css/
 	 * @return string	html fragment or empty string
 	 */
 	public static function newCommentForm($userId, $hidden = false) {
@@ -90,8 +90,8 @@ class CommentDisplay {
 	/**
 	 * Returns html display for a single profile comment
 	 *
-	 * @param  array $comment   structured comment data as returned by CommentBoard
-	 * @param  int   $highlight [optional] id of a comment to highlight from among those displayed
+	 * @param  array   $comment   structured comment data as returned by CommentBoard
+	 * @param  integer $highlight [optional] id of a comment to highlight from among those displayed
 	 * @return string	html for display
 	 */
 	public static function singleComment($comment, $highlight = false) {
@@ -222,8 +222,8 @@ class CommentDisplay {
 	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
-	 * @param  int $userId    the id of the user the parent comment belongs to
-	 * @param  int $commentId the id of the comment for which replies need to be loaded
+	 * @param  integer $userId    the id of the user the parent comment belongs to
+	 * @param  integer $commentId the id of the comment for which replies need to be loaded
 	 * @return string	html for display
 	 */
 	public static function repliesTo(int $userId, int $commentId) {
@@ -249,7 +249,6 @@ class CommentDisplay {
 	/**
 	 * Sanitizes a comment for display in HTML.
 	 *
-	 * @access public
 	 * @param  string $comment Comment as typed by user.
 	 * @return string	Comment sanitized for usage in HTML.
 	 */

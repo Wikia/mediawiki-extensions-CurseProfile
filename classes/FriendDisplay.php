@@ -24,8 +24,8 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param  int   $userId User ID of the profile page being viewed
-	 * @param  array &$links reference to the links array into which the links will be inserted
+	 * @param  integer $userId User ID of the profile page being viewed
+	 * @param  array   &$links reference to the links array into which the links will be inserted
 	 * @return void
 	 */
 	public static function addFriendLink(int $userId, array &$links) {
@@ -36,7 +36,7 @@ class FriendDisplay {
 			return;
 		}
 
-		$friendship = new Friendship($user->getId());
+		$friendship = new Friendship($user);
 
 		$links['user_id'] = $user->getId();
 		$relationship = $friendship->getRelationship($links['user_id']);
@@ -93,7 +93,7 @@ class FriendDisplay {
 	/**
 	 * Friend Button Stuff
 	 *
-	 * @param  int $userId user id or curse id of the user on which the buttons will act
+	 * @param  integer $userId user id or curse id of the user on which the buttons will act
 	 * @return string HTML button stuff
 	 */
 	public static function friendButtons(int $userId) {
@@ -138,13 +138,19 @@ class FriendDisplay {
 	/**
 	 * Get the user's friend count based on their local user ID.
 	 *
-	 * @access public
-	 * @param  Parser $parser - Not used, but the parser will pass it regardless.
-	 * @param  int    $userId Local User ID
-	 * @return int	Number of friends.
+	 * @param  Parser|null $parser - Not used, but the parser will pass it regardless.
+	 * @param  integer     $userId Local User ID
+	 *
+	 * @return integer	Number of friends.
 	 */
-	public static function count(Parser $parser, int $userId) {
-		$friendship = new Friendship($userId);
+	public static function count(?Parser $parser = null, int $userId) {
+		$user = User::newFromId($userId);
+
+		if (!$user) {
+			return 0;
+		}
+
+		$friendship = new Friendship($user);
 		$friends = $friendship->getFriends();
 
 		return count($friends);
@@ -153,13 +159,18 @@ class FriendDisplay {
 	/**
 	 * Get the user's friends based on their local user ID.
 	 *
-	 * @access public
-	 * @param  Parser &$parser - Not used, but the parser will pass it regardless.
-	 * @param  int    $userId  Local User ID
+	 * @param  Parser|null &$parser - Not used, but the parser will pass it regardless.
+	 * @param  integer     $userId  Local User ID
 	 * @return array	Parser compatible HTML array.
 	 */
-	public static function friendList(Parser &$parser, int $userId) {
-		$friendship = new Friendship($userId);
+	public static function friendList(?Parser &$parser = null, int $userId) {
+		$user = User::newFromId($userId);
+
+		if (!$user) {
+			return 0;
+		}
+
+		$friendship = new Friendship($user);
 		$friends = $friendship->getFriends();
 		if (count($friends) == 0) {
 			return '';
@@ -174,11 +185,11 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of global IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param  array $userIds        [Optional] User IDs
-	 * @param  bool  $manageButtons  [Optional] signature: callback($userObj) returns string
-	 * @param  int   $limit          [Optional] Number of results to limit.
-	 * @param  int   $offset         [Optional] Offset to start from.
-	 * @param  bool  $sortByActivity [Optional] Sort by user activity instead of name.
+	 * @param  array   $userIds        [Optional] User IDs
+	 * @param  bool    $manageButtons  [Optional] signature: callback($userObj) returns string
+	 * @param  integer $limit          [Optional] Number of results to limit.
+	 * @param  integer $offset         [Optional] Offset to start from.
+	 * @param  bool    $sortByActivity [Optional] Sort by user activity instead of name.
 	 * @return string	HTML UL List
 	 */
 	public static function listFromArray($userIds = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {

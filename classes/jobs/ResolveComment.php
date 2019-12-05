@@ -14,7 +14,6 @@ class ResolveComment extends Job {
 	/**
 	 * Look up a wiki by md5key and open a connection to its database
 	 *
-	 * @access public
 	 * @param  string $dbKey MD5 key for the wiki
 	 * @return object	Active MW database connection
 	 */

@@ -28,7 +28,6 @@ class SpecialFriends extends UnlistedSpecialPage {
 	/**
 	 * Main Constructor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
@@ -38,8 +37,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 	/**
 	 * Show the special page
 	 *
-	 * @access public
-	 * @param  string $path - Mixed: parameter(s) passed to the page or null.
+	 * @param string $path - Mixed: parameter(s) passed to the page or null.
 	 */
 	public function execute($path) {
 		$wgRequest = $this->getRequest();
@@ -87,10 +85,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 		$templateManageFriends = new TemplateManageFriends;
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
-
-		$f = new Friendship($globalId);
+		$f = new Friendship($user);
 
 		$friends = $f->getFriends();
 		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);

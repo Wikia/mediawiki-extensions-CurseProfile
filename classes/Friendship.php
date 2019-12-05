@@ -13,21 +13,21 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use Hooks;
-use RequestContext;
+use MWException;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;
 use Title;
+use User;
 
 /**
- * Class that manages friendship relations between users. Create an instance with a curse ID.
+ * Class that manages friendship relations between users. Create an instance with a User object.
  * All relationships statuses are then described from the perspective of that user.
  */
 class Friendship {
-	private $globalId;
+	private $user;
 
 	/**
 	 * Relationship status constants
@@ -41,24 +41,24 @@ class Friendship {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param int $globalId curse ID of a user
+	 * @param User $user
 	 */
-	public function __construct($globalId) {
-		$this->globalId = intval($globalId);
+	public function __construct(User $user) {
+		if (!$user->getId()) {
+			throw new MWException('Anonymous user object passed.');
+		}
+		$this->user = $user;
 	}
 
 	/**
 	 * Check the relationship status between two users.
 	 *
-	 * @param  int $toUser curse ID of a user
+	 * @param  integer $toUserId user ID of a user
 	 * @return int	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
-	public function getRelationship($toUser) {
-		if ($this->globalId < 1) {
-			return -1;
-		}
+	public function getRelationship($toUserId) {
 		try {
-			$status = Cheevos::getFriendStatus($this->globalId, $toUser);
+			$status = Cheevos::getFriendStatus($this->user->getId(), $toUserId);
 			if ($status['status']) {
 				return $status['status'];
 			}
@@ -69,22 +69,13 @@ class Friendship {
 	}
 
 	/**
-	 * Returns the array of curse IDs for this or another user's friends
+	 * Returns the array of user IDs for this or another user's friends
 	 *
-	 * @param  int|null $user optional curse ID of a user (default|null $this->globalId
-	 * @return array	curse IDs of friends
+	 * @return array User IDs of friends
 	 */
-	public function getFriends($user = null) {
-		if ($this->globalId < 1) {
-			return [];
-		}
-
-		if ($user == null) {
-			$user = $this->globalId;
-		}
-
+	public function getFriends() {
 		try {
-			$friends = Cheevos::getFriends($user);
+			$friends = Cheevos::getFriends($this->user->getId());
 			if ($friends['friends']) {
 				return $friends['friends'];
 			}
@@ -97,27 +88,23 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @param  int|null $user optional curse ID of a user (default|null $this->globalId
-	 * @return int	a number of friends
+	 * @return integer Number of friends
 	 */
-	public function getFriendCount($user = null) {
+	public function getFriendCount() {
 		// my god look how efficient this is
-		$friends = $this->getFriends($user);
+		$friends = $this->getFriends();
 		return count($friends);
 	}
 
 	/**
 	 * Returns the array of pending friend requests that have sent this user
 	 *
-	 * @return array	keys are curse IDs of potential friends,
+	 * @return array Keys are user IDs of potential friends,
 	 *     values are json strings with additional data (currently empty)
 	 */
 	public function getReceivedRequests() {
-		if ($this->globalId < 1) {
-			return [];
-		}
 		try {
-			$friends = Cheevos::getFriends($this->globalId);
+			$friends = Cheevos::getFriends($this->user->getId());
 			if ($friends['incoming_requests']) {
 				return $friends['incoming_requests'];
 			}
@@ -130,14 +117,11 @@ class Friendship {
 	/**
 	 * Returns the array of pending friend requests that have been sent by this user
 	 *
-	 * @return array	values are curse IDs
+	 * @return array Values are user IDs
 	 */
 	public function getSentRequests() {
-		if ($this->globalId < 1) {
-			return [];
-		}
 		try {
-			$friends = Cheevos::getFriends($this->globalId);
+			$friends = Cheevos::getFriends($this->user->getId());
 			if ($friends['outgoing_requests']) {
 				return $friends['outgoing_requests'];
 			}
@@ -150,18 +134,21 @@ class Friendship {
 	/**
 	 * Sends a friend request to a given user
 	 *
-	 * @access public
-	 * @param  int $toGlobalId Global ID of the user to friend.
+	 * @param  integer $toUserId User ID of the user to friend.
 	 * @return boolean	True on success, False on failure.
 	 */
-	public function sendRequest($toGlobalId) {
-		$wgUser = RequestContext::getMain()->getUser();
+	public function sendRequest(int $toUserId) {
+		$toUser = User::newFromId($toUserId);
 
-		if ($wgUser->isBlocked()) {
+		if (!$toUser || $toUser->isAnon() || $this->user->getId() === $toUserId) {
+			return false;
+		}
+
+		if ($this->user->isBlocked() || $toUser->isBlocked()) {
 			return ['error' => 'friendrequest-blocked'];
 		}
 
-		$relationShip = $this->getRelationship($toGlobalId);
+		$relationShip = $this->getRelationship($toUserId);
 
 		if ($relationShip == -1) {
 			return ['error' => 'friendrequest-status-unavailable'];
@@ -172,26 +159,18 @@ class Friendship {
 		}
 
 		try {
-			$makeFriend = Cheevos::createFriendRequest($this->globalId, $toGlobalId);
+			$makeFriend = Cheevos::createFriendRequest($this->user->getId(), $toUserId);
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
 		}
 
-		$toGlobalId = intval($toGlobalId);
-		$lookup = CentralIdLookup::factory();
-		$toLocalUser = $lookup->localUserFromCentralId($toGlobalId);
-
-		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1 || !$toLocalUser->getId()) {
-			return false;
-		}
-
-		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $wgUser->getName());
+		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
 		$canonicalUrl = SpecialPage::getTitleFor('ManageFriends')->getFullURL();
 		$broadcast = NotificationBroadcast::newSingle(
 			'user-interest-profile-friendship',
-			$wgUser,
-			$toLocalUser,
+			$this->user,
+			$toUser,
 			[
 				'url' => $canonicalUrl,
 				'message' => [
@@ -201,7 +180,7 @@ class Friendship {
 					],
 					[
 						1,
-						$wgUser->getName()
+						$this->user->getName()
 					],
 					[
 						2,
@@ -218,23 +197,24 @@ class Friendship {
 			$broadcast->transmit();
 		}
 
-		Hooks::run('CurseProfileAddFriend', [$wgUser, $toLocalUser]);
+		Hooks::run('CurseProfileAddFriend', [$this->user, $toUser]);
 		return true;
 	}
 
 	/**
 	 * Accepts a pending request
 	 *
-	 * @access public
-	 * @param  int $toGlobalId curse ID of a user
-	 * @return bool	true on success, false on failure
+	 * @param integer $toUserId user ID of a user
+	 *
+	 * @return boolean	true on success, false on failure
 	 */
-	public function acceptRequest($toGlobalId) {
-		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
-			return -1;
+	public function acceptRequest(int $toUserId) {
+		if ($this->user->getId() === $toUserId || $toUserId < 1) {
+			return false;
 		}
+
 		try {
-			$res = Cheevos::acceptFriendRequest($this->globalId, $toGlobalId);
+			$res = Cheevos::acceptFriendRequest($this->user->getId(), $toUserId);
 			if ($res['message'] == "success") {
 				return true;
 			}
@@ -247,16 +227,17 @@ class Friendship {
 	/**
 	 * Ignores and dismisses a pending request
 	 *
-	 * @access public
-	 * @param  int $toGlobalId curse ID of a user
-	 * @return bool	true on success, false on failure
+	 * @param integer $toUserId user ID of a user
+	 *
+	 * @return boolean True on success, false on failure.
 	 */
-	public function ignoreRequest($toGlobalId) {
-		if ($this->globalId < 1 || $this->globalId == $toGlobalId || $toGlobalId < 1) {
-			return -1;
+	public function ignoreRequest(int $toUserId) {
+		if ($this->user->getId() === $toUserId || $toUserId < 1) {
+			return false;
 		}
+
 		try {
-			$res = Cheevos::cancelFriendRequest($this->globalId, $toGlobalId);
+			$res = Cheevos::cancelFriendRequest($this->user->getId(), $toUserId);
 			if ($res['message'] == "success") {
 				return true;
 			}
@@ -269,35 +250,23 @@ class Friendship {
 	/**
 	 * Removes a friend relationship, or cancels a pending request
 	 *
-	 * @param  int $toUser global ID of a user
-	 * @return bool	true on success, false on failure
+	 * @param integer $toUserId global ID of a user
+	 *
+	 * @return boolean true on success, false on failure
 	 */
-	public function removeFriend($toUser) {
-		$toUser = intval($toUser);
-		if ($this->globalId < 1 || $this->globalId == $toUser || $toUser < 1) {
+	public function removeFriend(int $toUserId) {
+		if ($this->user->getId() === $toUserId || $toUserId < 1) {
 			return false;
 		}
 
-		/*
-			// NOTE: The documentation of this function suggests this may be a local id and not a global id.
-			// Uncomment this to fix that issue if we find it in testing.
-
-			$localUser = \User::newFromId($toUser);
-			$lookup = \CentralIdLookup::factory();
-			$globalId = $lookup->centralIdFromLocalUser($localUser);
-
-			// Otherwise, the below code handles it just fine.
-		*/
-		$globalId = $toUser;
-
 		try {
-			Cheevos::cancelFriendRequest($this->globalId, $globalId);
+			Cheevos::cancelFriendRequest($this->user->getId(), $toUserId);
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
 		}
 
-		Hooks::run('CurseProfileRemoveFriend', [$this->globalId, $toUser]);
+		Hooks::run('CurseProfileRemoveFriend', [$this->user->getId(), $toUserId]);
 
 		return true;
 	}

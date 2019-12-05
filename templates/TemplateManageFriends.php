@@ -24,11 +24,10 @@ class TemplateManageFriends {
 	/**
 	 * Displays a list of friends.
 	 *
-	 * @access public
-	 * @param  array  $friends      Raw friend IDs.
-	 * @param  string $pagination   Pagination HTML
-	 * @param  int    $itemsPerPage Items Per Page
-	 * @param  int    $start        Start Offset
+	 * @param  array   $friends      Raw friend IDs.
+	 * @param  string  $pagination   Pagination HTML
+	 * @param  integer $itemsPerPage Items Per Page
+	 * @param  integer $start        Start Offset
 	 * @return void
 	 */
 	public function display($friends, $pagination, $itemsPerPage, $start) {
@@ -46,12 +45,11 @@ class TemplateManageFriends {
 	/**
 	 * Displays a management page for friends
 	 *
-	 * @access public
-	 * @param  array $friends      array of current friends Curse IDs
-	 * @param  array $received     array of received friend requests (curse IDs as keys)
-	 * @param  array $sent         array of curse ids to whom friend requests are pending
-	 * @param  int   $itemsPerPage Items Per Page
-	 * @param  int   $start        Start Offset
+	 * @param  array   $friends      array of current friends Curse IDs
+	 * @param  array   $received     array of received friend requests (curse IDs as keys)
+	 * @param  array   $sent         array of curse ids to whom friend requests are pending
+	 * @param  integer $itemsPerPage Items Per Page
+	 * @param  integer $start        Start Offset
 	 * @return string	Built HTML
 	 */
 	public function manage($friends, $received, $sent, $itemsPerPage, $start) {

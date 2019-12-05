@@ -60,7 +60,6 @@ class TemplateCommentModeration {
 	/**
 	 * Renders the main body of the CommentModeration special page
 	 *
-	 * @access public
 	 * @param  array $reports CommentReport instances.
 	 * @return string	HTML fragment
 	 */
@@ -129,7 +128,6 @@ class TemplateCommentModeration {
 	/**
 	 * Produces the introduction line above a reported comment "First reporteded X time ago by [user]:"
 	 *
-	 * @access private
 	 * @param  rep    array CommentReport data
 	 * @return string HTML fragment
 	 */
@@ -144,7 +142,6 @@ class TemplateCommentModeration {
 	/**
 	 * Creates the small user icons indicating who has reported a comment
 	 *
-	 * @access private
 	 * @param  array	Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
 	 * @return string	HTML fragment
 	 */
@@ -171,7 +168,6 @@ class TemplateCommentModeration {
 	/**
 	 * Returns a permalink to a comment on its origin wiki.
 	 *
-	 * @access private
 	 * @param  object	CommentReport instance
 	 * @return string	HTML fragment
 	 */
