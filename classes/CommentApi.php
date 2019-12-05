@@ -67,13 +67,9 @@ class CommentApi extends HydraApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'global_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
-					],
 					'user_id' => [
 						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_REQUIRED => true
 					],
 					'text' => [
 						ApiBase::PARAM_TYPE => 'string',
@@ -131,13 +127,9 @@ class CommentApi extends HydraApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'global_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
-					],
 					'user_id' => [
 						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_REQUIRED => true
 					],
 					'title' => [
 						ApiBase::PARAM_TYPE => 'string',
@@ -191,19 +183,15 @@ class CommentApi extends HydraApiBase {
 	 * depending on what the user has chosen as their default user page.
 	 */
 	public function doAddToDefault() {
-		// intentional use of value returned from assignment
-		if (!($user_id = $this->getMain()->getVal('user_id'))) {
-			$lookup = CentralIdLookup::factory();
-			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
-			if ($user->isAnon()) {
-				return $this->dieWithError(['comment-invaliduser']);
-			}
+		$user = User::newFromId($this->getMain()->getVal('user_id'));
+		if (!$user || $user->isAnon()) {
+			return $this->dieWithError(['comment-invaliduser']);
 		}
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
 		if ($user->getIntOption('comment-pref')) {
-			$board = new CommentBoard($user_id);
+			$board = new CommentBoard($user->getId());
 			$commentSuccess = $board->addComment($text, null, $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 		} else {
@@ -231,20 +219,16 @@ class CommentApi extends HydraApiBase {
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
 	public function doAdd() {
-		$toUser = $this->getMain()->getVal('user_id');
-		if (!$toUser) {
-			$lookup = CentralIdLookup::factory();
-			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
-			if (!$user) {
+		$toUser = User::newFromId($this->getMain()->getVal('user_id'));
+		if (!$toUser || !$toUser->isAnon()) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				return;
 			}
-			$toUser = $user->getId();
 		}
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getMain()->getVal('inReplyTo');
 
-		$board = new CommentBoard($toUser);
+		$board = new CommentBoard($toUser->getId());
 		$commentSuccess = $board->addComment($text, null, $inreply);
 
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));

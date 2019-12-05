@@ -78,7 +78,7 @@ class CommentBoard {
 	 *
 	 * @throws Exception
 	 */
-	public function __construct($user_id, $type = self::BOARDTYPE_RECENT) {
+	public function __construct(int $user_id, $type = self::BOARDTYPE_RECENT) {
 		$this->DB = CP::getDb(DB_MASTER);
 		$this->user_id = intval($user_id);
 		$this->type = intval($type);
@@ -90,11 +90,11 @@ class CommentBoard {
 	/**
 	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
 	 *
-	 * @param object $asUser [Optional] mw User object doing the viewing (defaults to wgUser)
+	 * @param User $asUser [Optional] mw User object doing the viewing (defaults to wgUser)
 	 *
 	 * @return string  a single SQL condition entirely enclosed in parenthesis
 	 */
-	private static function visibleClause($asUser = null) {
+	private static function visibleClause(?User $asUser = null) {
 		if (is_null($asUser)) {
 			global $wgUser;
 			$asUser = $wgUser;
@@ -120,17 +120,13 @@ class CommentBoard {
 	/**
 	 * Returns the total number of top-level comments (or replies to a given comment) that have been left
 	 *
-	 * @param int|null $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
-	 * @param int|null $asUser    [Optional] user ID of a user viewing (defaults to wgUser)
+	 * @param int $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
+	 * @param User|null $asUser    [Optional] user ID of a user viewing (defaults to wgUser)
 	 *
 	 * @return int
 	 */
-	public function countComments($inReplyTo = null, $asUser = null) {
-		if (is_null($inReplyTo)) {
-			$inReplyTo = 0;
-		} else {
-			$inReplyTo = intval($inReplyTo);
-		}
+	public function countComments(int $inReplyTo = 0, ?User $asUser = null) {
+		$inReplyTo = intval($inReplyTo);
 
 		$db = CP::getDb(DB_REPLICA);
 		$results = $db->select(
