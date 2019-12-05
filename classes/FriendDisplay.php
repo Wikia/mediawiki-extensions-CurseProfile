@@ -125,12 +125,12 @@ class FriendDisplay {
 	/**
 	 * Adds a Friend Button
 	 *
-	 * @param  string $userId
-	 * @param  bool   $isGlobalId
+	 * @param  integer $userId
+	 *
 	 * @return string
 	 */
-	public static function addFriendButton($userId = '', $isGlobalId = false) {
-		return '<div class="friendship-container">' . self::friendButtons($userId, $isGlobalId) . '</div>';
+	public static function addFriendButton(int $userId) {
+		return '<div class="friendship-container">' . self::friendButtons($userId) . '</div>';
 	}
 
 	/**
@@ -203,7 +203,7 @@ class FriendDisplay {
 			$html .= ProfilePage::userAvatar(null, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$html .= ' ' . CP::userLink($fUser->getId());
 			if ($manageButtons) {
-				$html .= ' ' . self::addFriendButton($fUser->getId(), true);
+				$html .= ' ' . self::addFriendButton($fUser->getId());
 			}
 			$html .= '</li>';
 		}

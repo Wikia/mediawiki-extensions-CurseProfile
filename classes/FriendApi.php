@@ -104,7 +104,7 @@ class FriendApi extends HydraApiBase {
 	protected function doSend() {
 		$userId = $this->getMain()->getInt('user_id');
 		$result = $this->f->sendRequest($userId);
-		$html = FriendDisplay::friendButtons($userId, true);
+		$html = FriendDisplay::friendButtons($userId);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
@@ -145,7 +145,7 @@ class FriendApi extends HydraApiBase {
 	protected function doRemove() {
 		$userId = $this->getMain()->getInt('user_id');
 		$result = $this->f->removeFriend($userId);
-		$html = FriendDisplay::friendButtons($userId, true);
+		$html = FriendDisplay::friendButtons($userId);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}

@@ -345,11 +345,9 @@ class ProfileData {
 			$redis = RedisCache::getClient('cache');
 			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
 			// is to report each individual user as using the last pref they saved on any wiki
-			$lookup = CentralIdLookup::factory();
-			$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
 			try {
 				if ($redis !== false) {
-					$redis->hSet('profilestats:lastpref', $globalId, $preferences['profile-pref']);
+					$redis->hSet('profilestats:lastpref', $user->getId(), $preferences['profile-pref']);
 				}
 			} catch (Throwable $e) {
 				wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
