@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
@@ -73,7 +72,7 @@ class CommentBoard {
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
-	 * @param User    $owner The owner of this board.
+	 * @param User   $owner The owner of this board.
 	 * @param string $type
 	 *
 	 * @throws Exception
@@ -393,20 +392,16 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to leave a comment.
 	 *
-	 * @param User      $toUser   User object who owns the potential board.
-	 * @param object|null $fromUser [Optional] User object for comment author, defaults to $wgUser.
+	 * @param User $toUser   User object who owns the potential board.
+	 * @param User $fromUser User object for comment author, defaults to $wgUser.
 	 *
 	 * @return boolean	Can Comment
 	 */
-	public static function canComment(User $toUser, ?User $fromUser = null) {
+	public static function canComment(User $toUser, User $fromUser) {
 		global $wgCPEditsToComment, $wgEmailAuthentication, $wgUser;
 
 		if ($toUser->isAnon()) {
 			return false;
-		}
-		if ($fromUser === null) {
-			global $wgUser;
-			$fromUser = $wgUser;
 		}
 
 		$editCount = $fromUser->getEditCount();
@@ -664,7 +659,7 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to reply to a comment
 	 *
-	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
+	 * @param mixed     $commentId int id of comment to check, or array row from user_board table
 	 * @param User|null $user      [Optional] mw User object, defaults to|null $wgUser
 	 *
 	 * @return bool
@@ -735,17 +730,12 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to edit a comment
 	 *
-	 * @param int|array       $commentId int id of comment to check, or array row from user_board table
-	 * @param User|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param int|array $commentId ID of comment to check or array row from the user_board table.
+	 * @param User      $actor     User performing this action.
 	 *
 	 * @return bool
 	 */
-	public static function canEdit($commentId, ?User $user = null) {
-		if ($user === null) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
+	public static function canEdit($commentId, User $actor) {
 		if (is_array($commentId)) {
 			$comment = $commentId;
 		} else {
@@ -753,7 +743,7 @@ class CommentBoard {
 		}
 
 		// comment must not be deleted and must be written by this user
-		return $comment['ub_type'] > self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $user->getId();
+		return $comment['ub_type'] > self::DELETED_MESSAGE && $comment['ub_user_id_from'] == $actor->getId();
 	}
 
 	/**
@@ -761,18 +751,12 @@ class CommentBoard {
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param int         $commentId ID of the comment to remove.
-	 * @param int|null    $user      [Optional] User object of the admin acting, defaults to|null $wgUser
+	 * @param User        $actor     User object of the admin acting
 	 * @param string|null $time      [Optional] Timestamp in the format of date('Y-m-d H:i:s').
 	 *
 	 * @return mixed	$db->update return or false on error.
 	 */
-	public static function removeComment(int $commentId, ?User $user = null, ?string $time = null) {
-		if (!($user instanceof User)) {
-			global $wgUser;
-
-			$user = $wgUser;
-		}
-
+	public static function removeComment(int $commentId, User $actor, ?string $time = null) {
 		if (!$time) {
 			$time = date('Y-m-d H:i:s');
 		}
@@ -783,7 +767,7 @@ class CommentBoard {
 		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
 		$log = new ManualLogEntry('curseprofile', 'comment-deleted');
-		$log->setPerformer($user);
+		$log->setPerformer($actor);
 		$log->setTarget($title);
 		$log->setComment(null);
 		$log->setParameters(
@@ -809,17 +793,12 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to remove a comment
 	 *
-	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
-	 * @param object|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param mixed $commentId int id of comment to check, or array row from user_board table
+	 * @param User  $actor     User performing the action.
 	 *
 	 * @return bool
 	 */
-	public static function canRemove($commentId, $user = null) {
-		if ($user === null) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
+	public static function canRemove($commentId, User $actor) {
 		if (is_array($commentId)) {
 			$comment = $commentId;
 		} else {
@@ -827,21 +806,21 @@ class CommentBoard {
 		}
 
 		// user must not be blocked, comment must either be authored by current user or on user's profile
-		return $comment['ub_type'] != self::DELETED_MESSAGE && !$user->isBlocked() &&
-			($comment['ub_user_id'] == $user->getId()
-				|| (isset($comment['ub_user_from_id']) && intval($comment['ub_user_from_id']) === $user->getId())
-				|| $user->isAllowed('profile-moderate'));
+		return $comment['ub_type'] != self::DELETED_MESSAGE && !$actor->isBlocked() &&
+			($comment['ub_user_id'] == $actor->getId()
+				|| (isset($comment['ub_user_from_id']) && intval($comment['ub_user_from_id']) === $actor->getId())
+				|| $actor->isAllowed('profile-moderate'));
 	}
 
 	/**
 	 * Restore a comment to the board. Permissions are not checked. Use canRemove() to check.
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
-	 * @param int $commentId id of a comment to remove
+	 * @param int $commentId Comment to remove
 	 *
-	 * @return mixed	whatever DB->update() returns
+	 * @return boolean
 	 */
-	public static function restoreComment($commentId) {
+	public static function restoreComment(int $commentId) {
 		$db = CP::getDb(DB_MASTER);
 		return $db->update(
 			'user_board',
@@ -850,24 +829,19 @@ class CommentBoard {
 				'ub_admin_acted' => null,
 				'ub_admin_acted_at' => null,
 			],
-			['ub_id=' . intval($commentId)]
+			['ub_id' => $commentId]
 		);
 	}
 
 	/**
 	 * Checks if a user has permissions to restore a deleted comment
 	 *
-	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
-	 * @param object|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param mixed $commentId int id of comment to check, or array row from user_board table
+	 * @param User  $actor     User performing the action.
 	 *
 	 * @return bool
 	 */
-	public static function canRestore($commentId, $user = null) {
-		if ($user === null) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
+	public static function canRestore($commentId, User $actor) {
 		if (is_array($commentId)) {
 			$comment = $commentId;
 		} else {
@@ -876,8 +850,8 @@ class CommentBoard {
 
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $comment['ub_type'] == self::DELETED_MESSAGE &&
-			($user->isAllowed('profile-moderate')
-				|| $comment['ub_user_id'] == $user->getId() && $comment['ub_admin_acted'] == $user->getId());
+			($actor->isAllowed('profile-moderate')
+				|| $comment['ub_user_id'] == $actor->getId() && $comment['ub_admin_acted'] == $actor->getId());
 	}
 
 	/**
@@ -885,22 +859,19 @@ class CommentBoard {
 	 *
 	 * @param int    $commentId id of a comment to remove
 	 * @param string $reason
+	 * @param User   $actor     User performing this action.
 	 *
 	 * @return mixed whatever DB->delete() returns
 	 */
-	public static function purgeComment($commentId, $reason) {
-		global $wgUser;
-
-		$user = $wgUser;
-
+	public static function purgeComment(int $commentId, string $reason, User $actor) {
 		// Get comments to be purged
 		$comments = self::getCommentById($commentId, false);
 		if ($comments) {
-			self::performPurge($user, $comments[0], $reason);
+			self::performPurge($actor, $comments[0], $reason);
 			$replies = $comments[0]['replies'];
 
 			foreach ($replies as $reply) {
-				self::performPurge($user, $reply, $reason);
+				self::performPurge($actor, $reply, $reason);
 			}
 		}
 	}
@@ -908,13 +879,13 @@ class CommentBoard {
 	/**
 	 * Handle logging and purging comments
 	 *
-	 * @param User   $user
+	 * @param User   $actor   User performing this action.
 	 * @param array  $comment
 	 * @param string $reason
 	 *
 	 * @return void
 	 */
-	private static function performPurge($user, $comment, $reason) {
+	private static function performPurge($actor, $comment, $reason) {
 		$toUser = User::newFromId($comment['ub_user_id']);
 		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
@@ -925,7 +896,7 @@ class CommentBoard {
 			[
 				'ubpa_user_id' => $comment['ub_user_id'],
 				'ubpa_user_from_id' => $comment['ub_user_id_from'],
-				'ubpa_admin_id' => $user->getId(),
+				'ubpa_admin_id' => $actor->getId(),
 				'ubpa_comment_id' => $comment['ub_id'],
 				'ubpa_comment' => $comment['ub_message'],
 				'ubpa_reason' => $reason,
@@ -940,7 +911,7 @@ class CommentBoard {
 
 		// system log
 		$log = new ManualLogEntry('curseprofile', 'comment-purged');
-		$log->setPerformer($user);
+		$log->setPerformer($actor);
 		$log->setTarget($title);
 		$log->setComment($reason);
 		$log->setParameters(
@@ -961,20 +932,13 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to permanently comments
 	 *
-	 * @param object|null $user [Optional] mw User object, defaults to|null $wgUser
+	 * @param User $actor User performing this action.
 	 *
 	 * @return bool
 	 */
-	public static function canPurge($user = null) {
-		if ($user === null) {
-			global $wgUser;
-			$user = $wgUser;
-		} elseif (!is_a($user, 'User')) {
-			return false;
-		}
-
+	public static function canPurge(User $actor) {
 		// Only Curse group has this right
-		return $user->isAllowed('profile-purgecomments');
+		return $actor->isAllowed('profile-purgecomments');
 	}
 
 	/**
@@ -982,9 +946,9 @@ class CommentBoard {
 	 *
 	 * @param int $commentId id of the comment to report
 	 *
-	 * @return mixed	CommentReport instance or null for failure
+	 * @return CommentReport	Object or null for failure.
 	 */
-	public static function reportComment($commentId) {
+	public static function reportComment(int $commentId) {
 		if ($commentId) {
 			return CommentReport::newUserReport($commentId);
 		}
@@ -993,17 +957,12 @@ class CommentBoard {
 	/**
 	 * Checks if a user has permissions to report a comment
 	 *
-	 * @param mixed       $commentId int id of comment to check, or array row from user_board table
-	 * @param object|null $user      [Optional] mw User object, defaults to|null $wgUser
+	 * @param mixed $commentId int id of comment to check, or array row from user_board table
+	 * @param User  $actor     User performing this action.
 	 *
 	 * @return bool
 	 */
-	public static function canReport($commentId, $user = null) {
-		if ($user === null) {
-			global $wgUser;
-			$user = $wgUser;
-		}
-
+	public static function canReport($commentId, User $actor) {
 		if (is_array($commentId)) {
 			$comment = $commentId;
 		} else {
@@ -1011,6 +970,6 @@ class CommentBoard {
 		}
 
 		// user must be logged-in to report and comment must be public (not deleted)
-		return !$user->isAnon() && $comment['ub_user_id_from'] != $user->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
+		return !$actor->isAnon() && $comment['ub_user_id_from'] != $actor->getId() && $comment['ub_type'] == self::PUBLIC_MESSAGE;
 	}
 }

@@ -14,7 +14,6 @@
 namespace CurseProfile;
 
 use ApiBase;
-use CentralIdLookup;
 use HydraApiBase;
 use RequestContext;
 use User;

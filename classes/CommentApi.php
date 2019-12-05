@@ -15,7 +15,6 @@ namespace CurseProfile;
 
 use ApiBase;
 use ApiMain;
-use CentralIdLookup;
 use DerivativeRequest;
 use HydraApiBase;
 
@@ -250,7 +249,7 @@ class CommentApi extends HydraApiBase {
 	public function doEdit() {
 		$commentId = $this->getMain()->getVal('comment_id');
 		$text = $this->getMain()->getVal('text');
-		if ($commentId && CommentBoard::canEdit($commentId)) {
+		if ($commentId && CommentBoard::canEdit($commentId, $this->getUser())) {
 			$res = CommentBoard::editComment($commentId, $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
@@ -262,8 +261,8 @@ class CommentApi extends HydraApiBase {
 
 	public function doRestore() {
 		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRestore($commentId)) {
-			CommentBoard::restoreComment($commentId);
+		if ($commentId && CommentBoard::canRestore($commentId, $this->getUser())) {
+			CommentBoard::restoreComment($commentId, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -273,8 +272,8 @@ class CommentApi extends HydraApiBase {
 
 	public function doRemove() {
 		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRemove($commentId)) {
-			CommentBoard::removeComment($commentId);
+		if ($commentId && CommentBoard::canRemove($commentId, $this->getUser())) {
+			CommentBoard::removeComment($commentId, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -285,7 +284,7 @@ class CommentApi extends HydraApiBase {
 	public function doPurge() {
 		$commentId = $this->getMain()->getVal('comment_id');
 		$reason = $this->getMain()->getVal('reason');
-		if ($commentId && CommentBoard::canPurge()) {
+		if ($commentId && CommentBoard::canPurge($this->getUser())) {
 			CommentBoard::purgeComment($commentId, $reason);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
@@ -295,7 +294,7 @@ class CommentApi extends HydraApiBase {
 
 	public function doReport() {
 		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId) {
+		if ($commentId && CommentBoard::canReport($commentId, $this->getUser())) {
 			$result = CommentBoard::reportComment($commentId);
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {
