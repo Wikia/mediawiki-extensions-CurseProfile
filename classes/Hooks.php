@@ -147,7 +147,7 @@ class Hooks {
 	 * Make links to user pages known when that user opts for a profile page
 	 *
 	 * @param LinkRenderer $linkRenderer
-	 * @param LinkTarget   $target
+	 * @param Title        $target
 	 * @param bool         $isKnown
 	 * @param string       $text
 	 * @param array        $attribs
@@ -171,7 +171,9 @@ class Hooks {
 		$profilePage = ProfilePage::newFromTitle($target);
 		if ($profilePage->isProfilePreferred()) {
 			$prefix = strtok($attribs['title'], ':');
-			$attribs['href'] = $target->getFullUrl();
+			$queryString = self::handleProfileOverride($attribs, $target);
+
+			$attribs['href'] = $target->getFullUrl() . $queryString;
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
@@ -202,6 +204,23 @@ class Hooks {
 		}
 
 		return self::renderUserPages($title);
+	}
+
+	/**
+	 * Determine if profile link should override redirect
+	 *
+	 * @param array $attribs
+	 * @param Title $target
+	 *
+	 * @return string
+	 */
+	private static function handleProfileOverride($attribs, $target) {
+		if (strpos($attribs['class'], 'mw-changeslist-title') !== false &&
+			$target->getNamespace() === NS_USER
+			) {
+				return '?profile=no';
+		}
+		return '';
 	}
 
 	/**
@@ -336,7 +355,6 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
-
 		// Only modify the navbar if we are on a user, user talk, or profile page
 		if (self::$profilePage !== false && in_array(self::$title->getNamespace(), [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
 			self::$profilePage->customizeNavBar($links, $skin->getContext()->getTitle());
