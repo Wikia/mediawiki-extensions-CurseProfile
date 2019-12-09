@@ -139,7 +139,7 @@ class FriendDisplay {
 	 * @param Parser|null $parser - Not used, but the parser will pass it regardless.
 	 * @param integer     $userId Local User ID
 	 *
-	 * @return integer	Number of friends.
+	 * @return integer Number of friends.
 	 */
 	public static function count(?Parser $parser = null, int $userId) {
 		$user = User::newFromId($userId);
