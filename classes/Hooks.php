@@ -167,9 +167,10 @@ class Hooks {
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
+		$user = User::newFromName($target->getText());
 		// override user links based on enhanced user profile preference
-		$profilePage = ProfilePage::newFromTitle($target);
-		if ($profilePage->isProfilePreferred()) {
+		$profileData = new ProfileData($user);
+		if ($profileData->getProfileTypePreference()) {
 			$prefix = strtok($attribs['title'], ':');
 			$queryString = self::handleProfileOverride($attribs, $target);
 
@@ -178,7 +179,7 @@ class Hooks {
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
 		// override enhanced profile links if preference is standard
-		if (!$profilePage->isProfilePreferred() && $target->getNamespace() === NS_USER_PROFILE) {
+		if (!$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
 			$attribs['href'] = $target->getFullUrl();
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
@@ -355,9 +356,12 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
+		// get title and namespace from request context
+		$skinTitle = $skin->getContext()->getTitle();
+		$skinNamespace = $skin->getContext()->getTitle()->getNamespace();
 		// Only modify the navbar if we are on a user, user talk, or profile page
-		if (self::$profilePage !== false && in_array(self::$title->getNamespace(), [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
-			self::$profilePage->customizeNavBar($links, $skin->getContext()->getTitle());
+		if (self::$profilePage !== false && in_array($skinNamespace, [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
+			self::$profilePage->customizeNavBar($links, $skinTitle);
 		}
 		return true;
 	}
