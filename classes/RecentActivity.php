@@ -13,6 +13,7 @@
 
 namespace CurseProfile;
 
+use ActorMigration;
 use Linker;
 use RequestContext;
 use Title;
@@ -25,8 +26,9 @@ class RecentActivity {
 	/**
 	 * Handle parser hook call
 	 *
-	 * @param  object &$parser
-	 * @param  string $user_id
+	 * @param object $parser
+	 * @param string $user_id
+	 *
 	 * @return mixed
 	 */
 	public static function parserHook(&$parser, $user_id = '') {
@@ -47,8 +49,15 @@ class RecentActivity {
 		foreach ($activity as $rev) {
 			$title = Title::newFromID($rev['rev_page']);
 			if ($title) {
-				$verb = $rev['rev_parent_id'] ? wfMessage('profileactivity-edited')->params($wgUser->getName()) : wfMessage('profileactivity-created')->params($wgUser->getName());
-				$html .= '<li>' . $verb . ' ' . Linker::link($title) . ' ' . self::diffHistLinks($title, $rev) . ' ' . CP::timeTag($rev['rev_timestamp']) . '</li>';
+				$action = $rev['rev_parent_id'] ? 'edited' : 'created';
+				$history = [
+					wfMessage('profileactivity-' . $action)->params($wgUser->getName()),
+					Linker::link($title),
+					self::diffHistLinks($title, $rev),
+					CP::timeTag($rev['rev_timestamp'])
+				];
+				$history = implode(' ', $history);
+				$html .= '<li>' . $history . '</li>';
 			}
 		}
 		$html .= '
@@ -77,21 +86,37 @@ class RecentActivity {
 
 	/**
 	 * Fetches 10 recent revisions authored by given user id and returns as an array
+	 *
+	 * @param int $user_id
+	 *
+	 * @return array
 	 */
 	private static function fetchRecentRevisions($user_id) {
-		$db = CP::getDb(DB_MASTER);
+		$db = wfGetDB(DB_REPLICA);
+		$revQuery = [
+			'tables' => ['revision'],
+			'fields' => ['rev_page', 'rev_timestamp', 'rev_id', 'rev_parent_id'],
+			'conds' => [],
+			'joins' => [],
+		];
+
+		// Add in ActorMigration query
+		$actorQuery = ActorMigration::newMigration()
+		->getWhere($db, 'rev_user', User::newFromId($user_id, false));
+		$revQuery['tables'] += $actorQuery['tables'];
+		$revQuery['conds'][] = $actorQuery['conds'];
+		$revQuery['joins'] += $actorQuery['joins'];
+
 		$results = $db->select(
-			['revision'],
-			['*'],
-			[
-				'rev_user'		=> $user_id,
-				'rev_deleted'	=> 0
-			],
+			$revQuery['tables'],
+			$revQuery['fields'],
+			$revQuery['conds'],
 			__METHOD__,
 			[
 				'ORDER BY'	=> 'rev_timestamp DESC',
 				'LIMIT'		=> 10
-			]
+			],
+			$revQuery['joins']
 		);
 
 		$rows = [];
