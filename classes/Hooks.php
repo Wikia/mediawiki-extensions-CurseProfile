@@ -163,24 +163,22 @@ class Hooks {
 		&$attribs,
 		&$ret
 	) {
-		// only process user namespace links
+		// Only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
 		$user = User::newFromName($target->getText());
-		// override user links based on enhanced user profile preference
+		// Override user links based on enhanced user profile preference
 		$profileData = new ProfileData($user);
 		if ($profileData->getProfileTypePreference()) {
 			$prefix = strtok($attribs['title'], ':');
-			$queryString = self::handleProfileOverride($attribs, $target);
-
-			$attribs['href'] = $target->getFullUrl() . $queryString;
+			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
-		// override enhanced profile links if preference is standard
+		// Override enhanced profile links if preference is standard
 		if (!$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
-			$attribs['href'] = $target->getFullUrl();
+			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
 		}
@@ -208,20 +206,31 @@ class Hooks {
 	}
 
 	/**
-	 * Determine if profile link should override redirect
+	 * Resolve href without red link
 	 *
-	 * @param array $attribs
-	 * @param Title $target
+	 * @param array  $attribs
+	 * @param string $target
 	 *
 	 * @return string
 	 */
-	private static function handleProfileOverride($attribs, $target) {
-		if (strpos($attribs['class'], 'mw-changeslist-title') !== false &&
-			$target->getNamespace() === NS_USER
-			) {
-				return '?profile=no';
+	private static function resolveHref($attribs, $target) {
+		$url_components = parse_url($attribs['href']);
+		parse_str($url_components['query'], $query);
+
+		// Remove redlink and edit
+		if ($query && isset($query['redlink'])) {
+			unset($query['redlink'], $query['action']);
 		}
-		return '';
+
+		if ($target->getNamespace() === NS_USER) {
+			// Add profile=no where needed
+			if (strpos($attribs['class'], 'mw-changeslist-title') !== false) {
+				$query['profile'] = 'no';
+			}
+		}
+		// Rebuild query string
+		$params = count($query) ? '?' . http_build_query($query) : '';
+		return $url_components['path'] . $params;
 	}
 
 	/**
@@ -282,7 +291,6 @@ class Hooks {
 	 */
 	private static function renderUserPages(&$title) {
 		global $wgRequest, $wgOut;
-
 		// Check if we are on a base page
 		$username = self::resolveUsername($title);
 		$basepage = ($title->getText() == $username);
@@ -294,7 +302,7 @@ class Hooks {
 
 		list($preferProfile, $key) = self::getProfilePreference($title);
 
-		// Only redirect if we dont have "?profile=no" and they prefer the profile.
+		// Only redirect if we don't have "?profile=no" and they prefer the profile.
 		if ($wgRequest->getVal('profile') !== "no" &&
 			$preferProfile &&
 			self::$profilePage->isActionView() &&
