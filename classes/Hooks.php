@@ -147,7 +147,7 @@ class Hooks {
 	 * Make links to user pages known when that user opts for a profile page
 	 *
 	 * @param LinkRenderer $linkRenderer
-	 * @param LinkTarget   $target
+	 * @param Title        $target
 	 * @param bool         $isKnown
 	 * @param string       $text
 	 * @param array        $attribs
@@ -163,21 +163,22 @@ class Hooks {
 		&$attribs,
 		&$ret
 	) {
-		// only process user namespace links
+		// Only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
-		// override user links based on enhanced user profile preference
-		$profilePage = ProfilePage::newFromTitle($target);
-		if ($profilePage->isProfilePreferred()) {
+		$user = User::newFromName($target->getText());
+		// Override user links based on enhanced user profile preference
+		$profileData = new ProfileData($user);
+		if ($profileData->getProfileTypePreference()) {
 			$prefix = strtok($attribs['title'], ':');
-			$attribs['href'] = $target->getFullUrl();
+			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
-		// override enhanced profile links if preference is standard
-		if (!$profilePage->isProfilePreferred() && $target->getNamespace() === NS_USER_PROFILE) {
-			$attribs['href'] = $target->getFullUrl();
+		// Override enhanced profile links if preference is standard
+		if (!$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
+			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
 		}
@@ -202,6 +203,34 @@ class Hooks {
 		}
 
 		return self::renderUserPages($title);
+	}
+
+	/**
+	 * Resolve href without red link
+	 *
+	 * @param array  $attribs
+	 * @param string $target
+	 *
+	 * @return string
+	 */
+	private static function resolveHref($attribs, $target) {
+		$url_components = parse_url($attribs['href']);
+		parse_str($url_components['query'], $query);
+
+		// Remove redlink and edit
+		if ($query && isset($query['redlink'])) {
+			unset($query['redlink'], $query['action']);
+		}
+
+		if ($target->getNamespace() === NS_USER) {
+			// Add profile=no where needed
+			if (strpos($attribs['class'], 'mw-changeslist-title') !== false) {
+				$query['profile'] = 'no';
+			}
+		}
+		// Rebuild query string
+		$params = count($query) ? '?' . http_build_query($query) : '';
+		return $url_components['path'] . $params;
 	}
 
 	/**
@@ -262,7 +291,6 @@ class Hooks {
 	 */
 	private static function renderUserPages(&$title) {
 		global $wgRequest, $wgOut;
-
 		// Check if we are on a base page
 		$username = self::resolveUsername($title);
 		$basepage = ($title->getText() == $username);
@@ -274,7 +302,7 @@ class Hooks {
 
 		list($preferProfile, $key) = self::getProfilePreference($title);
 
-		// Only redirect if we dont have "?profile=no" and they prefer the profile.
+		// Only redirect if we don't have "?profile=no" and they prefer the profile.
 		if ($wgRequest->getVal('profile') !== "no" &&
 			$preferProfile &&
 			self::$profilePage->isActionView() &&
@@ -336,9 +364,12 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onSkinTemplateNavigation($skin, &$links) {
+		// get title and namespace from request context
+		$skinTitle = $skin->getContext()->getTitle();
+		$skinNamespace = $skin->getContext()->getTitle()->getNamespace();
 		// Only modify the navbar if we are on a user, user talk, or profile page
-		if (self::$profilePage !== false && in_array(self::$title->getNamespace(), [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
-			self::$profilePage->customizeNavBar($links, $skin->getContext()->getTitle());
+		if (self::$profilePage !== false && in_array($skinNamespace, [NS_USER, NS_USER_TALK, NS_USER_PROFILE])) {
+			self::$profilePage->customizeNavBar($links, $skinTitle);
 		}
 		return true;
 	}
