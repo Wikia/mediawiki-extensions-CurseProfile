@@ -46,53 +46,6 @@ class StatsRecache extends Job {
 	];
 
 	/**
-	 * Migration utility function that only needs to be run once (and when redis has been emptied)
-	 * Crawls all wikis and throws as many user's profile preferences into redis as possible
-	 */
-	private function populateLastPref() {
-		$redis = RedisCache::getClient('cache');
-		$sites = Wiki::loadAll();
-		foreach ($sites as $siteKey => $wiki) {
-			$dbs[$wiki->getSiteKey()] = $wiki->getDatabaseLB();
-			$wikiKeys[] = $wiki->getSiteKey();
-		}
-		// Add the master into the lists so it gets processed over.
-		$dbs['master'] = MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB('master');
-		$wikis['master'] = 'Master Wiki';
-
-		unset($sites);
-
-		foreach ($wikiKeys as $dbKey) {
-			try {
-				$db = $dbs[$dbKey]->getConnection(DB_MASTER);
-			} catch (Exception $e) {
-				$this->outputLine(__METHOD__ . " - Unable to connect to database.", time());
-				continue;
-			}
-
-			$results = $db->select(
-				['user_properties', 'user_global'],
-				['up_value', 'global_id'],
-				[
-					'up_property' => 'profile-pref',
-					'global_id > 0'
-				],
-				__METHOD__,
-				[],
-				[
-					'user_global' => [
-						'INNER JOIN', 'user_global.user_id = user_properties.up_user'
-					]
-				]
-			);
-
-			while ($row = $results->fetchRow()) {
-				$redis->hSet('profilestats:lastpref', $row['global_id'], $row['up_value']);
-			}
-		}
-	}
-
-	/**
 	 * Refreshes profile stats data. Should be run regularly (via the StatsRecacheCron.php wrapper script)
 	 * Puts a serialized PHP object into redis in the following format:
 	 * {
@@ -119,7 +72,6 @@ class StatsRecache extends Job {
 	 */
 	public function execute($args = []) {
 		$redisPrefix = $this->redis->getOption(Redis::OPT_PREFIX);
-		// self::populateLastPref();
 
 		$profileFields = ProfileData::getValidEditFields();
 		$profileFields[] = 'profile-pref';
