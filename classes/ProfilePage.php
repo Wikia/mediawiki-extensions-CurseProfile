@@ -840,6 +840,10 @@ class ProfilePage extends Article {
 	protected function profileLayout() {
 		global $wgUser;
 
+		// @TODO: Remove this and the achievement parser check below once Cheevos no longer uses global ID.
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
+
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {
 			$cacheSetting = Subscription::skipCache(true);
@@ -923,6 +927,7 @@ __NOINDEX__
 	protected function mobileProfileLayout() {
 		global $wgUser;
 
+		// @TODO: Remove this and the achievement parser check below once Cheevos no longer uses global ID.
 		$lookup = CentralIdLookup::factory();
 		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
