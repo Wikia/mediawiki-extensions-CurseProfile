@@ -15,7 +15,6 @@ namespace CurseProfile;
 
 use Action;
 use Article;
-use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosAchievement;
 use Cheevos\CheevosException;
@@ -839,9 +838,6 @@ class ProfilePage extends Article {
 	 */
 	protected function profileLayout() {
 		global $wgUser;
-
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {

@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use Hooks;
 use Html;
 use HydraCore;

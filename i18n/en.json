@@ -292,7 +292,7 @@
 	"apihelp-friend-param-token": "The edit token for the requesting user",
 	"apihelp-comment-param-comment_id": "The the ID of a comment which is being acted upon. Required for remove actions.",
 	"apihelp-comment-param-reportKey": "The unique report key identifying an instance of a comment. \"{sitemd5key}:{comment_id}:{edit_timestamp}\"",
-	"apihelp-comment-param-byUser": "The curse ID of the acting user. Defaults to the user currently logged in.",
+	"apihelp-comment-param-byUser": "The user ID of the acting user.  Defaults to the user currently logged in.",
 	"apihelp-comment-param-withAction": "One of \"delete\" or \"dismiss\".",
 	"apihelp-comment-param-user_id": "The user ID for a user on whose board a comment will be added.",
 	"apihelp-comment-param-text": "The content of the comment to be added",

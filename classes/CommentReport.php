@@ -77,10 +77,8 @@ class CommentReport {
 			switch ($sortStyle) {
 				case 'byWiki':
 					return $redis->zCard(self::REDIS_KEY_WIKI_INDEX . $qualifier);
-
 				case 'byUser':
 					return $redis->zCard(self::REDIS_KEY_USER_INDEX . $qualifier);
-
 				case 'byDate':
 				case 'byVolume':
 				default:
