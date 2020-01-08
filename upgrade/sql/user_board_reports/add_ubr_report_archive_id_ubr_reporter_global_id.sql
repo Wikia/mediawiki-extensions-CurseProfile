@@ -1,1 +1,0 @@
-ALTER TABLE /*_*/user_board_reports ADD UNIQUE KEY `ubr_report_archive_id_ubr_reporter_global_id` (`ubr_report_archive_id`,`ubr_reporter_global_id`);

@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_report_archives ADD `ra_action_taken_by_user_id` INT(11) NULL DEFAULT NULL AFTER `ra_action_taken_by_global_id`; 

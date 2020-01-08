@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_report_archives CHANGE `ra_action_taken_by` `ra_action_taken_by_global_id` INT(11) NULL DEFAULT NULL; 

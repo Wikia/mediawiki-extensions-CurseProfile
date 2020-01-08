@@ -1,1 +1,0 @@
-DROP INDEX /*i*/ra_curse_id_from ON /*_*/user_board_report_archives;

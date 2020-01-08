@@ -374,7 +374,7 @@ class CommentReport {
 			],
 			'reports' => self::getReportsForId($report['ra_id']),
 			'action_taken' => $report['ra_action_taken'],
-			'action_taken_by' => $report['ra_action_taken_by'],
+			'action_taken_by' => $report['ra_action_taken_by_user_id'],
 			'action_taken_at' => strtotime($report['ra_action_taken_at']),
 			'first_reported' => strtotime($report['ra_first_reported']),
 		];
@@ -446,7 +446,7 @@ class CommentReport {
 				'ra_comment_text' => $this->data['comment']['text'],
 				'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
 				'ra_action_taken' => $this->data['action_taken'],
-				'ra_action_taken_by' => $this->data['action_taken_by'],
+				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
 				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at'])
 			],
 			__METHOD__
@@ -620,13 +620,12 @@ class CommentReport {
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
-		// write curse ID of acting user to ra_action_taken_by
 		$db = CP::getDb(DB_MASTER);
 		$result = $db->update(
 			'user_board_report_archives',
 			[
 				'ra_action_taken' => $this->data['action_taken'],
-				'ra_action_taken_by' => $this->data['action_taken_by'],
+				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
 				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
 			],
 			[

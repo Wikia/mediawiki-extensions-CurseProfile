@@ -286,7 +286,7 @@
 	"reverb-pref-tooltip-user-interest-profile-friendship": "Someone is requesting to be the viewing user's friend.",
 	"reverb-pref-tooltip-user-moderation-profile-comment-report": "A comment on someone's profile was reported.",
 	"curseProfile.css": "/* CSS placed here will affect profile pages only */",
-	"apihelp-friend-param-global_id": "The user upon which the action should be taken",
+	"apihelp-friend-param-user_id": "The user upon which the action should be taken",
 	"apihelp-friend-param-do": "The friending action to be taken (send, confirm, ignore, remove)",
 	"apihelp-friend-param-name": "The username to be added as a friend",
 	"apihelp-friend-param-token": "The edit token for the requesting user",
@@ -294,12 +294,11 @@
 	"apihelp-comment-param-reportKey": "The unique report key identifying an instance of a comment. \"{sitemd5key}:{comment_id}:{edit_timestamp}\"",
 	"apihelp-comment-param-byUser": "The curse ID of the acting user. Defaults to the user currently logged in.",
 	"apihelp-comment-param-withAction": "One of \"delete\" or \"dismiss\".",
-	"apihelp-comment-param-global_id": "The id for a user on whose board a comment will be added",
-	"apihelp-comment-param-user_id": "The optional id for a user on whose board a comment will be added.  global_id is ignored when this is present.",
+	"apihelp-comment-param-user_id": "The user ID for a user on whose board a comment will be added.",
 	"apihelp-comment-param-text": "The content of the comment to be added",
 	"apihelp-comment-param-inReplyTo": "An OPTIONAL id of a comment that the new comment will reply to",
 	"apihelp-comment-param-title": "The headline to use when posting a new section to the user's talk page",
-	"apihelp-profile-param-user_id": "The local id for a user.",
+	"apihelp-profile-param-user_id": "The user ID for a user.",
 	"apihelp-profile-param-do": "The action that should be performed",
 	"apihelp-profile-param-token": "The edit token for the current user, for write actions"
 }

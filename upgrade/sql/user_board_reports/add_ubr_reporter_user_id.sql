@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_reports ADD `ubr_reporter_user_id` INT(11) NOT NULL DEFAULT '0' AFTER `ubr_reporter_global_id`, ADD INDEX `ubr_reporter_user_id` (`ubr_reporter_user_id`); 
