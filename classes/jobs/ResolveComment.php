@@ -55,7 +55,7 @@ class ResolveComment extends Job {
 		if (!$report) {
 			return 0;
 		}
-		$lookup = CentralIdLookup::factory();
+
 		$user = User::newFromId($args['byUser']);
 		$result = $report->resolve($args['action'], $user);
 

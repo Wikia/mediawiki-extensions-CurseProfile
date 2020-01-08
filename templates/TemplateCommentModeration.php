@@ -67,11 +67,9 @@ class TemplateCommentModeration {
 		$html = '
 				<div id="commentmoderation" class="comments">';
 
-		$lookup = CentralIdLookup::factory();
-
 		foreach ($reports as $report) {
 			$rep = $report->data;
-			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
+			$author = User::newFromId($rep['comment']['author']);
 			if ($author) { // handle failures where central ID doesn't exist on local wiki
 				$html .= '
 					<div class="report-item" data-key="' . $report->reportKey() . '">';
@@ -111,8 +109,7 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$lookup = CentralIdLookup::factory();
-		$user = $lookup->localUserFromCentralId($rep->data['action_taken_by']);
+		$user = User::newFromId($rep->data['action_taken_by_user_id']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
 				$action = 'dis';
@@ -148,9 +145,8 @@ class TemplateCommentModeration {
 	private function reporterIcons($reports) {
 		$html = '';
 		$iter = 0;
-		$lookup = CentralIdLookup::factory();
 		foreach ($reports as $rep) {
-			$reporter = $lookup->localUserFromCentralId($rep['reporter']);
+			$reporter = User::newFromId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
 			$html .= Html::rawElement(
 				'a',
