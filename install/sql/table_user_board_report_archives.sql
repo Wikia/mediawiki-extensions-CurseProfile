@@ -7,7 +7,6 @@ CREATE TABLE /*_*/user_board_report_archives (
   `ra_first_reported` datetime DEFAULT NULL,
   `ra_action_taken` int(1) DEFAULT '0',
   `ra_action_taken_at` datetime DEFAULT NULL,
-  `ra_action_taken_by_global_id` int(11) DEFAULT NULL,
   `ra_action_taken_by_user_id` int(11) DEFAULT NULL
 ) /*$wgDBTableOptions*/;
 
