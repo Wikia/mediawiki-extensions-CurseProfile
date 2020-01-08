@@ -133,7 +133,7 @@ class CommentDisplay {
 				<div class="commentheader">';
 		$HTML .= '
 					<div class="right">'
-				. ($comment['ub_admin_acted'] ? self::adminAction($comment) . ', ' : '')
+				. ($comment['ub_admin_acted_user_id'] ? self::adminAction($comment) . ', ' : '')
 				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'], 'comment' . $comment['ub_id'])->getLinkURL()], self::timestamp($comment)) . ' '
 				. (CommentBoard::canReply($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], HydraCore::awesomeIcon('reply')) . ' ' : '')
 				. (CommentBoard::canEdit($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
@@ -182,8 +182,7 @@ class CommentDisplay {
 	 * @return string	html fragment
 	 */
 	private static function adminAction($comment) {
-		$lookup = CentralIdLookup::factory();
-		$admin = $lookup->localUserFromCentralId($comment['ub_admin_acted']);
+		$admin = User::newFromId($comment['ub_admin_acted_user_id']);
 		if (!$admin->getName()) {
 			return '';
 		}

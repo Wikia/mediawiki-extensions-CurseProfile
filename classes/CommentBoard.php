@@ -782,9 +782,9 @@ class CommentBoard {
 		return $db->update(
 			'user_board',
 			[
-				'ub_type'			=> self::DELETED_MESSAGE,
-				'ub_admin_acted'	=> $actor->getId(),
-				'ub_admin_acted_at'	=> $time
+				'ub_type' => self::DELETED_MESSAGE,
+				'ub_admin_acted_user_id' => $actor->getId(),
+				'ub_admin_acted_at' => $time
 			],
 			['ub_id' => $commentId]
 		);
@@ -826,7 +826,7 @@ class CommentBoard {
 			'user_board',
 			[
 				'ub_type' => self::PUBLIC_MESSAGE,
-				'ub_admin_acted' => null,
+				'ub_admin_acted_user_id' => null,
 				'ub_admin_acted_at' => null,
 			],
 			['ub_id' => $commentId]
@@ -851,7 +851,7 @@ class CommentBoard {
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $comment['ub_type'] == self::DELETED_MESSAGE &&
 			($actor->isAllowed('profile-moderate')
-				|| $comment['ub_user_id'] == $actor->getId() && $comment['ub_admin_acted'] == $actor->getId());
+				|| $comment['ub_user_id'] == $actor->getId() && $comment['ub_admin_acted_user_id'] == $actor->getId());
 	}
 
 	/**

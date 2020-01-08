@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board ADD `ub_admin_acted_user_id` INT(11) NULL DEFAULT NULL AFTER `ub_admin_acted`; 

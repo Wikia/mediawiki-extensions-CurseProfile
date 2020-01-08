@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board DROP `ub_admin_acted_global_id`;
