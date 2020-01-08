@@ -446,11 +446,6 @@ class Hooks {
 		$updater->addExtensionUpdate(['addTable', 'user_board_report_archives', "{$extDir}/install/sql/table_user_board_report_archives.sql", true]);
 		$updater->addExtensionUpdate(['addTable', 'user_board_reports', "{$extDir}/install/sql/table_user_board_reports.sql", true]);
 
-		// Update tables with extra fields for our use.
-		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
-		$updater->addExtensionField('user_board', 'ub_edited', "{$extDir}/upgrade/sql/add_user_board_edit_and_reply_date.sql", true);
-		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);
-
 		// global_id migration.
 		$updater->addExtensionUpdate(['addField', 'user_board_reports', 'ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql", true]);
 		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_user_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql", true]);
