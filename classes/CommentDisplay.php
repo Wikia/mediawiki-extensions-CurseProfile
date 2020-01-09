@@ -15,7 +15,6 @@ namespace CurseProfile;
 
 use Html;
 use HydraCore;
-use Parser;
 use RequestContext;
 use SpecialPage;
 use Title;
@@ -39,7 +38,8 @@ class CommentDisplay {
 
 		$html = '';
 
-		$html .= self::newCommentForm($userId, false);
+		$boardOwner = User::newFromId($userId);
+		$html .= self::newCommentForm($boardOwner, false);
 
 		$board = new CommentBoard(User::newFromId($userId));
 		$comments = $board->getComments();
@@ -57,18 +57,18 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param  integer $userId ID of the user whose comment board will receive a new comment via this form
-	 * @param  bool    $hidden If true, the form will have an added class to be hidden by css/
+	 * @param  User $owner  User whose comment board will receive a new comment via this form
+	 * @param  bool $hidden If true, the form will have an added class to be hidden by css/
 	 * @return string	html fragment or empty string
 	 */
-	public static function newCommentForm($userId, $hidden = false) {
+	public static function newCommentForm(User $owner, bool $hidden = false) {
 		global $wgUser;
 
-		$comment = new Comment(['ub_user_id' => $userId]);
+		$comment = Comment::newWithOwner($owner);
 		if ($comment->canComment($wgUser)) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			$page = Title::newFromText("Special:AddComment/" . $userId);
+			$page = Title::newFromText("Special:AddComment/" . $owner->getId());
 			return '
 			<div class="commentdisplay add-comment' . ($hidden ? ' hidden' : '') . '">
 				<div class="avatar">' . ProfilePage::userAvatar(null, 48, $wgUser->getEmail(), $wgUser->getName())[0] . '</div>
@@ -89,7 +89,7 @@ class CommentDisplay {
 	 * Returns html display for a single profile comment
 	 *
 	 * @param  Comment $comment   Comment instance to pull data from.
-	 * @param  integer $highlight [optional] id of a comment to highlight from among those displayed
+	 * @param  integer $highlight [optional] ID of a comment to highlight from among those displayed.
 	 * @return string	html for display
 	 */
 	public static function singleComment(Comment $comment, $highlight = false) {
@@ -180,12 +180,12 @@ class CommentDisplay {
 	 * @return string	HTML fragment
 	 */
 	private static function adminAction(Comment $comment) {
-		$admin = User::newFromId($comment['ub_admin_acted_user_id']);
+		$admin = $comment->getAdminActedUser();
 		if (!$admin->getName()) {
 			return '';
 		}
 
-		return wfMessage('cp-commentmoderated', $admin->getName())->text() . ' ' . CP::timeTag($comment['ub_admin_acted_at']);
+		return wfMessage('cp-commentmoderated', $admin->getName())->text() . ' ' . CP::timeTag($comment->getAdminActionTimestamp());
 	}
 
 	/**

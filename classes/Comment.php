@@ -89,6 +89,17 @@ class Comment {
 	}
 
 	/**
+	 * Get a new unsaved comment with an attached board owner.
+	 *
+	 * @param User $owner The board owner.
+	 *
+	 * @return self
+	 */
+	public static function newWithOwner(User $owner): ?self {
+		return new self(['ub_user_id' => $owner->getId()]);
+	}
+
+	/**
 	 * Get a raw comment from the database by ID.
 	 *
 	 * @param integer $commentId Comment ID
@@ -149,7 +160,7 @@ class Comment {
 			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
 				return false;
 			}
-			
+
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
@@ -341,6 +352,15 @@ class Comment {
 	 */
 	public function getLastReplyTimestamp(): ?int {
 		return $this->processDate($this->data['ub_last_reply']);
+	}
+
+	/**
+	 * Get the timestamp for an administrator performed an action on this comment.
+	 *
+	 * @return integer|null
+	 */
+	public function getAdminActionTimestamp(): ?int {
+		return $this->processDate($this->data['ub_admin_acted_at']);
 	}
 
 	/**

@@ -17,7 +17,6 @@ use Exception;
 use Hooks;
 use ManualLogEntry;
 use Reverb\Notification\NotificationBroadcast;
-use Sanitizer;
 use SpecialPage;
 use Title;
 use User;
@@ -135,65 +134,6 @@ class CommentBoard {
 
 		$row = $results->fetchRow();
 		return $row['total'];
-	}
-
-	/**
-	 * Look up a single comment given a comment id (for display from a permalink)
-	 *
-	 * @param integer $commentId  ID of a user board comment
-	 * @param User    $asUser     Userviewing
-	 * @param boolean $withParent [Optional] true by default, if given ID is a reply, will fetch parent comment as well
-	 *
-	 * @return array An array of comment data in the same format as getComments.
-	 *   array will be empty if comment is unknown, or not visible.
-	 */
-	public static function getCommentById(int $commentId, User $asUser, bool $withParent = true) {
-		if ($commentId < 1) {
-			return [];
-		}
-
-		// Look up the target comment.
-		$comment = self::queryCommentById($commentId);
-
-		if (empty($comment)) {
-			return [];
-		}
-
-		// Switch our primary ID a parent comment, if it exists.
-		if ($withParent && $comment['ub_in_reply_to']) {
-			$rootId = $comment['ub_in_reply_to'];
-		} else {
-			$rootId = $commentId;
-		}
-
-		if (!self::canView($comment, $asUser)) {
-			return [];
-		}
-
-		$board = new self($comment['ub_user_id'], self::BOARDTYPE_ARCHIVES);
-		$comment = $board->getCommentsWithConditions(['ub_id' => $rootId], $asUser, 0, 1);
-		// force loading all replies instead of just 5
-		$comment[0]['replies'] = $board->getReplies($rootId, $asUser, 0);
-		return $comment;
-	}
-
-	/**
-	 * Get a raw comment from the database by ID.
-	 *
-	 * @param integer $commentId Comment ID
-	 *
-	 * @return mixed	Database result or false.
-	 */
-	private static function queryCommentById($commentId) {
-		$DB = CP::getDb(DB_MASTER);
-		$result = $DB->select(
-			['user_board'],
-			['*'],
-			['ub_id' => intval($commentId)],
-			__METHOD__
-		);
-
-		return $result->fetchRow();
 	}
 
 	/**
@@ -342,16 +282,15 @@ class CommentBoard {
 		}
 		$dbw = CP::getDb(DB_MASTER);
 
-		if (!self::canComment($this->owner, $fromUser)) {
+		$comment = Comment::newWithOwner($this->owner);
+		if ($comment->canComment($fromUser)) {
 			return false;
 		}
 
 		$parentCommenter = null;
 		if ($inReplyTo) {
-			$parentComment = self::queryCommentById($inReplyTo);
-			if (isset($parentComment['ub_user_id_from'])) {
-				$parentCommenter = User::newFromId($parentComment['ub_user_id_from']);
-			}
+			$parentComment = Comment::newFromId($inReplyTo);
+			$parentCommenter = $parentComment->getActorUser();
 		}
 
 		$success = $dbw->insert(
@@ -550,22 +489,24 @@ class CommentBoard {
 	/**
 	 * Replaces the text content of a comment. Permissions are not checked. Use canEdit() to check.
 	 *
-	 * @param integer $commentId id of a user board comment
+	 * @param integer $commentId User ID of the user board comment.
+	 * @param User    $actor     User object of the user doing this action.
 	 * @param string  $message   new text to use for the comment
 	 *
 	 * @return boolean true if successful
 	 */
-	public static function editComment(int $commentId, string $message) {
-		global $wgUser;
-
-		$DB = CP::getDb(DB_MASTER);
-		$commentId = intval($commentId);
+	public static function editComment(int $commentId, User $actor, string $message) {
+		$db = CP::getDb(DB_MASTER);
 
 		// Preparing stuff for the Log Entry
-		$comment = self::getCommentById($commentId, $wgUser, true);
-		$toUser = User::newFromId($comment[0]['ub_user_id']);
+		$comment = Comment::newFromId($commentId);
+		if (!$comment->canEdit($actor)) {
+			return false;
+		}
+
+		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::newFromURL('UserProfile:' . $toUser->getName());
-		$fromUser = $wgUser;
+		$fromUser = $actor;
 
 		$log = new ManualLogEntry('curseprofile', 'comment-edited');
 		$log->setPerformer($fromUser);
@@ -579,13 +520,13 @@ class CommentBoard {
 		$logId = $log->insert();
 		$log->publish($logId);
 
-		return $DB->update(
+		return $db->update(
 			'user_board',
 			[
 				'ub_message' => $message,
 				'ub_edited' => date('Y-m-d H:i:s'),
 			],
-			['ub_id' => $commentId],
+			['ub_id' => $comment->getId()],
 			__METHOD__
 		);
 	}
@@ -595,7 +536,7 @@ class CommentBoard {
 	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
 	 *
 	 * @param integer     $commentId ID of the comment to remove.
-	 * @param User        $actor     User object of the admin acting
+	 * @param User        $actor     User object of the user doing this action.
 	 * @param string|null $time      [Optional] Timestamp in the format of date('Y-m-d H:i:s').
 	 *
 	 * @return mixed	$db->update return or false on error.
@@ -606,8 +547,12 @@ class CommentBoard {
 		}
 
 		// Preparing stuff for the Log Entry
-		$comment = self::getCommentById($commentId, $actor);
-		$toUser = User::newFromId($comment[0]['ub_user_id']);
+		$comment = Comment::newFromId($commentId);
+		if (!$comment->canRemove($actor)) {
+			return false;
+		}
+
+		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
 		$log = new ManualLogEntry('curseprofile', 'comment-deleted');
@@ -630,19 +575,24 @@ class CommentBoard {
 				'ub_admin_acted_user_id' => $actor->getId(),
 				'ub_admin_acted_at' => $time
 			],
-			['ub_id' => $commentId]
+			['ub_id' => $comment->getId()]
 		);
 	}
 
 	/**
-	 * Restore a comment to the board. Permissions are not checked. Use canRemove() to check.
-	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
+	 * Restore a comment to the board.
 	 *
-	 * @param integer $commentId Comment to remove
+	 * @param integer $commentId ID of the comment to restore.
+	 * @param User    $actor     User object of the user doing this action.
 	 *
 	 * @return boolean
 	 */
-	public static function restoreComment(int $commentId) {
+	public static function restoreComment(int $commentId, User $actor) {
+		$comment = Comment::newFromId($commentId);
+		if (!$comment->canRestore($actor)) {
+			return false;
+		}
+
 		$db = CP::getDb(DB_MASTER);
 		return $db->update(
 			'user_board',
@@ -651,25 +601,29 @@ class CommentBoard {
 				'ub_admin_acted_user_id' => null,
 				'ub_admin_acted_at' => null,
 			],
-			['ub_id' => $commentId]
+			['ub_id' => $comment->getId()]
 		);
 	}
 
 	/**
 	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
 	 *
-	 * @param integer $commentId id of a comment to remove
-	 * @param string  $reason
+	 * @param integer $commentId ID of a comment to purge from the database.
 	 * @param User    $actor     User performing this action.
+	 * @param string  $reason
 	 *
 	 * @return mixed whatever DB->delete() returns
 	 */
-	public static function purgeComment(int $commentId, string $reason, User $actor) {
+	public static function purgeComment(int $commentId, User $actor, string $reason) {
 		// Get comments to be purged
-		$comments = self::getCommentById($commentId, $actor, false);
-		if ($comments) {
-			self::performPurge($actor, $comments[0], $reason);
-			$replies = $comments[0]['replies'];
+		$comment = Comment::newFromId($commentId);
+		if (!$comment->canPurge($actor)) {
+			return false;
+		}
+
+		if ($comment) {
+			self::performPurge($actor, $comment, $reason);
+			$replies = $comment->getReplies();
 
 			foreach ($replies as $reply) {
 				self::performPurge($actor, $reply, $reason);
@@ -686,8 +640,8 @@ class CommentBoard {
 	 *
 	 * @return void
 	 */
-	private static function performPurge($actor, $comment, $reason) {
-		$toUser = User::newFromId($comment['ub_user_id']);
+	private static function performPurge(User $actor, Comment $comment, string $reason) {
+		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
 		$db = CP::getDb(DB_MASTER);
@@ -695,11 +649,11 @@ class CommentBoard {
 		$success = $db->insert(
 			'user_board_purge_archive',
 			[
-				'ubpa_user_id' => $comment['ub_user_id'],
-				'ubpa_user_from_id' => $comment['ub_user_id_from'],
+				'ubpa_user_id' => $comment->getBoardOwnerUserId(),
+				'ubpa_user_from_id' => $comment->getActorUserId(),
 				'ubpa_admin_id' => $actor->getId(),
-				'ubpa_comment_id' => $comment['ub_id'],
-				'ubpa_comment' => $comment['ub_message'],
+				'ubpa_comment_id' => $comment->getId(),
+				'ubpa_comment' => $comment->getMessage(),
 				'ubpa_reason' => $reason,
 				'ubpa_purged_at' => date('Y-m-d H:i:s'),
 			],
@@ -717,30 +671,30 @@ class CommentBoard {
 		$log->setComment($reason);
 		$log->setParameters(
 			[
-				'4:comment_id' => $comment['ub_id']
+				'4:comment_id' => $comment->getId()
 			]
 		);
 		$logId = $log->insert();
 		$log->publish($logId);
 
-		// Purge comment and any replies
+		// Purge comment.
 		return $db->delete(
 			'user_board',
-			['ub_id =' . intval($comment['ub_id'])]
+			['ub_id' => $comment->getId()]
 		);
 	}
 
 	/**
 	 * Send a comment to the moderation queue. Does not check permissions.
 	 *
-	 * @param integer $commentId ID of the comment to report
-	 * @param User    $actor     User performing this action.
+	 * @param Comment $comment The comment to report
+	 * @param User    $actor   User performing this action.
 	 *
 	 * @return CommentReport	Object or false for failure.
 	 */
-	public static function reportComment(int $commentId, User $actor) {
-		if ($commentId) {
-			return CommentReport::newUserReport($commentId, $actor);
+	public static function reportComment(Comment $comment, User $actor) {
+		if ($comment) {
+			return CommentReport::newUserReport($comment, $actor);
 		}
 		return false;
 	}

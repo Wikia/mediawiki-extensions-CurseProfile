@@ -254,42 +254,26 @@ class CommentReport {
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
-	 * @param integer $commentId Comment ID of a local comment.
-	 * @param User    $actor     User creating this report.
+	 * @param Comment $comment The comment being reported.
+	 * @param User    $actor   User creating this report.
 	 *
 	 * @return mixed	CommentReport instance that is already saved or false on failure.
 	 */
-	public static function newUserReport(int $commentId, User $actor) {
+	public static function newUserReport(Comment $comment, User $actor) {
 		$db = CP::getDb(DB_REPLICA);
 
-		if ($commentId < 1) {
-			return false;
-		}
-
-		$res = $db->select(
-			['user_board'],
-			['*'],
-			[
-				"ub_id" => $commentId,
-				"ub_type" => CommentBoard::PUBLIC_MESSAGE
-			],
-			__METHOD__
-		);
-		$comment = $res->fetchRow();
-
-		if (!$comment) {
-			// comment did not exist, is already deleted, or a private message (legacy feature of leaguepedia's old profile system)
+		if (!$comment->getId() < 1) {
 			return false;
 		}
 
 		// check for existing reports// Look up the target comment
-		$comment['last_touched'] = $comment['ub_edited'] ? $comment['ub_edited'] : $comment['ub_date'];
+		$lastTouched = $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp();
 		$res = $db->select(
 			['user_board_report_archives'],
 			['*'],
 			[
-				"ra_comment_id" => $commentId,
-				"ra_last_edited" => $comment['last_touched']
+				"ra_comment_id" => $comment->getId(),
+				"ra_last_edited" => $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp()
 			],
 			__METHOD__
 		);
@@ -314,15 +298,15 @@ class CommentReport {
 	/**
 	 * Archive the contents of a comment into a new report
 	 *
-	 * @param array $comment Row from the user_board DB table
-	 * @param User  $actor   User creating this report.
+	 * @param Comment $comment The comment being reported.
+	 * @param User    $actor   User creating this report.
 	 *
 	 * @return object		CommentReport instance
 	 */
-	private static function createWithArchive(array $comment, User $actor) {
+	private static function createWithArchive(Comment $comment, User $actor) {
 		global $dsSiteKey;
 
-		$userFrom = User::newFromId($comment['ub_user_id_from']);
+		$userFrom = $comment->getActorUser();
 		if (!$userFrom) {
 			return false;
 		}
@@ -330,10 +314,10 @@ class CommentReport {
 		// insert data into redis and update indexes
 		$data = [
 			'comment' => [
-				'text' => $comment['ub_message'],
-				'cid' => $comment['ub_id'],
+				'text' => $comment->getMessage(),
+				'cid' => $comment->getId(),
 				'origin_wiki' => $dsSiteKey,
-				'last_touched' => strtotime($comment['last_touched']),
+				'last_touched' => $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp(),
 				'author' => $userFrom->getId(),
 			],
 			'reports' => [],

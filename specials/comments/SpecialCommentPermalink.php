@@ -34,9 +34,9 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		$this->setHeaders();
 
 		// checks if comment exists and if wgUser can view it
-		$comment = CommentBoard::getCommentById($commentId, $this->getUser());
+		$comment = Comment::newFromId($commentId);
 
-		if (!$comment) {
+		if (!$comment || !$comment->canView($this->getUser())) {
 			$purged = CommentBoard::getPurgedCommentById($commentId);
 			if ($purged) {
 				$user = User::newFromId($purged['ubpa_user_id']);
@@ -48,26 +48,23 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 				$wgOut->setStatusCode(404);
 				return;
 			}
-		}
 
-		if (empty($comment)) {
 			$wgOut->setPageTitle(wfMessage('commentboard-invalid-title')->plain());
 			$wgOut->addWikiMsg('commentboard-invalid');
 			$wgOut->setStatusCode(404);
 			return;
 		}
 
-		$user = User::newFromId($comment[0]['ub_user_id']);
-		$user->load();
+		$owner = $comment->getBoardOwnerUser();
 
-		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $user->getName())->plain());
+		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $owner->getName())->plain());
 		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles']);
 		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
 		$templateCommentBoard = new TemplateCommentBoard;
 
-		$wgOut->addHTML($templateCommentBoard->permalinkHeader($user, $wgOut->getPageTitle()));
+		$wgOut->addHTML($templateCommentBoard->permalinkHeader($owner, $wgOut->getPageTitle()));
 
 		// display single comment while highlighting the selected ID
-		$wgOut->addHTML('<div class="comments">' . CommentDisplay::newCommentForm($user->getId(), true) . CommentDisplay::singleComment($comment[0], $commentId) . '</div>');
+		$wgOut->addHTML('<div class="comments">' . CommentDisplay::newCommentForm($owner, true) . CommentDisplay::singleComment($comment, $comment->getId()) . '</div>');
 	}
 }
