@@ -3,7 +3,7 @@
  * Curse Profile
  *
  * @package   CurseProfile
- * @author    Noah Manneschmidt
+ * @author    Alexia E. Smith
  * @copyright (c) 2020 Fandom
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
