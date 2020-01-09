@@ -111,16 +111,13 @@ class CommentBoard {
 	 *
 	 * @param array   $conditions SQL conditions applied to the user_board table query.
 	 *                            Will be merged with existing conditions.
-	 * @param integer $asUser     [Optional] User ID of user viewing. (Defaults to wgUser)
+	 * @param User $asUser     User viewing.
 	 * @param integer $startAt    [Optional] Number of comments to skip when loading more.
 	 * @param integer $limit      [Optional] Number of top-level items to return.
 	 *
 	 * @return array	comments!
 	 */
-	private function getCommentsWithConditions($conditions, $asUser = null, $startAt = 0, $limit = 100) {
-		if (!is_array($conditions)) {
-			$conditions = [];
-		}
+	private function getCommentsWithConditions(array $conditions, User $asUser, $startAt = 0, $limit = 100) {
 		// Fetch top level comments.
 		$results = $this->DB->select(
 			['user_board'],
@@ -152,6 +149,30 @@ class CommentBoard {
 	}
 
 	/**
+	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
+	 *
+	 * @param User $actor User object doing the viewing.
+	 *
+	 * @return string A single SQL condition entirely enclosed in parenthesis.
+	 */
+	public static function visibleClause(User $actor) {
+		if ($actor->isAllowed('profile-moderate')) {
+			// admins see everything
+			$sql = '1=1';
+		} else {
+			$conditions = [];
+			// Everyone sees public messages.
+			$conditions[] = 'user_board.ub_type = 0';
+			// See private if you are author or recipient.
+			$conditions[] = sprintf('user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $actor->getId());
+			// See deleted if you are the author.
+			$conditions[] = sprintf('user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId());
+			$sql = '( (' . implode(') OR (', $conditions) . ') )';
+		}
+		return $sql;
+	}
+
+	/**
 	 * Look up a single comment given a comment id (for display from a permalink)
 	 *
 	 * @param integer $commentId id of a user board comment
@@ -179,14 +200,14 @@ class CommentBoard {
 	/**
 	 * Gets all comments on the board.
 	 *
-	 * @param int|null $asUser  [Optional] user ID of user viewing (defaults to wgUser)
+	 * @param User $asUser  User viewing.
 	 * @param integer  $startAt [Optional] number of comments to skip when loading more
 	 * @param integer  $limit   [Optional] number of top-level items to return
 	 * @param integer  $maxAge  [Optional] maximum age of comments (by number of days)
 	 *
 	 * @return array	an array of comment data (text and user info)
 	 */
-	public function getComments($asUser = null, $startAt = 0, $limit = 100, $maxAge = 30) {
+	public function getComments(User $asUser, $startAt = 0, $limit = 100, $maxAge = 30) {
 		$searchConditions = [
 			'ub_in_reply_to'	=> 0,
 			'ub_user_id'		=> $this->owner->getId()
@@ -554,7 +575,7 @@ class CommentBoard {
 
 		if ($comment) {
 			self::performPurge($actor, $comment, $reason);
-			$replies = $comment->getReplies();
+			$replies = $comment->getReplies($actor);
 
 			foreach ($replies as $reply) {
 				self::performPurge($actor, $reply, $reason);

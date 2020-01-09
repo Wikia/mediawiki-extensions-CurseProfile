@@ -32,6 +32,8 @@ class CommentDisplay {
 	 * @return array	with html at index 0
 	 */
 	public static function comments(&$parser, int $userId) {
+		global $wgUser;
+
 		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
@@ -42,7 +44,7 @@ class CommentDisplay {
 		$html .= self::newCommentForm($boardOwner, false);
 
 		$board = new CommentBoard(User::newFromId($userId));
-		$comments = $board->getComments();
+		$comments = $board->getComments($wgUser);
 
 		foreach ($comments as $comment) {
 			$html .= self::singleComment($comment, false);
@@ -146,7 +148,7 @@ class CommentDisplay {
 					' . self::sanitizeComment($comment->getMessage()) . '
 				</div>
 			</div>';
-		$replies = $comment->getReplies();
+		$replies = $comment->getReplies($wgUser);
 		if (!empty($replies)) {
 			$html .= '<div class="replyset">';
 

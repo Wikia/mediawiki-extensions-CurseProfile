@@ -121,12 +121,12 @@ class Comment {
 	/**
 	 * Gets all comment replies to this comment.
 	 *
-	 * @param User $actor [Optional] The user viewing these comments to limit visibility and give an accurate count.
+	 * @param User $actor The user viewing these comments to limit visibility and give an accurate count.
 	 * @param integer $limit [Optional] Maximum number items to return (older replies will be ommitted)
 	 *
 	 * @return array Array of Comment instances.
 	 */
-	public function getReplies(?User $actor = null, int $limit = 5) {
+	public function getReplies(User $actor = null, int $limit = 5) {
 		// Fetch comments.
 		$options = [
 			'ORDER BY'	=> 'ub_date DESC'
@@ -143,7 +143,7 @@ class Comment {
 				'*',
 			],
 			[
-				self::visibleClause($actor),
+				CommentBoard::visibleClause($actor),
 				'ub_in_reply_to' => $this->getId(),
 				'ub_user_id' => $this->getBoardOwnerUserId()
 			],
@@ -174,7 +174,7 @@ class Comment {
 				'count(ub_in_reply_to) as total_replies',
 			],
 			[
-				self::visibleClause($actor),
+				CommendBoard::visibleClause($actor),
 				'ub_in_reply_to' => $this->getId(),
 				'ub_user_id' => $this->getBoardOwnerUserId()
 			],
@@ -186,30 +186,6 @@ class Comment {
 		$row = $result->fetchRow();
 		var_dump($row);
 		return intval($row['total_replies']);
-	}
-
-	/**
-	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
-	 *
-	 * @param User $actor User object doing the viewing.
-	 *
-	 * @return string A single SQL condition entirely enclosed in parenthesis.
-	 */
-	private static function visibleClause(User $actor) {
-		if ($asUser->isAllowed('profile-moderate')) {
-			// admins see everything
-			$sql = '1=1';
-		} else {
-			$conditions = [];
-			// Everyone sees public messages.
-			$conditions[] = 'user_board.ub_type = 0';
-			// See private if you are author or recipient.
-			$conditions[] = sprintf('user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $actor->getId());
-			// See deleted if you are the author.
-			$conditions[] = sprintf('user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId());
-			$sql = '( (' . implode(') OR (', $conditions) . ') )';
-		}
-		return $sql;
 	}
 
 	/**
