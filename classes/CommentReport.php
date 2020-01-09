@@ -257,7 +257,7 @@ class CommentReport {
 	 * @param Comment $comment The comment being reported.
 	 * @param User    $actor   User creating this report.
 	 *
-	 * @return mixed	CommentReport instance that is already saved or false on failure.
+	 * @return mixed CommentReport instance that is already saved or false on failure.
 	 */
 	public static function newUserReport(Comment $comment, User $actor) {
 		$db = CP::getDb(DB_REPLICA);
@@ -301,7 +301,7 @@ class CommentReport {
 	 * @param Comment $comment The comment being reported.
 	 * @param User    $actor   User creating this report.
 	 *
-	 * @return object		CommentReport instance
+	 * @return object CommentReport instance
 	 */
 	private static function createWithArchive(Comment $comment, User $actor) {
 		global $dsSiteKey;
@@ -341,7 +341,8 @@ class CommentReport {
 	/**
 	 * Creates a new comment report object from a DB row.
 	 *
-	 * @param  array	Row from the the user_board_report_archives table.
+	 * @param array $report Row from the the user_board_report_archives table.
+	 *
 	 * @return CommentReport
 	 */
 	private static function newFromRow($report) {
@@ -368,8 +369,9 @@ class CommentReport {
 	/**
 	 * Loads individual user reports for a given comment report.
 	 *
-	 * @param  integer	The ra_comment_id from the user_board_report_archives table
-	 * @return array	With sub arrays for each report having keys reporter => user_id, timestamp
+	 * @param integer $id The ra_comment_id from the user_board_report_archives table
+	 *
+	 * @return array With sub arrays for each report having keys reporter => user_id, timestamp
 	 */
 	private static function getReportsForId($id) {
 		$db = CP::getDb(DB_REPLICA);
@@ -392,7 +394,7 @@ class CommentReport {
 	/**
 	 * Is this report stored in this local wiki database?
 	 *
-	 * @return boolean	True if report is stored on this wiki.
+	 * @return boolean True if report is stored on this wiki.
 	 */
 	public function isLocal() {
 		global $dsSiteKey;
@@ -402,8 +404,9 @@ class CommentReport {
 	/**
 	 * Is this report key stored in this local wiki database?
 	 *
-	 * @param  string $reportKey Report Key
-	 * @return boolean	True if report is stored on this wiki.
+	 * @param string $reportKey Report Key
+	 *
+	 * @return boolean True if report is stored on this wiki.
 	 */
 	public static function keyIsLocal($reportKey) {
 		global $dsSiteKey;
@@ -439,7 +442,7 @@ class CommentReport {
 	/**
 	 * Insert a new report into redis with indexes
 	 *
-	 * @return boolean	Success
+	 * @return boolean Success
 	 */
 	private function initialRedisInsert() {
 		$redis = RedisCache::getClient('cache');
@@ -574,7 +577,7 @@ class CommentReport {
 	 * @param string $action Action to take on the reported comment. either 'delete' or 'dismiss'
 	 * @param User   $actor  [Optional] User object of the acting user, defaults to|null $wgUser
 	 *
-	 * @return boolean	true if successful
+	 * @return boolean True if successful
 	 */
 	public function resolve(string $action, User $actor) {
 		if (!$this->isLocal()) {
@@ -598,7 +601,7 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in the local database
 	 *
-	 * @return boolean	success
+	 * @return boolean Success
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
@@ -622,7 +625,7 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in redis
 	 *
-	 * @return boolean	true
+	 * @return boolean True
 	 */
 	private function resolveInRedis() {
 		$redis = RedisCache::getClient('cache');
