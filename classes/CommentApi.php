@@ -187,11 +187,11 @@ class CommentApi extends HydraApiBase {
 			return $this->dieWithError(['comment-invaliduser']);
 		}
 		$text = $this->getMain()->getVal('text');
-		$inreply = $this->getMain()->getVal('inReplyTo');
+		$inreply = $this->getMain()->getInt('inReplyTo');
 
 		if ($user->getIntOption('comment-pref')) {
 			$board = new CommentBoard($user);
-			$commentSuccess = $board->addComment($text, null, $inreply);
+			$commentSuccess = $board->addComment($text, $this->getUser(), $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 		} else {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
@@ -218,17 +218,17 @@ class CommentApi extends HydraApiBase {
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
 	public function doAdd() {
-		$toUser = User::newFromId($this->getMain()->getVal('user_id'));
+		$toUser = User::newFromId($this->getMain()->getInt('user_id'));
 		if (!$toUser || !$toUser->isAnon()) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				return;
 		}
 
 		$text = $this->getMain()->getVal('text');
-		$inreply = $this->getMain()->getVal('inReplyTo');
+		$inreply = $this->getMain()->getInt('inReplyTo');
 
 		$board = new CommentBoard($toUser);
-		$commentSuccess = $board->addComment($text, null, $inreply);
+		$commentSuccess = $board->addComment($text, $this->getUser(), $inreply);
 
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 	}
@@ -237,19 +237,19 @@ class CommentApi extends HydraApiBase {
 	 * Returns all replies to a specific comment
 	 */
 	public function doGetReplies() {
-		$replies = CommentDisplay::repliesTo($this->getMain()->getVal('user_id'), $this->getMain()->getVal('comment_id'));
+		$replies = CommentDisplay::repliesTo($this->getMain()->getInt('user_id'), $this->getMain()->getInt('comment_id'));
 		$this->getResult()->addValue(null, 'html', $replies);
 	}
 
 	public function doGetRaw() {
-		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'), false);
-		$this->getResult()->addValue(null, 'text', (isset($comment[0]['ub_message']) ? $comment[0]['ub_message'] : ''));
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
+		$this->getResult()->addValue(null, 'text', $comment->canView() ? $comment->getMessage() : '');
 	}
 
 	public function doEdit() {
-		$commentId = $this->getMain()->getVal('comment_id');
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
 		$text = $this->getMain()->getVal('text');
-		if ($commentId && CommentBoard::canEdit($commentId, $this->getUser())) {
+		if ($comment && $comment->canEdit($this->getUser())) {
 			$res = CommentBoard::editComment($commentId, $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
@@ -260,8 +260,8 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doRestore() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRestore($commentId, $this->getUser())) {
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
+		if ($comment && $comment->canRestore($this->getUser())) {
 			CommentBoard::restoreComment($commentId, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
@@ -271,9 +271,9 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doRemove() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRemove($commentId, $this->getUser())) {
-			CommentBoard::removeComment($commentId, $this->getUser());
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
+		if ($comment && $comment->canRemove($commentId, $this->getUser())) {
+			CommentBoard::removeComment($this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -282,9 +282,9 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doPurge() {
-		$commentId = $this->getMain()->getVal('comment_id');
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
 		$reason = $this->getMain()->getVal('reason');
-		if ($commentId && CommentBoard::canPurge($this->getUser())) {
+		if ($comment && $comment->canPurge($this->getUser())) {
 			CommentBoard::purgeComment($commentId, $reason);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
@@ -293,8 +293,8 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doReport() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canReport($commentId, $this->getUser())) {
+		$comment = Comment::newFromId($this->getMain()->getInt('comment_id'));
+		if ($comment && $comment->canReport($this->getUser())) {
 			$result = CommentBoard::reportComment($commentId);
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {

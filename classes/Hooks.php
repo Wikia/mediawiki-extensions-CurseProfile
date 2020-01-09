@@ -215,10 +215,13 @@ class Hooks {
 	 */
 	private static function resolveHref($attribs, $target) {
 		$url_components = parse_url($attribs['href']);
-		parse_str($url_components['query'], $query);
+		$query = [];
+		if (isset($url_components['query'])) {
+			parse_str($url_components['query'], $query);
+		}
 
 		// Remove redlink and edit
-		if ($query && isset($query['redlink'])) {
+		if (!empty($query) && isset($query['redlink'])) {
 			unset($query['redlink'], $query['action']);
 		}
 

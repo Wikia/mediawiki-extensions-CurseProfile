@@ -32,25 +32,24 @@ class CommentDisplay {
 	 * @param  integer $userId  id of the user whose recent comments should be displayed
 	 * @return array	with html at index 0
 	 */
-	public static function comments(&$parser, int $userId = null) {
-		$userId = intval($userId);
+	public static function comments(&$parser, int $userId) {
 		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 
-		$HTML = '';
+		$html = '';
 
-		$HTML .= self::newCommentForm($userId, false);
+		$html .= self::newCommentForm($userId, false);
 
 		$board = new CommentBoard(User::newFromId($userId));
 		$comments = $board->getComments();
 
 		foreach ($comments as $comment) {
-			$HTML .= self::singleComment($comment, false);
+			$html .= self::singleComment($comment, false);
 		}
 
 		return [
-			$HTML,
+			$html,
 			'isHTML' => true,
 		];
 	}
@@ -65,8 +64,8 @@ class CommentDisplay {
 	public static function newCommentForm($userId, $hidden = false) {
 		global $wgUser;
 
-		$targetUser = User::newFromId($userId);
-		if (CommentBoard::canComment($targetUser, $wgUser)) {
+		$comment = new Comment(['ub_user_id' => $userId]);
+		if ($comment->canComment($wgUser)) {
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			$page = Title::newFromText("Special:AddComment/" . $userId);
@@ -75,7 +74,7 @@ class CommentDisplay {
 				<div class="avatar">' . ProfilePage::userAvatar(null, 48, $wgUser->getEmail(), $wgUser->getName())[0] . '</div>
 				<div class="entryform">
 					<form action="' . $page->getFullUrl() . '" method="post">
-						<textarea name="message" maxlength="' . CommentBoard::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
+						<textarea name="message" maxlength="' . Comment::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
 						<button name="inreplyto" class="submit" value="0">' . wfMessage('commentaction')->escaped() . '</button>
 						' . Html::hidden('token', $wgUser->getEditToken()) . '
 					</form>
@@ -89,32 +88,30 @@ class CommentDisplay {
 	/**
 	 * Returns html display for a single profile comment
 	 *
-	 * @param  array   $comment   structured comment data as returned by CommentBoard
+	 * @param  Comment $comment   Comment instance to pull data from.
 	 * @param  integer $highlight [optional] id of a comment to highlight from among those displayed
 	 * @return string	html for display
 	 */
-	public static function singleComment($comment, $highlight = false) {
+	public static function singleComment(Comment $comment, $highlight = false) {
 		global $wgOut, $wgUser;
 
-		$HTML = '';
-		$cUser = User::newFromId($comment['ub_user_id_from']);
+		$html = '';
+		$cUser = $comment->getActorUser();
 
 		$type = '';
-		switch ($comment['ub_type']) {
-			case CommentBoard::PRIVATE_MESSAGE:
+		switch ($comment->getType()) {
+			case Comment::PRIVATE_MESSAGE:
 				$type = 'private';
-			break;
-
-			case CommentBoard::DELETED_MESSAGE:
+				break;
+			case Comment::DELETED_MESSAGE:
 				$type = 'deleted';
-			break;
-
-			case CommentBoard::PUBLIC_MESSAGE:
+				break;
+			case Comment::PUBLIC_MESSAGE:
 				$type = 'public';
-			break;
+				break;
 		}
 
-		if ($highlight == $comment['ub_id']) {
+		if ($highlight === $comment->getId()) {
 			$type .= ' highlighted';
 		}
 
@@ -124,33 +121,33 @@ class CommentDisplay {
 			$avatarSize = 48;
 		}
 
-		$HTML .= '
-		<div class="commentdisplay ' . $type . '" data-id="' . $comment['ub_id'] . '">
-			<a name="comment' . $comment['ub_id'] . '"></a>
+		$html .= '
+		<div class="commentdisplay ' . $type . '" data-id="' . $comment->getId() . '">
+			<a name="comment' . $comment->getId() . '"></a>
 			<div class="commentblock">
 				<div class="avatar">' . ProfilePage::userAvatar(null, $avatarSize, $cUser->getEmail(), $cUser->getName())[0] . '</div>
 				<div class="commentheader">';
-		$HTML .= '
+		$html .= '
 					<div class="right">'
-				. ($comment['ub_admin_acted_user_id'] ? self::adminAction($comment) . ', ' : '')
-				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment['ub_id'], 'comment' . $comment['ub_id'])->getLinkURL()], self::timestamp($comment)) . ' '
-				. (CommentBoard::canReply($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], HydraCore::awesomeIcon('reply')) . ' ' : '')
-				. (CommentBoard::canEdit($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
-				. (CommentBoard::canRemove($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], HydraCore::awesomeIcon('trash')) : '')
-				. (CommentBoard::canRestore($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], HydraCore::awesomeIcon('undo')) : '')
-				. (CommentBoard::canPurge($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], HydraCore::awesomeIcon('eraser')) : '')
-				. (CommentBoard::canReport($comment, $wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], HydraCore::awesomeIcon('flag')) : '')
+				. ($comment->getAdminActedUserId() ? self::adminAction($comment) . ', ' : '')
+				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment->getId(), 'comment' . $comment->getId())->getLinkURL()], self::timestamp($comment)) . ' '
+				. ($comment->canReply($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], HydraCore::awesomeIcon('reply')) . ' ' : '')
+				. ($comment->canEdit($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
+				. ($comment->canRemove($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], HydraCore::awesomeIcon('trash')) : '')
+				. ($comment->canRestore($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], HydraCore::awesomeIcon('undo')) : '')
+				. ($comment->canPurge($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], HydraCore::awesomeIcon('eraser')) : '')
+				. ($comment->canReport($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], HydraCore::awesomeIcon('flag')) : '')
 				. '
 					</div>'
-				. CP::userLink($comment['ub_user_id_from'], "commentUser");
-		$HTML .= '
+				. CP::userLink($comment->getActorUserId(), "commentUser");
+		$html .= '
 				</div>
 				<div class="commentbody">
-					' . self::sanitizeComment($comment['ub_message']) . '
+					' . self::sanitizeComment($comment->getMessage()) . '
 				</div>
 			</div>';
-		if (isset($comment['replies'])) {
-			$HTML .= '<div class="replyset">';
+		/*if (isset($comment['replies'])) {
+			$html .= '<div class="replyset">';
 
 			// perhaps there are more replies not yet loaded
 			if ($comment['reply_count'] > count($comment['replies'])) {
@@ -161,26 +158,28 @@ class CommentDisplay {
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
 				$viewReplies = Parser::stripOuterParagraph($wgOut->parse(wfMessage('viewearlierreplies', $comment['reply_count'] - count($comment['replies']))->escaped()));
-				$HTML .= "<button type='button' class='reply-count' data-id='{$comment['ub_id']}' title='{$repliesTooltip}'>{$viewReplies}</button>";
+				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
 			foreach ($comment['replies'] as $reply) {
-				$HTML .= self::singleComment($reply, $highlight);
+				$html .= self::singleComment($reply, $highlight);
 			}
-			$HTML .= '</div>';
-		}
-		$HTML .= '
+			$html .= '</div>';
+		}*/
+		$html .= '
 		</div>';
-		return $HTML;
+
+		return $html;
 	}
 
 	/**
 	 * Returns extra info visible only to admins on who and when admin action was taken on a comment
 	 *
-	 * @param  array $comment comment data
-	 * @return string	html fragment
+	 * @param Comment $comment
+	 *
+	 * @return string	HTML fragment
 	 */
-	private static function adminAction($comment) {
+	private static function adminAction(Comment $comment) {
 		$admin = User::newFromId($comment['ub_admin_acted_user_id']);
 		if (!$admin->getName()) {
 			return '';
@@ -192,28 +191,30 @@ class CommentDisplay {
 	/**
 	 * Returns a <time> tag with a comment's post date or last edited date
 	 *
-	 * @param  array $comment comment data
-	 * @return string	html fragment
+	 * @param Comment $comment
+	 *
+	 * @return string	HTML fragment
 	 */
-	private static function timestamp($comment) {
-		if ($comment['ub_edited'] === null) {
-			return wfMessage('cp-commentposted')->text() . ' ' . CP::timeTag($comment['ub_date']);
+	private static function timestamp(Comment $comment) {
+		if ($comment->getEditTimestamp() === null) {
+			return wfMessage('cp-commentposted')->text() . ' ' . CP::timeTag($comment->getPostTimestamp());
 		} else {
-			return wfMessage('cp-commentedited')->text() . ' ' . CP::timeTag($comment['ub_edited']);
+			return wfMessage('cp-commentedited')->text() . ' ' . CP::timeTag($comment->getEditTimestamp());
 		}
 	}
 
 	/**
 	 * Returns a <time> tag with a comment's post date or last edited date for mobile.
 	 *
-	 * @param  array $comment comment data
-	 * @return string	html fragment
+	 * @param Comment $comment
+	 *
+	 * @return string	HTML fragment
 	 */
-	private static function mobileTimestamp($comment) {
-		if ($comment['ub_edited'] === null) {
-			return CP::timeTag($comment['ub_date'], true);
+	private static function mobileTimestamp(Comment $comment) {
+		if ($comment->getEditTimestamp() === null) {
+			return CP::timeTag($comment->getPostTimestamp(), true);
 		} else {
-			return CP::timeTag($comment['ub_edited'], true);
+			return CP::timeTag($comment->getEditTimestamp(), true);
 		}
 	}
 
@@ -228,20 +229,20 @@ class CommentDisplay {
 		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
-		$HTML = '';
+		$html = '';
 
 		$board = new CommentBoard(User::newFromId($userId));
 		$comments = $board->getReplies($commentId, null, -1);
 
 		if (empty($comments)) {
-			$HTML = wfMessage('cp-nocommentreplies');
+			$html = wfMessage('cp-nocommentreplies');
 		} else {
 			foreach ($comments as $comment) {
-				$HTML .= self::singleComment($comment);
+				$html .= self::singleComment($comment);
 			}
 		}
 
-		return $HTML;
+		return $html;
 	}
 
 	/**

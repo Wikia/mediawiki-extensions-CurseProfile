@@ -15,6 +15,7 @@ namespace CurseProfile;
 
 use SpecialPage;
 use UnlistedSpecialPage;
+use User;
 
 class SpecialAddComment extends UnlistedSpecialPage {
 	public function __construct() {
@@ -36,7 +37,7 @@ class SpecialAddComment extends UnlistedSpecialPage {
 
 		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
 			$board = new CommentBoard(User::newFromId($toUserId));
-			$newCommentId = $board->addComment($wgRequest->getVal('message'), null, $wgRequest->getVal('inreplyto'));
+			$newCommentId = $board->addComment($wgRequest->getVal('message'), $wgUser, $wgRequest->getInt('inreplyto'));
 		}
 
 		if ($newCommentId && $redirectToComment) {

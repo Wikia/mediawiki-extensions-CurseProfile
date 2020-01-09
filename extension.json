@@ -83,6 +83,7 @@
 		"CurseProfile\\Friendship": "classes/Friendship.php",
 		"CurseProfile\\FriendDisplay": "classes/FriendDisplay.php",
 		"CurseProfile\\FriendApi": "classes/FriendApi.php",
+		"CurseProfile\\Comment": "classes/Comment.php",
 		"CurseProfile\\CommentApi": "classes/CommentApi.php",
 		"CurseProfile\\CommentBoard": "classes/CommentBoard.php",
 		"CurseProfile\\CommentReport": "classes/CommentReport.php",

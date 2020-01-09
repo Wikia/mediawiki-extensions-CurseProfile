@@ -125,7 +125,7 @@ class FriendDisplay {
 	/**
 	 * Adds a Friend Button
 	 *
-	 * @param  integer $userId
+	 * @param integer $userId
 	 *
 	 * @return string
 	 */

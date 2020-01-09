@@ -34,7 +34,7 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		$this->setHeaders();
 
 		// checks if comment exists and if wgUser can view it
-		$comment = CommentBoard::getCommentById($commentId);
+		$comment = CommentBoard::getCommentById($commentId, $this->getUser());
 
 		if (!$comment) {
 			$purged = CommentBoard::getPurgedCommentById($commentId);
