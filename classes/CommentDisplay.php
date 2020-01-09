@@ -146,11 +146,12 @@ class CommentDisplay {
 					' . self::sanitizeComment($comment->getMessage()) . '
 				</div>
 			</div>';
-		/*if (isset($comment['replies'])) {
+		$replies = $comment->getReplies();
+		if (!empty($replies)) {
 			$html .= '<div class="replyset">';
 
 			// perhaps there are more replies not yet loaded
-			if ($comment['reply_count'] > count($comment['replies'])) {
+			if ($comment->getTotalReplies() > count($replies)) {
 				if (!isset($repliesTooltip)) {
 					$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
 				}
@@ -161,11 +162,11 @@ class CommentDisplay {
 				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
-			foreach ($comment['replies'] as $reply) {
+			foreach ($replies as $reply) {
 				$html .= self::singleComment($reply, $highlight);
 			}
 			$html .= '</div>';
-		}*/
+		}
 		$html .= '
 		</div>';
 
@@ -225,14 +226,13 @@ class CommentDisplay {
 	 * @param  integer $commentId the id of the comment for which replies need to be loaded
 	 * @return string	html for display
 	 */
-	public static function repliesTo(int $userId, int $commentId) {
+	public static function repliesTo(Comment $comment, User $actor) {
 		if ($userId < 1) {
 			return 'Invalid user ID given';
 		}
 		$html = '';
 
-		$board = new CommentBoard(User::newFromId($userId));
-		$comments = $board->getReplies($commentId, null, -1);
+		$comments = $comment->getReplies($actor, -1);
 
 		if (empty($comments)) {
 			$html = wfMessage('cp-nocommentreplies');

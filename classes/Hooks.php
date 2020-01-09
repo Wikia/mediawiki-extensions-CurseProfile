@@ -512,7 +512,7 @@ class Hooks {
 	}
 
 	/**
-	 * Function Documentation
+	 * Handle modifying preferences before the form saves.
 	 *
 	 * @param array  $formData array of user submitted data
 	 * @param object $form     PreferencesForm object, also a ContextSource

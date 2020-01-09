@@ -237,7 +237,8 @@ class CommentApi extends HydraApiBase {
 	 * Returns all replies to a specific comment
 	 */
 	public function doGetReplies() {
-		$replies = CommentDisplay::repliesTo($this->getInt('user_id'), $this->getInt('comment_id'));
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		$replies = CommentDisplay::repliesTo($comment, $this->getUser());
 		$this->getResult()->addValue(null, 'html', $replies);
 	}
 

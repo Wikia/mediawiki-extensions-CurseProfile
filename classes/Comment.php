@@ -107,8 +107,8 @@ class Comment {
 	 * @return mixed	Database result or false.
 	 */
 	private static function queryCommentById(int $commentId) {
-		$DB = wfGetDB(DB_REPLICA);
-		$result = $DB->select(
+		$db = wfGetDB(DB_REPLICA);
+		$result = $db->select(
 			['user_board'],
 			['*'],
 			['ub_id' => $commentId],
@@ -116,6 +116,100 @@ class Comment {
 		);
 
 		return $result->fetchRow();
+	}
+
+	/**
+	 * Gets all comment replies to this comment.
+	 *
+	 * @param User $actor [Optional] The user viewing these comments to limit visibility and give an accurate count.
+	 * @param integer $limit [Optional] Maximum number items to return (older replies will be ommitted)
+	 *
+	 * @return array Array of Comment instances.
+	 */
+	public function getReplies(?User $actor = null, int $limit = 5) {
+		// Fetch comments.
+		$options = [
+			'ORDER BY'	=> 'ub_date DESC'
+		];
+
+		if ($limit > 0) {
+			$options['LIMIT'] = intval($limit);
+		}
+
+		$db = wfGetDB(DB_REPLICA);
+		$results = $db->select(
+			['user_board'],
+			[
+				'*',
+			],
+			[
+				self::visibleClause($actor),
+				'ub_in_reply_to' => $this->getId(),
+				'ub_user_id' => $this->getBoardOwnerUserId()
+			],
+			__METHOD__,
+			$options
+		);
+
+		$comments = [];
+		while ($row = $results->fetchRow()) {
+			$comments[] = new Comment($row);
+		}
+
+		return array_reverse($comments);
+	}
+
+	/**
+	 * Return the number of replies to this comment.
+	 *
+	 * @param User $actor [Optional] The user viewing these comments to limit visibility and give an accurate count.
+	 *
+	 * @return integer Total number of replies to this comment.
+	 */
+	public function getTotalReplies(?User $actor = null): int {
+		$db = wfGetDB(DB_REPLICA);
+		$result = $db->select(
+			['user_board'],
+			[
+				'count(ub_in_reply_to) as total_replies',
+			],
+			[
+				self::visibleClause($actor),
+				'ub_in_reply_to' => $this->getId(),
+				'ub_user_id' => $this->getBoardOwnerUserId()
+			],
+			__METHOD__,
+			[
+				'GROUP BY' => 'ub_in_reply_to'
+			]
+		);
+		$row = $result->fetchRow();
+		var_dump($row);
+		return intval($row['total_replies']);
+	}
+
+	/**
+	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
+	 *
+	 * @param User $actor User object doing the viewing.
+	 *
+	 * @return string A single SQL condition entirely enclosed in parenthesis.
+	 */
+	private static function visibleClause(User $actor) {
+		if ($asUser->isAllowed('profile-moderate')) {
+			// admins see everything
+			$sql = '1=1';
+		} else {
+			$conditions = [];
+			// Everyone sees public messages.
+			$conditions[] = 'user_board.ub_type = 0';
+			// See private if you are author or recipient.
+			$conditions[] = sprintf('user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $actor->getId());
+			// See deleted if you are the author.
+			$conditions[] = sprintf('user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId());
+			$sql = '( (' . implode(') OR (', $conditions) . ') )';
+		}
+		return $sql;
 	}
 
 	/**

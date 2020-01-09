@@ -80,36 +80,6 @@ class CommentBoard {
 	}
 
 	/**
-	 * Returns a sql WHERE clause fragment limiting comments to the current user's visibility
-	 *
-	 * @param User $asUser [Optional] mw User object doing the viewing (defaults to wgUser)
-	 *
-	 * @return string  a single SQL condition entirely enclosed in parenthesis
-	 */
-	private static function visibleClause(?User $asUser = null) {
-		if ($asUser === null) {
-			global $wgUser;
-			$asUser = $wgUser;
-		} else {
-			$asUser = User::newFromId($asUser);
-		}
-
-		if ($asUser->isAllowed('profile-moderate')) {
-			// admins see everything
-			return '1=1';
-		} else {
-			$conditions = [];
-			// Everyone sees public messages.
-			$conditions[] = 'user_board.ub_type = 0';
-			// See private if you are author or recipient.
-			$conditions[] = sprintf('user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $asUser->getId());
-			// See deleted if you are the author.
-			$conditions[] = sprintf('user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $asUser->getId());
-			return '( (' . implode(') OR (', $conditions) . ') )';
-		}
-	}
-
-	/**
 	 * Returns the total number of top-level comments (or replies to a given comment) that have been left
 	 *
 	 * @param integer   $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
@@ -225,45 +195,6 @@ class CommentBoard {
 			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' . $this->DB->addQuotes(date('Y-m-d H:i:s', time() - $maxAge * 86400));
 		}
 		return $this->getCommentsWithConditions($searchConditions, $asUser, $startAt, $limit);
-	}
-
-	/**
-	 * Gets all replies to a given comment
-	 *
-	 * @param integer  $rootComment id of a comment that would be replied to
-	 * @param int|null $asUser      [Optional] user ID of user viewing (defaults to wgUser)
-	 * @param integer  $limit       [Optional] max number items to return (older replies will be ommitted)
-	 *
-	 * @return array	array of reply data
-	 */
-	public function getReplies($rootComment, $asUser = null, $limit = 5) {
-		// Fetch comments.
-		$options = [
-			'ORDER BY'	=> 'ub_date DESC'
-		];
-		if ($limit > 0) {
-			$options['LIMIT'] = intval($limit);
-		}
-		$results = $this->DB->select(
-			['user_board'],
-			[
-				'*',
-			],
-			[
-				self::visibleClause($asUser),
-				'ub_in_reply_to'	=> $rootComment,
-				'ub_user_id'		=> $this->owner->getId()
-			],
-			__METHOD__,
-			$options
-		);
-
-		$comments = [];
-		while ($row = $results->fetchRow()) {
-			$comments[] = $row;
-		}
-
-		return array_reverse($comments);
 	}
 
 	/**
