@@ -71,7 +71,7 @@ class Comment {
 	 *
 	 * @param integer $commentId The comment ID.
 	 *
-	 * @return self
+	 * @return Comment|null
 	 */
 	public static function newFromId(int $commentId): ?self {
 		if ($commentId < 1) {
@@ -93,10 +93,12 @@ class Comment {
 	 *
 	 * @param User $owner The board owner.
 	 *
-	 * @return self
+	 * @return Comment
 	 */
-	public static function newWithOwner(User $owner): ?self {
-		return new self(['ub_user_id' => $owner->getId()]);
+	public static function newWithOwner(User $owner): self {
+		$comment = new self();
+		$comment->setBoardOwnerUser($owner);
+		return $comment;
 	}
 
 	/**
@@ -116,6 +118,36 @@ class Comment {
 		);
 
 		return $result->fetchRow();
+	}
+
+	/**
+	 * Function Documentation
+	 *
+	 * @return bool
+	 */
+	public function save(): bool {
+		$db = wfGetDB(DB_MASTER);
+		$success = false;
+
+		$data = $this->data['ub_id'];
+		if ($this->data['ub_id'] > 0) {
+			unset($data['ub_id']);
+
+			$success = $db->update(
+				'user_board',
+				$data,
+				__METHOD__,
+				['ub_id' => $this->data['ub_id']]
+			);
+		} else {
+			$success = $db->insert(
+				'user_board',
+				$data,
+				__METHOD__
+			);
+		}
+
+		return $success;
 	}
 
 	/**
@@ -335,12 +367,50 @@ class Comment {
 	}
 
 	/**
+	 * Set the comment content.
+	 *
+	 * @param string $message Comment
+	 *
+	 * @return null
+	 */
+	public function setMessage(string $message) {
+		$this->data['ub_message'] = substr($message, 0, self::MAX_LENGTH);
+	}
+
+	/**
 	 * Return the comment type.(Public, Archived, Deleted)
 	 *
 	 * @return integer
 	 */
 	public function getType(): int {
 		return intval($this->data['ub_type']);
+	}
+
+	/**
+	 * Mark this message as public.
+	 *
+	 * @return null
+	 */
+	public function markAsPublic() {
+		$this->data['ub_type'] = self::PUBLIC_MESSAGE;
+	}
+
+	/**
+	 * Mark this message as deleted.
+	 *
+	 * @return null
+	 */
+	public function markAsDeleted() {
+		$this->data['ub_type'] = self::DELETED_MESSAGE;
+	}
+
+	/**
+	 * Mark this message as private.
+	 *
+	 * @return null
+	 */
+	public function markAsPrivate() {
+		$this->data['ub_type'] = self::PRIVATE_MESSAGE;
 	}
 
 	/**
@@ -353,12 +423,35 @@ class Comment {
 	}
 
 	/**
+	 * Set the user ID and user name from an User instance of the user that made the comment.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setActorUser(User $user) {
+		$this->data['ub_user_id_from'] = $user->getId();
+		$this->data['ub_user_name_from'] = $user->getName();
+	}
+
+	/**
 	 * Get the user ID of the user that made the comment.
 	 *
 	 * @return integer User ID
 	 */
 	public function getActorUserId(): int {
 		return intval($this->data['ub_user_id_from']);
+	}
+
+	/**
+	 * Set the user ID of the user that made the comment.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setActorUserId(int $userId) {
+		$this->data['ub_user_id_from'] = $userId;
 	}
 
 	/**
@@ -371,12 +464,35 @@ class Comment {
 	}
 
 	/**
+	 * Set the user ID from an User instance of the user board that this comment belongs to.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setBoardOwnerUser(User $user) {
+		$this->data['ub_user_id'] = $user->getId();
+		$this->data['ub_user_name'] = $user->getName();
+	}
+
+	/**
 	 * Get the user ID of the user board that this comment belongs to.
 	 *
 	 * @return integer Board Owner User ID
 	 */
 	public function getBoardOwnerUserId(): int {
 		return intval($this->data['ub_user_id']);
+	}
+
+	/**
+	 * Set the user ID of the user board that this comment belongs to.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setBoardOwnerUserId(int $userId) {
+		$this->data['ub_user_id'] = $userId;
 	}
 
 	/**
@@ -389,12 +505,34 @@ class Comment {
 	}
 
 	/**
+	 * Set the user ID from an User instance of the the administrator that performed an administrative action on this comment.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setAdminActedUser(User $user) {
+		$this->data['ub_admin_acted_user_id'] = $user->getId();
+	}
+
+	/**
 	 * Get the user ID of the the administrator that performed an administrative action on this comment.
 	 *
 	 * @return integer Admin Acted User ID
 	 */
 	public function getAdminActedUserId(): int {
 		return intval($this->data['ub_admin_acted_user_id']);
+	}
+
+	/**
+	 * Set the user ID of the the administrator that performed an administrative action on this comment.
+	 *
+	 * @param integer User ID
+	 *
+	 * @return null
+	 */
+	public function setAdminActedUserId(int $userId) {
+		$this->data['ub_admin_acted_user_id'] = $userId;
 	}
 
 	/**
@@ -407,12 +545,34 @@ class Comment {
 	}
 
 	/**
+	 * Set the post(creation) timestamp.
+	 *
+	 * @param integer|null
+	 *
+	 * @return null
+	 */
+	public function setPostTimestamp(?int $timestamp = null) {
+		$this->data['ub_date'] = $timestamp
+	}
+
+	/**
 	 * Get the edit timestamp.
 	 *
 	 * @return integer|null
 	 */
 	public function getEditTimestamp(): ?int {
 		return $this->processDate($this->data['ub_edited']);
+	}
+
+	/**
+	 * Set the edit timestamp.
+	 *
+	 * @param integer|null
+	 *
+	 * @return null
+	 */
+	public function setEditTimestamp(?int $timestamp = null) {
+		$this->data['ub_edited'] = $timestamp
 	}
 
 	/**
@@ -425,12 +585,34 @@ class Comment {
 	}
 
 	/**
+	 * Set the last reply timestamp.
+	 *
+	 * @param integer|null
+	 *
+	 * @return null
+	 */
+	public function setLastReplyTimestamp(?int $timestamp = null) {
+		$this->data['ub_last_reply'] = $timestamp
+	}
+
+	/**
 	 * Get the timestamp for an administrator performed an action on this comment.
 	 *
 	 * @return integer|null
 	 */
 	public function getAdminActionTimestamp(): ?int {
 		return $this->processDate($this->data['ub_admin_acted_at']);
+	}
+
+	/**
+	 * Set the timestamp for an administrator performed an action on this comment.
+	 *
+	 * @param integer|null
+	 *
+	 * @return null
+	 */
+	public function setAdminActionTimestamp(?int $timestamp = null) {
+		$this->data['ub_admin_acted_at'] = $timestamp
 	}
 
 	/**
@@ -447,5 +629,25 @@ class Comment {
 
 		$timestamp = new MWTimestamp($date);
 		return $timestamp->getTimestamp(TS_UNIX);
+	}
+
+	/**
+	 * Get the comment ID of the parent comment to this one.
+	 *
+	 * @return integer Parent Comment ID
+	 */
+	public function getParentCommentId(): int {
+		return intval($this->data['ub_in_reply_to']);
+	}
+
+	/**
+	 * Set the comment ID of the parent comment to this one.
+	 *
+	 * @param integer [Optional] Parent Comment ID
+	 *
+	 * @return null
+	 */
+	public function setParentCommentId(int $parentId = 0) {
+		$this->data['ub_in_reply_to'] = $parentId;
 	}
 }

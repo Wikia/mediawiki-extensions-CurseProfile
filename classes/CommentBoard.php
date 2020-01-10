@@ -227,7 +227,7 @@ class CommentBoard {
 	 *
 	 * @return int	ID of the newly created comment, or 0 for failure
 	 */
-	public function addComment(string $commentText, User $fromUser = null, ?int $inReplyTo = 0) {
+	public function addComment(string $commentText, User $fromUser = null, int $inReplyTo = 0) {
 		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
@@ -245,20 +245,12 @@ class CommentBoard {
 			$parentCommenter = $parentComment->getActorUser();
 		}
 
-		$success = $dbw->insert(
-			'user_board',
-			[
-				'ub_in_reply_to' => $inReplyTo,
-				'ub_user_id_from' => $fromUser->getId(),
-				'ub_user_name_from' => $fromUser->getName(),
-				'ub_user_id' => $this->owner->getId(),
-				'ub_user_name' => $this->owner->getName(),
-				'ub_message' => $commentText,
-				'ub_type' => self::PUBLIC_MESSAGE,
-				'ub_date' => date('Y-m-d H:i:s'),
-			],
-			__METHOD__
-		);
+		$comment->setMessage($commentText);
+		$comment->setActorUser($fromUser);
+		$comment->markAsPublic();
+		$comment->setPostTimestamp(time());
+		$comment->setParentCommentId($inReplyTo);
+		$success = $comment->save();
 
 		if ($success) {
 			$newCommentId = $dbw->insertId();
