@@ -55,11 +55,11 @@ class Comment {
 	/**
 	 * Setup and validate data for this class.
 	 *
-	 * @param array $comment Database row for a comment.
+	 * @param array [Optional] $comment Database row for a comment.
 	 *
 	 * @throws MWException
 	 */
-	public function __construct(array $comment) {
+	public function __construct(array $comment = []) {
 		if (count(array_diff_key($comment, $this->data))) {
 			throw new MWException(__METHOD__ . " Comment data contained invalid keys.");
 		}
@@ -121,31 +121,52 @@ class Comment {
 	}
 
 	/**
-	 * Function Documentation
+	 * Save changes to the database.
 	 *
-	 * @return bool
+	 * @return boolean Save Success
 	 */
 	public function save(): bool {
 		$db = wfGetDB(DB_MASTER);
 		$success = false;
 
-		$data = $this->data['ub_id'];
+		$db->startAtomic(__METHOD__);
+		$data = $this->data;
 		if ($this->data['ub_id'] > 0) {
 			unset($data['ub_id']);
 
-			$success = $db->update(
+			$result = $db->update(
 				'user_board',
 				$data,
 				__METHOD__,
 				['ub_id' => $this->data['ub_id']]
 			);
 		} else {
-			$success = $db->insert(
+			$result = $db->insert(
 				'user_board',
 				$data,
 				__METHOD__
 			);
 		}
+		if (!$result) {
+			$db->cancelAtomic(__METHOD__);
+		} else {
+			$success = true;
+			$this->data['ub_id'] = $db->insertId();
+		}
+
+		if ($success) {
+			if ($this->getParentCommentId() > 0) {
+				$db->update(
+					'user_board',
+					[
+						'ub_last_reply' => $this->convertUnixDateToDB(time())
+					],
+					['ub_id = ' . $this->getParentCommentId()],
+					__METHOD__
+				);
+			}
+		}
+		$db->endAtomic(__METHOD__);
 
 		return $success;
 	}
@@ -153,7 +174,7 @@ class Comment {
 	/**
 	 * Gets all comment replies to this comment.
 	 *
-	 * @param User $actor The user viewing these comments to limit visibility and give an accurate count.
+	 * @param User    $actor The user viewing these comments to limit visibility and give an accurate count.
 	 * @param integer $limit [Optional] Maximum number items to return (older replies will be ommitted)
 	 *
 	 * @return array Array of Comment instances.
@@ -194,11 +215,11 @@ class Comment {
 	/**
 	 * Return the number of replies to this comment.
 	 *
-	 * @param User $actor [Optional] The user viewing these comments to limit visibility and give an accurate count.
+	 * @param User $actor The user viewing these comments to limit visibility and give an accurate count.
 	 *
 	 * @return integer Total number of replies to this comment.
 	 */
-	public function getTotalReplies(?User $actor = null): int {
+	public function getTotalReplies(User $actor = null): int {
 		$db = wfGetDB(DB_REPLICA);
 		$result = $db->select(
 			['user_board'],
@@ -206,7 +227,7 @@ class Comment {
 				'count(ub_in_reply_to) as total_replies',
 			],
 			[
-				CommendBoard::visibleClause($actor),
+				CommentBoard::visibleClause($actor),
 				'ub_in_reply_to' => $this->getId(),
 				'ub_user_id' => $this->getBoardOwnerUserId()
 			],
@@ -374,7 +395,7 @@ class Comment {
 	 * @return null
 	 */
 	public function setMessage(string $message) {
-		$this->data['ub_message'] = substr($message, 0, self::MAX_LENGTH);
+		$this->data['ub_message'] = trim(substr($message, 0, self::MAX_LENGTH));
 	}
 
 	/**
@@ -541,7 +562,7 @@ class Comment {
 	 * @return integer|null
 	 */
 	public function getPostTimestamp(): ?int {
-		return $this->processDate($this->data['ub_date']);
+		return $this->convertDBDateToUnix($this->data['ub_date']);
 	}
 
 	/**
@@ -552,7 +573,7 @@ class Comment {
 	 * @return null
 	 */
 	public function setPostTimestamp(?int $timestamp = null) {
-		$this->data['ub_date'] = $timestamp
+		$this->data['ub_date'] = $this->convertUnixDateToDB($timestamp);
 	}
 
 	/**
@@ -561,7 +582,7 @@ class Comment {
 	 * @return integer|null
 	 */
 	public function getEditTimestamp(): ?int {
-		return $this->processDate($this->data['ub_edited']);
+		return $this->convertDBDateToUnix($this->data['ub_edited']);
 	}
 
 	/**
@@ -572,7 +593,7 @@ class Comment {
 	 * @return null
 	 */
 	public function setEditTimestamp(?int $timestamp = null) {
-		$this->data['ub_edited'] = $timestamp
+		$this->data['ub_edited'] = $this->convertUnixDateToDB($timestamp);
 	}
 
 	/**
@@ -581,7 +602,7 @@ class Comment {
 	 * @return integer|null
 	 */
 	public function getLastReplyTimestamp(): ?int {
-		return $this->processDate($this->data['ub_last_reply']);
+		return $this->convertDBDateToUnix($this->data['ub_last_reply']);
 	}
 
 	/**
@@ -592,7 +613,7 @@ class Comment {
 	 * @return null
 	 */
 	public function setLastReplyTimestamp(?int $timestamp = null) {
-		$this->data['ub_last_reply'] = $timestamp
+		$this->data['ub_last_reply'] = $this->convertUnixDateToDB($timestamp);
 	}
 
 	/**
@@ -601,7 +622,7 @@ class Comment {
 	 * @return integer|null
 	 */
 	public function getAdminActionTimestamp(): ?int {
-		return $this->processDate($this->data['ub_admin_acted_at']);
+		return $this->convertDBDateToUnix($this->data['ub_admin_acted_at']);
 	}
 
 	/**
@@ -612,23 +633,39 @@ class Comment {
 	 * @return null
 	 */
 	public function setAdminActionTimestamp(?int $timestamp = null) {
-		$this->data['ub_admin_acted_at'] = $timestamp
+		$this->data['ub_admin_acted_at'] = $this->convertUnixDateToDB($timestamp);
 	}
 
 	/**
-	 * Process a database date string or null into a usable response.
+	 * Process a database date string or null into an Unix date.
 	 *
 	 * @param string $date Database Date String
 	 *
 	 * @return integer|null
 	 */
-	private function processDate(?string $date): ?int {
+	private function convertDBDateToUnix(?string $date): ?int {
 		if (empty($date)) {
 			return null;
 		}
 
 		$timestamp = new MWTimestamp($date);
 		return $timestamp->getTimestamp(TS_UNIX);
+	}
+
+	/**
+	 * Process an Unix date string or null into a database date.
+	 *
+	 * @param string $date Unix Date String
+	 *
+	 * @return string|null
+	 */
+	private function convertUnixDateToDB(?string $date): ?string {
+		if (empty($date)) {
+			return null;
+		}
+
+		$timestamp = new MWTimestamp($date);
+		return $timestamp->getTimestamp(TS_DB);
 	}
 
 	/**

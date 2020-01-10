@@ -153,7 +153,7 @@ class CommentDisplay {
 			$html .= '<div class="replyset">';
 
 			// perhaps there are more replies not yet loaded
-			if ($comment->getTotalReplies() > count($replies)) {
+			if ($comment->getTotalReplies($wgUser) > count($replies)) {
 				if (!isset($repliesTooltip)) {
 					$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
 				}

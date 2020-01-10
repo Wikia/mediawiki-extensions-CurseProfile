@@ -111,7 +111,7 @@ class CommentBoard {
 	 *
 	 * @param array   $conditions SQL conditions applied to the user_board table query.
 	 *                            Will be merged with existing conditions.
-	 * @param User $asUser     User viewing.
+	 * @param User    $asUser     User viewing.
 	 * @param integer $startAt    [Optional] Number of comments to skip when loading more.
 	 * @param integer $limit      [Optional] Number of top-level items to return.
 	 *
@@ -200,10 +200,10 @@ class CommentBoard {
 	/**
 	 * Gets all comments on the board.
 	 *
-	 * @param User $asUser  User viewing.
-	 * @param integer  $startAt [Optional] number of comments to skip when loading more
-	 * @param integer  $limit   [Optional] number of top-level items to return
-	 * @param integer  $maxAge  [Optional] maximum age of comments (by number of days)
+	 * @param User    $asUser  User viewing.
+	 * @param integer $startAt [Optional] number of comments to skip when loading more
+	 * @param integer $limit   [Optional] number of top-level items to return
+	 * @param integer $maxAge  [Optional] maximum age of comments (by number of days)
 	 *
 	 * @return array	an array of comment data (text and user info)
 	 */
@@ -228,14 +228,13 @@ class CommentBoard {
 	 * @return int	ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment(string $commentText, User $fromUser = null, int $inReplyTo = 0) {
-		$commentText = substr(trim($commentText), 0, self::MAX_LENGTH);
 		if (empty($commentText)) {
 			return false;
 		}
 		$dbw = CP::getDb(DB_MASTER);
 
 		$comment = Comment::newWithOwner($this->owner);
-		if ($comment->canComment($fromUser)) {
+		if (!$comment->canComment($fromUser)) {
 			return false;
 		}
 
@@ -253,25 +252,13 @@ class CommentBoard {
 		$success = $comment->save();
 
 		if ($success) {
-			$newCommentId = $dbw->insertId();
+			$newCommentId = $comment->getId();
 		} else {
 			$newCommentId = 0;
 		}
 
 		if ($newCommentId) {
-			$action = 'created';
-
-			if ($inReplyTo) {
-				$dbw->update(
-					'user_board',
-					[
-						'ub_last_reply' => date('Y-m-d H:i:s')
-					],
-					['ub_id = ' . $inReplyTo],
-					__METHOD__
-				);
-				$action = 'replied';
-			}
+			$action = $inReplyTo > 0 ? 'replied' : 'created';
 
 			Hooks::run('CurseProfileAddComment', [$fromUser, $this->owner, $inReplyTo, $commentText]);
 			if ($inReplyTo) {

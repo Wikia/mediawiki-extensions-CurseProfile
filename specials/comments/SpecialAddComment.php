@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use SpecialPage;
 use UnlistedSpecialPage;
 use User;
 
