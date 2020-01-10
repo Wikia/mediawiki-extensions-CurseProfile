@@ -552,7 +552,7 @@ class Comment {
 	 *
 	 * @return null
 	 */
-	public function setAdminActedUserId(int $userId) {
+	public function setAdminActedUserId(?int $userId = null) {
 		$this->data['ub_admin_acted_user_id'] = $userId;
 	}
 

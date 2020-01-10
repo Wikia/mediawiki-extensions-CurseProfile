@@ -250,8 +250,8 @@ class CommentApi extends HydraApiBase {
 	public function doEdit() {
 		$comment = Comment::newFromId($this->getInt('comment_id'));
 		$text = $this->getMain()->getVal('text');
-		if ($comment && $comment->canEdit($this->getUser())) {
-			$res = CommentBoard::editComment($comment->getId(), $this->getUser(), $text);
+		if ($comment) {
+			$res = CommentBoard::editComment($comment, $this->getUser(), $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			$this->getResult()->addValue(null, 'parsedContent', CommentDisplay::sanitizeComment($text));
@@ -262,8 +262,8 @@ class CommentApi extends HydraApiBase {
 
 	public function doRestore() {
 		$comment = Comment::newFromId($this->getInt('comment_id'));
-		if ($comment && $comment->canRestore($this->getUser())) {
-			CommentBoard::restoreComment($comment->getId(), $this->getUser());
+		if ($comment) {
+			CommentBoard::restoreComment($comment, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -273,8 +273,8 @@ class CommentApi extends HydraApiBase {
 
 	public function doRemove() {
 		$comment = Comment::newFromId($this->getInt('comment_id'));
-		if ($comment && $comment->canRemove($this->getUser())) {
-			CommentBoard::removeComment($comment->getId(), $this->getUser());
+		if ($comment) {
+			CommentBoard::removeComment($comment, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -285,8 +285,8 @@ class CommentApi extends HydraApiBase {
 	public function doPurge() {
 		$comment = Comment::newFromId($this->getInt('comment_id'));
 		$reason = $this->getMain()->getVal('reason');
-		if ($comment && $comment->canPurge($this->getUser())) {
-			CommentBoard::purgeComment($comment->getId(), $this->getUser(), $reason);
+		if ($comment) {
+			CommentBoard::purgeComment($comment, $this->getUser(), $reason);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
 			return $this->dieWithError(['comment-invalidaction']);
@@ -295,7 +295,7 @@ class CommentApi extends HydraApiBase {
 
 	public function doReport() {
 		$comment = Comment::newFromId($this->getInt('comment_id'));
-		if ($comment && $comment->canReport($this->getUser())) {
+		if ($comment) {
 			$result = CommentBoard::reportComment($comment);
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {

@@ -225,13 +225,12 @@ class CommentBoard {
 	 * @param User    $fromUser    User of user posting.
 	 * @param integer $inReplyTo   [Optional] ID of a board post that this will be in reply to.
 	 *
-	 * @return int	ID of the newly created comment, or 0 for failure
+	 * @return integer ID of the newly created comment, or 0 for failure
 	 */
 	public function addComment(string $commentText, User $fromUser = null, int $inReplyTo = 0) {
 		if (empty($commentText)) {
 			return false;
 		}
-		$dbw = CP::getDb(DB_MASTER);
 
 		$comment = Comment::newWithOwner($this->owner);
 		if (!$comment->canComment($fromUser)) {
@@ -420,18 +419,15 @@ class CommentBoard {
 	/**
 	 * Replaces the text content of a comment.
 	 *
-	 * @param integer $commentId User ID of the user board comment.
-	 * @param User    $actor     User object of the user doing this action.
-	 * @param string  $message   New text to use for the comment.
+	 * @param Comment $comment Comment to edit.
+	 * @param User    $actor   User object of the user doing this action.
+	 * @param string  $message New text to use for the comment.
 	 *
 	 * @return boolean Success
 	 */
-	public static function editComment(int $commentId, User $actor, string $message) {
-		$db = CP::getDb(DB_MASTER);
+	public static function editComment(Comment $comment, User $actor, string $message) {
 		$success = false;
 
-		// Preparing stuff for the Log Entry
-		$comment = Comment::newFromId($commentId);
 		if (!$comment->canEdit($actor)) {
 			return false;
 		}
@@ -451,7 +447,7 @@ class CommentBoard {
 			$log->setComment(null);
 			$log->setParameters(
 				[
-					'4:comment_id' => $commentId
+					'4:comment_id' => $comment->getId()
 				]
 			);
 			$logId = $log->insert();
@@ -462,91 +458,80 @@ class CommentBoard {
 	}
 
 	/**
-	 * Remove a comment from the board. Permissions are not checked. Use canRemove() to check.
-	 * TODO: if comment is a reply, update the parent's ub_last_reply field (would that behavior be too surprising?)
+	 * Remove a comment from the board.
 	 *
-	 * @param integer     $commentId ID of the comment to remove.
-	 * @param User        $actor     User object of the user doing this action.
-	 * @param string|null $time      [Optional] Timestamp in the format of date('Y-m-d H:i:s').
+	 * @param Comment $comment Comment to remove.
+	 * @param User    $actor   User object of the user doing this action.
 	 *
-	 * @return mixed	$db->update return or false on error.
+	 * @return boolean Success
 	 */
-	public static function removeComment(int $commentId, User $actor, ?string $time = null) {
-		if (!$time) {
-			$time = date('Y-m-d H:i:s');
-		}
+	public static function removeComment(Comment $comment, User $actor) {
+		$success = false;
 
-		// Preparing stuff for the Log Entry
-		$comment = Comment::newFromId($commentId);
 		if (!$comment->canRemove($actor)) {
 			return false;
 		}
 
-		$toUser = $comment->getBoardOwnerUser();
-		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
+		$comment->markAsDeleted();
+		$comment->setAdminActionTimestamp(time());
+		$comment->setAdminActedUser($actor);
+		$success = $comment->save();
 
-		$log = new ManualLogEntry('curseprofile', 'comment-deleted');
-		$log->setPerformer($actor);
-		$log->setTarget($title);
-		$log->setComment(null);
-		$log->setParameters(
-			[
-				'4:comment_id' => $commentId
-			]
-		);
-		$logId = $log->insert();
-		$log->publish($logId);
+		if ($success) {
+			$toUser = $comment->getBoardOwnerUser();
+			$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
-		$db = CP::getDb(DB_MASTER);
-		return $db->update(
-			'user_board',
-			[
-				'ub_type' => self::DELETED_MESSAGE,
-				'ub_admin_acted_user_id' => $actor->getId(),
-				'ub_admin_acted_at' => $time
-			],
-			['ub_id' => $comment->getId()]
-		);
+			$log = new ManualLogEntry('curseprofile', 'comment-deleted');
+			$log->setPerformer($actor);
+			$log->setTarget($title);
+			$log->setComment(null);
+			$log->setParameters(
+				[
+					'4:comment_id' => $comment->getId()
+				]
+			);
+			$logId = $log->insert();
+			$log->publish($logId);
+		}
+
+		return $success;
 	}
 
 	/**
 	 * Restore a comment to the board.
 	 *
-	 * @param integer $commentId ID of the comment to restore.
-	 * @param User    $actor     User object of the user doing this action.
+	 * @param Comment $comment Comment to restore.
+	 * @param User    $actor   User object of the user doing this action.
 	 *
-	 * @return boolean
+	 * @return boolean Success
 	 */
-	public static function restoreComment(int $commentId, User $actor) {
-		$comment = Comment::newFromId($commentId);
+	public static function restoreComment(Comment $comment, User $actor) {
+		$success = false;
+
 		if (!$comment->canRestore($actor)) {
 			return false;
 		}
 
-		$db = CP::getDb(DB_MASTER);
-		return $db->update(
-			'user_board',
-			[
-				'ub_type' => self::PUBLIC_MESSAGE,
-				'ub_admin_acted_user_id' => null,
-				'ub_admin_acted_at' => null,
-			],
-			['ub_id' => $comment->getId()]
-		);
+		$comment->markAsPublic();
+		$comment->setAdminActionTimestamp(time());
+		$comment->setAdminActedUser($actor);
+		$success = $comment->save();
+
+		return $success;
 	}
 
 	/**
-	 * Permanently remove a comment from the board. Permissions are not checked. Use canPurge() to check.
+	 * Permanently remove a comment from the board.
 	 *
-	 * @param integer $commentId ID of a comment to purge from the database.
-	 * @param User    $actor     User performing this action.
+	 * @param Comment $comment Comment to purge from the database.
+	 * @param User    $actor   User performing this action.
 	 * @param string  $reason
 	 *
-	 * @return mixed whatever DB->delete() returns
+	 * @return boolean Success
 	 */
-	public static function purgeComment(int $commentId, User $actor, string $reason) {
-		// Get comments to be purged
-		$comment = Comment::newFromId($commentId);
+	public static function purgeComment(Comment $comment, User $actor, string $reason) {
+		$success = false;
+
 		if (!$comment->canPurge($actor)) {
 			return false;
 		}
@@ -562,13 +547,13 @@ class CommentBoard {
 	}
 
 	/**
-	 * Handle logging and purging comments
+	 * Handle purging comments and logging the administrative action.
 	 *
-	 * @param User   $actor   User performing this action.
-	 * @param array  $comment
-	 * @param string $reason
+	 * @param User    $actor   User performing this action.
+	 * @param Comment $comment
+	 * @param string  $reason
 	 *
-	 * @return void
+	 * @return boolean Success.
 	 */
 	private static function performPurge(User $actor, Comment $comment, string $reason) {
 		$toUser = $comment->getBoardOwnerUser();
@@ -615,14 +600,18 @@ class CommentBoard {
 	}
 
 	/**
-	 * Send a comment to the moderation queue. Does not check permissions.
+	 * Send a comment to the moderation queue.
 	 *
 	 * @param Comment $comment The comment to report
 	 * @param User    $actor   User performing this action.
 	 *
-	 * @return CommentReport	Object or false for failure.
+	 * @return CommentReport Object or false for failure.
 	 */
 	public static function reportComment(Comment $comment, User $actor) {
+		if (!$comment->canReport($actor)) {
+			return false;
+		}
+
 		if ($comment) {
 			return CommentReport::newUserReport($comment, $actor);
 		}
