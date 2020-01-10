@@ -137,8 +137,8 @@ class Comment {
 			$result = $db->update(
 				'user_board',
 				$data,
-				__METHOD__,
-				['ub_id' => $this->data['ub_id']]
+				['ub_id' => $this->data['ub_id']],
+				__METHOD__
 			);
 		} else {
 			$result = $db->insert(
@@ -237,7 +237,7 @@ class Comment {
 			]
 		);
 		$row = $result->fetchRow();
-		var_dump($row);
+
 		return intval($row['total_replies']);
 	}
 

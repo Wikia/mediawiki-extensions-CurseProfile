@@ -418,16 +418,17 @@ class CommentBoard {
 	}
 
 	/**
-	 * Replaces the text content of a comment. Permissions are not checked. Use canEdit() to check.
+	 * Replaces the text content of a comment.
 	 *
 	 * @param integer $commentId User ID of the user board comment.
 	 * @param User    $actor     User object of the user doing this action.
-	 * @param string  $message   new text to use for the comment
+	 * @param string  $message   New text to use for the comment.
 	 *
-	 * @return boolean true if successful
+	 * @return boolean Success
 	 */
 	public static function editComment(int $commentId, User $actor, string $message) {
 		$db = CP::getDb(DB_MASTER);
+		$success = false;
 
 		// Preparing stuff for the Log Entry
 		$comment = Comment::newFromId($commentId);
@@ -435,31 +436,29 @@ class CommentBoard {
 			return false;
 		}
 
-		$toUser = $comment->getBoardOwnerUser();
-		$title = Title::newFromURL('UserProfile:' . $toUser->getName());
-		$fromUser = $actor;
+		$comment->setMessage($message);
+		$comment->setEditTimestamp(time());
+		$success = $comment->save();
 
-		$log = new ManualLogEntry('curseprofile', 'comment-edited');
-		$log->setPerformer($fromUser);
-		$log->setTarget($title);
-		$log->setComment(null);
-		$log->setParameters(
-			[
-				'4:comment_id' => $commentId
-			]
-		);
-		$logId = $log->insert();
-		$log->publish($logId);
+		if ($success) {
+			$toUser = $comment->getBoardOwnerUser();
+			$title = Title::newFromURL('UserProfile:' . $toUser->getName());
+			$fromUser = $actor;
 
-		return $db->update(
-			'user_board',
-			[
-				'ub_message' => $message,
-				'ub_edited' => date('Y-m-d H:i:s'),
-			],
-			['ub_id' => $comment->getId()],
-			__METHOD__
-		);
+			$log = new ManualLogEntry('curseprofile', 'comment-edited');
+			$log->setPerformer($fromUser);
+			$log->setTarget($title);
+			$log->setComment(null);
+			$log->setParameters(
+				[
+					'4:comment_id' => $commentId
+				]
+			);
+			$logId = $log->insert();
+			$log->publish($logId);
+		}
+
+		return $success;
 	}
 
 	/**
