@@ -31,19 +31,13 @@ class SpecialAddComment extends UnlistedSpecialPage {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$wgUser = $wgOut->getUser();
-		// maybe we will want to redirect to the comment permalink in some cases?
-		// if that ever comes up, just update with the correct logic here
-		$redirectToComment = false;
 
+		$toUser = User::newFromId($toUserId);
 		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
-			$board = new CommentBoard(User::newFromId($toUserId));
+			$board = new CommentBoard($toUser);
 			$newCommentId = $board->addComment($wgRequest->getVal('message'), $wgUser, $wgRequest->getInt('inreplyto'));
 		}
 
-		if ($newCommentId && $redirectToComment) {
-			$wgOut->redirect(SpecialPage::getTitleFor('CommentPermalink', $newCommentId)->getFullURL());
-		} else {
-			$wgOut->redirect((new ProfileData($toUser))->getProfilePageUrl());
-		}
+		$wgOut->redirect((new ProfileData($toUser))->getProfilePageUrl());
 	}
 }
