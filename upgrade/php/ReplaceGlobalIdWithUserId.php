@@ -29,7 +29,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription('Replaces global ID with user ID in the global_block table.');
+		$this->addDescription('Replaces global ID with user ID in CurseProfile tables.');
 		$this->setBatchSize(100);
 	}
 
