@@ -451,6 +451,8 @@ class Hooks {
 
 		// global_id migration.
 		$updater->addExtensionUpdate(['addField', 'user_board_reports', 'ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql", true]);
+		$updater->addExtensionUpdate(['addIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql", true]);
+		$updater->addExtensionUpdate(['dropIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql", true]);
 		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_user_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql", true]);
 		$updater->addExtensionUpdate(['modifyField', 'user_board_report_archives', 'ra_action_taken_by', "{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql", true]);
 		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_action_taken_by_user_id', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql", true]);
