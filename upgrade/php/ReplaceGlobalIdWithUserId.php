@@ -8,7 +8,7 @@
  * @link      https://gitlab.com/hydrawiki
 **/
 
-namespace CurseProfile;
+namespace CurseProfile\Maintenance;
 
 use HydraAuthUser;
 use LoggedUpdateMaintenance;
@@ -171,5 +171,5 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = ReplaceGlobalIdWithUserId::class;
+$maintClass = \CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

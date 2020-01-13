@@ -459,6 +459,7 @@ class Hooks {
 		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_action_taken_by_user_id', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql", true]);
 		$updater->addExtensionUpdate(['addField', 'user_board', 'ub_admin_acted_user_id', "{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql", true]);
 		$updater->addExtensionUpdate(['modifyField', 'user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql", true]);
+		$updater->addPostDatabaseUpdateMaintenance(\CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class);
 
 		// global_id migration - Second part, uncomment in the future.
 		// $updater->addExtensionUpdate(['dropField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql", true]);
