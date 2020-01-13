@@ -115,16 +115,21 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			foreach ($res as $row) {
 				$update = [];
 				foreach ($globalIdFields as $globalIdField => $userIdField) {
-					$update[$userIdField] = HydraAuthUser::userIdFromGlobalId($row->$globalIdField);
+					$userId = HydraAuthUser::userIdFromGlobalId($row->$globalIdField);
+					if ($userId > 0) {
+						$update[$userIdField] = $userId;
+					}
 				}
 
-				$dbw->update(
-					$table,
-					$update,
-					[$primaryKey => $row->$primaryKey],
-					__METHOD__
-				);
-				$count += $dbw->affectedRows();
+				if (!empty($update)) {
+					$dbw->update(
+						$table,
+						$update,
+						[$primaryKey => $row->$primaryKey],
+						__METHOD__
+					);
+					$count += $dbw->affectedRows();
+				}
 			}
 
 			list($next, $display) = $this->makeNextCond($dbw, $orderby, $row);
@@ -146,7 +151,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	 *
 	 * @return string[] [ string $next, string $display ]
 	 */
-	private function makeNextCond($dbw, $indexFields, $row) {
+	private function makeNextCond($dbw, array $indexFields, $row) {
 		$next = '';
 		$display = [];
 		for ($i = count($indexFields) - 1; $i >= 0; $i--) {
