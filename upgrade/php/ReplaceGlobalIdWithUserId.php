@@ -99,7 +99,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			// Fetch the rows needing update
 			$res = $dbw->select(
 				$table,
-				[$primaryKey] + array_keys($globalIdFields),
+				array_merge([$primaryKey], array_keys($globalIdFields)),
 				[$next],
 				__METHOD__,
 				[
@@ -115,9 +115,11 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			foreach ($res as $row) {
 				$update = [];
 				foreach ($globalIdFields as $globalIdField => $userIdField) {
-					$userId = HydraAuthUser::userIdFromGlobalId($row->$globalIdField);
-					if ($userId > 0) {
-						$update[$userIdField] = $userId;
+					if ($row->$globalIdField) {
+						$userId = HydraAuthUser::userIdFromGlobalId($row->$globalIdField);
+						if ($userId > 0) {
+							$update[$userIdField] = $userId;
+						}
 					}
 				}
 
