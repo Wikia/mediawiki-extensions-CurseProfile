@@ -80,14 +80,14 @@ class CommentBoard {
 	}
 
 	/**
-	 * Returns the total number of top-level comments (or replies to a given comment) that have been left
+	 * Returns the total number of top-level comments (or replies to a given comment) that have been left.
 	 *
-	 * @param integer $inReplyTo [Optional] id of a comment (changes from a top-level count to a reply count)
 	 * @param User    $asUser    User instance of a user viewing.
+	 * @param integer $inReplyTo [Optional] ID of a comment (changes from a top-level count to a reply count)
 	 *
-	 * @return int
+	 * @return integer
 	 */
-	public function countComments(int $inReplyTo = 0, User $asUser) {
+	public function countComments(User $asUser, int $inReplyTo = 0) {
 		$db = CP::getDb(DB_REPLICA);
 		$results = $db->select(
 			['user_board'],
