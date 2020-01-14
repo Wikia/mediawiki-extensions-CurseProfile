@@ -485,7 +485,7 @@ class ProfileData {
 		global $wgOut;
 		$wgUser = RequestContext::getMain()->getUser();
 
-		$fieldHtml = $wgOut->parse($this->getField($field));
+		$fieldHtml = $wgOut->parseAsContent($this->getField($field));
 
 		if ($this->canEdit($wgUser) === true) {
 			if (empty($fieldHtml)) {
