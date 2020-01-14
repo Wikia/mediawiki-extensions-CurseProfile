@@ -51,21 +51,22 @@ class TemplateCommentBoard {
 	}
 
 	/**
-	 * Comments display
+	 * Comments display.
 	 *
-	 * @param  array   $comments   array of comments
-	 * @param  integer $user_id    id of user to whom this comment list belongs
-	 * @param  string  $pagination [optional] built HTML fragment for pagination
-	 * @return string	Built HTML
+	 * @param array   $comments   Array of comments
+	 * @param integer $user       User instance to who this comment list belongs to.
+	 * @param string  $pagination [Optional] Built HTML fragment for pagination.
+	 *
+	 * @return string Built HTML
 	 */
-	public function comments($comments, $user_id, $pagination = '') {
+	public function comments($comments, User $user, $pagination = '') {
 		$this->HTML = '';
 		$this->HTML .= '<div>' . $pagination . '</div>';
 
-		$this->HTML .= '<div class="comments curseprofile" data-user_id="' . $user_id . '">';
+		$this->HTML .= '<div class="comments curseprofile" data-user_id="' . $user->getId() . '">';
 
 		// add hidden compose form, to support replies
-		$this->HTML .= CommentDisplay::newCommentForm($user_id, true);
+		$this->HTML .= CommentDisplay::newCommentForm($user, true);
 
 		foreach ($comments as $comment) {
 			$this->HTML .= CommentDisplay::singleComment($comment, false);

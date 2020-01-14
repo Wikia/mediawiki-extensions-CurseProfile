@@ -80,6 +80,6 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 		$comments = $board->getComments($this->getUser(), $start, $itemsPerPage, -1);
 		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($templateCommentBoard->comments($comments, $userId, $pagination));
+		$wgOut->addHTML($templateCommentBoard->comments($comments, $user, $pagination));
 	}
 }
