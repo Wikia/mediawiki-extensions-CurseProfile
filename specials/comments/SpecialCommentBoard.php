@@ -71,7 +71,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		$board = new CommentBoard($user, CommentBoard::BOARDTYPE_ARCHIVES);
 
-		$total = $board->countComments();
+		$total = $board->countComments($this->getUser());
 		if ($total == 0) {
 			$wgOut->addWikiMsg('commentboard-empty', $user->getName());
 			return;
