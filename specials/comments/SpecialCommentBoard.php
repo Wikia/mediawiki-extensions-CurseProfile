@@ -40,8 +40,8 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
-		list($user_id, $user_name) = explode('/', $path);
-		$user = User::newFromId($user_id);
+		list($userId, $user_name) = explode('/', $path);
+		$user = User::newFromId($userId);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('commentboard-invalid');
@@ -51,7 +51,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		// Fix missing or incorrect username segment in the path
 		if ($user->getTitleKey() != $user_name) {
-			$fixedPath = '/Special:CommentBoard/' . $user_id . '/' . $user->getTitleKey();
+			$fixedPath = '/Special:CommentBoard/' . $userId . '/' . $user->getTitleKey();
 			if (!empty($_SERVER['QUERY_STRING'])) {
 				// don't destroy any extra params
 				$fixedPath .= '?' . $_SERVER['QUERY_STRING'];
@@ -69,7 +69,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		$wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$board = new CommentBoard($user_id, CommentBoard::BOARDTYPE_ARCHIVES);
+		$board = new CommentBoard($user, CommentBoard::BOARDTYPE_ARCHIVES);
 
 		$total = $board->countComments();
 		if ($total == 0) {
@@ -77,9 +77,9 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 			return;
 		}
 
-		$comments = $board->getComments(null, $start, $itemsPerPage, -1);
+		$comments = $board->getComments($this->getUser(), $start, $itemsPerPage, -1);
 		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
 
-		$wgOut->addHTML($templateCommentBoard->comments($comments, $user_id, $pagination));
+		$wgOut->addHTML($templateCommentBoard->comments($comments, $userId, $pagination));
 	}
 }
