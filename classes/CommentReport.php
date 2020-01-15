@@ -262,7 +262,7 @@ class CommentReport {
 	public static function newUserReport(Comment $comment, User $actor) {
 		$db = CP::getDb(DB_REPLICA);
 
-		if (!$comment->getId() < 1) {
+		if ($comment->getId() < 1) {
 			return false;
 		}
 
