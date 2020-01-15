@@ -17,6 +17,7 @@ use ApiBase;
 use ApiMain;
 use DerivativeRequest;
 use HydraApiBase;
+use User;
 
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
