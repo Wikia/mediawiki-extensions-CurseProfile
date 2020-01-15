@@ -463,6 +463,7 @@ class Hooks {
 		$updater->addPostDatabaseUpdateMaintenance(\CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class);
 
 		// global_id migration - Second part, uncomment in the future.
+		// Make sure to remove $this->data['ub_admin_acted_global_id'] from the Comment class!
 		// $updater->addExtensionUpdate(['dropField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql", true]);
 		// $updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql", true]);
 		// $updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_action_taken_by_global_id', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql", true]);
