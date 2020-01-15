@@ -426,13 +426,13 @@ class CommentReport {
 			'user_board_report_archives',
 			[
 				'ra_comment_id' => $this->data['comment']['cid'],
-				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
+				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ? date('Y-m-d H:i:s', $this->data['comment']['last_touched']) : null,
 				'ra_user_id_from' => $this->data['comment']['author'],
 				'ra_comment_text' => $this->data['comment']['text'],
-				'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
+				'ra_first_reported' => $this->data['first_reported'] !== null ? date('Y-m-d H:i:s', $this->data['first_reported']) : null,
 				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
-				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at'])
+				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ? date('Y-m-d H:i:s', $this->data['action_taken_at']) : null
 			],
 			__METHOD__
 		);
