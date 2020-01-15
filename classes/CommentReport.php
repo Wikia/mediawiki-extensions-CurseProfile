@@ -273,7 +273,7 @@ class CommentReport {
 			['*'],
 			[
 				"ra_comment_id" => $comment->getId(),
-				"ra_last_edited" => $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp()
+				"ra_last_edited" => date('Y-m-d H:i:s', $lastTouched)
 			],
 			__METHOD__
 		);
