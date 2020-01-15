@@ -317,7 +317,7 @@ class CommentApi extends HydraApiBase {
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getInt('byUser', $user->getId()),
+			'byUser' => $this->getInt('byUser', $this->getUser()->getId()),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki
