@@ -593,7 +593,8 @@ class CommentReport {
 		$this->data['action_taken_at']	= time();
 
 		// update data stores
-		return ($action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $actor))
+		$comment = Comment::newFromId($this->data['comment']['cid']);
+		return ($action == 'dismiss' || CommentBoard::removeComment($comment, $actor))
 			&& $this->resolveInDb()
 			&& $this->resolveInRedis();
 	}
