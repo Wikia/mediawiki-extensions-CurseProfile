@@ -38,7 +38,7 @@ class Comment {
 		'ub_date' => null,
 		'ub_last_reply' => null,
 		'ub_edited' => null,
-		'ub_admin_acted_global_id' => null, // @TODO: Removed after the migration period is finished. --Alexia E. Smith 2020-01-14
+		'ub_admin_acted_global_id' => null, // @TODO: Removed after the migration period is finished.  Make sure to uncomment the drop database statements in the Hooks as well.  --Alexia E. Smith 2020-01-14
 		'ub_admin_acted_user_id' => null,
 		'ub_admin_acted_at' => null
 	];
