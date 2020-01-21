@@ -15,6 +15,7 @@ namespace CurseProfile;
 
 use Html;
 use HydraCore;
+use Parser;
 use RequestContext;
 use SpecialPage;
 use Title;
