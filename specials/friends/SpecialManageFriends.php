@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use SpecialPage;
 use TemplateManageFriends;
 use UserNotLoggedIn;
@@ -31,7 +30,6 @@ class SpecialManageFriends extends SpecialPage {
 	/**
 	 * Return the group name for this special page.
 	 *
-	 * @access protected
 	 * @return string
 	 */
 	protected function getGroupName() {
@@ -64,10 +62,7 @@ class SpecialManageFriends extends SpecialPage {
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($user, CentralIdLookup::AUDIENCE_RAW);
-
-		$f = new Friendship($globalId);
+		$f = new Friendship($user);
 
 		$friends = $f->getFriends();
 		$rcvd = $f->getReceivedRequests();

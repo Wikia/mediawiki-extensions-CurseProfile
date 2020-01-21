@@ -60,7 +60,6 @@ class TemplateCommentModeration {
 	/**
 	 * Renders the main body of the CommentModeration special page
 	 *
-	 * @access public
 	 * @param  array $reports CommentReport instances.
 	 * @return string	HTML fragment
 	 */
@@ -68,11 +67,9 @@ class TemplateCommentModeration {
 		$html = '
 				<div id="commentmoderation" class="comments">';
 
-		$lookup = CentralIdLookup::factory();
-
 		foreach ($reports as $report) {
 			$rep = $report->data;
-			$author = $lookup->localUserFromCentralId($rep['comment']['author']);
+			$author = User::newFromId($rep['comment']['author']);
 			if ($author) { // handle failures where central ID doesn't exist on local wiki
 				$html .= '
 					<div class="report-item" data-key="' . $report->reportKey() . '">';
@@ -112,8 +109,7 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$lookup = CentralIdLookup::factory();
-		$user = $lookup->localUserFromCentralId($rep->data['action_taken_by']);
+		$user = User::newFromId($rep->data['action_taken_by_user_id']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
 				$action = 'dis';
@@ -129,7 +125,6 @@ class TemplateCommentModeration {
 	/**
 	 * Produces the introduction line above a reported comment "First reporteded X time ago by [user]:"
 	 *
-	 * @access private
 	 * @param  rep    array CommentReport data
 	 * @return string HTML fragment
 	 */
@@ -144,16 +139,14 @@ class TemplateCommentModeration {
 	/**
 	 * Creates the small user icons indicating who has reported a comment
 	 *
-	 * @access private
 	 * @param  array	Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
 	 * @return string	HTML fragment
 	 */
 	private function reporterIcons($reports) {
 		$html = '';
 		$iter = 0;
-		$lookup = CentralIdLookup::factory();
 		foreach ($reports as $rep) {
-			$reporter = $lookup->localUserFromCentralId($rep['reporter']);
+			$reporter = User::newFromId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
 			$html .= Html::rawElement(
 				'a',
@@ -171,7 +164,6 @@ class TemplateCommentModeration {
 	/**
 	 * Returns a permalink to a comment on its origin wiki.
 	 *
-	 * @access private
 	 * @param  object	CommentReport instance
 	 * @return string	HTML fragment
 	 */

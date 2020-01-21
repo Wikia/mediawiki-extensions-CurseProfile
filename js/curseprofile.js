@@ -81,7 +81,7 @@
 			(new mw.Api()).post({
 				action: 'friend',
 				do: $this.data('action'),
-				global_id: $this.data('id'),
+				user_id: $this.data('id'),
 				format: 'json',
 				formatversion: 2,
 				token: mw.user.tokens.get('csrfToken')

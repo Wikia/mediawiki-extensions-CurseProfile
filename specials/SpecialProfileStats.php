@@ -24,7 +24,6 @@ class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Constructor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
@@ -34,7 +33,6 @@ class SpecialProfileStats extends SpecialPage {
 	/**
 	 * Main Executor
 	 *
-	 * @access public
 	 * @param  string $path unused
 	 * @return void	[Outputs to screen]
 	 */

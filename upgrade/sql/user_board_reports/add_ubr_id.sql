@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_reports ADD `ubr_id` INT NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`ubr_id`); 

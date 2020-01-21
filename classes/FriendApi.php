@@ -14,7 +14,6 @@
 namespace CurseProfile;
 
 use ApiBase;
-use CentralIdLookup;
 use HydraApiBase;
 use RequestContext;
 use User;
@@ -33,10 +32,10 @@ class FriendApi extends HydraApiBase {
 			'tokenRequired' => true,
 			'postRequired' => true,
 			'params' => [
-				'global_id' => [
+				'user_id' => [
 					ApiBase::PARAM_TYPE => 'string',
-					ApiBase::PARAM_REQUIRED => true,
-				],
+					ApiBase::PARAM_REQUIRED => true
+				]
 			]
 		];
 
@@ -52,7 +51,7 @@ class FriendApi extends HydraApiBase {
 				'params' => [
 					'name' => [
 						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ApiBase::PARAM_REQUIRED => true
 					]
 				]
 			]
@@ -65,11 +64,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function execute() {
-		$wgUser = RequestContext::getMain()->getUser();
-
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($wgUser, CentralIdLookup::AUDIENCE_RAW);
-		$this->f = new Friendship($globalId);
+		$this->f = new Friendship($this->getUser());
 		parent::execute();
 	}
 
@@ -90,13 +85,7 @@ class FriendApi extends HydraApiBase {
 			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($targetUser);
-		if (!$globalId) {
-			$this->dieUsage(wfMessage('friendrequest-direct-unmerged')->params($targetUser->getName(), $wgUser->getName())->text(), 'friendrequest-direct-unmerged');
-		}
-
-		$result = $this->f->sendRequest($globalId);
+		$result = $this->f->sendRequest($targetUser->getId());
 		if (is_array($result) && isset($result['error'])) {
 			$this->dieUsage(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName())->text(), $result['error']);
 		} elseif (!$result) {
@@ -113,9 +102,9 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doSend() {
-		$this->globalId = $this->getMain()->getVal('global_id');
-		$result = $this->f->sendRequest($this->globalId);
-		$html = FriendDisplay::friendButtons($this->globalId, true);
+		$userId = $this->getMain()->getInt('user_id');
+		$result = $this->f->sendRequest($userId);
+		$html = FriendDisplay::friendButtons($userId);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
@@ -126,8 +115,8 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doConfirm() {
-		$this->globalId = $this->getMain()->getVal('global_id');
-		$result = $this->f->acceptRequest($this->globalId);
+		$userId = $this->getMain()->getInt('user_id');
+		$result = $this->f->acceptRequest($userId);
 		$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
@@ -139,9 +128,9 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doIgnore() {
-		$this->globalId = $this->getMain()->getVal('global_id');
-		$rel = $this->f->getRelationship($this->globalId);
-		$result = $this->f->ignoreRequest($this->globalId);
+		$userId = $this->getMain()->getInt('user_id');
+		$rel = $this->f->getRelationship($userId);
+		$result = $this->f->ignoreRequest($userId);
 		if ($rel == Friendship::REQUEST_RECEIVED) {
 			$this->getResult()->addValue(null, 'remove', true);
 		}
@@ -154,9 +143,9 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doRemove() {
-		$this->globalId = $this->getMain()->getVal('global_id');
-		$result = $this->f->removeFriend($this->globalId);
-		$html = FriendDisplay::friendButtons($this->globalId, true);
+		$userId = $this->getMain()->getInt('user_id');
+		$result = $this->f->removeFriend($userId);
+		$html = FriendDisplay::friendButtons($userId);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}

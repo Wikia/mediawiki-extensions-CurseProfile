@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use DynamicSettings\Environment;
 use RedisCache;
 use Reverb\Notification\NotificationBroadcast;
@@ -56,7 +55,6 @@ class CommentReport {
 	/**
 	 * Constructor used by static methods to create instances of this class.
 	 *
-	 * @access private
 	 * @param  array $data a mostly filled out data set (see newFromRow)
 	 * @return void
 	 */
@@ -67,7 +65,6 @@ class CommentReport {
 	/**
 	 * Gets the total count of how many comments are in a given queue
 	 *
-	 * @access public
 	 * @param  string      $sortStyle which queue to count
 	 * @param  string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
 	 * @return int
@@ -80,10 +77,8 @@ class CommentReport {
 			switch ($sortStyle) {
 				case 'byWiki':
 					return $redis->zCard(self::REDIS_KEY_WIKI_INDEX . $qualifier);
-
 				case 'byUser':
 					return $redis->zCard(self::REDIS_KEY_USER_INDEX . $qualifier);
-
 				case 'byDate':
 				case 'byVolume':
 				default:
@@ -99,9 +94,9 @@ class CommentReport {
 	/**
 	 * Main retrieval function to get data out of redis or the local db
 	 *
-	 * @param  string $sortStyle [optional] default byVolume
-	 * @param  int    $limit     [optional] default 10
-	 * @param  int    $offset    [optional] default 0
+	 * @param  string  $sortStyle [optional] default byVolume
+	 * @param  integer $limit     [optional] default 10
+	 * @param  integer $offset    [optional] default 0
 	 * @return array
 	 */
 	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
@@ -162,7 +157,6 @@ class CommentReport {
 	/**
 	 * Queries redis data store for reports
 	 *
-	 * @access private
 	 * @param  string	sort style
 	 * @param  integer	max number of reports to return
 	 * @param  integer	offset
@@ -260,42 +254,26 @@ class CommentReport {
 	 * Primary entry point for a user clicking the report button.
 	 * Assumes $wgUser is the acting reporter
 	 *
-	 * @access public
-	 * @param  int $commentId Comment ID of a local comment.
-	 * @return mixed	CommentReport instance that is already saved or null on failure.
+	 * @param Comment $comment The comment being reported.
+	 * @param User    $actor   User creating this report.
+	 *
+	 * @return mixed CommentReport instance that is already saved or false on failure.
 	 */
-	public static function newUserReport($commentId) {
+	public static function newUserReport(Comment $comment, User $actor) {
 		$db = CP::getDb(DB_REPLICA);
-		$commentId = intval($commentId);
-		if ($commentId < 1) {
-			return null;
-		}
 
-		$res = $db->select(
-			['user_board'],
-			['*'],
-			[
-				"ub_id" => $commentId,
-				"ub_type" => CommentBoard::PUBLIC_MESSAGE
-			],
-			__METHOD__
-		);
-		$comment = $res->fetchRow();
-		$res->free();
-
-		if (!$comment) {
-			// comment did not exist, is already deleted, or a private message (legacy feature of leaguepedia's old profile system)
-			return null;
+		if ($comment->getId() < 1) {
+			return false;
 		}
 
 		// check for existing reports// Look up the target comment
-		$comment['last_touched'] = $comment['ub_edited'] ? $comment['ub_edited'] : $comment['ub_date'];
+		$lastTouched = $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp();
 		$res = $db->select(
 			['user_board_report_archives'],
 			['*'],
 			[
-				"ra_comment_id" => $commentId,
-				"ra_last_edited" => $comment['last_touched']
+				"ra_comment_id" => $comment->getId(),
+				"ra_last_edited" => date('Y-m-d H:i:s', $lastTouched)
 			],
 			__METHOD__
 		);
@@ -304,7 +282,7 @@ class CommentReport {
 
 		if (!$reportRow) {
 			// create new report item if never reported before
-			$report = self::createWithArchive($comment);
+			$report = self::createWithArchive($comment, $actor);
 		} elseif ($reportRow['ra_action_taken']) {
 			// comment has already been moderated
 			return self::newFromRow($reportRow);
@@ -320,27 +298,27 @@ class CommentReport {
 	/**
 	 * Archive the contents of a comment into a new report
 	 *
-	 * @param  array	comment row from the user_board DB table
-	 * @return object		CommentReport instance
+	 * @param Comment $comment The comment being reported.
+	 * @param User    $actor   User creating this report.
+	 *
+	 * @return object CommentReport instance
 	 */
-	private static function createWithArchive($comment) {
-		global $wgUser, $dsSiteKey;
+	private static function createWithArchive(Comment $comment, User $actor) {
+		global $dsSiteKey;
 
-		$lookup = CentralIdLookup::factory();
-		$userFrom = User::newFromId($comment['ub_user_id_from']);
+		$userFrom = $comment->getActorUser();
 		if (!$userFrom) {
 			return false;
 		}
-		$authorGlobalId = $lookup->centralIdFromLocalUser($userFrom);
 
 		// insert data into redis and update indexes
 		$data = [
 			'comment' => [
-				'text' => $comment['ub_message'],
-				'cid' => $comment['ub_id'],
+				'text' => $comment->getMessage(),
+				'cid' => $comment->getId(),
 				'origin_wiki' => $dsSiteKey,
-				'last_touched' => strtotime($comment['last_touched']),
-				'author' => $authorGlobalId,
+				'last_touched' => $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp(),
+				'author' => $userFrom->getId(),
 			],
 			'reports' => [],
 			'action_taken' => 0,
@@ -355,7 +333,7 @@ class CommentReport {
 		}
 		$report->initialRedisInsert();
 
-		$report->addReportFrom($wgUser);
+		$report->addReportFrom($actor);
 
 		return $report;
 	}
@@ -363,9 +341,9 @@ class CommentReport {
 	/**
 	 * Creates a new comment report object from a DB row.
 	 *
-	 * @access private
-	 * @param  array	Row from the the user_board_report_archives table.
-	 * @return object	CommentReport instance
+	 * @param array $report Row from the the user_board_report_archives table.
+	 *
+	 * @return CommentReport
 	 */
 	private static function newFromRow($report) {
 		global $dsSiteKey;
@@ -375,11 +353,11 @@ class CommentReport {
 				'cid' => $report['ra_comment_id'],
 				'origin_wiki' => $dsSiteKey,
 				'last_touched' => strtotime($report['ra_last_edited']),
-				'author' => $report['ra_global_id_from'],
+				'author' => $report['ra_user_id_from'],
 			],
 			'reports' => self::getReportsForId($report['ra_id']),
 			'action_taken' => $report['ra_action_taken'],
-			'action_taken_by' => $report['ra_action_taken_by'],
+			'action_taken_by' => $report['ra_action_taken_by_user_id'],
 			'action_taken_at' => strtotime($report['ra_action_taken_at']),
 			'first_reported' => strtotime($report['ra_first_reported']),
 		];
@@ -391,15 +369,15 @@ class CommentReport {
 	/**
 	 * Loads individual user reports for a given comment report.
 	 *
-	 * @access private
-	 * @param  integer	The ra_comment_id from the user_board_report_archives table
-	 * @return array	With sub arrays for each report having keys reporter => global_id, timestamp
+	 * @param integer $id The ra_comment_id from the user_board_report_archives table
+	 *
+	 * @return array With sub arrays for each report having keys reporter => user_id, timestamp
 	 */
 	private static function getReportsForId($id) {
 		$db = CP::getDb(DB_REPLICA);
 		$res = $db->select(
 			['user_board_reports'],
-			['ubr_reporter_global_id as reporter', 'ubr_reported as timestamp'],
+			['ubr_reporter_user_id as reporter', 'ubr_reported as timestamp'],
 			['ubr_report_archive_id = ' . intval($id)],
 			__METHOD__,
 			['ORDER BY' => 'ubr_reported ASC']
@@ -416,8 +394,7 @@ class CommentReport {
 	/**
 	 * Is this report stored in this local wiki database?
 	 *
-	 * @access public
-	 * @return boolean	True if report is stored on this wiki.
+	 * @return boolean True if report is stored on this wiki.
 	 */
 	public function isLocal() {
 		global $dsSiteKey;
@@ -427,9 +404,9 @@ class CommentReport {
 	/**
 	 * Is this report key stored in this local wiki database?
 	 *
-	 * @access public
-	 * @param  string $reportKey Report Key
-	 * @return boolean	True if report is stored on this wiki.
+	 * @param string $reportKey Report Key
+	 *
+	 * @return boolean True if report is stored on this wiki.
 	 */
 	public static function keyIsLocal($reportKey) {
 		global $dsSiteKey;
@@ -440,7 +417,6 @@ class CommentReport {
 	/**
 	 * Insert a new report into the local database.
 	 *
-	 * @access private
 	 * @return void
 	 */
 	private function initialLocalInsert() {
@@ -450,13 +426,13 @@ class CommentReport {
 			'user_board_report_archives',
 			[
 				'ra_comment_id' => $this->data['comment']['cid'],
-				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched']),
-				'ra_global_id_from' => $this->data['comment']['author'],
+				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ? date('Y-m-d H:i:s', $this->data['comment']['last_touched']) : null,
+				'ra_user_id_from' => $this->data['comment']['author'],
 				'ra_comment_text' => $this->data['comment']['text'],
-				'ra_first_reported' => date('Y-m-d H:i:s', $this->data['first_reported']),
+				'ra_first_reported' => $this->data['first_reported'] !== null ? date('Y-m-d H:i:s', $this->data['first_reported']) : null,
 				'ra_action_taken' => $this->data['action_taken'],
-				'ra_action_taken_by' => $this->data['action_taken_by'],
-				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at'])
+				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
+				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ? date('Y-m-d H:i:s', $this->data['action_taken_at']) : null
 			],
 			__METHOD__
 		);
@@ -466,8 +442,7 @@ class CommentReport {
 	/**
 	 * Insert a new report into redis with indexes
 	 *
-	 * @access private
-	 * @return boolean	Success
+	 * @return boolean Success
 	 */
 	private function initialRedisInsert() {
 		$redis = RedisCache::getClient('cache');
@@ -493,7 +468,6 @@ class CommentReport {
 	/**
 	 * Get the unique key identifying this reported comment in redis
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function reportKey() {
@@ -508,22 +482,20 @@ class CommentReport {
 	/**
 	 * Add a new report to comment that has already been archived.
 	 *
-	 * @access private
-	 * @param  object $fromUser The User reporting this comment
+	 * @param User $fromUser The User reporting this comment
+	 *
 	 * @return void
 	 */
-	private function addReportFrom($fromUser) {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($fromUser, CentralIdLookup::AUDIENCE_RAW);
-		$commentAuthor = $lookup->localUserFromCentralId($this->data['comment']['author']);
+	private function addReportFrom(User $fromUser) {
+		$commentAuthor = User::newFromId($this->data['comment']['author']);
 
-		if (!isset($this->id) || !$globalId) {
+		if (!isset($this->id) || $fromUser->isAnon()) {
 			// Can't add to a comment that hasn't been archived yet.
 			return false;
 		}
 
 		$newReport = [
-			'reporter' => $globalId,
+			'reporter' => $fromUser->getId(),
 			'timestamp' => time(),
 		];
 
@@ -533,7 +505,7 @@ class CommentReport {
 			'user_board_reports',
 			[
 				'ubr_report_archive_id' => $this->id,
-				'ubr_reporter_global_id' => $globalId,
+				'ubr_reporter_user_id' => $fromUser->getId(),
 				'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp'])
 			],
 			__METHOD__
@@ -600,15 +572,14 @@ class CommentReport {
 	}
 
 	/**
-	 * Dismiss or delete a reported comment/
+	 * Dismiss or delete a reported comment.
 	 *
-	 * @param  string     $action Action to take on the reported comment. either 'delete' or 'dismiss'
-	 * @param  mixed|null $byUser [Optional] User object of the acting user, defaults to|null $wgUser
-	 * @return boolean	true if successful
+	 * @param string $action Action to take on the reported comment. either 'delete' or 'dismiss'
+	 * @param User   $actor  [Optional] User object of the acting user, defaults to|null $wgUser
+	 *
+	 * @return boolean True if successful
 	 */
-	public function resolve($action, $byUser = null) {
-		global $wgUser;
-
+	public function resolve(string $action, User $actor) {
 		if (!$this->isLocal()) {
 			return false;
 		}
@@ -616,24 +587,14 @@ class CommentReport {
 			return false;
 		}
 
-		if (is_null($byUser)) {
-			$byUser = $wgUser;
-		}
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($byUser, CentralIdLookup::AUDIENCE_RAW);
-
-		// Need a Curse ID to continue;
-		if (!$globalId) {
-			return false;
-		}
-
 		// update internal data
 		$this->data['action_taken']		= ($action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS);
-		$this->data['action_taken_by']	= $globalId;
+		$this->data['action_taken_by']	= $actor->getId();
 		$this->data['action_taken_at']	= time();
 
 		// update data stores
-		return ($action == 'dismiss' || CommentBoard::removeComment($this->data['comment']['cid'], $byUser))
+		$comment = Comment::newFromId($this->data['comment']['cid']);
+		return ($action == 'dismiss' || CommentBoard::removeComment($comment, $actor))
 			&& $this->resolveInDb()
 			&& $this->resolveInRedis();
 	}
@@ -641,17 +602,16 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in the local database
 	 *
-	 * @return bool	success
+	 * @return boolean Success
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
-		// write curse ID of acting user to ra_action_taken_by
 		$db = CP::getDb(DB_MASTER);
 		$result = $db->update(
 			'user_board_report_archives',
 			[
 				'ra_action_taken' => $this->data['action_taken'],
-				'ra_action_taken_by' => $this->data['action_taken_by'],
+				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
 				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
 			],
 			[
@@ -666,7 +626,7 @@ class CommentReport {
 	/**
 	 * Marks a report as archived in redis
 	 *
-	 * @return bool	true
+	 * @return boolean True
 	 */
 	private function resolveInRedis() {
 		$redis = RedisCache::getClient('cache');

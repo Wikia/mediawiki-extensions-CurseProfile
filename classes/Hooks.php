@@ -153,7 +153,7 @@ class Hooks {
 	 * @param array        $attribs
 	 * @param mixed        $ret
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onHtmlPageLinkRendererEnd(
 		LinkRenderer $linkRenderer,
@@ -191,7 +191,7 @@ class Hooks {
 	 * @param Title   $title
 	 * @param Article $article
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onArticleFromTitle(Title &$title, &$article) {
 		if (!self::$profilePage) {
@@ -215,10 +215,13 @@ class Hooks {
 	 */
 	private static function resolveHref($attribs, $target) {
 		$url_components = parse_url($attribs['href']);
-		parse_str($url_components['query'], $query);
+		$query = [];
+		if (isset($url_components['query'])) {
+			parse_str($url_components['query'], $query);
+		}
 
 		// Remove redlink and edit
-		if ($query && isset($query['redlink'])) {
+		if (!empty($query) && isset($query['redlink'])) {
 			unset($query['redlink'], $query['action']);
 		}
 
@@ -239,7 +242,7 @@ class Hooks {
 	 * @param Title   $title
 	 * @param Article $article
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function renderProfile(&$title, &$article) {
 		global $wgOut;
@@ -287,7 +290,7 @@ class Hooks {
 	 *
 	 * @param Title $title
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function renderUserPages(&$title) {
 		global $wgRequest, $wgOut;
@@ -329,7 +332,7 @@ class Hooks {
 	 *
 	 * @param object $request Global $wgRequest object
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function shouldWarn($request) {
 		return (
@@ -446,21 +449,25 @@ class Hooks {
 		$updater->addExtensionUpdate(['addTable', 'user_board_report_archives', "{$extDir}/install/sql/table_user_board_report_archives.sql", true]);
 		$updater->addExtensionUpdate(['addTable', 'user_board_reports', "{$extDir}/install/sql/table_user_board_reports.sql", true]);
 
-		// Update tables with extra fields for our use.
-		$updater->addExtensionField('user_board', 'ub_in_reply_to', "{$extDir}/upgrade/sql/add_user_board_reply_to.sql", true);
-		$updater->addExtensionField('user_board', 'ub_edited', "{$extDir}/upgrade/sql/add_user_board_edit_and_reply_date.sql", true);
-		$updater->addExtensionField('user_board_report_archives', 'ra_action_taken_at', "{$extDir}/upgrade/sql/add_user_board_report_archives_action_taken_timestamp.sql", true);
-		$updater->addExtensionField('user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/add_user_board_admin_action_log.sql", true);
+		// global_id migration.
+		$updater->addExtensionUpdate(['addField', 'user_board_reports', 'ubr_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_id.sql", true]);
+		$updater->addExtensionUpdate(['modifyField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/change_ubr_reporter_global_id.sql", true]);
+		$updater->addExtensionUpdate(['addField', 'user_board_reports', 'ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql", true]);
+		$updater->addExtensionUpdate(['addIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql", true]);
+		$updater->addExtensionUpdate(['dropIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql", true]);
+		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_user_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql", true]);
+		$updater->addExtensionUpdate(['modifyField', 'user_board_report_archives', 'ra_action_taken_by', "{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql", true]);
+		$updater->addExtensionUpdate(['addField', 'user_board_report_archives', 'ra_action_taken_by_user_id', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql", true]);
+		$updater->addExtensionUpdate(['addField', 'user_board', 'ub_admin_acted_user_id', "{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql", true]);
+		$updater->addExtensionUpdate(['modifyField', 'user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql", true]);
+		$updater->addPostDatabaseUpdateMaintenance(\CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class);
 
-		$updater->addExtensionUpdate(['modifyField', 'user_board_reports', 'ubr_reporter_curse_id', "{$extDir}/upgrade/sql/user_board_reports/rename_ubr_reporter_curse_id.sql", true]);
-		$updater->addExtensionUpdate(['dropIndex', 'user_board_reports', 'ubr_report_curse_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_report_curse_id.sql", true]);
-		$updater->addExtensionUpdate(['addIndex', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_global_id.sql", true]);
-		$updater->addExtensionUpdate(['dropIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_curse_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_report_archive_id_ubr_reporter_curse_id.sql", true]);
-		$updater->addExtensionUpdate(['addIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_report_archive_id_ubr_reporter_global_id.sql", true]);
-
-		$updater->addExtensionUpdate(['modifyField', 'user_board_report_archives', 'ra_curse_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_curse_id_from.sql", true]);
-		$updater->addExtensionUpdate(['dropIndex', 'user_board_report_archives', 'ra_curse_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_curse_id_from.sql", true]);
-		$updater->addExtensionUpdate(['addIndex', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_global_id_from.sql", true]);
+		// global_id migration - Second part, uncomment in the future.
+		// Make sure to remove $this->data['ub_admin_acted_global_id'] from the Comment class!
+		// $updater->addExtensionUpdate(['dropField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql", true]);
+		// $updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql", true]);
+		// $updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_action_taken_by_global_id', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql", true]);
+		// $updater->addExtensionUpdate(['dropField', 'user_board', 'ub_admin_acted_global_id', "{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql", true]);
 
 		if (Environment::isMasterWiki()) {
 			$updater->addExtensionUpdate(['addTable', 'user_relationship', "{$extDir}/install/sql/table_user_relationship.sql", true]);
@@ -511,7 +518,7 @@ class Hooks {
 	}
 
 	/**
-	 * Function Documentation
+	 * Handle modifying preferences before the form saves.
 	 *
 	 * @param array  $formData array of user submitted data
 	 * @param object $form     PreferencesForm object, also a ContextSource
@@ -613,7 +620,7 @@ class Hooks {
 	 * @param Integer $index  The index of the namespace being checked
 	 * @param Boolean $result Whether MediaWiki currently thinks this namespace is movable
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onNamespaceIsMovable($index, &$result) {
 		if ($index == NS_USER_PROFILE) {
@@ -631,7 +638,7 @@ class Hooks {
 	 * @param string $action Action concerning the title in question
 	 * @param bool   $result Whether MediaWiki currently thinks the action may be performed
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function onUserCan(&$title, &$user, $action, &$result) {
 		if ($title->getNamespace() == NS_USER_PROFILE && $action === 'edit') {

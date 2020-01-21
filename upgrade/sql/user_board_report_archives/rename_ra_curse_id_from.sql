@@ -1,1 +1,0 @@
-ALTER TABLE /*_*/user_board_report_archives CHANGE `ra_curse_id_from` `ra_global_id_from` INT(11) NOT NULL DEFAULT '0';

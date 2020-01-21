@@ -41,7 +41,7 @@ class CP {
 	/**
 	 * Returns a db connection to use
 	 *
-	 * @param  int $id mw db id (DB_MASTER or DB_SLAVE)
+	 * @param  integer $id mw db id (DB_MASTER or DB_SLAVE)
 	 * @return object	mw db connection
 	 */
 	public static function getDb($id) {

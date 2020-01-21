@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_reports ADD UNIQUE `ubr_report_archive_id_ubr_reporter_user_id` (`ubr_report_archive_id`, `ubr_reporter_user_id`);

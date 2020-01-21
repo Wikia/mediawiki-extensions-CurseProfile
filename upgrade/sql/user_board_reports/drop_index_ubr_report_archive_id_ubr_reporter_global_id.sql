@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_reports DROP INDEX `ubr_report_archive_id_ubr_reporter_global_id`;

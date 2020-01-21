@@ -15,9 +15,9 @@ namespace CurseProfile;
 
 use ApiBase;
 use ApiMain;
-use CentralIdLookup;
 use DerivativeRequest;
 use HydraApiBase;
+use User;
 
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
@@ -67,13 +67,9 @@ class CommentApi extends HydraApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'global_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
-					],
 					'user_id' => [
 						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_REQUIRED => true
 					],
 					'text' => [
 						ApiBase::PARAM_TYPE => 'string',
@@ -131,13 +127,9 @@ class CommentApi extends HydraApiBase {
 				'tokenRequired' => true,
 				'postRequired' => true,
 				'params' => [
-					'global_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
-					],
 					'user_id' => [
 						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ApiBase::PARAM_REQUIRED => true
 					],
 					'title' => [
 						ApiBase::PARAM_TYPE => 'string',
@@ -191,20 +183,16 @@ class CommentApi extends HydraApiBase {
 	 * depending on what the user has chosen as their default user page.
 	 */
 	public function doAddToDefault() {
-		// intentional use of value returned from assignment
-		if (!($user_id = $this->getMain()->getVal('user_id'))) {
-			$lookup = CentralIdLookup::factory();
-			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
-			if ($user->isAnon()) {
-				return $this->dieWithError(['comment-invaliduser']);
-			}
+		$user = User::newFromId($this->getMain()->getVal('user_id'));
+		if (!$user || $user->isAnon()) {
+			return $this->dieWithError(['comment-invaliduser']);
 		}
 		$text = $this->getMain()->getVal('text');
-		$inreply = $this->getMain()->getVal('inReplyTo');
+		$inreply = $this->getInt('inReplyTo');
 
 		if ($user->getIntOption('comment-pref')) {
-			$board = new CommentBoard($user_id);
-			$commentSuccess = $board->addComment($text, null, $inreply);
+			$board = new CommentBoard($user);
+			$commentSuccess = $board->addComment($text, $this->getUser(), $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 		} else {
 			// the recommended way of editing a local article was with WikiPage::doEditContent
@@ -231,21 +219,17 @@ class CommentApi extends HydraApiBase {
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
 	public function doAdd() {
-		$toUser = $this->getMain()->getVal('user_id');
-		if (!$toUser) {
-			$lookup = CentralIdLookup::factory();
-			$user = $lookup->localUserFromCentralId($this->getMain()->getVal('global_id'));
-			if (!$user) {
+		$toUser = User::newFromId($this->getInt('user_id'));
+		if (!$toUser || !$toUser->isAnon()) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				return;
-			}
-			$toUser = $user->getId();
 		}
+
 		$text = $this->getMain()->getVal('text');
-		$inreply = $this->getMain()->getVal('inReplyTo');
+		$inreply = $this->getInt('inReplyTo');
 
 		$board = new CommentBoard($toUser);
-		$commentSuccess = $board->addComment($text, null, $inreply);
+		$commentSuccess = $board->addComment($text, $this->getUser(), $inreply);
 
 		$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
 	}
@@ -254,20 +238,21 @@ class CommentApi extends HydraApiBase {
 	 * Returns all replies to a specific comment
 	 */
 	public function doGetReplies() {
-		$replies = CommentDisplay::repliesTo($this->getMain()->getVal('user_id'), $this->getMain()->getVal('comment_id'));
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		$replies = CommentDisplay::repliesTo($comment, $this->getUser());
 		$this->getResult()->addValue(null, 'html', $replies);
 	}
 
 	public function doGetRaw() {
-		$comment = CommentBoard::getCommentById($this->getMain()->getVal('comment_id'), false);
-		$this->getResult()->addValue(null, 'text', (isset($comment[0]['ub_message']) ? $comment[0]['ub_message'] : ''));
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		$this->getResult()->addValue(null, 'text', $comment->canView($this->getUser()) ? $comment->getMessage() : '');
 	}
 
 	public function doEdit() {
-		$commentId = $this->getMain()->getVal('comment_id');
+		$comment = Comment::newFromId($this->getInt('comment_id'));
 		$text = $this->getMain()->getVal('text');
-		if ($commentId && CommentBoard::canEdit($commentId)) {
-			$res = CommentBoard::editComment($commentId, $text);
+		if ($comment) {
+			$res = CommentBoard::editComment($comment, $this->getUser(), $text);
 			$this->getResult()->addValue(null, 'result', 'success');
 			// add parsed text to result
 			$this->getResult()->addValue(null, 'parsedContent', CommentDisplay::sanitizeComment($text));
@@ -277,9 +262,9 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doRestore() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRestore($commentId)) {
-			CommentBoard::restoreComment($commentId);
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		if ($comment) {
+			CommentBoard::restoreComment($comment, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -288,9 +273,9 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doRemove() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId && CommentBoard::canRemove($commentId)) {
-			CommentBoard::removeComment($commentId);
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		if ($comment) {
+			CommentBoard::removeComment($comment, $this->getUser());
 			$this->getResult()->addValue(null, 'result', 'success');
 			$this->getResult()->addValue(null, 'html', wfMessage('comment-adminremoved'));
 		} else {
@@ -299,10 +284,10 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doPurge() {
-		$commentId = $this->getMain()->getVal('comment_id');
+		$comment = Comment::newFromId($this->getInt('comment_id'));
 		$reason = $this->getMain()->getVal('reason');
-		if ($commentId && CommentBoard::canPurge()) {
-			CommentBoard::purgeComment($commentId, $reason);
+		if ($comment) {
+			CommentBoard::purgeComment($comment, $this->getUser(), $reason);
 			$this->getResult()->addValue(null, 'result', 'success');
 		} else {
 			return $this->dieWithError(['comment-invalidaction']);
@@ -310,9 +295,9 @@ class CommentApi extends HydraApiBase {
 	}
 
 	public function doReport() {
-		$commentId = $this->getMain()->getVal('comment_id');
-		if ($commentId) {
-			$result = CommentBoard::reportComment($commentId);
+		$comment = Comment::newFromId($this->getInt('comment_id'));
+		if ($comment) {
+			$result = CommentBoard::reportComment($comment, $this->getUser());
 			$this->getResult()->addValue(null, 'result', $result ? 'success' : 'error');
 		} else {
 			return $this->dieWithError(['comment-invalidaction']);
@@ -322,13 +307,10 @@ class CommentApi extends HydraApiBase {
 	/**
 	 * Resolve Report API End Point
 	 *
-	 * @access public
 	 * @return boolean	Success
 	 */
 	public function doResolveReport() {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->getUser(), CentralIdLookup::AUDIENCE_RAW);
-		if (!$globalId) {
+		if (!$this->getUser()->isLoggedIn()) {
 			return false;
 		}
 
@@ -336,7 +318,7 @@ class CommentApi extends HydraApiBase {
 		$jobArgs = [
 			'reportKey' => $reportKey,
 			'action' => $this->getMain()->getVal('withAction'),
-			'byUser' => $this->getMain()->getVal('byUser', $globalId),
+			'byUser' => $this->getInt('byUser', $this->getUser()->getId()),
 		];
 
 		// if not dealing with a comment originating here, dispatch it off to the origin wiki
@@ -358,5 +340,17 @@ class CommentApi extends HydraApiBase {
 	 */
 	public function isWriteMode() {
 		return true;
+	}
+
+	/**
+	 * Get a value from a parameter in the request and cast to an integer.
+	 *
+	 * @param string $key     Parameter Name
+	 * @param mixed  $default [Optional] Default value to return if not found.
+	 *
+	 * @return integer
+	 */
+	private function getInt(string $key, $default = 0): int {
+		return intval($this->getMain()->getVal($key, $default));
 	}
 }

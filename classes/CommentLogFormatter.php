@@ -24,7 +24,6 @@ class CommentLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for comments.
 	 *
-	 * @access public
 	 * @return array	Extract and parsed parameters.
 	 */
 	protected function getMessageParameters() {

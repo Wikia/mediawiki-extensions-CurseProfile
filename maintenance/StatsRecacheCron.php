@@ -21,7 +21,6 @@ class StatsRecacheCron extends Maintenance {
 	/**
 	 * Main Executor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function execute() {

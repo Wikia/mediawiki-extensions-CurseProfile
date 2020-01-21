@@ -312,8 +312,13 @@
 				formatversion: 2,
 				token: mw.user.tokens.get('csrfToken')
 			}).done(function(resp) {
-				// TODO what happens after a comment is reported?
-				window.alert( mw.message('report-thanks').text() );
+				var success = resp.result === 'success';
+				if (success) {
+					window.alert(mw.message('report-thanks').text());
+				} else {
+					window.alert('Error submitting report action.  Check the JS console for debug info.');
+					console.dir(resp);
+				}
 			}).fail(function(code, resp) {
 				$this.show();
 				console.dir(resp);

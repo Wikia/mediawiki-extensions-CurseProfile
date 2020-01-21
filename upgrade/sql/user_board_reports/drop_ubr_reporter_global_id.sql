@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_reports DROP `ubr_reporter_global_id`;

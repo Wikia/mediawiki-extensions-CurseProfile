@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_report_archives DROP `ra_action_taken_by_global_id`;

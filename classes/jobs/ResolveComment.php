@@ -5,16 +5,15 @@
 
 namespace CurseProfile;
 
-use CentralIdLookup;
 use DynamicSettings\Wiki;
 use SyncService\Job;
+use User;
 use Wikimedia\Rdbms\DBConnectionError;
 
 class ResolveComment extends Job {
 	/**
 	 * Look up a wiki by md5key and open a connection to its database
 	 *
-	 * @access public
 	 * @param  string $dbKey MD5 key for the wiki
 	 * @return object	Active MW database connection
 	 */
@@ -37,7 +36,7 @@ class ResolveComment extends Job {
 	 * @param  array	Params for this job with string keys:
 	 *   reportKey: unique key identifying the reported comment
 	 *   action: 'dismiss' or 'delete'
-	 *   byUser: curse ID of admin acting
+	 *   byUser: User ID of admin acting
 	 * @return integer	return code
 	 */
 	public function execute($args = []) {
@@ -57,8 +56,8 @@ class ResolveComment extends Job {
 		if (!$report) {
 			return 0;
 		}
-		$lookup = CentralIdLookup::factory();
-		$user = $lookup->localUserFromCentralId($args['byUser']);
+
+		$user = User::newFromId($args['byUser']);
 		$result = $report->resolve($args['action'], $user);
 
 		// Revert back to standard db connections.

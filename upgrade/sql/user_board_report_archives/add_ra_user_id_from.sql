@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/user_board_report_archives ADD `ra_user_id_from` INT(11) NOT NULL DEFAULT '0' AFTER `ra_global_id_from`, ADD INDEX `ra_user_id_from` (`ra_user_id_from`); 
