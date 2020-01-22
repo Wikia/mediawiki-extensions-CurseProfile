@@ -148,8 +148,12 @@ class Friendship {
 			return false;
 		}
 
-		if ($this->user->isBlocked() || $toUser->isBlocked()) {
+		if ($this->user->isBlocked()) {
 			return ['error' => 'friendrequest-blocked'];
+		}
+
+		if ($toUser->isBlocked()) {
+			return ['error' => 'friendrequest-blocked-other'];
 		}
 
 		$relationShip = $this->getRelationship();
