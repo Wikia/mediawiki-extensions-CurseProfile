@@ -24,8 +24,9 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param  integer $userId User ID of the profile page being viewed
-	 * @param  array   &$links reference to the links array into which the links will be inserted
+	 * @param integer $userId User ID of the profile page being viewed
+	 * @param array   &$links reference to the links array into which the links will be inserted
+	 *
 	 * @return void
 	 */
 	public static function addFriendLink(User $toUser, array &$links) {
@@ -150,9 +151,9 @@ class FriendDisplay {
 		}
 
 		$friendship = new Friendship($user);
-		$friends = $friendship->getFriends();
+		$friendTypes = $friendship->getFriends();
 
-		return count($friends);
+		return count($friendTypes['friends']);
 	}
 
 	/**
@@ -171,13 +172,13 @@ class FriendDisplay {
 		}
 
 		$friendship = new Friendship($user);
-		$friends = $friendship->getFriends();
-		if (count($friends) == 0) {
+		$friendTypes = $friendship->getFriends();
+		if (!count($friendTypes['friends'])) {
 			return '';
 		}
 
 		return [
-			self::listFromArray($friends, false, 10, 0, true),
+			self::listFromArray($friendTypes['friends'], false, 10, 0, true),
 			'isHTML' => true,
 		];
 	}
@@ -185,18 +186,17 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param  array   $userIds        [Optional] User IDs
+	 * @param  array   $user        [Optional] User objects
 	 * @param  bool    $manageButtons  [Optional] signature: callback($userObj) returns string
 	 * @param  integer $limit          [Optional] Number of results to limit.
 	 * @param  integer $offset         [Optional] Offset to start from.
 	 * @param  bool    $sortByActivity [Optional] Sort by user activity instead of name.
 	 * @return string	HTML UL List
 	 */
-	public static function listFromArray($userIds = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
+	public static function listFromArray(?array $users = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$html = '
 		<ul class="friends">';
-		foreach ($userIds as $userId) {
-			$fUser = User::newFromId($userId);
+		foreach ($users as $fUser) {
 			if (!$fUser->getId()) {
 				// Just silently drop if the user is actually missing.
 				continue;

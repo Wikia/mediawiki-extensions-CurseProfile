@@ -80,14 +80,19 @@ class Friendship {
 	 */
 	public function getFriends() {
 		try {
-			$friends = Cheevos::getFriends($this->user);
-			if ($friends['friends']) {
-				return $friends['friends'];
+			$friendTypes = [
+				'friends' => [],
+				'incoming_requests' => [],
+				'outgoing_requests' => []
+			];
+			$friendTypes = array_merge($friendTypes, array_intersect_key(Cheevos::getFriends($this->user), $friendTypes));
+			foreach ($friendTypes as $type => $data) {
+				$friendTypes[$type] = (array) $data;
 			}
+			return $friendTypes;
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
-		return [];
 	}
 
 	/**
@@ -97,43 +102,8 @@ class Friendship {
 	 */
 	public function getFriendCount() {
 		// my god look how efficient this is
-		$friends = $this->getFriends();
-		return count($friends);
-	}
-
-	/**
-	 * Returns the array of pending friend requests that have sent this user
-	 *
-	 * @return array Keys are user IDs of potential friends,
-	 *     values are json strings with additional data (currently empty)
-	 */
-	public function getReceivedRequests() {
-		try {
-			$friends = Cheevos::getFriends($this->user);
-			if ($friends['incoming_requests']) {
-				return $friends['incoming_requests'];
-			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
-		}
-		return [];
-	}
-
-	/**
-	 * Returns the array of pending friend requests that have been sent by this user
-	 *
-	 * @return array Values are user IDs
-	 */
-	public function getSentRequests() {
-		try {
-			$friends = Cheevos::getFriends($this->user);
-			if ($friends['outgoing_requests']) {
-				return $friends['outgoing_requests'];
-			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
-		}
-		return [];
+		$friendTypes = $this->getFriends();
+		return count($friendTypes['friends']);
 	}
 
 	/**
@@ -156,7 +126,7 @@ class Friendship {
 			return ['error' => 'friendrequest-blocked-other'];
 		}
 
-		$relationShip = $this->getRelationship();
+		$relationShip = $this->getRelationship($toUser);
 
 		if ($relationShip == -1) {
 			return ['error' => 'friendrequest-status-unavailable'];

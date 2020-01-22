@@ -45,14 +45,16 @@ class TemplateManageFriends {
 	/**
 	 * Displays a management page for friends
 	 *
-	 * @param  array   $friends      array of current friends Curse IDs
-	 * @param  array   $received     array of received friend requests (curse IDs as keys)
-	 * @param  array   $sent         array of curse ids to whom friend requests are pending
+	 * @param  array   $friendTypes  Association of friend types(accepted friends, sent requests, received requests) to User objects.
 	 * @param  integer $itemsPerPage Items Per Page
 	 * @param  integer $start        Start Offset
 	 * @return string	Built HTML
 	 */
-	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
+	public function manage(array $friendTypes, $itemsPerPage, $start) {
+		$friends = $friendTypes['friends'];
+		$received = $friendTypes['incoming_requests'];
+		$sent = $friendTypes['outgoing_requests'];
+
 		$this->HTML = '';
 		$pagination = HydraCore::generatePaginationHtml(SpecialPage::getTitleFor('ManageFriends'), count($friends), $itemsPerPage, $start);
 
