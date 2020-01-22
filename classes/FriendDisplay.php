@@ -28,16 +28,16 @@ class FriendDisplay {
 	 * @param  array   &$links reference to the links array into which the links will be inserted
 	 * @return void
 	 */
-	public static function addFriendLink(int $userId, array &$links) {
-		$user = User::newFromId($userId);
-		if (!$user || $user->isAnon()) {
+	public static function addFriendLink(User $toUser, array &$links) {
+		if ($toUser->isAnon()) {
 			return;
 		}
 
-		$friendship = new Friendship($user);
+		$friendship = new Friendship($toUser);
+		$userId = $toUser->getId();
 
-		$links['user_id'] = $user->getId();
-		$relationship = $friendship->getRelationship($links['user_id']);
+		$links['user_id'] = $toUser->getId();
+		$relationship = $friendship->getRelationship($toUser);
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
@@ -91,13 +91,14 @@ class FriendDisplay {
 	/**
 	 * Friend Button Stuff
 	 *
-	 * @param  integer $userId user id or curse id of the user on which the buttons will act
+	 * @param User $toUser User ID of the user on which the buttons will act
+	 *
 	 * @return string HTML button stuff
 	 */
-	public static function friendButtons(int $userId) {
+	public static function friendButtons(User $toUser) {
 		// reuse logic from the other function
 		$links = [];
-		self::addFriendLink($userId, $links);
+		self::addFriendLink($toUser, $links);
 
 		if (isset($links['actions'])) {
 			$links['views'] = $links['actions'];
@@ -125,12 +126,12 @@ class FriendDisplay {
 	/**
 	 * Adds a Friend Button
 	 *
-	 * @param integer $userId
+	 * @param User $toUser
 	 *
 	 * @return string
 	 */
-	public static function addFriendButton(int $userId) {
-		return '<div class="friendship-container">' . self::friendButtons($userId) . '</div>';
+	public static function addFriendButton(User $toUser) {
+		return '<div class="friendship-container">' . self::friendButtons($toUser) . '</div>';
 	}
 
 	/**
@@ -204,7 +205,7 @@ class FriendDisplay {
 			$html .= ProfilePage::userAvatar(null, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$html .= ' ' . CP::userLink($fUser->getId());
 			if ($manageButtons) {
-				$html .= ' ' . self::addFriendButton($fUser->getId());
+				$html .= ' ' . self::addFriendButton($fUser);
 			}
 			$html .= '</li>';
 		}

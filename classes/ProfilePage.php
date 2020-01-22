@@ -111,15 +111,13 @@ class ProfilePage extends Article {
 		$this->user = User::newFromName($this->userName);
 		if ($this->user) {
 			$this->user->load();
-			$this->user_id = $this->user->getID();
 			$this->getContext()->getSkin()->setRelevantUser($this->getUser());
 		} else {
 			$this->user = User::newFromId(0);
-			$this->user_id = 0;
 		}
 
 		$this->mobile = HydraCore::isMobileSkin($this->getContext()->getSkin());
-		$this->profile = new ProfileData($this->user_id);
+		$this->profile = new ProfileData($this->user->getId());
 	}
 
 	/**
@@ -633,7 +631,7 @@ class ProfilePage extends Article {
 			$output = "<dl>";
 			foreach ($input as $msgKey => $value) {
 				if (is_string($msgKey)) {
-					$output .= "<dt>" . wfMessage($msgKey, $this->user_id, $wgUser->getId())->plain() . "</dt>";
+					$output .= "<dt>" . wfMessage($msgKey, $this->user->getId(), $wgUser->getId())->plain() . "</dt>";
 				}
 				// check for sub-list, if there is one
 				if (is_array($value)) {
@@ -813,7 +811,7 @@ class ProfilePage extends Article {
 	 * @return array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
-		$html = FriendDisplay::addFriendButton($this->user_id);
+		$html = FriendDisplay::addFriendButton($this->user);
 
 		if ($this->profile->isViewingSelf()) {
 			$html .= Html::element(

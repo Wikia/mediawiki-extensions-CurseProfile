@@ -105,7 +105,7 @@ class FriendApi extends HydraApiBase {
 		$userId = $this->getMain()->getInt('user_id');
 		$toUser = User::newFromId($userId);
 		$result = $this->f->sendRequest($toUser);
-		$html = FriendDisplay::friendButtons($userId);
+		$html = FriendDisplay::friendButtons($toUser);
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
