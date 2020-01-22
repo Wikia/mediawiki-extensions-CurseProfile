@@ -50,8 +50,11 @@ class SpecialFriends extends UnlistedSpecialPage {
 
 		// parse path segment for special page url similar to:
 		// /Special:Friends/4/Cathadan
-		list($user_id, $user_name) = explode('/', $path);
-		$user = User::newFromId($user_id);
+		$parts = explode('/', $path);
+		$userId = isset($parts[0]) ? intval($parts[0]) : 0;
+		$userName = isset($parts[1]) ? $parts[1] : null;
+
+		$user = User::newFromId($userId);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('friendsboard-invalid');
@@ -67,8 +70,8 @@ class SpecialFriends extends UnlistedSpecialPage {
 		}
 
 		// Fix missing or incorrect username segment in the path
-		if ($user->getTitleKey() != $user_name) {
-			$specialFriends = Title::newFromText('Special:Friends/' . $user_id . '/' . $user->getTitleKey());
+		if ($user->getTitleKey() != $userName) {
+			$specialFriends = Title::newFromText('Special:Friends/' . $userId . '/' . $user->getTitleKey());
 			if (!empty($_SERVER['QUERY_STRING'])) {
 				// don't destroy any extra params
 				$query = '?' . $_SERVER['QUERY_STRING'];
@@ -87,8 +90,8 @@ class SpecialFriends extends UnlistedSpecialPage {
 		$f = new Friendship($user);
 
 		$friendTypes = $f->getFriends();
-		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($friends), $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($friendTypes['friends']), $itemsPerPage, $start);
 
-		$wgOut->addHTML($templateManageFriends->display($friendTypes, $pagination, $itemsPerPage, $start));
+		$wgOut->addHTML($templateManageFriends->display($friendTypes['friends'], $pagination, $itemsPerPage, $start));
 	}
 }

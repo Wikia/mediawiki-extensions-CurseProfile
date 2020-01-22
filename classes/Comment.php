@@ -288,7 +288,7 @@ class Comment {
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
-		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && ((!$toUser->isBlocked()) || $fromUser->isAllowed('block'));
+		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (!$toUser->isBlocked() || $fromUser->isAllowed('block'));
 	}
 
 	/**
