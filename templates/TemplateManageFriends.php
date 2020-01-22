@@ -45,12 +45,14 @@ class TemplateManageFriends {
 	/**
 	 * Displays a management page for friends
 	 *
-	 * @param  array   $friendTypes  Association of friend types(accepted friends, sent requests, received requests) to User objects.
-	 * @param  integer $itemsPerPage Items Per Page
-	 * @param  integer $start        Start Offset
+	 * @param User    $actor        The User performing friend management actions.
+	 * @param array   $friendTypes  Association of friend types(accepted friends, sent requests, received requests) to User objects.
+	 * @param integer $itemsPerPage Items Per Page
+	 * @param integer $start        Start Offset
+	 *
 	 * @return string	Built HTML
 	 */
-	public function manage(array $friendTypes, $itemsPerPage, $start) {
+	public function manage(User $actor, array $friendTypes, $itemsPerPage, $start) {
 		$friends = $friendTypes['friends'];
 		$received = $friendTypes['incoming_requests'];
 		$sent = $friendTypes['outgoing_requests'];
@@ -60,13 +62,13 @@ class TemplateManageFriends {
 
 		if (count($received)) {
 			$this->HTML .= '<h2>' . wfMessage('pendingrequests') . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray($received, true);
+			$this->HTML .= FriendDisplay::listFromArray($received, true, $actor);
 		}
 
 		$this->HTML .= '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray($friends, true, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, true, $actor, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('soronery')->plain();
@@ -74,7 +76,7 @@ class TemplateManageFriends {
 
 		if (count($sent)) {
 			$this->HTML .= '<h2>' . wfMessage('sentrequests') . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray($sent, true);
+			$this->HTML .= FriendDisplay::listFromArray($sent, true, $actor);
 		}
 
 		$this->HTML .= '<h3>' . wfMessage('senddirectrequest') . '</h3>';

@@ -66,6 +66,6 @@ class SpecialManageFriends extends SpecialPage {
 
 		$friendTypes = $f->getFriends();
 
-		$wgOut->addHTML($templateManageFriends->manage($friendTypes, $itemsPerPage, $start));
+		$wgOut->addHTML($templateManageFriends->manage($user, $friendTypes, $itemsPerPage, $start));
 	}
 }

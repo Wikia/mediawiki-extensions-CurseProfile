@@ -25,16 +25,17 @@ class FriendDisplay {
 	 * Generates an array to be inserted into the nav links of the page
 	 *
 	 * @param integer $userId User ID of the profile page being viewed
+	 * @param User    $actor  The User performing friend management actions.
 	 * @param array   &$links reference to the links array into which the links will be inserted
 	 *
 	 * @return void
 	 */
-	public static function addFriendLink(User $toUser, array &$links) {
+	public static function addFriendLink(User $toUser, User $actor, array &$links) {
 		if ($toUser->isAnon()) {
 			return;
 		}
 
-		$friendship = new Friendship($toUser);
+		$friendship = new Friendship($actor);
 		$userId = $toUser->getId();
 
 		$links['user_id'] = $toUser->getId();
@@ -93,13 +94,14 @@ class FriendDisplay {
 	 * Friend Button Stuff
 	 *
 	 * @param User $toUser User ID of the user on which the buttons will act
+	 * @param User $actor  The User performing friend management actions.
 	 *
 	 * @return string HTML button stuff
 	 */
-	public static function friendButtons(User $toUser) {
+	public static function friendButtons(User $toUser, $actor) {
 		// reuse logic from the other function
 		$links = [];
-		self::addFriendLink($toUser, $links);
+		self::addFriendLink($toUser, $actor, $links);
 
 		if (isset($links['actions'])) {
 			$links['views'] = $links['actions'];
@@ -128,11 +130,12 @@ class FriendDisplay {
 	 * Adds a Friend Button
 	 *
 	 * @param User $toUser
+	 * @param User $actor  The User performing friend management actions.
 	 *
 	 * @return string
 	 */
-	public static function addFriendButton(User $toUser) {
-		return '<div class="friendship-container">' . self::friendButtons($toUser) . '</div>';
+	public static function addFriendButton(User $toUser, User $actor) {
+		return '<div class="friendship-container">' . self::friendButtons($toUser, $actor) . '</div>';
 	}
 
 	/**
@@ -186,14 +189,16 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param  array   $user        [Optional] User objects
-	 * @param  bool    $manageButtons  [Optional] signature: callback($userObj) returns string
-	 * @param  integer $limit          [Optional] Number of results to limit.
-	 * @param  integer $offset         [Optional] Offset to start from.
-	 * @param  bool    $sortByActivity [Optional] Sort by user activity instead of name.
+	 * @param array   $user           [Optional] User objects
+	 * @param boolean $manageButtons  [Optional] signature: callback($userObj) returns string
+	 * @param User    $actor          [Optional] The User performing friend management actions.
+	 * @param integer $limit          [Optional] Number of results to limit.
+	 * @param integer $offset         [Optional] Offset to start from.
+	 * @param boolean $sortByActivity [Optional] Sort by user activity instead of name.
+	 *
 	 * @return string	HTML UL List
 	 */
-	public static function listFromArray(?array $users = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
+	public static function listFromArray(?array $users = [], $manageButtons = false, ?User $actor = null, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$html = '
 		<ul class="friends">';
 		foreach ($users as $fUser) {
@@ -204,8 +209,8 @@ class FriendDisplay {
 			$html .= '<li>';
 			$html .= ProfilePage::userAvatar(null, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$html .= ' ' . CP::userLink($fUser->getId());
-			if ($manageButtons) {
-				$html .= ' ' . self::addFriendButton($fUser);
+			if ($manageButtons && $actor !== null) {
+				$html .= ' ' . self::addFriendButton($fUser, $actor);
 			}
 			$html .= '</li>';
 		}

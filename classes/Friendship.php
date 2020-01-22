@@ -87,7 +87,7 @@ class Friendship {
 			];
 			$friendTypes = array_merge($friendTypes, array_intersect_key(Cheevos::getFriends($this->user), $friendTypes));
 			foreach ($friendTypes as $type => $data) {
-				$friendTypes[$type] = (array) $data;
+				$friendTypes[$type] = (array)$data;
 			}
 			return $friendTypes;
 		} catch (CheevosException $e) {
