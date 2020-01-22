@@ -34,7 +34,7 @@ class TemplateManageFriends {
 		$this->HTML = '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray($friends, false, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, false, null, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('nofriends')->plain();
@@ -45,26 +45,30 @@ class TemplateManageFriends {
 	/**
 	 * Displays a management page for friends
 	 *
-	 * @param  array   $friends      array of current friends Curse IDs
-	 * @param  array   $received     array of received friend requests (curse IDs as keys)
-	 * @param  array   $sent         array of curse ids to whom friend requests are pending
-	 * @param  integer $itemsPerPage Items Per Page
-	 * @param  integer $start        Start Offset
+	 * @param User    $actor        The User performing friend management actions.
+	 * @param array   $friendTypes  Association of friend types(accepted friends, sent requests, received requests) to User objects.
+	 * @param integer $itemsPerPage Items Per Page
+	 * @param integer $start        Start Offset
+	 *
 	 * @return string	Built HTML
 	 */
-	public function manage($friends, $received, $sent, $itemsPerPage, $start) {
+	public function manage(User $actor, array $friendTypes, $itemsPerPage, $start) {
+		$friends = $friendTypes['friends'];
+		$received = $friendTypes['incoming_requests'];
+		$sent = $friendTypes['outgoing_requests'];
+
 		$this->HTML = '';
 		$pagination = HydraCore::generatePaginationHtml(SpecialPage::getTitleFor('ManageFriends'), count($friends), $itemsPerPage, $start);
 
 		if (count($received)) {
 			$this->HTML .= '<h2>' . wfMessage('pendingrequests') . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray($received, true);
+			$this->HTML .= FriendDisplay::listFromArray($received, true, $actor);
 		}
 
 		$this->HTML .= '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray($friends, true, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, true, $actor, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('soronery')->plain();
@@ -72,7 +76,7 @@ class TemplateManageFriends {
 
 		if (count($sent)) {
 			$this->HTML .= '<h2>' . wfMessage('sentrequests') . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray($sent, true);
+			$this->HTML .= FriendDisplay::listFromArray($sent, true, $actor);
 		}
 
 		$this->HTML .= '<h3>' . wfMessage('senddirectrequest') . '</h3>';

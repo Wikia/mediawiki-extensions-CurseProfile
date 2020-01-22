@@ -53,12 +53,17 @@ class Friendship {
 	/**
 	 * Check the relationship status between two users.
 	 *
-	 * @param  integer $toUserId user ID of a user
-	 * @return int	-1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
+	 * @param User $toUser
+	 *
+	 * @return integer -1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
-	public function getRelationship($toUserId) {
+	public function getRelationship(User $toUser) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
+			return -1;
+		}
+
 		try {
-			$status = Cheevos::getFriendStatus($this->user->getId(), $toUserId);
+			$status = Cheevos::getFriendStatus($this->user, $toUser);
 			if ($status['status']) {
 				return $status['status'];
 			}
@@ -75,14 +80,19 @@ class Friendship {
 	 */
 	public function getFriends() {
 		try {
-			$friends = Cheevos::getFriends($this->user->getId());
-			if ($friends['friends']) {
-				return $friends['friends'];
+			$friendTypes = [
+				'friends' => [],
+				'incoming_requests' => [],
+				'outgoing_requests' => []
+			];
+			$friendTypes = array_merge($friendTypes, array_intersect_key(Cheevos::getFriends($this->user), $friendTypes));
+			foreach ($friendTypes as $type => $data) {
+				$friendTypes[$type] = (array)$data;
 			}
+			return $friendTypes;
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 		}
-		return [];
 	}
 
 	/**
@@ -92,64 +102,31 @@ class Friendship {
 	 */
 	public function getFriendCount() {
 		// my god look how efficient this is
-		$friends = $this->getFriends();
-		return count($friends);
+		$friendTypes = $this->getFriends();
+		return count($friendTypes['friends']);
 	}
 
 	/**
-	 * Returns the array of pending friend requests that have sent this user
+	 * Sends a friend request to a given user.
 	 *
-	 * @return array Keys are user IDs of potential friends,
-	 *     values are json strings with additional data (currently empty)
-	 */
-	public function getReceivedRequests() {
-		try {
-			$friends = Cheevos::getFriends($this->user->getId());
-			if ($friends['incoming_requests']) {
-				return $friends['incoming_requests'];
-			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
-		}
-		return [];
-	}
-
-	/**
-	 * Returns the array of pending friend requests that have been sent by this user
-	 *
-	 * @return array Values are user IDs
-	 */
-	public function getSentRequests() {
-		try {
-			$friends = Cheevos::getFriends($this->user->getId());
-			if ($friends['outgoing_requests']) {
-				return $friends['outgoing_requests'];
-			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
-		}
-		return [];
-	}
-
-	/**
-	 * Sends a friend request to a given user
-	 *
-	 * @param integer $toUserId User ID of a user.
+	 * @param User $toUser
 	 *
 	 * @return boolean True on success, False on failure.
 	 */
-	public function sendRequest(int $toUserId) {
-		$toUser = User::newFromId($toUserId);
-
-		if (!$toUser || $toUser->isAnon() || $this->user->getId() === $toUserId) {
+	public function sendRequest(User $toUser) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
-		if ($this->user->isBlocked() || $toUser->isBlocked()) {
+		if ($this->user->isBlocked()) {
 			return ['error' => 'friendrequest-blocked'];
 		}
 
-		$relationShip = $this->getRelationship($toUserId);
+		if ($toUser->isBlocked()) {
+			return ['error' => 'friendrequest-blocked-other'];
+		}
+
+		$relationShip = $this->getRelationship($toUser);
 
 		if ($relationShip == -1) {
 			return ['error' => 'friendrequest-status-unavailable'];
@@ -160,7 +137,7 @@ class Friendship {
 		}
 
 		try {
-			$makeFriend = Cheevos::createFriendRequest($this->user->getId(), $toUserId);
+			$makeFriend = Cheevos::createFriendRequest($this->user, $toUser);
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
@@ -205,17 +182,17 @@ class Friendship {
 	/**
 	 * Accepts a pending request.
 	 *
-	 * @param integer $toUserId User ID of a user.
+	 * @param User $toUser
 	 *
 	 * @return boolean True on success, False on failure.
 	 */
-	public function acceptRequest(int $toUserId) {
-		if ($this->user->getId() === $toUserId || $toUserId < 1) {
+	public function acceptRequest(User $toUser) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
 		try {
-			$res = Cheevos::acceptFriendRequest($this->user->getId(), $toUserId);
+			$res = Cheevos::acceptFriendRequest($this->user, $toUser);
 			if ($res['message'] == "success") {
 				return true;
 			}
@@ -228,17 +205,17 @@ class Friendship {
 	/**
 	 * Ignores and dismisses a pending request.
 	 *
-	 * @param integer $toUserId User ID of a user.
+	 * @param User $toUser
 	 *
 	 * @return boolean True on success, False on failure.
 	 */
-	public function ignoreRequest(int $toUserId) {
-		if ($this->user->getId() === $toUserId || $toUserId < 1) {
+	public function ignoreRequest(User $toUser) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
 		try {
-			$res = Cheevos::cancelFriendRequest($this->user->getId(), $toUserId);
+			$res = Cheevos::cancelFriendRequest($this->user, $toUser);
 			if ($res['message'] == "success") {
 				return true;
 			}
@@ -251,24 +228,50 @@ class Friendship {
 	/**
 	 * Removes a friend relationship or cancels a pending request.
 	 *
-	 * @param integer $toUserId User ID of a user.
+	 * @param User $toUser
 	 *
 	 * @return boolean True on success, False on failure.
 	 */
-	public function removeFriend(int $toUserId) {
-		if ($this->user->getId() === $toUserId || $toUserId < 1) {
+	public function removeFriend(User $toUser) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
 		try {
-			Cheevos::cancelFriendRequest($this->user->getId(), $toUserId);
+			Cheevos::cancelFriendRequest($this->user, $toUser);
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
 		}
 
-		Hooks::run('CurseProfileRemoveFriend', [$this->user->getId(), $toUserId]);
+		Hooks::run('CurseProfileRemoveFriend', [$this->user, $toUser]);
 
+		return true;
+	}
+
+	/**
+	 * Make sure that the User objects are valid and that they are not the same user.
+	 *
+	 * @param User|null $to
+	 *
+	 * @return boolean All checks passed.
+	 */
+	private function checkIfValidUserRelation(?User $to): bool {
+		$from = $this->user;
+		// No null users.
+		if (!$from || !$to) {
+			return false;
+		}
+
+		// Not the same user.
+		if ($from->getId() === $to->getId()) {
+			return false;
+		}
+
+		// No anonymous users.
+		if ($from->isAnon() || $to->isAnon()) {
+			return false;
+		}
 		return true;
 	}
 }

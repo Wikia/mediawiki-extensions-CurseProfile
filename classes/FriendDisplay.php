@@ -24,20 +24,22 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param  integer $userId User ID of the profile page being viewed
-	 * @param  array   &$links reference to the links array into which the links will be inserted
+	 * @param integer $userId User ID of the profile page being viewed
+	 * @param User    $actor  The User performing friend management actions.
+	 * @param array   &$links reference to the links array into which the links will be inserted
+	 *
 	 * @return void
 	 */
-	public static function addFriendLink(int $userId, array &$links) {
-		$user = User::newFromId($userId);
-		if (!$user || $user->isAnon()) {
+	public static function addFriendLink(User $toUser, User $actor, array &$links) {
+		if ($toUser->isAnon()) {
 			return;
 		}
 
-		$friendship = new Friendship($user);
+		$friendship = new Friendship($actor);
+		$userId = $toUser->getId();
 
-		$links['user_id'] = $user->getId();
-		$relationship = $friendship->getRelationship($links['user_id']);
+		$links['user_id'] = $toUser->getId();
+		$relationship = $friendship->getRelationship($toUser);
 
 		switch ($relationship) {
 			case Friendship::STRANGERS:
@@ -79,7 +81,7 @@ class FriendDisplay {
 					'class'   => 'friend-request-sent',
 					'href'    => "/Special:RemoveFriend/$userId",
 					'text'    => wfMessage('removefriend')->plain(),
-					'confirm' => wfMessage('friendrequestremove-prompt', $user->getName())->plain(),
+					'confirm' => wfMessage('friendrequestremove-prompt', $toUser->getName())->plain(),
 				];
 				break;
 
@@ -91,13 +93,15 @@ class FriendDisplay {
 	/**
 	 * Friend Button Stuff
 	 *
-	 * @param  integer $userId user id or curse id of the user on which the buttons will act
+	 * @param User $toUser User ID of the user on which the buttons will act
+	 * @param User $actor  The User performing friend management actions.
+	 *
 	 * @return string HTML button stuff
 	 */
-	public static function friendButtons(int $userId) {
+	public static function friendButtons(User $toUser, $actor) {
 		// reuse logic from the other function
 		$links = [];
-		self::addFriendLink($userId, $links);
+		self::addFriendLink($toUser, $actor, $links);
 
 		if (isset($links['actions'])) {
 			$links['views'] = $links['actions'];
@@ -125,12 +129,13 @@ class FriendDisplay {
 	/**
 	 * Adds a Friend Button
 	 *
-	 * @param integer $userId
+	 * @param User $toUser
+	 * @param User $actor  The User performing friend management actions.
 	 *
 	 * @return string
 	 */
-	public static function addFriendButton(int $userId) {
-		return '<div class="friendship-container">' . self::friendButtons($userId) . '</div>';
+	public static function addFriendButton(User $toUser, User $actor) {
+		return '<div class="friendship-container">' . self::friendButtons($toUser, $actor) . '</div>';
 	}
 
 	/**
@@ -149,17 +154,18 @@ class FriendDisplay {
 		}
 
 		$friendship = new Friendship($user);
-		$friends = $friendship->getFriends();
+		$friendTypes = $friendship->getFriends();
 
-		return count($friends);
+		return count($friendTypes['friends']);
 	}
 
 	/**
 	 * Get the user's friends based on their local user ID.
 	 *
-	 * @param  Parser|null &$parser - Not used, but the parser will pass it regardless.
-	 * @param  integer     $userId  Local User ID
-	 * @return array	Parser compatible HTML array.
+	 * @param Parser|null &$parser Not used, but the parser will pass it regardless.
+	 * @param integer     $userId  Local User ID
+	 *
+	 * @return array Parser compatible HTML array.
 	 */
 	public static function friendList(?Parser &$parser = null, int $userId) {
 		$user = User::newFromId($userId);
@@ -169,13 +175,13 @@ class FriendDisplay {
 		}
 
 		$friendship = new Friendship($user);
-		$friends = $friendship->getFriends();
-		if (count($friends) == 0) {
+		$friendTypes = $friendship->getFriends();
+		if (!count($friendTypes['friends'])) {
 			return '';
 		}
 
 		return [
-			self::listFromArray($friends, false, 10, 0, true),
+			self::listFromArray($friendTypes['friends'], false, null, 10, 0, true),
 			'isHTML' => true,
 		];
 	}
@@ -183,18 +189,19 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param  array   $userIds        [Optional] User IDs
-	 * @param  bool    $manageButtons  [Optional] signature: callback($userObj) returns string
-	 * @param  integer $limit          [Optional] Number of results to limit.
-	 * @param  integer $offset         [Optional] Offset to start from.
-	 * @param  bool    $sortByActivity [Optional] Sort by user activity instead of name.
+	 * @param array   $user           [Optional] User objects
+	 * @param boolean $manageButtons  [Optional] signature: callback($userObj) returns string
+	 * @param User    $actor          [Optional] The User performing friend management actions.
+	 * @param integer $limit          [Optional] Number of results to limit.
+	 * @param integer $offset         [Optional] Offset to start from.
+	 * @param boolean $sortByActivity [Optional] Sort by user activity instead of name.
+	 *
 	 * @return string	HTML UL List
 	 */
-	public static function listFromArray($userIds = [], $manageButtons = false, $limit = 10, $offset = 0, $sortByActivity = false) {
+	public static function listFromArray(?array $users = [], $manageButtons = false, ?User $actor = null, $limit = 10, $offset = 0, $sortByActivity = false) {
 		$html = '
 		<ul class="friends">';
-		foreach ($userIds as $userId) {
-			$fUser = User::newFromId($userId);
+		foreach ($users as $fUser) {
 			if (!$fUser->getId()) {
 				// Just silently drop if the user is actually missing.
 				continue;
@@ -202,8 +209,8 @@ class FriendDisplay {
 			$html .= '<li>';
 			$html .= ProfilePage::userAvatar(null, 32, $fUser->getEmail(), $fUser->getName())[0];
 			$html .= ' ' . CP::userLink($fUser->getId());
-			if ($manageButtons) {
-				$html .= ' ' . self::addFriendButton($fUser->getId());
+			if ($manageButtons && $actor !== null) {
+				$html .= ' ' . self::addFriendButton($fUser, $actor);
 			}
 			$html .= '</li>';
 		}

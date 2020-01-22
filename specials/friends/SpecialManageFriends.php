@@ -64,10 +64,8 @@ class SpecialManageFriends extends SpecialPage {
 
 		$f = new Friendship($user);
 
-		$friends = $f->getFriends();
-		$rcvd = $f->getReceivedRequests();
-		$sent = $f->getSentRequests();
+		$friendTypes = $f->getFriends();
 
-		$wgOut->addHTML($templateManageFriends->manage($friends, $rcvd, $sent, $itemsPerPage, $start));
+		$wgOut->addHTML($templateManageFriends->manage($user, $friendTypes, $itemsPerPage, $start));
 	}
 }
