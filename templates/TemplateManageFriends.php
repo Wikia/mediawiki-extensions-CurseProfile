@@ -34,7 +34,7 @@ class TemplateManageFriends {
 		$this->HTML = '<h2>' . wfMessage('friends') . '</h2>';
 		if (count($friends)) {
 			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray($friends, false, $itemsPerPage, $start);
+			$this->HTML .= FriendDisplay::listFromArray($friends, false, null, $itemsPerPage, $start);
 			$this->HTML .= $pagination;
 		} else {
 			$this->HTML .= wfMessage('nofriends')->plain();

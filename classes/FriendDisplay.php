@@ -181,7 +181,7 @@ class FriendDisplay {
 		}
 
 		return [
-			self::listFromArray($friendTypes['friends'], false, 10, 0, true),
+			self::listFromArray($friendTypes['friends'], false, null, 10, 0, true),
 			'isHTML' => true,
 		];
 	}

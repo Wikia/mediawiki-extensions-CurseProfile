@@ -811,7 +811,9 @@ class ProfilePage extends Article {
 	 * @return array	with html as the first element
 	 */
 	public function editOrFriends(&$parser) {
-		$html = FriendDisplay::addFriendButton($this->user);
+		global $wgUser;
+
+		$html = FriendDisplay::addFriendButton($this->getUser(), $wgUser);
 
 		if ($this->profile->isViewingSelf()) {
 			$html .= Html::element(
