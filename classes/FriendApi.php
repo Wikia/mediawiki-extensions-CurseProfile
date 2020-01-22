@@ -85,7 +85,7 @@ class FriendApi extends HydraApiBase {
 			$this->dieWithError(wfMessage('friendrequest-direct-notfound'), 'friendrequest-direct-notfound');
 		}
 
-		$result = $this->f->sendRequest($targetUser->getId());
+		$result = $this->f->sendRequest($targetUser);
 		if (is_array($result) && isset($result['error'])) {
 			$this->dieWithError(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName()), $result['error']);
 		} elseif (!$result) {

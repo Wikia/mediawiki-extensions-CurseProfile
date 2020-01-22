@@ -58,7 +58,7 @@ class Friendship {
 	 * @return integer -1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
 	public function getRelationship(User $toUser) {
-		if ($this->checkIfValidUserRelation($toUser)) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return -1;
 		}
 
@@ -144,7 +144,7 @@ class Friendship {
 	 * @return boolean True on success, False on failure.
 	 */
 	public function sendRequest(User $toUser) {
-		if ($this->checkIfValidUserRelation($toUser)) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
@@ -163,7 +163,7 @@ class Friendship {
 		}
 
 		try {
-			$makeFriend = Cheevos::createFriendRequest($this->user->getId(), $toUser);
+			$makeFriend = Cheevos::createFriendRequest($this->user, $toUser);
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
 			return false;
@@ -213,7 +213,7 @@ class Friendship {
 	 * @return boolean True on success, False on failure.
 	 */
 	public function acceptRequest(User $toUser) {
-		if ($this->checkIfValidUserRelation($toUser)) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
@@ -236,7 +236,7 @@ class Friendship {
 	 * @return boolean True on success, False on failure.
 	 */
 	public function ignoreRequest(User $toUser) {
-		if ($this->checkIfValidUserRelation($toUser)) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
@@ -259,7 +259,7 @@ class Friendship {
 	 * @return boolean True on success, False on failure.
 	 */
 	public function removeFriend(User $toUser) {
-		if ($this->checkIfValidUserRelation($toUser)) {
+		if (!$this->checkIfValidUserRelation($toUser)) {
 			return false;
 		}
 
