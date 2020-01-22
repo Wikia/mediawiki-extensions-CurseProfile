@@ -81,7 +81,7 @@ class FriendDisplay {
 					'class'   => 'friend-request-sent',
 					'href'    => "/Special:RemoveFriend/$userId",
 					'text'    => wfMessage('removefriend')->plain(),
-					'confirm' => wfMessage('friendrequestremove-prompt', $user->getName())->plain(),
+					'confirm' => wfMessage('friendrequestremove-prompt', $toUser->getName())->plain(),
 				];
 				break;
 

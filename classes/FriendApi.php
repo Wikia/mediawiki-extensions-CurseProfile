@@ -102,10 +102,10 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doSend() {
-		$userId = $this->getMain()->getInt('user_id');
+		$userId = $this->getInt('user_id');
 		$toUser = User::newFromId($userId);
 		$result = $this->f->sendRequest($toUser);
-		$html = FriendDisplay::friendButtons($toUser);
+		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}
@@ -116,7 +116,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doConfirm() {
-		$userId = $this->getMain()->getInt('user_id');
+		$userId = $this->getInt('user_id');
 		$toUser = User::newFromId($userId);
 		$result = $this->f->acceptRequest($toUser);
 		$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
@@ -130,7 +130,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doIgnore() {
-		$userId = $this->getMain()->getInt('user_id');
+		$userId = $this->getInt('user_id');
 		$toUser = User::newFromId($userId);
 		$rel = $this->f->getRelationship($toUser);
 		$result = $this->f->ignoreRequest($toUser);
@@ -146,10 +146,10 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doRemove() {
-		$userId = $this->getMain()->getInt('user_id');
+		$userId = $this->getInt('user_id');
 		$toUser = User::newFromId($userId);
 		$result = $this->f->removeFriend($toUser);
-		$html = FriendDisplay::friendButtons($toUser);
+		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
 		$this->getResult()->addValue(null, 'result', $result);
 		$this->getResult()->addValue(null, 'html', $html);
 	}

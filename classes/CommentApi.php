@@ -341,16 +341,4 @@ class CommentApi extends HydraApiBase {
 	public function isWriteMode() {
 		return true;
 	}
-
-	/**
-	 * Get a value from a parameter in the request and cast to an integer.
-	 *
-	 * @param string $key     Parameter Name
-	 * @param mixed  $default [Optional] Default value to return if not found.
-	 *
-	 * @return integer
-	 */
-	private function getInt(string $key, $default = 0): int {
-		return intval($this->getMain()->getVal($key, $default));
-	}
 }
