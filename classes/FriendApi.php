@@ -78,18 +78,18 @@ class FriendApi extends HydraApiBase {
 
 		$targetUser = User::newFromName($this->getMain()->getVal('name'));
 		if (!$targetUser) {
-			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
+			$this->dieWithError(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 		$targetUser->load();
 		if ($targetUser->isAnon()) {
-			$this->dieUsage(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
+			$this->dieWithError(wfMessage('friendrequest-direct-notfound')->text(), 'friendrequest-direct-notfound');
 		}
 
 		$result = $this->f->sendRequest($targetUser->getId());
 		if (is_array($result) && isset($result['error'])) {
-			$this->dieUsage(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName())->text(), $result['error']);
+			$this->dieWithError(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName())->text(), $result['error']);
 		} elseif (!$result) {
-			$this->dieUsage(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
+			$this->dieWithError(wfMessage('friendrequestsend-error')->text(), 'friendrequestsend-error');
 		}
 		$html = wfMessage('friendrequest-direct-success')->text();
 		$this->getResult()->addValue(null, 'result', $result);
