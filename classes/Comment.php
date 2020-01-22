@@ -220,7 +220,7 @@ class Comment {
 	 *
 	 * @return integer Total number of replies to this comment.
 	 */
-	public function getTotalReplies(User $actor = null): int {
+	public function getTotalReplies(User $actor): int {
 		$db = wfGetDB(DB_REPLICA);
 		$result = $db->select(
 			['user_board'],
