@@ -31,7 +31,7 @@ class FriendDisplay {
 	 * @return void
 	 */
 	public static function addFriendLink(User $toUser, User $actor, array &$links) {
-		if ($toUser->isAnon()) {
+		if ($actor->isAnon() || $toUser->isAnon()) {
 			return;
 		}
 
@@ -98,7 +98,7 @@ class FriendDisplay {
 	 *
 	 * @return string HTML button stuff
 	 */
-	public static function friendButtons(User $toUser, $actor) {
+	public static function friendButtons(User $toUser, User $actor) {
 		// reuse logic from the other function
 		$links = [];
 		self::addFriendLink($toUser, $actor, $links);
