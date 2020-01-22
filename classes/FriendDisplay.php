@@ -157,9 +157,10 @@ class FriendDisplay {
 	/**
 	 * Get the user's friends based on their local user ID.
 	 *
-	 * @param  Parser|null &$parser - Not used, but the parser will pass it regardless.
-	 * @param  integer     $userId  Local User ID
-	 * @return array	Parser compatible HTML array.
+	 * @param Parser|null &$parser Not used, but the parser will pass it regardless.
+	 * @param integer     $userId  Local User ID
+	 *
+	 * @return array Parser compatible HTML array.
 	 */
 	public static function friendList(?Parser &$parser = null, int $userId) {
 		$user = User::newFromId($userId);
