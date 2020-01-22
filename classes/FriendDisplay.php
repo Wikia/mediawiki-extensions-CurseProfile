@@ -199,6 +199,10 @@ class FriendDisplay {
 	 * @return string	HTML UL List
 	 */
 	public static function listFromArray(?array $users = [], $manageButtons = false, ?User $actor = null, $limit = 10, $offset = 0, $sortByActivity = false) {
+		if ($limit > 0 || $offset > 0) {
+			$users = array_slice($users, $offset, $limit, true);
+		}
+
 		$html = '
 		<ul class="friends">';
 		foreach ($users as $fUser) {
