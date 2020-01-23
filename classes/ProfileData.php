@@ -685,10 +685,18 @@ class ProfileData {
 				if (empty($data)) {
 					continue;
 				}
+				$deleted = false;
 				foreach ($data as $field => $val) {
-					$data[$field] = unserialize($val);
+					$val = unserialize($val);
+					if ($field === 'deleted' && $val == 1) {
+						$deleted = true;
+						break;
+					}
+					$data[$field] = $val;
 				}
-				$ret[$md5] = $data;
+				if (!$deleted) {
+					$ret[$md5] = $data;
+				}
 			}
 		}
 		return $ret;
