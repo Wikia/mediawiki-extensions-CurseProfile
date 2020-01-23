@@ -96,6 +96,15 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 		$next = '1=1';
 		$count = 0;
 		while (true) {
+			foreach ($globalIdFields as $key => $value) {
+				if (!$dbw->fieldExists($table, $key)) {
+					unset($globalIdFields[$key]);
+				}
+			}
+			if (empty($globalIdFields)) {
+				$this->output("Skipping due to global ID fields not being present.\n");
+				break;
+			}
 			// Fetch the rows needing update
 			$res = $dbw->select(
 				$table,
