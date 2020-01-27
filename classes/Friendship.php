@@ -92,6 +92,8 @@ class Friendship {
 			return $friendTypes;
 		} catch (CheevosException $e) {
 			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+			// Return default array after Cheevos Exception.
+			return $friendTypes;
 		}
 	}
 
