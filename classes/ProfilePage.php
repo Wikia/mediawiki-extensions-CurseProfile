@@ -386,7 +386,7 @@ class ProfilePage extends Article {
 			return '';
 		}
 
-		$specialListUsersTitle = SpecialPage::getTitleFor('ListUsers');
+		$specialListUsersTitle = SpecialPage::getTitleFor('Listusers');
 		$html = '<ul class="grouptags">';
 		foreach ($groups as $group) {
 			if (in_array($group, $this->hiddenGroups) || ($group == "sysop" && in_array("wiki_guardian", $groups))) {
