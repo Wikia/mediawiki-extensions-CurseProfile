@@ -538,25 +538,22 @@ class ProfilePage extends Article {
 	public function userStats() {
 		global $dsSiteKey;
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
-
 		$stats = [];
 		$wikisEdited = 0;
 		if ($globalId > 0) {
 			try {
 				$stats = Cheevos::getStatProgress(
 					[
-						'user_id'	=> $globalId,
 						'global'	=> true
-					]
+					],
+					$this->user
 				);
 				$stats = CheevosHelper::makeNiceStatProgressArray($stats);
 			} catch (CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting Stat Progress.");
 			}
 			try {
-				$wikisEdited = intval(Cheevos::getUserSitesCountByStat($globalId, 'article_edit'));
+				$wikisEdited = intval(Cheevos::getUserSitesCountByStat($this->user, 'article_edit'));
 			} catch (CheevosException $e) {
 				wfDebug("Encountered Cheevos API error getting getUserSitesCountByStat.");
 			}
@@ -564,14 +561,15 @@ class ProfilePage extends Article {
 
 		// Keys are message keys fed to wfMessage().
 		// Values are numbers or an array of sub-stats with a number at key 0.
+		$userId = $this->user->getId();
 		if (!empty($stats)) {
 			$statsOutput = [
 				'wikisedited' => $wikisEdited,
 				'totalcontribs' => [
-					'totalcreations'   => (isset($stats[$globalId]['article_create']) ? $stats[$globalId]['article_create']['count'] : 0),
-					'totaledits'   => (isset($stats[$globalId]['article_edit']) ? $stats[$globalId]['article_edit']['count'] : 0),
-					'totaldeletes' => (isset($stats[$globalId]['article_delete']) ? $stats[$globalId]['article_delete']['count'] : 0),
-					'totalpatrols' => (isset($stats[$globalId]['admin_patrol']) ? $stats[$globalId]['admin_patrol']['count'] : 0),
+					'totalcreations'   => (isset($stats[$userId]['article_create']) ? $stats[$userId]['article_create']['count'] : 0),
+					'totaledits'   => (isset($stats[$userId]['article_edit']) ? $stats[$userId]['article_edit']['count'] : 0),
+					'totaldeletes' => (isset($stats[$userId]['article_delete']) ? $stats[$userId]['article_delete']['count'] : 0),
+					'totalpatrols' => (isset($stats[$userId]['admin_patrol']) ? $stats[$userId]['admin_patrol']['count'] : 0),
 				],
 				'localrank' => '',
 				'globalrank' => '', // data for these fills in below
@@ -590,10 +588,10 @@ class ProfilePage extends Article {
 			];
 		}
 
-		if ($globalId > 0 && method_exists('\Cheevos\Cheevos', 'getUserPointRank')) {
+		if (method_exists('\Cheevos\Cheevos', 'getUserPointRank')) {
 			try {
-				$statsOutput['localrank'] = Cheevos::getUserPointRank($globalId, $dsSiteKey);
-				$statsOutput['globalrank'] = Cheevos::getUserPointRank($globalId);
+				$statsOutput['localrank'] = Cheevos::getUserPointRank($this->user, $dsSiteKey);
+				$statsOutput['globalrank'] = Cheevos::getUserPointRank($this->user);
 
 				if (empty($statsOutput['localrank'])) {
 					unset($statsOutput['localrank']);
@@ -682,11 +680,8 @@ class ProfilePage extends Article {
 			];
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
-
 		$earned = [];
-		if ($globalId > 0 && class_exists("\CheevosHooks")) {
+		if (class_exists("\CheevosHooks")) {
 			$achievements = [];
 			$progresses = [];
 			try {
@@ -707,7 +702,7 @@ class ProfilePage extends Article {
 
 			if ($type === 'general') {
 				try {
-					$progresses = Cheevos::getAchievementProgress(['user_id' => $globalId, 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					$progresses = Cheevos::getAchievementProgress(['site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval($limit)], $this->user);
 				} catch (CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress.");
 				}
@@ -715,7 +710,7 @@ class ProfilePage extends Article {
 
 			if ($type === 'special') {
 				try {
-					$progresses = Cheevos::getAchievementProgress(['user_id' => $globalId, 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)]);
+					$progresses = Cheevos::getAchievementProgress(['earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval($limit)], $this->user);
 				} catch (CheevosException $e) {
 					wfDebug("Encountered Cheevos API error getting Achievement Progress.");
 				}
@@ -765,15 +760,12 @@ class ProfilePage extends Article {
 	 * @return mixed	array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel(&$parser) {
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
-
 		// Check for existence of wikipoints functions
-		if (!$globalId || !method_exists('\Cheevos\Points\PointsDisplay', 'getWikiPointsForRange')) {
+		if (!method_exists('\Cheevos\Points\PointsDisplay', 'getWikiPointsForRange')) {
 			return '';
 		}
 
-		$userPoints = PointsDisplay::getWikiPointsForRange($globalId);
+		$userPoints = PointsDisplay::getWikiPointsForRange($this->user);
 		$levelDefinitions = PointLevels::getLevels();
 
 		if (!is_array($levelDefinitions)) {
@@ -840,10 +832,6 @@ class ProfilePage extends Article {
 	protected function profileLayout() {
 		global $wgUser;
 
-		// @TODO: Remove this and the achievement parser check below once Cheevos no longer uses global ID.
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
-
 		$classes = false;
 		if (!empty($this->user) && $this->user->getId()) {
 			$cacheSetting = Subscription::skipCache(true);
@@ -904,13 +892,13 @@ class ProfilePage extends Article {
 			{{#friendlist: ' . $this->user->getID() . '}}<br />
 			<div style="float: right;">' . wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain() . '</div>
 		</div>
-		{{#if: ' . ($globalId ? 'true' : '') . ' | <div class="section achievements">
+		<div class="section achievements">
 			<h3>' . wfMessage('cp-achievementssection')->plain() . '</h3>
 			{{#achievements:general}}
 			{{#achievements:special}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">' . wfMessage('cp-achievementssection-all', $this->user->getName())->plain() . '</div>
-		</div> }}
+		</div>
 	</div>
 	{{#if: ' . ($this->user->isBlocked() ? 'true' : '') . ' | <div class="blocked"></div> }}
 </div>
@@ -926,10 +914,6 @@ __NOINDEX__
 	 */
 	protected function mobileProfileLayout() {
 		global $wgUser;
-
-		// @TODO: Remove this and the achievement parser check below once Cheevos no longer uses global ID.
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser($this->user, CentralIdLookup::AUDIENCE_RAW);
 
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
@@ -949,15 +933,13 @@ __NOINDEX__
 		<h1>' . wfMessage('cp-friendssection')->plain() . '</h1>
 		{{#friendlist: ' . $this->user->getID() . '}}
 		<div style="float: right;">' . wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain() . '</div>
-		{{#if: ' . ($globalId ? 'true' : '') . ' | <h1>' . wfMessage('cp-achievementssection')->plain() . '</h1>
+		<h1>' . wfMessage('cp-achievementssection')->plain() . '</h1>
 		<div class="section achievements">
 			{{#achievements:general}}
 			{{#achievements:special}}
 			<div style="clear: both;"></div>
 			<div style="float: right; clear: both;">' . wfMessage('cp-achievementssection-all', $this->user->getName())->plain() . '</div>
 		</div>
-
-		}}
 		<h1>' . wfMessage('cp-recentactivitysection') . '</h1>
 		<p>[[Special:Contributions/' . $this->user->getName() . '|' . wfMessage('contributions')->text() . ']]</p>
 		{{#recentactivity: ' . $this->user->getID() . '}}
