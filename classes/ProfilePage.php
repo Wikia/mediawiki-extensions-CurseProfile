@@ -540,23 +540,21 @@ class ProfilePage extends Article {
 
 		$stats = [];
 		$wikisEdited = 0;
-		if ($globalId > 0) {
-			try {
-				$stats = Cheevos::getStatProgress(
-					[
-						'global'	=> true
-					],
-					$this->user
-				);
-				$stats = CheevosHelper::makeNiceStatProgressArray($stats);
-			} catch (CheevosException $e) {
-				wfDebug("Encountered Cheevos API error getting Stat Progress.");
-			}
-			try {
-				$wikisEdited = intval(Cheevos::getUserSitesCountByStat($this->user, 'article_edit'));
-			} catch (CheevosException $e) {
-				wfDebug("Encountered Cheevos API error getting getUserSitesCountByStat.");
-			}
+		try {
+			$stats = Cheevos::getStatProgress(
+				[
+					'global'	=> true
+				],
+				$this->user
+			);
+			$stats = CheevosHelper::makeNiceStatProgressArray($stats);
+		} catch (CheevosException $e) {
+			wfDebug("Encountered Cheevos API error getting Stat Progress.");
+		}
+		try {
+			$wikisEdited = intval(Cheevos::getUserSitesCountByStat($this->user, 'article_edit'));
+		} catch (CheevosException $e) {
+			wfDebug("Encountered Cheevos API error getting getUserSitesCountByStat.");
 		}
 
 		// Keys are message keys fed to wfMessage().
