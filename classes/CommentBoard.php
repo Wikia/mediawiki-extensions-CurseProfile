@@ -127,7 +127,7 @@ class CommentBoard {
 			], $conditions),
 			__METHOD__,
 			[
-				'ORDER BY'	=> 'ub_last_reply, ub_date DESC',
+				'ORDER BY'	=> 'ub_last_reply DESC, ub_date DESC',
 				'OFFSET'	=> $startAt,
 				'LIMIT'		=> $limit
 			]
