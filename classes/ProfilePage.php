@@ -15,7 +15,6 @@ namespace CurseProfile;
 
 use Action;
 use Article;
-use CentralIdLookup;
 use Cheevos\Cheevos;
 use Cheevos\CheevosAchievement;
 use Cheevos\CheevosException;
