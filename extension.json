@@ -358,16 +358,6 @@
 			"path": false,
 			"descriptionmsg": "curseprofile-config-cpcommentmodgroup",
 			"public": false
-		},
-		"SyncServices": {
-			"value": {
-				"ResolveComment": "CurseProfile\\ResolveComment",
-				"StatsRecache": "CurseProfile\\StatsRecache"
-			},
-			"path": false,
-			"descriptionmsg": "curseprofile-config-syncservices",
-			"public": false,
-			"merge_strategy": "array_merge"
 		}
 	},
 	"manifest_version": 2

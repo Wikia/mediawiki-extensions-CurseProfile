@@ -46,7 +46,7 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onRegistration() {
-		global $wgExtraNamespaces, $wgReverbNotifications;
+		global $wgExtraNamespaces, $wgReverbNotifications, $wgSyncServices;
 
 		if (!defined('NS_USER_PROFILE')) {
 			define('NS_USER_PROFILE', 202);
@@ -78,6 +78,9 @@ class Hooks {
 			]
 		];
 		$wgReverbNotifications = array_merge($wgReverbNotifications, $reverbNotifications);
+
+		$wgSyncServices["ResolveComment"] = "CurseProfile\\ResolveComment";
+		$wgSyncServices["StatsRecache"] = "CurseProfile\\StatsRecache";
 
 		return true;
 	}
