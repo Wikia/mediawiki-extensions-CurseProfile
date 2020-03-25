@@ -120,14 +120,15 @@ class CommentBoard {
 		$results = $this->DB->select(
 			['user_board'],
 			[
-				'*'
+				'*',
+				'GREATEST(COALESCE(ub_date, 0), COALESCE(ub_last_reply, 0)) as date_sort'
 			],
 			array_merge([
 				self::visibleClause($asUser),
 			], $conditions),
 			__METHOD__,
 			[
-				'ORDER BY'	=> 'ub_last_reply DESC, ub_date DESC',
+				'ORDER BY'	=> 'date_sort DESC',
 				'OFFSET'	=> $startAt,
 				'LIMIT'		=> $limit
 			]
@@ -136,6 +137,7 @@ class CommentBoard {
 		$comments = [];
 		// (for fast lookup of a comment by id when inserting replies)
 		while ($row = $results->fetchRow()) {
+			unset($row['date_sort']);
 			$comments[] = new Comment($row);
 		}
 
