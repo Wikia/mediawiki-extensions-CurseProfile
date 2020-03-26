@@ -338,7 +338,7 @@
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"userCan": "CurseProfile\\Hooks::onUserCan",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
+		"FandomUserSaveOptions": "CurseProfile\\Hooks::onFandomUserSaveOptions",
 		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
