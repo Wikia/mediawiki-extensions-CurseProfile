@@ -33,6 +33,8 @@ class ResolveComment extends Job {
 	 * @return boolean Success
 	 */
 	public function run() {
+		$args = $this->getParams();
+
 		if (!CommentReport::keyIsLocal($args['reportKey'])) {
 			list($md5key, $comment_id, $timestamp) = explode(':', $args['reportKey']);
 			// Get direct DB connection to the origin wiki.
