@@ -16,8 +16,7 @@
 			"HydraAuth": "*",
 			"HydraCore": ">= 3.0.0",
 			"RedisCache": "*",
-			"Reverb": "*",
-			"SyncService": ">= 2.0.0"
+			"Reverb": "*"
 		}
 	},
 	"AvailableRights": [
@@ -44,8 +43,7 @@
 		"CommentBoard": "CurseProfile\\SpecialCommentBoard",
 		"CommentPermalink": "CurseProfile\\SpecialCommentPermalink",
 		"CommentModeration": "CurseProfile\\SpecialCommentModeration",
-		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect",
-		"ProfileStats": "CurseProfile\\SpecialProfileStats"
+		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect"
 	},
 	"LogTypes": {
 		"curseprofile": "curseprofile"
@@ -73,6 +71,9 @@
 		"CurseProfileAlias": "/CurseProfile.alias.php",
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
+	"JobClasses": {
+		"CurseProfile\\ResolveComment": "CurseProfile\\ResolveComment"
+	},
 	"AutoloadClasses": {
 		"CurseProfile\\Comment": "classes/Comment.php",
 		"CurseProfile\\CommentApi": "classes/CommentApi.php",
@@ -94,8 +95,6 @@
 		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
 		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
-		"CurseProfile\\SpecialProfileStats": "specials/SpecialProfileStats.php",
-		"CurseProfile\\StatsRecache": "classes/jobs/StatsRecache.php",
 		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
 		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
 		"TemplateManageFriends": "templates/TemplateManageFriends.php",
