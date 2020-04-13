@@ -58,16 +58,16 @@ class SpecialCommentModeration extends SpecialPage {
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
 
-		$total = $this->countModQueue();
+		$reports = CommentReport::getReports($this->sortStyle, $itemsPerPage, $start);
 
-		if (!$total) {
+		if (!count($reports)) {
 			$this->output->addWikiMsg('commentmoderation-empty');
 			return;
 		} else {
-			$content = $templateCommentModeration->renderComments(CommentReport::getReports($this->sortStyle, $itemsPerPage, $start));
+			$content = $templateCommentModeration->renderComments($reports);
 		}
 
-		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), $total, $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($reports), $itemsPerPage, $start);
 
 		$this->output->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
 		$this->output->addHTML($pagination);

@@ -98,7 +98,6 @@
 		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
 		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
 		"TemplateManageFriends": "templates/TemplateManageFriends.php",
-		"TemplateProfileStats": "templates/TemplateProfileStats.php",
 		"CurseProfile\\SpecialManageFriends": "specials/friends/SpecialManageFriends.php",
 		"CurseProfile\\SpecialFriends": "specials/friends/SpecialFriends.php",
 		"CurseProfile\\SpecialAddComment": "specials/comments/SpecialAddComment.php",

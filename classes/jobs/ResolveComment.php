@@ -35,17 +35,6 @@ class ResolveComment extends Job {
 	public function run() {
 		$args = $this->getParams();
 
-		if (!CommentReport::keyIsLocal($args['reportKey'])) {
-			list($md5key, $comment_id, $timestamp) = explode(':', $args['reportKey']);
-			// Get direct DB connection to the origin wiki.
-			$db = self::getWikiDb($md5key);
-		} else {
-			$db = null;
-		}
-
-		// Have all curse profile use this db connection for now.
-		CP::setDb($db);
-
 		$report = CommentReport::newFromKey($args['reportKey'], true);
 		if (!$report) {
 			return true;
@@ -53,9 +42,6 @@ class ResolveComment extends Job {
 
 		$user = User::newFromId($args['byUser']);
 		$result = $report->resolve($args['action'], $user);
-
-		// Revert back to standard db connections.
-		CP::setDb(null);
 
 		if (!$result) {
 			$this->setLastError("Resolve action encountered an error.");

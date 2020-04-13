@@ -120,15 +120,6 @@
 	"notification-profile-friendship-email-subject": "$1 vous a ajouté en ami sur Gamepedia !",
 	"notification-profile-friendship-email-body": "$1 vous a demandé en ami sur Gamepedia. Vous pouvez confirmer sa demande en visualisant son profil sur {{SITENAME}} {{canonicalurl:{{ns:User}}:$1}} ou en visitant la page de gestion des amis :\n\n{{canonicalurl:{{#special:ManageFriends}}}}",
 	"emailfooter-gamepedia": "Amicalement,\nLe système de notifications Gamepedia\n\nVous pouvez vous désinscrire en changeant vos préférences email sur :\n{{canonicalurl:{{#special:Preferences}}#mw-prefsection-echo}}",
-	"profilestats": "Statistiques du profil Curse",
-	"action-profilestats": "voir les statistiques du profil Curse",
-	"profilestats-profile": "Profil Curse",
-	"profilestats-wiki": "Wiki de l'utilisateur",
-	"profilestats-none": "Aucun",
-	"profilestats-more": "Un ou plus",
-	"profilestats-empty": "Vide",
-	"profilestats-filled": "Champ >1",
-	"profilestats-avgFriends": "Utilisateurs ayant au moins 1 ami environ $1 amis.",
 	"achievementsearned": "Succès ([[Spécial:Achievements|Voir tout]])",
 	"cp-mobile-aboutme": "À propos de moi"
 }

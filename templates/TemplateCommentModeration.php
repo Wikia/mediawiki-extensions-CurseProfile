@@ -167,19 +167,7 @@ class TemplateCommentModeration {
 	 * @return string	HTML fragment
 	 */
 	private function permalink($rep) {
-		$wiki = Wiki::loadFromHash($rep['comment']['origin_wiki']);
-		if ($rep['comment']['origin_wiki'] == 'master') {
-			global $wgSitename;
-			$wikiName = $wgSitename;
-			$url = SpecialPage::getTitleFor('CommentModeration/' . $rep['comment']['cid'])->getFullUrl();
-		} elseif ($wiki !== false) {
-			$domain = $wiki->getDomains()->getDomain();
-			$wikiName = $wiki->getNameForDisplay();
-			if (!isset($domain) || !isset($wikiName)) {
-				return '';
-			}
-			$url = wfExpandUrl('https://' . $domain . '/Special:CommentPermalink/' . $rep['comment']['cid']);
-		}
-		return 'content as posted ' . Html::rawElement('a', ['href' => $url], CP::timeTag($rep['comment']['last_touched']) . ' on ' . $wikiName);
+		$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $rep['comment']['cid'], 'comment' . $rep['comment']['cid'])->getFullURL();
+		return Html::rawElement('a', ['href' => $commentPermanentLink], 'content as posted ' . CP::timeTag($rep['comment']['last_touched']));
 	}
 }
