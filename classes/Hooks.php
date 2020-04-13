@@ -13,7 +13,6 @@
 
 namespace CurseProfile;
 
-use DynamicSettings\Environment;
 use EditPage;
 use Linker;
 use MediaWiki\Linker\LinkRenderer;
@@ -493,11 +492,6 @@ class Hooks {
 		$updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql", true]);
 		$updater->addExtensionUpdate(['dropField', 'user_board_report_archives', 'ra_action_taken_by_global_id', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql", true]);
 		$updater->addExtensionUpdate(['dropField', 'user_board', 'ub_admin_acted_global_id', "{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql", true]);
-
-		if (Environment::isMasterWiki()) {
-			$updater->addExtensionUpdate(['addTable', 'user_relationship', "{$extDir}/install/sql/table_user_relationship.sql", true]);
-			$updater->addExtensionUpdate(['addTable', 'user_relationship_request', "{$extDir}/install/sql/table_user_relationship_request.sql", true]);
-		}
 
 		$updater->addExtensionUpdate(['addTable', 'user_board_purge_archive', "{$extDir}/install/sql/table_user_board_purge_archive.sql", true]);
 
