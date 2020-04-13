@@ -49,23 +49,4 @@ class ResolveComment extends Job {
 		}
 		return true;
 	}
-
-	/**
-	 * Look up a wiki by md5key and open a connection to its database
-	 *
-	 * @param  string $dbKey MD5 key for the wiki
-	 * @return object	Active MW database connection
-	 */
-	public static function getWikiDB($dbKey) {
-		try {
-			$wiki = Wiki::loadFromHash($dbKey);
-			if ($wiki !== false) {
-				$db = $wiki->getDatabaseLB()->getConnection(DB_MASTER);
-				return $db;
-			}
-		} catch (DBConnectionError $e) {
-			// Doot doot, just fall down to false below.
-		}
-		return false;
-	}
 }
