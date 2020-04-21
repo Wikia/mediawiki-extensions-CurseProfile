@@ -48,7 +48,6 @@
 	"totalpatrols": "Patrulhas",
 	"cp-friendssection-all": "([[Special:Friends/$1/$3|{{#ifeq: $1 | $2 | Gerenciar Amigos | Ver Todos }}]])",
 	"totaledits": "Edições",
-	"action-profilestats": "Visualizar estatísticas CurseProfile",
 	"avataralt": "Avatar para $1",
 	"comment-pref": "Comentários aprimorados",
 	"cp-achievementssection-all": "([[Special:Achievements/$1|Ver tudo]])",

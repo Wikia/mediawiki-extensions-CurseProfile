@@ -321,15 +321,8 @@ class CommentApi extends HydraApiBase {
 			'byUser' => $this->getInt('byUser', $this->getUser()->getId()),
 		];
 
-		// if not dealing with a comment originating here, dispatch it off to the origin wiki
-		if (CommentReport::keyIsLocal($reportKey)) {
-			$output = ResolveComment::run($jobArgs, true, $result);
-			$this->getResult()->addValue(null, 'result', ($result == 0 ? 'success' : 'error'));
-			$this->getResult()->addValue(null, 'output', explode("\n", trim($output)));
-		} else {
-			ResolveComment::queue($jobArgs);
-			$this->getResult()->addValue(null, 'result', 'queued');
-		}
+		ResolveComment::queue($jobArgs);
+		$this->getResult()->addValue(null, 'result', 'queued');
 		return true;
 	}
 

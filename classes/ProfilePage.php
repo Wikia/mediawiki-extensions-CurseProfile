@@ -26,6 +26,7 @@ use Hydra\Subscription;
 use HydraCore;
 use IContextSource;
 use Linker;
+use MediaWiki\MediaWikiServices;
 use Message;
 use MessageCache;
 use Revision;
@@ -763,9 +764,11 @@ class ProfilePage extends Article {
 		}
 
 		$userPoints = PointsDisplay::getWikiPointsForRange($this->user);
-		$levelDefinitions = PointLevels::getLevels();
 
-		if (!is_array($levelDefinitions)) {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$levelDefinitions = $config->get('PointsLevels');
+
+		if (!is_array($levelDefinitions) || empty($levelDefinitions)) {
 			return '';
 		}
 
@@ -773,7 +776,6 @@ class ProfilePage extends Article {
 		foreach ($levelDefinitions as $tier) {
 			// assuming that the definitions array is sorted by level ASC, overwriting previous iterations
 			if ($userPoints >= $tier['points']) {
-				// @TODO display $tier['image_icon'] or $tier['image_large']
 				$html = Html::element(
 					'img',
 					[

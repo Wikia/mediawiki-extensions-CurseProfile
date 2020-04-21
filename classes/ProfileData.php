@@ -339,21 +339,6 @@ class ProfileData {
 	public static function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
 
-		// save the user's preference between curse profile or user wiki into redis for our profile stats tally
-		if (isset($preferences['profile-pref'])) {
-			$redis = RedisCache::getClient('cache');
-			// since we don't sync profile-pref between wikis, the best we can do for reporting adoption rate
-			// is to report each individual user as using the last pref they saved on any wiki
-			try {
-				if ($redis !== false) {
-					$redis->hSet('profilestats:lastpref', $user->getId(), $preferences['profile-pref']);
-				}
-			} catch (Throwable $e) {
-				wfDebug(__METHOD__ . ": Caught RedisException - " . $e->getMessage());
-				return '';
-			}
-		}
-
 		// don't allow blocked users to change their about me text
 		// Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
 		if ($user->isSafeToLoad() && $wgUser !== null && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
