@@ -13,7 +13,6 @@
 		"extensions": {
 			"Cheevos": ">= 1.0.0",
 			"DynamicSettings": ">= 3.0.0",
-			"HydraAuth": "*",
 			"HydraCore": ">= 3.0.0",
 			"RedisCache": "*",
 			"Reverb": "*"
