@@ -597,7 +597,7 @@ class Hooks {
 	 *
 	 * @return boolean	True
 	 */
-	public static function onUserSaveOptions(User $user, array &$options) {
+	public static function onFandomUserSaveOptions(User $user, array &$options) {
 		if ($user && $user->getId()) {
 			ProfileData::processPreferenceSave($user, $options);
 		}
