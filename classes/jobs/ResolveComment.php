@@ -5,7 +5,6 @@
 
 namespace CurseProfile;
 
-use DynamicSettings\Wiki;
 use Job;
 use JobQueueGroup;
 use User;

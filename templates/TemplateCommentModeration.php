@@ -14,7 +14,6 @@
 use CurseProfile\CommentReport;
 use CurseProfile\CP;
 use CurseProfile\ProfilePage;
-use DynamicSettings\Wiki;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment

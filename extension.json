@@ -12,7 +12,6 @@
 		"MediaWiki": ">= 1.29.0",
 		"extensions": {
 			"Cheevos": ">= 1.0.0",
-			"DynamicSettings": ">= 3.0.0",
 			"HydraCore": ">= 3.0.0",
 			"RedisCache": "*",
 			"Reverb": "*"
