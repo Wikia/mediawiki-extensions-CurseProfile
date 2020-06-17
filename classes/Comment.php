@@ -256,8 +256,8 @@ class Comment {
 
 		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
 		return $this->getType() === self::PUBLIC_MESSAGE
-			|| ($this->getType() === self::PRIVATE_MESSAGE && $this->getBoardOwnerUser() === $user->getId() && $this->$this->getActorUserId() === $user->getId())
-			|| ($this->getType() === self::DELETED_MESSAGE && $this->$this->getActorUserId() == $user->getId());
+			|| ($this->getType() === self::PRIVATE_MESSAGE && $this->getBoardOwnerUser() === $user->getId() && $this->getActorUserId() === $user->getId())
+			|| ($this->getType() === self::DELETED_MESSAGE && $this->getActorUserId() == $user->getId());
 	}
 
 	/**
