@@ -14,8 +14,6 @@
 use CurseProfile\CommentReport;
 use CurseProfile\CP;
 use CurseProfile\ProfilePage;
-use DynamicSettings\Environment;
-use DynamicSettings\Wiki;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -168,23 +166,7 @@ class TemplateCommentModeration {
 	 * @return string	HTML fragment
 	 */
 	private function permalink($rep) {
-		if (Environment::isMasterWiki()) {
-			$wiki = Wiki::loadFromHash($rep['comment']['origin_wiki']);
-			if ($rep['comment']['origin_wiki'] == 'master') {
-				global $wgSitename;
-				$wikiName = $wgSitename;
-				$url = SpecialPage::getTitleFor('CommentModeration/' . $rep['comment']['cid'])->getFullUrl();
-			} elseif ($wiki !== false) {
-				$domain = $wiki->getDomains()->getDomain();
-				$wikiName = $wiki->getNameForDisplay();
-				if (!isset($domain) || !isset($wikiName)) {
-					return '';
-				}
-				$url = wfExpandUrl('https://' . $domain . '/Special:CommentPermalink/' . $rep['comment']['cid']);
-			}
-			return 'content as posted ' . Html::rawElement('a', ['href' => $url], CP::timeTag($rep['comment']['last_touched']) . ' on ' . $wikiName);
-		} else {
-			return CP::timeTag($rep['comment']['last_touched']);
-		}
+		$commentPermanentLink = SpecialPage::getTitleFor('CommentPermalink', $rep['comment']['cid'], 'comment' . $rep['comment']['cid'])->getFullURL();
+		return Html::rawElement('a', ['href' => $commentPermanentLink], 'content as posted ' . CP::timeTag($rep['comment']['last_touched']));
 	}
 }

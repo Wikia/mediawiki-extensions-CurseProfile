@@ -12,12 +12,9 @@
 		"MediaWiki": ">= 1.29.0",
 		"extensions": {
 			"Cheevos": ">= 1.0.0",
-			"DynamicSettings": ">= 3.0.0",
-			"HydraAuth": "*",
 			"HydraCore": ">= 3.0.0",
 			"RedisCache": "*",
-			"Reverb": "*",
-			"SyncService": ">= 2.0.0"
+			"Reverb": "*"
 		}
 	},
 	"AvailableRights": [
@@ -44,8 +41,7 @@
 		"CommentBoard": "CurseProfile\\SpecialCommentBoard",
 		"CommentPermalink": "CurseProfile\\SpecialCommentPermalink",
 		"CommentModeration": "CurseProfile\\SpecialCommentModeration",
-		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect",
-		"ProfileStats": "CurseProfile\\SpecialProfileStats"
+		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect"
 	},
 	"LogTypes": {
 		"curseprofile": "curseprofile"
@@ -73,6 +69,9 @@
 		"CurseProfileAlias": "/CurseProfile.alias.php",
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
+	"JobClasses": {
+		"CurseProfile\\ResolveComment": "CurseProfile\\ResolveComment"
+	},
 	"AutoloadClasses": {
 		"CurseProfile\\Comment": "classes/Comment.php",
 		"CurseProfile\\CommentApi": "classes/CommentApi.php",
@@ -94,12 +93,9 @@
 		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
 		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
-		"CurseProfile\\SpecialProfileStats": "specials/SpecialProfileStats.php",
-		"CurseProfile\\StatsRecache": "classes/jobs/StatsRecache.php",
 		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
 		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
 		"TemplateManageFriends": "templates/TemplateManageFriends.php",
-		"TemplateProfileStats": "templates/TemplateProfileStats.php",
 		"CurseProfile\\SpecialManageFriends": "specials/friends/SpecialManageFriends.php",
 		"CurseProfile\\SpecialFriends": "specials/friends/SpecialFriends.php",
 		"CurseProfile\\SpecialAddComment": "specials/comments/SpecialAddComment.php",
@@ -358,6 +354,513 @@
 			"value": "sysop",
 			"path": false,
 			"descriptionmsg": "curseprofile-config-cpcommentmodgroup",
+			"public": false
+		},
+		"PointsLevels": {
+			"value": {
+				"1": {
+					"points": 0,
+					"text": "1",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/1.png"
+				},
+				"2": {
+					"points": 1,
+					"text": "2",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/2.png"
+				},
+				"3": {
+					"points": 3,
+					"text": "3",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/3.png"
+				},
+				"4": {
+					"points": 5,
+					"text": "4",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/4.png"
+				},
+				"5": {
+					"points": 7,
+					"text": "5",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/5.png"
+				},
+				"6": {
+					"points": 9,
+					"text": "6",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/6.png"
+				},
+				"7": {
+					"points": 11,
+					"text": "7",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/7.png"
+				},
+				"8": {
+					"points": 14,
+					"text": "8",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/8.png"
+				},
+				"9": {
+					"points": 17,
+					"text": "9",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/9.png"
+				},
+				"10": {
+					"points": 20,
+					"text": "10",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/10.png"
+				},
+				"11": {
+					"points": 23,
+					"text": "11",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/11.png"
+				},
+				"12": {
+					"points": 26,
+					"text": "12",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/12.png"
+				},
+				"13": {
+					"points": 29,
+					"text": "13",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/13.png"
+				},
+				"14": {
+					"points": 32,
+					"text": "14",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/14.png"
+				},
+				"15": {
+					"points": 36,
+					"text": "15",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/15.png"
+				},
+				"16": {
+					"points": 40,
+					"text": "16",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/16.png"
+				},
+				"17": {
+					"points": 45,
+					"text": "17",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/17.png"
+				},
+				"18": {
+					"points": 50,
+					"text": "18",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/18.png"
+				},
+				"19": {
+					"points": 55,
+					"text": "19",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/19.png"
+				},
+				"20": {
+					"points": 60,
+					"text": "20",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/20.png"
+				},
+				"21": {
+					"points": 65,
+					"text": "21",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/21.png"
+				},
+				"22": {
+					"points": 70,
+					"text": "22",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/22.png"
+				},
+				"23": {
+					"points": 75,
+					"text": "23",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/23.png"
+				},
+				"24": {
+					"points": 80,
+					"text": "24",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/24.png"
+				},
+				"25": {
+					"points": 90,
+					"text": "25",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/25.png"
+				},
+				"26": {
+					"points": 100,
+					"text": "26",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/26.png"
+				},
+				"27": {
+					"points": 110,
+					"text": "27",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/27.png"
+				},
+				"28": {
+					"points": 120,
+					"text": "28",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/28.png"
+				},
+				"29": {
+					"points": 130,
+					"text": "29",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/29.png"
+				},
+				"30": {
+					"points": 140,
+					"text": "30",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/30.png"
+				},
+				"31": {
+					"points": 150,
+					"text": "31",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/31.png"
+				},
+				"32": {
+					"points": 160,
+					"text": "32",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/32.png"
+				},
+				"33": {
+					"points": 180,
+					"text": "33",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/33.png"
+				},
+				"34": {
+					"points": 200,
+					"text": "34",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/34.png"
+				},
+				"35": {
+					"points": 220,
+					"text": "35",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/35.png"
+				},
+				"36": {
+					"points": 240,
+					"text": "36",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/36.png"
+				},
+				"37": {
+					"points": 270,
+					"text": "37",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/37.png"
+				},
+				"38": {
+					"points": 300,
+					"text": "38",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/38.png"
+				},
+				"39": {
+					"points": 350,
+					"text": "39",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/39.png"
+				},
+				"40": {
+					"points": 400,
+					"text": "40",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/40.png"
+				},
+				"41": {
+					"points": 450,
+					"text": "41",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/41.png"
+				},
+				"42": {
+					"points": 500,
+					"text": "42",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/42.png"
+				},
+				"43": {
+					"points": 550,
+					"text": "43",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/43.png"
+				},
+				"44": {
+					"points": 600,
+					"text": "44",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/44.png"
+				},
+				"45": {
+					"points": 650,
+					"text": "45",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/45.png"
+				},
+				"46": {
+					"points": 700,
+					"text": "46",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/46.png"
+				},
+				"47": {
+					"points": 750,
+					"text": "47",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/47.png"
+				},
+				"48": {
+					"points": 800,
+					"text": "48",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/48.png"
+				},
+				"49": {
+					"points": 900,
+					"text": "49",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/49.png"
+				},
+				"50": {
+					"points": 1000,
+					"text": "50",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/50.png"
+				},
+				"51": {
+					"points": 1100,
+					"text": "51",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/51.png"
+				},
+				"52": {
+					"points": 1200,
+					"text": "52",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/52.png"
+				},
+				"53": {
+					"points": 1300,
+					"text": "53",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/53.png"
+				},
+				"54": {
+					"points": 1400,
+					"text": "54",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/54.png"
+				},
+				"55": {
+					"points": 1500,
+					"text": "55",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/55.png"
+				},
+				"56": {
+					"points": 1600,
+					"text": "56",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/56.png"
+				},
+				"57": {
+					"points": 1700,
+					"text": "57",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/57.png"
+				},
+				"58": {
+					"points": 1800,
+					"text": "58",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/58.png"
+				},
+				"59": {
+					"points": 1900,
+					"text": "59",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/59.png"
+				},
+				"60": {
+					"points": 2000,
+					"text": "60",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/60.png"
+				},
+				"61": {
+					"points": 2250,
+					"text": "61",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/61.png"
+				},
+				"62": {
+					"points": 2500,
+					"text": "62",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/62.png"
+				},
+				"63": {
+					"points": 3000,
+					"text": "63",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/63.png"
+				},
+				"64": {
+					"points": 4000,
+					"text": "64",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/64.png"
+				},
+				"65": {
+					"points": 5000,
+					"text": "65",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/65.png"
+				},
+				"66": {
+					"points": 6000,
+					"text": "66",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/66.png"
+				},
+				"67": {
+					"points": 7000,
+					"text": "67",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/67.png"
+				},
+				"68": {
+					"points": 8000,
+					"text": "68",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/68.png"
+				},
+				"69": {
+					"points": 9000,
+					"text": "69",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/69.png"
+				},
+				"70": {
+					"points": 10000,
+					"text": "70",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/70.png"
+				},
+				"71": {
+					"points": 11000,
+					"text": "71",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/71.png"
+				},
+				"72": {
+					"points": 12000,
+					"text": "72",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/72.png"
+				},
+				"73": {
+					"points": 13000,
+					"text": "73",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/73.png"
+				},
+				"74": {
+					"points": 14000,
+					"text": "74",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/74.png"
+				},
+				"75": {
+					"points": 15000,
+					"text": "75",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/75.png"
+				},
+				"76": {
+					"points": 16000,
+					"text": "76",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/76.png"
+				},
+				"77": {
+					"points": 17000,
+					"text": "77",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/77.png"
+				},
+				"78": {
+					"points": 18000,
+					"text": "78",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/78.png"
+				},
+				"79": {
+					"points": 19000,
+					"text": "79",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/79.png"
+				},
+				"80": {
+					"points": 20000,
+					"text": "80",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/80.png"
+				},
+				"81": {
+					"points": 22000,
+					"text": "81",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/81.png"
+				},
+				"82": {
+					"points": 24000,
+					"text": "82",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/82.png"
+				},
+				"83": {
+					"points": 28000,
+					"text": "83",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/83.png"
+				},
+				"84": {
+					"points": 32000,
+					"text": "84",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/84.png"
+				},
+				"85": {
+					"points": 37000,
+					"text": "85",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/85.png"
+				},
+				"86": {
+					"points": 42000,
+					"text": "86",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/86.png"
+				},
+				"87": {
+					"points": 47000,
+					"text": "87",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/87.png"
+				},
+				"88": {
+					"points": 52000,
+					"text": "88",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/88.png"
+				},
+				"89": {
+					"points": 60000,
+					"text": "89",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/89.png"
+				},
+				"90": {
+					"points": 70000,
+					"text": "90",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/90.png"
+				},
+				"91": {
+					"points": 80000,
+					"text": "91",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/91.png"
+				},
+				"92": {
+					"points": 90000,
+					"text": "92",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/92.png"
+				},
+				"93": {
+					"points": 100000,
+					"text": "93",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/93.png"
+				},
+				"94": {
+					"points": 110000,
+					"text": "94",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/94.png"
+				},
+				"95": {
+					"points": 120000,
+					"text": "95",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/95.png"
+				},
+				"96": {
+					"points": 130000,
+					"text": "96",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/96.png"
+				},
+				"97": {
+					"points": 140000,
+					"text": "97",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/97.png"
+				},
+				"98": {
+					"points": 160000,
+					"text": "98",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/98.png"
+				},
+				"99": {
+					"points": 180000,
+					"text": "99",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/99.png"
+				},
+				"100": {
+					"points": 200000,
+					"text": "100",
+					"image_large": "https://gamepedia.cursecdn.com/pointslevels/100.png"
+				}
+			},
+			"path": false,
+			"descriptionmsg": "curseprofile-config-pointslevels",
 			"public": false
 		}
 	},
