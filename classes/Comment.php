@@ -60,6 +60,7 @@ class Comment {
 	 * @throws MWException
 	 */
 	public function __construct(array $comment = []) {
+		$comment = array_intersect_key($comment, $this->data);
 		if (count(array_diff_key($comment, $this->data))) {
 			throw new MWException(__METHOD__ . " Comment data contained invalid keys.");
 		}
