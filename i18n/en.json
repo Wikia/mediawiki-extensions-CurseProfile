@@ -292,5 +292,6 @@
 	"apihelp-comment-param-title": "The headline to use when posting a new section to the user's talk page",
 	"apihelp-profile-param-user_id": "The user ID for a user.",
 	"apihelp-profile-param-do": "The action that should be performed",
-	"apihelp-profile-param-token": "The edit token for the current user, for write actions"
+	"apihelp-profile-param-token": "The edit token for the current user, for write actions",
+	"save": "Save"
 }
