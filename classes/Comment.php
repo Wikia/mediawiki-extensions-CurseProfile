@@ -284,6 +284,9 @@ class Comment {
 			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
 				return false;
 			}
+			if ($fromUser->getId() == $toUser->getId()) {
+				return true;
+			}
 
 		}
 
