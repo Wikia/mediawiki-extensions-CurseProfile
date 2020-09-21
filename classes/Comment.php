@@ -281,13 +281,12 @@ class Comment {
 		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($fromUser->getEmail())));
 
 		if ($fromUser->getId()) {
-			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
-				return false;
-			}
 			if ($fromUser->getId() == $toUser->getId()) {
 				return true;
 			}
-
+			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
+				return false;
+			}
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
