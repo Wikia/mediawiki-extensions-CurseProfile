@@ -810,7 +810,7 @@ class ProfilePage extends Article {
 			$html .= Html::element(
 				'button',
 				[
-					'data-href'	=> Title::newFromText('Special:Preferences')->getFullURL() . '#mw-prefsection-personal-info-public',
+					'data-href'	=> Title::newFromText('Special:Preferences')->getFullURL() . '#mw-prefsection-personal',
 					'class'		=> 'linksub'
 				],
 				wfMessage('cp-editprofile')->plain()
