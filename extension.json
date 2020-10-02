@@ -114,10 +114,6 @@
 			"styles": [
 				"css/curseprofile.css"
 			],
-			"dependencies": [
-				"ext.curseprofile.customskin.styles",
-				"ext.curseprofile.comments.styles"
-			],
 			"position": "top",
 			"targets": [
 				"desktop",
@@ -178,9 +174,6 @@
 			]
 		},
 		"ext.curseprofile.preferences.styles": {
-			"dependencies": [
-				"ext.hydraCore.font-awesome.styles"
-			],
 			"position": "top",
 			"targets": [
 				"desktop",
@@ -205,9 +198,6 @@
 		"ext.curseprofile.comments.styles": {
 			"styles": [
 				"css/comments.css"
-			],
-			"dependencies": [
-				"ext.hydraCore.font-awesome.styles"
 			],
 			"position": "top",
 			"targets": [
@@ -242,9 +232,6 @@
 		"ext.curseprofile.commentmoderation.styles": {
 			"styles": [
 				"css/commentmoderation.less"
-			],
-			"dependencies": [
-				"ext.curseprofile.comments.styles"
 			],
 			"position": "top"
 		},

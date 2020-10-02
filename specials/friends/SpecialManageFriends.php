@@ -56,7 +56,7 @@ class SpecialManageFriends extends SpecialPage {
 
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 		$templateManageFriends = new TemplateManageFriends;
 

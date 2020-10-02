@@ -83,7 +83,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 25;
 		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 		$templateManageFriends = new TemplateManageFriends;
 
