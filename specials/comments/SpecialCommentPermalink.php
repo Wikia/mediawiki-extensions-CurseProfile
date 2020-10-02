@@ -58,7 +58,7 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		$owner = $comment->getBoardOwnerUser();
 
 		$wgOut->setPageTitle(wfMessage('commentboard-permalink-title', $owner->getName())->plain());
-		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
 		$templateCommentBoard = new TemplateCommentBoard;
 

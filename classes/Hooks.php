@@ -127,7 +127,7 @@ class Hooks {
 		self::$profilePage = ProfilePage::newFromTitle($title);
 
 		if ($title->equals(SpecialPage::getTitleFor("Preferences"))) {
-			$output->addModuleStyles(['ext.curseprofile.preferences.styles']);
+			$output->addModuleStyles(['ext.curseprofile.preferences.styles', 'ext.hydraCore.font-awesome.styles']);
 			$output->addModules(['ext.curseprofile.preferences.scripts']);
 		}
 	}
@@ -276,7 +276,7 @@ class Hooks {
 			return $wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 		}
 
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 
 		if (!self::$profilePage->getUser()->getId()) {
