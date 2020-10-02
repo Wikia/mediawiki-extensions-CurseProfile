@@ -682,8 +682,8 @@ class ProfileData {
 
 		$wikis = $wikiVariables->getListOfWikisWithVar(
 			$dsSiteKeyVar['variable_id'],
-			$siteKey ? '==' : '!=',
-			$siteKey ?? ''
+			$siteKey ? '=' : '!=',
+			$siteKey ? json_encode($siteKey) : ''
 		)['result'];
 		foreach ($wikis as $wiki) {
 			if (empty($wiki['value'])) {
