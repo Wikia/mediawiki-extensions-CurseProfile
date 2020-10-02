@@ -37,12 +37,12 @@ $(function(){
 			}).done(function(data) {
 				if (data.result == "success") {
 					var fill = [];
-					var results = data.data;
-					for (hash in results) {
-						var res = results[hash];
+					var wikis = data.data;
+					for (var i = 0; i < wikis.length; i++) {
+						var res = wikis[i];
 						var label = (typeof res.wiki_name_display !== 'undefined') ? res.wiki_name_display : res.wiki_name;
 						fill.push({ label: label });
-						wikiresponse[label] = hash; // push into the store object
+						wikiresponse[label] = res.md5_key; // push into the store object
 					}
 					if (fill.length) {
 						response(fill);
@@ -58,7 +58,7 @@ $(function(){
 			var selected = $(event.target).val();
 			if (typeof wikiresponse[selected] !== 'undefined' && wikiresponse[selected] !== "") {
 				favwiki.val(wikiresponse[selected]);
-				$(".mw-prefs-buttons .mw-htmlform-submit").addClass('oo-ui-widget-enabled').removeClass('oo-ui-widget-disabled').find("button[type='submit']").prop("disabled",false);
+				favwikiDisplayOrig.find('input').val(selected);
 			}
 		}
 	});
