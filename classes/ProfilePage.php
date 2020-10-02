@@ -518,7 +518,7 @@ class ProfilePage extends Article {
 		}
 
 		$title = Title::newFromText('UserProfile:' . $this->user->getTitleKey());
-		$link = "https://" . $wiki['wiki_domain'] . $title->getLocalURL();
+		$link = $wiki['wiki_url'] . $title->getLocalURL();
 
 		$html = "<a target='_blank' href='{$link}'>" . $html . "</a>";
 		$html = wfMessage('favoritewiki')->plain() . '<br/>' . $html;
