@@ -637,7 +637,7 @@ class ProfileData {
 			}
 		}
 
-		return $result;
+		return $result ?? [];
 	}
 
 	/**
@@ -691,7 +691,7 @@ class ProfileData {
 			}
 			$info[] = self::convertCityInfoToSiteData($wiki);
 		}
-		return $info;
+		return $info ?? [];
 	}
 
 	/**
