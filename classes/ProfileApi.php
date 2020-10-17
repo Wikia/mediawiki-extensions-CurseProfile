@@ -124,6 +124,7 @@ class ProfileApi extends HydraApiBase {
 			$return[$hash] = [
 				'wiki_name' => $r['wiki_name'],
 				'wiki_name_display' => $r['wiki_name_display'],
+				'wiki_url' => $r['wiki_url'],
 				'md5_key' => $r['md5_key']
 			];
 		}

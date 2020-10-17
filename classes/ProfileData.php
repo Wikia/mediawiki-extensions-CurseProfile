@@ -13,16 +13,14 @@
 
 namespace CurseProfile;
 
+use Fandom\Includes\Util\UrlUtilityService;
 use Hooks;
 use Html;
 use HydraCore;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MWException;
-use Redis;
-use RedisCache;
 use RequestContext;
-use Throwable;
 use Title;
 use User;
 use WikiConfig\WikiVariablesDataService;
@@ -257,7 +255,9 @@ class ProfileData {
 		];
 
 		$preferences['profile-favwiki'] = [
-			'type' => 'hidden',
+			'type' => 'text',
+			'label-message' => 'favoritewiki',
+			'cssclass' => 'profile-favwiki-hidden',
 			'section' => 'personal/info/public',
 		];
 
@@ -622,12 +622,12 @@ class ProfileData {
 	 */
 	public static function getWikiSitesSearch($search) {
 		$wikis = self::getWikisFromCityList();
+		$result = [];
 		foreach ($wikis as $wiki) {
-			$domain = parse_url($wiki['wiki_url'])['host'] ?? '';
-			$baseDomain = explode('.', $domain)[0] ?? '';
+			$domain = wfParseUrl($wiki['wiki_url'])['host'] ?? '';
 			if (
-				!stristr($wiki['wiki_name_for_display'], $search) &&
-				!stristr($baseDomain, $search)
+				mb_stripos($wiki['wiki_name_display'], $search) === false &&
+				mb_stripos($domain, $search) === false
 			) {
 				continue;
 			}
@@ -637,7 +637,7 @@ class ProfileData {
 			}
 		}
 
-		return $result ?? [];
+		return $result;
 	}
 
 	/**
@@ -660,10 +660,12 @@ class ProfileData {
 	 */
 	private static function convertCityInfoToSiteData($info) {
 		$lang = mb_strtoupper($info['city_lang']);
+		$urlUtilityService = MediaWikiServices::getInstance()->getService( UrlUtilityService::class );
+		$url = $urlUtilityService->forceHttps( $info['city_url'] );
 		return [
 			'wiki_name' => $info['city_title'],
 			'wiki_name_display' => "{$info['city_title']} ($lang)",
-			'wiki_url' => $info['city_url'],
+			'wiki_url' => $url,
 			'md5_key' => $info['value'],
 		];
 	}
@@ -673,25 +675,35 @@ class ProfileData {
 	 * @return array
 	 */
 	private static function getWikisFromCityList($siteKey = null) {
-		/** @var WikiVariablesDataService $wikiVariables */
-		$wikiVariables = MediaWikiServices::getInstance()->getService( WikiVariablesDataService::class );
-		$dsSiteKeyVar = $wikiVariables->getVariableInfo(null, 'dsSiteKey');
-		if (empty($dsSiteKeyVar)) {
-			return [];
-		}
-
-		$wikis = $wikiVariables->getListOfWikisWithVar(
-			$dsSiteKeyVar['variable_id'],
-			$siteKey ? '=' : '!=',
-			$siteKey ? json_encode($siteKey) : ''
-		)['result'];
-		foreach ($wikis as $wiki) {
-			if (empty($wiki['value'])) {
-				continue;
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		return $cache->getWithSetCallback(
+			$cache->makeGlobalKey(__CLASS__, 'wiki-info', $siteKey ?? 'all'),
+			14400,
+			function ($oldValue, &$ttl, array &$setOpts) use ($siteKey) {
+				/** @var WikiVariablesDataService $wikiVariables */
+				$wikiVariables = MediaWikiServices::getInstance()->getService(WikiVariablesDataService::class);
+				$dsSiteKeyVar = $wikiVariables->getVariableInfo(null, 'dsSiteKey');
+				if (empty($dsSiteKeyVar)) {
+					return [];
+				}
+		
+				$wikis = $wikiVariables->getListOfWikisWithVar(
+					$dsSiteKeyVar['variable_id'],
+					$siteKey ? '=' : '!=',
+					$siteKey ? json_encode($siteKey) : '',
+					'$',
+					0,
+					$siteKey ? 1 : 5000
+				)['result'];
+				foreach ($wikis as $wiki) {
+					if (empty($wiki['value'])) {
+						continue;
+					}
+					$info[] = self::convertCityInfoToSiteData($wiki);
+				}
+				return $info ?? false;
 			}
-			$info[] = self::convertCityInfoToSiteData($wiki);
-		}
-		return $info ?? [];
+		) ?: [];
 	}
 
 	/**
