@@ -116,7 +116,8 @@ class ProfilePage extends Article {
 			$this->user = User::newFromId(0);
 		}
 
-		$this->mobile = HydraCore::isMobileSkin($this->getContext()->getSkin());
+		$skin = $this->getContext()->getSkin();
+		$this->mobile = HydraCore::isMobileSkin($skin) || $skin->getSkinName() === 'fandommobile';
 		$this->profile = new ProfileData($this->user->getId());
 	}
 

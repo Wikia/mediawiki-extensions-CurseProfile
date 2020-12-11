@@ -23,6 +23,8 @@ use Status;
 use Title;
 use User;
 use WebRequest;
+use OutputPage;
+use Skin;
 
 class Hooks {
 	/**
@@ -131,6 +133,23 @@ class Hooks {
 			$output->addModules(['ext.curseprofile.preferences.scripts']);
 		}
 	}
+
+    /**
+     * @param OutputPage $output
+     * @param Skin $skin
+     *
+     * @return void
+     */
+    public static function onBeforePageDisplay( $output, $skin ) {
+        if (
+            self::$profilePage instanceof \CurseProfile\ProfilePage
+            && self::$profilePage->isProfilePage()
+            && $skin->getSkinName() === 'fandommobile'
+        ) {
+            $output->addModules( [ 'a.ext.curseprofile.profilepage.mobile.scripts' ] );
+            $output->addModuleStyles( [ 'a.ext.curseprofile.profilepage.mobile.styles' ] );
+        }
+    }
 
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
