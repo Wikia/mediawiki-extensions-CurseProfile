@@ -23,6 +23,8 @@ use Status;
 use Title;
 use User;
 use WebRequest;
+use OutputPage;
+use Skin;
 
 class Hooks {
 	/**
@@ -132,7 +134,13 @@ class Hooks {
 		}
 	}
 
-    public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
+    /**
+     * @param OutputPage $output
+     * @param Skin $skin
+     *
+     * @return void
+     */
+    public static function onBeforePageDisplay( $output, $skin ) {
         if (
             self::$profilePage instanceof \CurseProfile\ProfilePage
             && self::$profilePage->isProfilePage()
