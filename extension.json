@@ -309,6 +309,7 @@
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
 		"ArticleViewRedirect": "CurseProfile\\Hooks::onArticleViewRedirect",
 		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
+		"BeforePageDisplay": "CurseProfile\\Hooks::onBeforePageDisplay",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
 		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",

@@ -132,6 +132,17 @@ class Hooks {
 		}
 	}
 
+    public static function onBeforePageDisplay( OutputPage $output, Skin $skin ) {
+        if (
+            self::$profilePage instanceof \CurseProfile\ProfilePage
+            && self::$profilePage->isProfilePage()
+            && $skin->getSkinName() === 'fandommobile'
+        ) {
+            $output->addModules( [ 'a.ext.curseprofile.profilepage.mobile.scripts' ] );
+            $output->addModuleStyles( [ 'a.ext.curseprofile.profilepage.mobile.styles' ] );
+        }
+    }
+
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
 	 *
