@@ -282,7 +282,11 @@ class Comment {
 
 		if ($fromUser->getId()) {
 			if ($fromUser->getId() == $toUser->getId()) {
-				return true;
+				if (!$fromUser->isBlocked()) {
+					return true;
+				} else {
+					return false;
+				}
 			}
 			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
 				return false;
