@@ -14,6 +14,7 @@
 namespace CurseProfile;
 
 use Fandom\Includes\Util\UrlUtilityService;
+use Fandom\WikiConfig\WikiVariablesDataService;
 use Hooks;
 use Html;
 use HydraCore;
@@ -23,7 +24,6 @@ use MWException;
 use RequestContext;
 use Title;
 use User;
-use WikiConfig\WikiVariablesDataService;
 
 /**
  * Class for reading and saving custom user-set profile data
@@ -686,7 +686,7 @@ class ProfileData {
 				if (empty($dsSiteKeyVar)) {
 					return [];
 				}
-		
+
 				$wikis = $wikiVariables->getListOfWikisWithVar(
 					$dsSiteKeyVar['variable_id'],
 					$siteKey ? '=' : '!=',
