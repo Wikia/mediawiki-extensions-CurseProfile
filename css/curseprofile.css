@@ -434,9 +434,95 @@ ul.friends {
 		-webkit-columns: 3;
 		columns: 3;
 	}
-	/*.activity ul {
-		-moz-columns: 2;
-		-webkit-columns: 2;
-		columns: 2;
-	}*/
+}
+
+body.skin-fandomdesktop[class*="page-UserProfile_"] .page-header {
+	display: none;
+}
+
+body.skin-fandomdesktop .curseprofile .userinfo {
+	display: flex;
+}
+
+body.skin-fandomdesktop .curseprofile .mainavatar {
+	filter: none;
+	margin-right: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .mainavatar img {
+	border-radius: 50%;
+}
+
+body.skin-fandomdesktop .curseprofile .profile-info {
+	width: 100%;
+}
+
+body.skin-fandomdesktop .curseprofile .headline {
+	text-align: left;
+}
+
+body.skin-fandomdesktop .curseprofile .headline h1 {
+	float: none;
+	font-size: 30px;
+	font-weight: bold;
+	line-height: 30px;
+	margin-bottom: 15px;
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags {
+	font-size: 12px;
+	margin: 0 0 15px 0;
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li.edit {
+	background: none;
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+body.skin-fandomdesktop .curseprofile #profile-location,
+body.skin-fandomdesktop .curseprofile #profile-social {
+	margin-bottom: 15px;
+}
+
+body.skin-fandomdesktop .curseprofile ul.profilelinks {
+	list-style: none;
+	margin: 0;
+}
+
+body.skin-fandomdesktop .curseprofile #profile-user-fields > div {
+	min-height: auto;
+}
+
+body.skin-fandomdesktop .curseprofile .section:not(.borderless) {
+	border-color: rgba(14, 25, 26, 0.25);
+	border-width: 1px 0 0 0;
+	margin-top: 20px;
+	padding: 18px 0 0 0;
+}
+
+body.skin-fandomdesktop .curseprofile .rightcolumn {
+	background-color: var(--theme-page-background-color--secondary);
+	padding: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile input[type="text"] {
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
+	font-family: Rubik;
+}
+
+body.skin-fandomdesktop .curseprofile textarea {
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
+	font-family: Rubik;
+	height: auto;
+	padding: 12px;
+	width: 100%;
+}
+
+body.skin-fandomdesktop .curseprofile button.cancel {
+	margin-right: 6px;
+}
+
+body.skin-fandomdesktop .curseprofile #block-profile-social {
+	margin-bottom: 12px;
 }

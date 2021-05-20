@@ -78,7 +78,7 @@ class CommentDisplay {
 				<div class="entryform">
 					<form action="' . $page->getFullUrl() . '" method="post">
 						<textarea name="message" maxlength="' . Comment::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
-						<button name="inreplyto" class="submit" value="0">' . wfMessage('commentaction')->escaped() . '</button>
+						<button name="inreplyto" class="submit wds-button" value="0">' . wfMessage('commentaction')->escaped() . '</button>
 						' . Html::hidden('token', $wgUser->getEditToken()) . '
 					</form>
 				</div>

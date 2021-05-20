@@ -850,16 +850,18 @@ class ProfilePage extends Article {
 	<div class="leftcolumn">
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
-			<div class="headline">
-				<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
-				{{#groups:}}
-			</div>
-			<div id="profile-user-fields">
-				<div id="profile-location" data-field="location">{{#profilefield:location}}</div>
-				{{#profilelinks:}}
-			</div>
-			<div id="profile-aboutme" data-field="aboutme">
-				{{#profilefield:aboutme}}
+			<div class="profile-info">
+				<div class="headline">
+					<h1' . ($classes !== false ? ' class="' . implode(' ', $classes) . '"' : '') . '>' . $this->user->getName() . '</h1>
+					{{#groups:}}
+				</div>
+				<div id="profile-user-fields">
+					<div id="profile-location" data-field="location">{{#profilefield:location}}</div>
+					{{#profilelinks:}}
+				</div>
+				<div id="profile-aboutme" data-field="aboutme">
+					{{#profilefield:aboutme}}
+				</div>
 			</div>
 		</div>
 		<div class="activity section">
