@@ -480,11 +480,11 @@ class ProfileData {
 			$fieldHtml = Html::rawElement(
 				'a',
 				[
-					'class'	=> 'rightfloat profileedit',
+					'class'	=> 'rightfloat profileedit is-icon',
 					'href'	=> '#',
 					'title' => wfMessage('editfield-' . $field . '-tooltip')->params($this->user->getName())->text()
 				],
-				HydraCore::awesomeIcon('pencil-alt')
+				ProfilePage::PENCIL_ICON_SVG
 			) . $fieldHtml;
 		}
 
@@ -509,11 +509,11 @@ class ProfileData {
 			$html .= "" . Html::rawElement(
 				'a',
 				[
-					'class'	=> 'rightfloat socialedit',
+					'class'	=> 'rightfloat socialedit is-icon',
 					'href'	=> '#',
 					'title' => wfMessage('editfield-social-tooltip')->plain()
 				],
-				HydraCore::awesomeIcon('pencil-alt')
+				ProfilePage::PENCIL_ICON_SVG
 			);
 		}
 

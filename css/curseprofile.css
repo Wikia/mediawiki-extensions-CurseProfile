@@ -474,12 +474,36 @@ body.skin-fandomdesktop .curseprofile .grouptags {
 	margin: 0 0 15px 0;
 }
 
+body.skin-fandomdesktop .curseprofile .grouptags li {
+	background-color: rgba(var(--theme-page-dynamic-color-1--rgb), .15);
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li:hover {
+	background-color: rgba(var(--theme-page-dynamic-color-1--rgb), .35);
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li a {
+	color: var(--theme-link-color);
+}
+
 body.skin-fandomdesktop .curseprofile .grouptags li.edit {
 	background: none;
 	float: right;
 	margin: 0;
+	min-width: 18px;
 	padding: 0;
 }
+
+body.skin-fandomdesktop .curseprofile a.is-icon {
+	height: 18px;
+	width: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li.edit svg,
+body.skin-fandomdesktop .curseprofile a.is-icon svg {
+	fill: var(--theme-link-color);
+}
+
 body.skin-fandomdesktop .curseprofile #profile-location,
 body.skin-fandomdesktop .curseprofile #profile-social {
 	margin-bottom: 15px;
@@ -495,7 +519,7 @@ body.skin-fandomdesktop .curseprofile #profile-user-fields > div {
 }
 
 body.skin-fandomdesktop .curseprofile .section:not(.borderless) {
-	border-color: rgba(14, 25, 26, 0.25);
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
 	border-width: 1px 0 0 0;
 	margin-top: 20px;
 	padding: 18px 0 0 0;
@@ -504,6 +528,11 @@ body.skin-fandomdesktop .curseprofile .section:not(.borderless) {
 body.skin-fandomdesktop .curseprofile .rightcolumn {
 	background-color: var(--theme-page-background-color--secondary);
 	padding: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .rightcolumn h3 {
+	font-size: 16px;
+	font-weight: bold;
 }
 
 body.skin-fandomdesktop .curseprofile input[type="text"] {
@@ -525,4 +554,21 @@ body.skin-fandomdesktop .curseprofile button.cancel {
 
 body.skin-fandomdesktop .curseprofile #block-profile-social {
 	margin-bottom: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .errorbox {
+	background-color: transparent;
+	border-color: var(--theme-alert-color);
+	border-radius: 3px;
+	color: var(--theme-alert-color);
+}
+
+/* Override Hydra(?) link style */
+body.skin-fandomdesktop .curseprofile a {
+	color: var(--theme-link-color);
+	font-weight: 500;
+}
+
+body.skin-fandomdesktop .curseprofile .stats dt {
+	font-weight: 500;
 }

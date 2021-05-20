@@ -39,6 +39,9 @@ use User;
  * Holds the primary logic over how and when a profile page is displayed
  */
 class ProfilePage extends Article {
+
+	const PENCIL_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 18 18"><defs><path id="pencil-small" d="M14 8.586L9.414 4 11 2.414 15.586 7 14 8.586zM6.586 16H2v-4.586l6-6L12.586 10l-6 6zm11.121-9.707l-6-6a.999.999 0 0 0-1.414 0l-9.999 10a.99.99 0 0 0-.217.325A.991.991 0 0 0 0 11v6a1 1 0 0 0 1 1h6c.13 0 .26-.026.382-.077a.99.99 0 0 0 .326-.217l9.999-9.999a.999.999 0 0 0 0-1.414z"/></defs><use fill-rule="evenodd" xlink:href="#pencil-small"/></svg>';
+
 	/**
 	 * @var string
 	 */
@@ -403,7 +406,7 @@ class ProfilePage extends Article {
 		// Check the rights of the person viewing this page.
 		$cGroups = $wgUser->changeableGroups();
 		if (!empty($cGroups['add']) || !empty($cGroups['remove'])) {
-			$html .= "<li class=\"edit\">" . Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), HydraCore::awesomeIcon('pencil-alt')) . "</li>";
+			$html .= "<li class=\"edit\">" . Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), self::PENCIL_ICON_SVG) . "</li>";
 		}
 		$html .= '</ul>';
 
