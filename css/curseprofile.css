@@ -170,6 +170,7 @@ div.mainavatar {
 .grouptags li.edit {
 	background-color: #999;
 	background-color: rgba(128, 128, 128, 0.5);
+	min-width: 18px;
 }
 
 
@@ -436,6 +437,16 @@ ul.friends {
 	}
 }
 
+.curseprofile a.is-icon {
+	height: 18px;
+	width: 18px;
+}
+
+.curseprofile .grouptags li.edit svg,
+.curseprofile a.is-icon svg {
+	fill: currentColor;
+}
+
 body.skin-fandomdesktop[class*="page-UserProfile_"] .page-header {
 	display: none;
 }
@@ -490,18 +501,7 @@ body.skin-fandomdesktop .curseprofile .grouptags li.edit {
 	background: none;
 	float: right;
 	margin: 0;
-	min-width: 18px;
 	padding: 0;
-}
-
-body.skin-fandomdesktop .curseprofile a.is-icon {
-	height: 18px;
-	width: 18px;
-}
-
-body.skin-fandomdesktop .curseprofile .grouptags li.edit svg,
-body.skin-fandomdesktop .curseprofile a.is-icon svg {
-	fill: var(--theme-link-color);
 }
 
 body.skin-fandomdesktop .curseprofile #profile-location,
