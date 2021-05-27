@@ -89,7 +89,3 @@
 	.replyset .entryform {
 		margin-left: 40px;
 	}
-
-body.skin-fandomdesktop[class*="page-UserProfile_"] .comments .avatar img {
-	border-radius: 50%;
-}

@@ -152,7 +152,7 @@
 
 				//Create new form to function as an edit form.
 				profile.editForms = $('<div>').addClass('entryform').attr('id', 'block-' + blockId);
-				profile.editForms.append('<form data-field="' + field + '"><textarea class="autoresizeme" maxlength="5000"></textarea><button class="cancel wds-button wds-is-secondary"></button><button class="save wds-button"></button></form>');
+				profile.editForms.append('<form data-field="' + field + '"><textarea class="autoresizeme" maxlength="5000"></textarea><div class="form-buttons"><button class="cancel wds-button wds-is-secondary"></button><button class="save wds-button"></button></div></form>');
 				profile.editForms.find('button.cancel').text(mw.message('cancel').text());
 				profile.editForms.find('button.save').text(mw.message('save').text());
 				autosize(profile.editForms.find('textarea'));

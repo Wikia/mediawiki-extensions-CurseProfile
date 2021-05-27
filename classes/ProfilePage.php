@@ -814,7 +814,7 @@ class ProfilePage extends Article {
 				'button',
 				[
 					'data-href'	=> Title::newFromText('Special:Preferences')->getFullURL() . '#mw-prefsection-personal-info-public',
-					'class'		=> 'linksub'
+					'class'		=> 'linksub wds-button wds-is-secondary'
 				],
 				wfMessage('cp-editprofile')->plain()
 			);
@@ -848,9 +848,12 @@ class ProfilePage extends Article {
 			Subscription::skipCache($cacheSetting);
 		}
 
+		$tabsMarkup = $this->getTabsMarkup();
+
 		return '
 <div class="curseprofile" data-user_id="' . $this->user->getID() . '">
 	<div class="leftcolumn">
+		' . $tabsMarkup . '
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | ' . ($this->user->isBlocked() ? '' : self::emailToMD5Hash($this->user->getEmail())) . ' | ' . $this->user->getName() . '}}</div>
 			<div class="profile-info">
@@ -893,7 +896,7 @@ class ProfilePage extends Article {
 		</div>
 		<div class="section friends">
 			<h3>' . wfMessage('cp-friendssection')->plain() . '</h3>
-			{{#friendlist: ' . $this->user->getID() . '}}<br />
+			{{#friendlist: ' . $this->user->getID() . '}}
 			<div style="float: right;">' . wfMessage('cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey())->plain() . '</div>
 		</div>
 		<div class="section achievements">
@@ -957,5 +960,31 @@ __NOINDEX__
 __NOTOC__
 __NOINDEX__
 ';
+	}
+
+	protected function getTabsMarkup() {
+		// TODO fix these tabs
+		return '';
+		if ( $this->getContext()->getSkin()->getSkinName() !== 'fandomdesktop' ) {
+			return '';
+		}
+
+		$userName = $this->user->getName();
+		$userPageUrl = $this->user->getUserPage()->getFullURL();
+
+		return '<ul class="user-profile-navigation">
+			<li class="user-profile-navigation__link is-active">
+				<a href="https://mwupgradetest.mattk-18.fandom-dev.us/wiki/User:Mklucsarits">' . wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . '</a>
+			</li>
+			<li class="user-profile-navigation__link">
+				<a href="' . \Skin::makeNSUrl( $userName, '', NS_USER_TALK ) . '">' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . '</a>
+			</li>
+			<li class="user-profile-navigation__link">
+				' . Linker::linkKnown( SpecialPage::getTitleFor( 'Contributions', $userName ), wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() ) . '
+			</li>
+			<li class="user-profile-navigation__link">
+				<a href="' . \Skin::makeSpecialUrlSubpage( 'UserProfileActivity', $userName ) . '">' . wfMessage( 'userprofile-userprofilenavigation-link-activity' )->plain() . '</a>
+			</li>
+		</ul>';
 	}
 }
