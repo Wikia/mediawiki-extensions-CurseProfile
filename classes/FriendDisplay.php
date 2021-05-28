@@ -112,7 +112,7 @@ class FriendDisplay {
 		if (isset($links['views']) && count($links['views'])) {
 			foreach ($links['views'] as $link) {
 				$attribs = [
-					'class' => 'friendship-action',
+					'class' => 'friendship-action wds-button wds-is-secondary',
 					'data-action' => $link['action'],
 					'data-id' => $links['user_id'],
 				];

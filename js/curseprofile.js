@@ -152,7 +152,7 @@
 
 				//Create new form to function as an edit form.
 				profile.editForms = $('<div>').addClass('entryform').attr('id', 'block-' + blockId);
-				profile.editForms.append('<form data-field="' + field + '"><textarea class="autoresizeme" maxlength="5000"></textarea><button class="cancel"></button><button class="save"></button></form>');
+				profile.editForms.append('<form data-field="' + field + '"><textarea class="autoresizeme" maxlength="5000"></textarea><div class="form-buttons"><button class="cancel wds-button wds-is-secondary"></button><button class="save wds-button"></button></div></form>');
 				profile.editForms.find('button.cancel').text(mw.message('cancel').text());
 				profile.editForms.find('button.save').text(mw.message('save').text());
 				autosize(profile.editForms.find('textarea'));
@@ -203,7 +203,7 @@
 						var placeholder = mw.message(fields[x].replace('link-','') + 'linkplaceholder' ).text();
 						editFormInner += '<strong>' + title +':</strong> <input type="text" name="edit-'+fields[x]+'" placeholder="'+placeholder+'" class="sociallink"/><br />';
 					}
-				editFormInner += '<button class="cancel"></button><button class="saveGroup"></button></form>'
+				editFormInner += '<button class="cancel wds-button wds-is-secondary"></button><button class="saveGroup wds-button"></button></form>'
 
 				//Create new form to function as an edit form.
 				profile.editForms = $('<div>').addClass('entryform').attr('id', 'block-' + blockId);

@@ -170,6 +170,7 @@ div.mainavatar {
 .grouptags li.edit {
 	background-color: #999;
 	background-color: rgba(128, 128, 128, 0.5);
+	min-width: 18px;
 }
 
 
@@ -286,7 +287,7 @@ img.GP-brand {
 }
 
 .level {
-	margin-bottom: 0.4em;
+	margin-bottom: 12px;
 }
 
 .level img {
@@ -304,7 +305,7 @@ img.GP-brand {
 
 ul.friends {
 	list-style: none;
-	margin-left: 0;
+	margin: 0 0 15px;
 }
 
 .friends li {
@@ -434,9 +435,231 @@ ul.friends {
 		-webkit-columns: 3;
 		columns: 3;
 	}
-	/*.activity ul {
-		-moz-columns: 2;
-		-webkit-columns: 2;
-		columns: 2;
-	}*/
+}
+
+.curseprofile a.is-icon {
+	height: 18px;
+	width: 18px;
+}
+
+.curseprofile .grouptags li.edit svg,
+.curseprofile a.is-icon svg {
+	fill: currentColor;
+}
+
+body.skin-fandomdesktop[class*="page-UserProfile_"] .page-header {
+	display: none;
+}
+
+body.skin-fandomdesktop .curseprofile .userinfo {
+	display: flex;
+}
+
+body.skin-fandomdesktop .curseprofile .mainavatar {
+	filter: none;
+	margin-right: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .mainavatar img {
+	border-radius: 50%;
+}
+
+body.skin-fandomdesktop .curseprofile .profile-info {
+	width: 100%;
+}
+
+body.skin-fandomdesktop .curseprofile .headline {
+	text-align: left;
+}
+
+body.skin-fandomdesktop .curseprofile .headline h1 {
+	float: none;
+	font-size: 30px;
+	font-weight: bold;
+	line-height: 30px;
+	margin-bottom: 15px;
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags {
+	font-size: 12px;
+	margin: 0 0 15px 0;
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li {
+	background-color: rgba(var(--theme-page-dynamic-color-1--rgb), .15);
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li:hover {
+	background-color: rgba(var(--theme-page-dynamic-color-1--rgb), .35);
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li a {
+	color: var(--theme-link-color);
+}
+
+body.skin-fandomdesktop .curseprofile .grouptags li.edit {
+	background: none;
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+
+body.skin-fandomdesktop .curseprofile #profile-location,
+body.skin-fandomdesktop .curseprofile #profile-social {
+	margin-bottom: 15px;
+}
+
+body.skin-fandomdesktop .curseprofile .entryform {
+	margin-bottom: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .form-buttons {
+	text-align: right;
+}
+
+body.skin-fandomdesktop .curseprofile .form-buttons button {
+	display: inline-block;
+}
+
+body.skin-fandomdesktop .curseprofile ul.profilelinks {
+	list-style: none;
+	margin: 0;
+}
+
+body.skin-fandomdesktop .curseprofile #profile-user-fields > div {
+	min-height: auto;
+}
+
+body.skin-fandomdesktop .curseprofile .section:not(.borderless) {
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
+	border-width: 1px 0 0 0;
+	margin-top: 20px;
+	padding: 18px 0 0 0;
+}
+
+body.skin-fandomdesktop .curseprofile .rightcolumn .section {
+	border-width: 0;
+	margin: 0 0 18px 0;
+	padding: 0;
+}
+
+body.skin-fandomdesktop .curseprofile .rightcolumn .section:not(.borderless) {
+	background-color: var(--theme-page-background-color--secondary);
+	border-radius: 3px;
+	padding: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .rightcolumn h3 {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+body.skin-fandomdesktop .curseprofile input[type="text"] {
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
+	font-family: Rubik;
+}
+
+body.skin-fandomdesktop .curseprofile textarea {
+	border-color: rgba(var(--theme-page-dynamic-color-1--rgb), .25);
+	font-family: Rubik;
+	height: auto;
+	padding: 12px;
+	width: 100%;
+}
+
+body.skin-fandomdesktop .curseprofile button.cancel {
+	margin-right: 6px;
+}
+
+body.skin-fandomdesktop .curseprofile #block-profile-social {
+	margin-bottom: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .errorbox {
+	background-color: transparent;
+	border-color: var(--theme-alert-color);
+	border-radius: 3px;
+	color: var(--theme-alert-color);
+}
+
+/* Override Hydra(?) link style */
+body.skin-fandomdesktop .curseprofile a {
+	color: var(--theme-link-color);
+	font-weight: 500;
+}
+
+body.skin-fandomdesktop .curseprofile .stats dt {
+	font-weight: 500;
+}
+
+body.skin-fandomdesktop .curseprofile .comments .avatar img {
+	border-radius: 50%;
+	height: 42px;
+	width: 42px;
+}
+
+body.skin-fandomdesktop .curseprofile .commentdisplay {
+	align-items: flex-start;
+	display: flex;
+}
+
+body.skin-fandomdesktop .curseprofile .commentdisplay .entryform {
+	flex-basis: 100%;
+	margin: 0 0 0 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .commentdisplay .entryform form {
+	text-align: right;
+}
+
+body.skin-fandomdesktop .curseprofile .comments .mw-empty-elt,
+body.skin-fandomdesktop .curseprofile .comments .rightfloat {
+	margin: 0;
+}
+
+body.skin-fandomdesktop .curseprofile .page-content dl {
+	margin: 12px 0 0;
+}
+
+body.skin-fandomdesktop .curseprofile .friends li {
+	margin-bottom: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .friends li img {
+	border-radius: 3px;
+}
+
+body.skin-fandomdesktop .curseprofile .section.achievements h4:last-of-type {
+	margin-top: 18px;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation {
+	border-bottom: 1px solid var(--theme-border-color);
+	display: flex;
+	font-size: 16px;
+	list-style: none;
+	margin: 0 0 24px 0;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link {
+	font-size: 14px;
+	font-weight: 400;
+	letter-spacing: 0.5px;
+	line-height: 1.38;
+	opacity: 0.5;
+	padding: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link a {
+	color: var(--theme-page-text-color);
+	text-decoration: none;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link.is-active {
+	border-bottom: 4px solid var(--theme-link-color);
+	opacity: 1;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link.is-active * {
+	color: var(--theme-link-color);
 }
