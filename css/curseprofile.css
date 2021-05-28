@@ -632,3 +632,34 @@ body.skin-fandomdesktop .curseprofile .friends li img {
 body.skin-fandomdesktop .curseprofile .section.achievements h4:last-of-type {
 	margin-top: 18px;
 }
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation {
+	border-bottom: 1px solid var(--theme-border-color);
+	display: flex;
+	font-size: 16px;
+	list-style: none;
+	margin: 0 0 24px 0;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link {
+	font-size: 14px;
+	font-weight: 400;
+	letter-spacing: 0.5px;
+	line-height: 1.38;
+	opacity: 0.5;
+	padding: 12px;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link a {
+	color: var(--theme-page-text-color);
+	text-decoration: none;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link.is-active {
+	border-bottom: 4px solid var(--theme-link-color);
+	opacity: 1;
+}
+
+body.skin-fandomdesktop .curseprofile .user-profile-navigation__link.is-active * {
+	color: var(--theme-link-color);
+}

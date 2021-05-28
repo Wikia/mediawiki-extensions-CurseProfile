@@ -963,8 +963,6 @@ __NOINDEX__
 	}
 
 	protected function getTabsMarkup() {
-		// TODO fix these tabs
-		return '';
 		if ( $this->getContext()->getSkin()->getSkinName() !== 'fandomdesktop' ) {
 			return '';
 		}
@@ -974,16 +972,16 @@ __NOINDEX__
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">
-				<a href="https://mwupgradetest.mattk-18.fandom-dev.us/wiki/User:Mklucsarits">' . wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . '</a>
+				[[UserProfile:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				<a href="' . \Skin::makeNSUrl( $userName, '', NS_USER_TALK ) . '">' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . '</a>
+				[[User:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				' . Linker::linkKnown( SpecialPage::getTitleFor( 'Contributions', $userName ), wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() ) . '
+				[[UserTalk:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				<a href="' . \Skin::makeSpecialUrlSubpage( 'UserProfileActivity', $userName ) . '">' . wfMessage( 'userprofile-userprofilenavigation-link-activity' )->plain() . '</a>
+				[[Special:Contributions/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
 			</li>
 		</ul>';
 	}
