@@ -979,7 +979,7 @@ __NOINDEX__
 				[[User:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				[[UserTalk:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']]
+				[[User_talk:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
 				[[Special:Contributions/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
