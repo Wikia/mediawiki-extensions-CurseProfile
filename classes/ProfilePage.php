@@ -406,7 +406,8 @@ class ProfilePage extends Article {
 		// Check the rights of the person viewing this page.
 		$cGroups = $wgUser->changeableGroups();
 		if (!empty($cGroups['add']) || !empty($cGroups['remove'])) {
-			$html .= "<li class=\"edit\">" . Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), self::PENCIL_ICON_SVG) . "</li>";
+			$link = Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), self::PENCIL_ICON_SVG, [ 'class' => 'is-icon' ] );
+			$html .= "<li class=\"edit\">" . $link . "</li>";
 		}
 		$html .= '</ul>';
 
