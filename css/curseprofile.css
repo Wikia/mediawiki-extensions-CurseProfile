@@ -598,17 +598,17 @@ body.skin-fandomdesktop .curseprofile .comments .avatar img {
 	width: 42px;
 }
 
-body.skin-fandomdesktop .curseprofile .commentdisplay {
+body.skin-fandomdesktop .curseprofile .commentdisplay.add-comment {
 	align-items: flex-start;
 	display: flex;
 }
 
-body.skin-fandomdesktop .curseprofile .commentdisplay .entryform {
+body.skin-fandomdesktop .curseprofile .commentdisplay.add-comment .entryform {
 	flex-basis: 100%;
 	margin: 0 0 0 12px;
 }
 
-body.skin-fandomdesktop .curseprofile .commentdisplay .entryform form {
+body.skin-fandomdesktop .curseprofile .commentdisplay.add-comment .entryform form {
 	text-align: right;
 }
 

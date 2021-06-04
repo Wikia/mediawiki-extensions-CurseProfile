@@ -7,10 +7,7 @@
 	.commentdisplay .right {
 		float: right;
 	}
-		.commentdisplay .right a {
-			margin-left: 3px;
-		}
-		.commentdisplay .right a.purge {
+		.commentdisplay .right .icon {
 			margin-left: 5px;
 		}
 
