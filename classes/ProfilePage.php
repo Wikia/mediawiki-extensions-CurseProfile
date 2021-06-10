@@ -971,19 +971,23 @@ __NOINDEX__
 
 		$userName = $this->user->getName();
 		$userPageUrl = $this->user->getUserPage()->getFullURL();
+		$queryParam = $this->user->getOption( 'profile-pref' ) ? '|profile=no' : '';
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">
 				[[UserProfile:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				[[User:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']]
+				[{{fullurl:User:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']
 			</li>
 			<li class="user-profile-navigation__link">
-				[[User_talk:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']]
+				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
 			</li>
 			<li class="user-profile-navigation__link">
 				[[Special:Contributions/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
+			</li>
+			<li class="user-profile-navigation__link">
+				[[Special:UserProfileActivity/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-activity' )->plain() . ']]
 			</li>
 		</ul>';
 	}
