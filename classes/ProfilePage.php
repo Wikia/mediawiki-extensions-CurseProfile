@@ -971,6 +971,7 @@ __NOINDEX__
 		$userName = $this->user->getName();
 		$userPageUrl = $this->user->getUserPage()->getFullURL();
 		$queryParam = $this->user->getOption( 'profile-pref' ) ? '|profile=no' : '';
+echo 'TEST queryParam = '.$queryParam;
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">
