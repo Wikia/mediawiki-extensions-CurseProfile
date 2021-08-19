@@ -154,7 +154,8 @@ div.mainavatar {
 .grouptags li,
 .profilelinks li {
 	display: inline-block;
-	margin-right: 0.4em;
+	margin-bottom: 5px;
+	margin-right: 5px;
 }
 
 .grouptags li {
