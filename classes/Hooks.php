@@ -193,6 +193,7 @@ class Hooks {
 			return true;
 		}
 		$user = User::newFromName($target->getText());
+echo ' test_1 hook runs for '.$user->getName().' ';
 		// Override user links based on enhanced user profile preference
 		$profileData = new ProfileData($user);
 		if ($profileData->getProfileTypePreference()) {
@@ -239,6 +240,7 @@ class Hooks {
 	 * @return string
 	 */
 	private static function resolveHref($attribs, $target) {
+echo ' test_2 resolveHref ';
 		$url_components = parse_url($attribs['href']);
 		$query = [];
 		if (isset($url_components['query'])) {
@@ -248,6 +250,7 @@ class Hooks {
 		// Remove redlink and edit
 		if (!empty($query) && isset($query['redlink'])) {
 			unset($query['redlink'], $query['action']);
+echo ' test_3 removed redlink ';
 		}
 
 		if ($target->getNamespace() === NS_USER) {
@@ -258,6 +261,7 @@ class Hooks {
 		}
 		// Rebuild query string
 		$params = count($query) ? '?' . http_build_query($query) : '';
+echo ' test_4 final url = '.$url_components['path'] . $params;
 		return $url_components['path'] . $params;
 	}
 
