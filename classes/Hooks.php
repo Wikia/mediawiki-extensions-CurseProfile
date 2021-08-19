@@ -188,8 +188,10 @@ class Hooks {
 		&$attribs,
 		&$ret
 	) {
+echo ' test_0 ';
 		// Only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
+echo ' test_0 short circuited for '.$target->getText().' ';
 			return true;
 		}
 		$user = User::newFromName($target->getText());
