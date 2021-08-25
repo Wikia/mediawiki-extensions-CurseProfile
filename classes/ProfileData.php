@@ -182,7 +182,7 @@ class ProfileData {
 	 */
 	public function getUserPageUrl($title) {
 		$args = [];
-		if ($this->getProfileTypePreference()) {
+		if ($this->userPrefersEnhancedProfile()) {
 			$args['profile'] = 'no';
 		}
 
@@ -688,11 +688,11 @@ class ProfileData {
 	}
 
 	/**
-	 * Returns true if the profile page should be used, false if the wiki should be used
+	 * Returns true if the UserProfile page should be used, false if the wiki User page should be used
 	 *
 	 * @return boolean
 	 */
-	public function getProfileTypePreference() {
+	public function userPrefersEnhancedProfile() {
 		// override preference for non existent user
 		if ($this->user_id == 0) {
 			return false;

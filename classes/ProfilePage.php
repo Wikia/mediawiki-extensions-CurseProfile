@@ -189,7 +189,7 @@ class ProfilePage extends Article {
 	 * @return boolean	True if profile page is preferred, false if wiki is preferred.
 	 */
 	public function isProfilePreferred() {
-		return $this->profile->getProfileTypePreference();
+		return $this->profile->userPrefersEnhancedProfile();
 	}
 
 	/**
@@ -970,7 +970,7 @@ __NOINDEX__
 
 		$userName = $this->user->getName();
 		$userPageUrl = $this->user->getUserPage()->getFullURL();
-		$queryParam = $this->user->getIntOption( 'profile-pref' ) ? '|profile=no' : '';
+		$queryParam = $this->isProfilePreferred() ? '|profile=no' : '';
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">

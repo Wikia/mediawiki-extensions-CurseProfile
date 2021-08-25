@@ -198,14 +198,14 @@ echo ' test_0 short circuited for '.$target->getNamespace().':'.$target->getText
 echo ' test_1 hook runs for '.$user->getName().' ';
 		// Override user links based on enhanced user profile preference
 		$profileData = new ProfileData($user);
-		if ($profileData->getProfileTypePreference()) {
+		if (!$profileData->userPrefersEnhancedProfile()) {
 			$prefix = strtok($attribs['title'], ':');
 			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
 		// Override enhanced profile links if preference is standard
-		if (!$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
+		if ($profileData->userPrefersEnhancedProfile() && $target->getNamespace() === NS_USER_PROFILE) {
 			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
