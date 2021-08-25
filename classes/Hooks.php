@@ -214,14 +214,14 @@ class Hooks {
 		$user = User::newFromName($target->getText());
 		// Override user links based on enhanced user profile preference
 		$profileData = new ProfileData($user);
-		if ($profileData->getProfileTypePreference()) {
+		if (!$profileData->getProfileTypePreference()) {
 			$prefix = strtok($attribs['title'], ':');
 			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
 		// Override enhanced profile links if preference is standard
-		if (!$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
+		if ($profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE) {
 			$attribs['href'] = self::resolveHref($attribs, $target);
 			$attribs['class'] = str_replace('new', 'known', $attribs['class']);
 			$attribs['title'] = 'UserProfile:' . $target->getText();
