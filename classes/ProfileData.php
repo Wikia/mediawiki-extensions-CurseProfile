@@ -13,15 +13,15 @@
 
 namespace CurseProfile;
 
+use Fandom\Includes\Util\UrlUtilityService;
+use Fandom\WikiConfig\WikiVariablesDataService;
 use Hooks;
 use Html;
 use HydraCore;
 use ManualLogEntry;
+use MediaWiki\MediaWikiServices;
 use MWException;
-use Redis;
-use RedisCache;
 use RequestContext;
-use Throwable;
 use Title;
 use User;
 
@@ -255,7 +255,9 @@ class ProfileData {
 		];
 
 		$preferences['profile-favwiki'] = [
-			'type' => 'hidden',
+			'type' => 'text',
+			'label-message' => 'favoritewiki',
+			'cssclass' => 'profile-favwiki-hidden',
 			'section' => 'personal/info/public',
 		];
 
@@ -607,84 +609,101 @@ class ProfileData {
 	 */
 	public function getFavoriteWiki() {
 		if ($this->user->getOption('profile-favwiki')) {
-			$sites = self::getWikiSites($this->user->getOption('profile-favwiki'));
-			return current($sites) ? current($sites) : [];
+			return self::getWikiSite($this->user->getOption('profile-favwiki'));
 		}
 		return [];
 	}
 
 	/**
-	 * Get information about wiki sites from Redis for searching.
+	 * Get information about wiki sites from WikiVariables for searching.
 	 *
 	 * @param  string $search Search Term
 	 * @return array	Search Results
 	 */
 	public static function getWikiSitesSearch($search) {
-		$redis = RedisCache::getClient('cache');
-		if ($redis === false) {
-			return [];
-		}
-
-		$search = is_string($search) ? "*" . mb_strtolower($search, "UTF-8") . "*" : null;
-
-		$siteKeys = [];
-
-		$it = null;
-		$redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
-		while (($arrKeys = $redis->hScan('dynamicsettings:siteNameKeys', $it, $search)) !== false) {
-			foreach ($arrKeys as $strField => $strValue) {
-				$siteKeys[] = $strValue;
+		$wikis = self::getWikisFromCityList();
+		$result = [];
+		foreach ($wikis as $wiki) {
+			$domain = wfParseUrl($wiki['wiki_url'])['host'] ?? '';
+			if (
+				mb_stripos($wiki['wiki_name_display'], $search) === false &&
+				mb_stripos($domain, $search) === false
+			) {
+				continue;
 			}
-			if (count($siteKeys) >= 15) {
+			$result[] = $wiki;
+			if (count($result) >= 15) {
 				break;
 			}
 		}
 
-		return self::getWikiSites($siteKeys);
+		return $result;
 	}
 
 	/**
 	 * Returns the decoded wiki data available in redis
 	 *
-	 * @param  string|array|null $siteKey md5 key for wanted site, or array of keys.
-	 * @return array	Wiki data arrays.
+	 * @param  string $siteKey md5 key for wanted site, or array of keys.
+	 * @return array Wiki data
 	 */
-	public static function getWikiSites($siteKey = null) {
-		$redis = RedisCache::getClient('cache');
-		if ($redis === false) {
+	public static function getWikiSite(string $siteKey) {
+		if (empty($siteKey)) {
 			return [];
 		}
-		if ($siteKey === null) {
-			$sites = $redis->sMembers('dynamicsettings:siteHashes');
-		} else {
-			if (!is_array($siteKey)) {
-				$sites = [$siteKey];
-			} else {
-				$sites = $siteKey;
-			}
-		}
-		$ret = [];
-		if (!empty($sites)) {
-			foreach ($sites as $md5) {
-				$data = $redis->hGetAll('dynamicsettings:siteInfo:' . $md5);
-				if (empty($data)) {
-					continue;
+
+		return self::getWikisFromCityList($siteKey)[0] ?? [];
+	}
+
+	/**
+	 * @param array $info Element of array returned by getListOfWikisWithVar
+	 * @return array Array used by Profile controller
+	 */
+	private static function convertCityInfoToSiteData($info) {
+		$lang = mb_strtoupper($info['city_lang']);
+		$urlUtilityService = MediaWikiServices::getInstance()->getService( UrlUtilityService::class );
+		$url = $urlUtilityService->forceHttps( $info['city_url'] );
+		return [
+			'wiki_name' => $info['city_title'],
+			'wiki_name_display' => "{$info['city_title']} ($lang)",
+			'wiki_url' => $url,
+			'md5_key' => $info['value'],
+		];
+	}
+
+	/**
+	 * Get wikis from city_list by $dsSiteKey, or all wikis with a $dsSiteKey set.
+	 * @return array
+	 */
+	private static function getWikisFromCityList($siteKey = null) {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		return $cache->getWithSetCallback(
+			$cache->makeGlobalKey(__CLASS__, 'wiki-info', $siteKey ?? 'all'),
+			14400,
+			function ($oldValue, &$ttl, array &$setOpts) use ($siteKey) {
+				/** @var WikiVariablesDataService $wikiVariables */
+				$wikiVariables = MediaWikiServices::getInstance()->getService(WikiVariablesDataService::class);
+				$dsSiteKeyVar = $wikiVariables->getVariableInfo(null, 'dsSiteKey');
+				if (empty($dsSiteKeyVar)) {
+					return [];
 				}
-				$deleted = false;
-				foreach ($data as $field => $val) {
-					$val = unserialize($val);
-					if ($field === 'deleted' && $val == 1) {
-						$deleted = true;
-						break;
+
+				$wikis = $wikiVariables->getListOfWikisWithVar(
+					$dsSiteKeyVar['variable_id'],
+					$siteKey ? '=' : '!=',
+					$siteKey ? json_encode($siteKey) : '',
+					'$',
+					0,
+					$siteKey ? 1 : 5000
+				)['result'];
+				foreach ($wikis as $wiki) {
+					if (empty($wiki['value'])) {
+						continue;
 					}
-					$data[$field] = $val;
+					$info[] = self::convertCityInfoToSiteData($wiki);
 				}
-				if (!$deleted) {
-					$ret[$md5] = $data;
-				}
+				return $info ?? false;
 			}
-		}
-		return $ret;
+		) ?: [];
 	}
 
 	/**

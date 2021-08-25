@@ -114,10 +114,6 @@
 			"styles": [
 				"css/curseprofile.css"
 			],
-			"dependencies": [
-				"ext.curseprofile.customskin.styles",
-				"ext.curseprofile.comments.styles"
-			],
 			"position": "top",
 			"targets": [
 				"desktop",
@@ -178,8 +174,8 @@
 			]
 		},
 		"ext.curseprofile.preferences.styles": {
-			"dependencies": [
-				"ext.hydraCore.font-awesome.styles"
+			"styles": [
+				"css/preferences.css"
 			],
 			"position": "top",
 			"targets": [
@@ -198,16 +194,12 @@
 			],
 			"position": "top",
 			"targets": [
-				"desktop",
-				"mobile"
+				"desktop"
 			]
 		},
 		"ext.curseprofile.comments.styles": {
 			"styles": [
 				"css/comments.css"
-			],
-			"dependencies": [
-				"ext.hydraCore.font-awesome.styles"
 			],
 			"position": "top",
 			"targets": [
@@ -242,9 +234,6 @@
 		"ext.curseprofile.commentmoderation.styles": {
 			"styles": [
 				"css/commentmoderation.less"
-			],
-			"dependencies": [
-				"ext.curseprofile.comments.styles"
 			],
 			"position": "top"
 		},
@@ -320,6 +309,7 @@
 		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
 		"ArticleViewRedirect": "CurseProfile\\Hooks::onArticleViewRedirect",
 		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
+		"BeforePageDisplay": "CurseProfile\\Hooks::onBeforePageDisplay",
 		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
 		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
 		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
@@ -334,7 +324,7 @@
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"userCan": "CurseProfile\\Hooks::onUserCan",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"UserSaveOptions": "CurseProfile\\Hooks::onUserSaveOptions",
+		"FandomUserSaveOptions": "CurseProfile\\Hooks::onFandomUserSaveOptions",
 		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {

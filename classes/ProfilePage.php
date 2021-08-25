@@ -119,7 +119,8 @@ class ProfilePage extends Article {
 			$this->user = User::newFromId(0);
 		}
 
-		$this->mobile = HydraCore::isMobileSkin($this->getContext()->getSkin());
+		$skin = $this->getContext()->getSkin();
+		$this->mobile = HydraCore::isMobileSkin($skin) || $skin->getSkinName() === 'fandommobile';
 		$this->profile = new ProfileData($this->user->getId());
 	}
 
@@ -522,7 +523,7 @@ class ProfilePage extends Article {
 		}
 
 		$title = Title::newFromText('UserProfile:' . $this->user->getTitleKey());
-		$link = "https://" . $wiki['wiki_domain'] . $title->getLocalURL();
+		$link = $wiki['wiki_url'] . $title->getLocalURL();
 
 		$html = "<a target='_blank' href='{$link}'>" . $html . "</a>";
 		$html = wfMessage('favoritewiki')->plain() . '<br/>' . $html;
@@ -814,7 +815,7 @@ class ProfilePage extends Article {
 			$html .= Html::element(
 				'button',
 				[
-					'data-href'	=> Title::newFromText('Special:Preferences')->getFullURL() . '#mw-prefsection-personal-info-public',
+					'data-href'	=> Title::newFromText('Special:Preferences')->getFullURL() . '#mw-prefsection-personal',
 					'class'		=> 'linksub wds-button wds-is-secondary'
 				],
 				wfMessage('cp-editprofile')->plain()

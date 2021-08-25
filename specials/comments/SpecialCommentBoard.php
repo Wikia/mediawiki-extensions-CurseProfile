@@ -63,7 +63,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 		$start = $wgRequest->getInt('st');
 		$itemsPerPage = 50;
 		$wgOut->setPageTitle(wfMessage('commentboard-title', $user->getName())->plain());
-		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles', 'ext.hydraCore.pagination.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.comments.styles', 'ext.hydraCore.pagination.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.comments.scripts']);
 		$templateCommentBoard = new TemplateCommentBoard;
 

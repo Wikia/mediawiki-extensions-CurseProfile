@@ -60,6 +60,7 @@ class Comment {
 	 * @throws MWException
 	 */
 	public function __construct(array $comment = []) {
+		$comment = array_intersect_key($comment, $this->data);
 		if (count(array_diff_key($comment, $this->data))) {
 			throw new MWException(__METHOD__ . " Comment data contained invalid keys.");
 		}
@@ -280,10 +281,16 @@ class Comment {
 		$noEmailAuth = ($wgEmailAuthentication && (!boolval($fromUser->getEmailAuthenticationTimestamp()) || !Sanitizer::validateEmail($fromUser->getEmail())));
 
 		if ($fromUser->getId()) {
+			if ($fromUser->getId() == $toUser->getId()) {
+				if (!$fromUser->isBlocked()) {
+					return true;
+				} else {
+					return false;
+				}
+			}
 			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
 				return false;
 			}
-
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).

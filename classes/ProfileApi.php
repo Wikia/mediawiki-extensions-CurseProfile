@@ -124,6 +124,7 @@ class ProfileApi extends HydraApiBase {
 			$return[$hash] = [
 				'wiki_name' => $r['wiki_name'],
 				'wiki_name_display' => $r['wiki_name_display'],
+				'wiki_url' => $r['wiki_url'],
 				'md5_key' => $r['md5_key']
 			];
 		}
@@ -138,17 +139,11 @@ class ProfileApi extends HydraApiBase {
 	 */
 	public function doGetWiki() {
 		$hash = $this->getMain()->getVal('hash');
-		$return = ProfileData::getWikiSites($hash);
+		$wiki = ProfileData::getWikiSite($hash);
 
-		if (isset($return[$hash])) {
-			$r = $return[$hash];
-			$return = [
-				'wiki_name' => $r['wiki_name'],
-				'wiki_name_display' => $r['wiki_name_display'],
-				'md5_key' => $r['md5_key']
-			]; // curated data return.
+		if (!empty($wiki)) {
 			$this->getResult()->addValue(null, 'result', 'success');
-			$this->getResult()->addValue(null, 'data', $return);
+			$this->getResult()->addValue(null, 'data', $wiki);
 		} else {
 			$this->getResult()->addValue(null, 'result', 'error');
 			$this->getResult()->addValue(null, 'message', 'no result found for hash ' . $hash);

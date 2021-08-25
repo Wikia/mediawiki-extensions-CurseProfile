@@ -23,6 +23,8 @@ use Status;
 use Title;
 use User;
 use WebRequest;
+use OutputPage;
+use Skin;
 
 class Hooks {
 	/**
@@ -127,10 +129,27 @@ class Hooks {
 		self::$profilePage = ProfilePage::newFromTitle($title);
 
 		if ($title->equals(SpecialPage::getTitleFor("Preferences"))) {
-			$output->addModuleStyles(['ext.curseprofile.preferences.styles']);
+			$output->addModuleStyles(['ext.curseprofile.preferences.styles', 'ext.hydraCore.font-awesome.styles']);
 			$output->addModules(['ext.curseprofile.preferences.scripts']);
 		}
 	}
+
+    /**
+     * @param OutputPage $output
+     * @param Skin $skin
+     *
+     * @return void
+     */
+    public static function onBeforePageDisplay( $output, $skin ) {
+        if (
+            self::$profilePage instanceof \CurseProfile\ProfilePage
+            && self::$profilePage->isProfilePage()
+            && $skin->getSkinName() === 'fandommobile'
+        ) {
+            $output->addModules( [ 'a.ext.curseprofile.profilepage.mobile.scripts' ] );
+            $output->addModuleStyles( [ 'a.ext.curseprofile.profilepage.mobile.styles' ] );
+        }
+    }
 
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
@@ -282,7 +301,7 @@ echo ' test_4 final url = '.$url_components['path'] . $params;
 			return $wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
 		}
 
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles']);
+		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
 		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
 
 		if (!self::$profilePage->getUser()->getId()) {
@@ -594,7 +613,7 @@ echo ' test_4 final url = '.$url_components['path'] . $params;
 	 *
 	 * @return boolean	True
 	 */
-	public static function onUserSaveOptions(User $user, array &$options) {
+	public static function onFandomUserSaveOptions(User $user, array &$options) {
 		if ($user && $user->getId()) {
 			ProfileData::processPreferenceSave($user, $options);
 		}

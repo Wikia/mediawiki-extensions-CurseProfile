@@ -44,7 +44,7 @@ class SpecialCommentModeration extends SpecialPage {
 
 		$this->output->setPageTitle(wfMessage('commentmoderation-title')->escaped());
 
-		$this->output->addModuleStyles(['ext.curseprofile.commentmoderation.styles', 'ext.hydraCore.pagination.styles']);
+		$this->output->addModuleStyles(['ext.curseprofile.commentmoderation.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.comments.styles']);
 		$this->output->addModules(['ext.curseprofile.commentmoderation.scripts']);
 
 		$templateCommentModeration = new TemplateCommentModeration;
