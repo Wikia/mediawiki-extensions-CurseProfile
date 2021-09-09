@@ -21,6 +21,5 @@ $specialPageAliases['en'] = [
 	'CommentModeration'	=> ['CommentModeration'],
 	'CommentPermalink'	=> ['CommentPermalink'],
 	'Friends'			=> ['Friends'],
-	'ManageFriends'		=> ['ManageFriends'],
-	'WikiImageRedirect'	=> ['WikiImageRedirect']
+	'ManageFriends'		=> ['ManageFriends']
 ];
