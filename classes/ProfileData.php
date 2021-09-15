@@ -658,11 +658,12 @@ class ProfileData {
 	 * @param array $info Element of array returned by getListOfWikisWithVar
 	 * @return array Array used by Profile controller
 	 */
-	private static function convertCityInfoToSiteData($info) {
+	private static function convertCityInfoToSiteData($cityId, $info) {
 		$lang = mb_strtoupper($info['city_lang']);
 		$urlUtilityService = MediaWikiServices::getInstance()->getService( UrlUtilityService::class );
 		$url = $urlUtilityService->forceHttps( $info['city_url'] );
 		return [
+			'wiki_id' => $cityId,
 			'wiki_name' => $info['city_title'],
 			'wiki_name_display' => "{$info['city_title']} ($lang)",
 			'wiki_url' => $url,
@@ -677,7 +678,7 @@ class ProfileData {
 	private static function getWikisFromCityList($siteKey = null) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		return $cache->getWithSetCallback(
-			$cache->makeGlobalKey(__CLASS__, 'wiki-info', $siteKey ?? 'all'),
+			$cache->makeGlobalKey(__CLASS__, 'wiki-info-v3', $siteKey ?? 'all'),
 			14400,
 			function ($oldValue, &$ttl, array &$setOpts) use ($siteKey) {
 				/** @var WikiVariablesDataService $wikiVariables */
@@ -695,11 +696,11 @@ class ProfileData {
 					0,
 					$siteKey ? 1 : 5000
 				)['result'];
-				foreach ($wikis as $wiki) {
+				foreach ($wikis as $cityId => $wiki) {
 					if (empty($wiki['value'])) {
 						continue;
 					}
-					$info[] = self::convertCityInfoToSiteData($wiki);
+					$info[] = self::convertCityInfoToSiteData($cityId, $wiki);
 				}
 				return $info ?? false;
 			}

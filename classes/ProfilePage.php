@@ -21,6 +21,7 @@ use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
 use Cheevos\Points\PointLevels;
 use Cheevos\Points\PointsDisplay;
+use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
 use Hydra\Subscription;
 use HydraCore;
@@ -511,22 +512,27 @@ class ProfilePage extends Article {
 	 */
 	public function favoriteWiki(&$parser) {
 		$wiki = $this->profile->getFavoriteWiki();
-		if (empty($wiki)) {
+		if ( empty( $wiki ) ) {
 			return '';
 		}
 
-		$imgPath = CP::getWikiImageByHash($wiki['md5_key']);
-		if (!empty($imgPath) && !empty($wiki['md5_key'])) {
-			$html = Html::element('img', ['src' => $imgPath, 'height' => 118, 'width' => 157, 'alt' => $wiki['wiki_name']]);
+		$wikiConfig = MediaWikiServices::getInstance()->getService( WikiVariablesDataService::class );
+		$imgPath = $wikiConfig->getVarValueByName( 'wgGpAvatarImage', $wiki['wiki_id'], false, '' );
+
+		if ( !empty( $imgPath ) && !empty( $wiki['md5_key'] ) ) {
+			$html = Html::element(
+				'img',
+				[ 'src' => $imgPath, 'height' => 118, 'width' => 157, 'alt' => $wiki['wiki_name'] ]
+			);
 		} else {
-			$html = htmlspecialchars($wiki['wiki_name']);
+			$html = htmlspecialchars( $wiki['wiki_name'] );
 		}
 
-		$title = Title::newFromText('UserProfile:' . $this->user->getTitleKey());
+		$title = Title::newFromText( 'UserProfile:' . $this->user->getTitleKey() );
 		$link = $wiki['wiki_url'] . $title->getLocalURL();
 
 		$html = "<a target='_blank' href='{$link}'>" . $html . "</a>";
-		$html = wfMessage('favoritewiki')->plain() . '<br/>' . $html;
+		$html = wfMessage( 'favoritewiki' )->plain() . '<br/>' . $html;
 
 		return [
 			$html,

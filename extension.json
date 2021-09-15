@@ -40,8 +40,7 @@
 		"AddComment": "CurseProfile\\SpecialAddComment",
 		"CommentBoard": "CurseProfile\\SpecialCommentBoard",
 		"CommentPermalink": "CurseProfile\\SpecialCommentPermalink",
-		"CommentModeration": "CurseProfile\\SpecialCommentModeration",
-		"WikiImageRedirect": "CurseProfile\\SpecialWikiImageRedirect"
+		"CommentModeration": "CurseProfile\\SpecialCommentModeration"
 	},
 	"LogTypes": {
 		"curseprofile": "curseprofile"
@@ -101,8 +100,7 @@
 		"CurseProfile\\SpecialAddComment": "specials/comments/SpecialAddComment.php",
 		"CurseProfile\\SpecialCommentBoard": "specials/comments/SpecialCommentBoard.php",
 		"CurseProfile\\SpecialCommentPermalink": "specials/comments/SpecialCommentPermalink.php",
-		"CurseProfile\\SpecialCommentModeration": "specials/comments/SpecialCommentModeration.php",
-		"CurseProfile\\SpecialWikiImageRedirect": "specials/SpecialWikiImageRedirect.php"
+		"CurseProfile\\SpecialCommentModeration": "specials/comments/SpecialCommentModeration.php"
 	},
 	"ResourceModules": {
 		"ext.curseprofile.noprofile.scripts": {
