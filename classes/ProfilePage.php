@@ -976,8 +976,11 @@ __NOINDEX__
 		}
 
 		$userName = $this->user->getName();
-		$userPageUrl = $this->user->getUserPage()->getFullURL();
 		$queryParam = $this->user->getIntOption( 'profile-pref' ) ? '|profile=no' : '';
+
+		$userTalkTab = $this->user->getIntOption( 'comment-pref' ) != 1 ? '<li class="user-profile-navigation__link">
+				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
+			</li>' : '';
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">
@@ -985,10 +988,8 @@ __NOINDEX__
 			</li>
 			<li class="user-profile-navigation__link">
 				[{{fullurl:User:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']
-			</li>
-			<li class="user-profile-navigation__link">
-				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
-			</li>
+			</li>'
+			. $userTalkTab . '
 			<li class="user-profile-navigation__link">
 				[[Special:Contributions/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
 			</li>
