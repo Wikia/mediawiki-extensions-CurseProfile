@@ -207,6 +207,7 @@ class Hooks {
 		&$attribs,
 		&$ret
 	) {
+		$target = Title::newFromLinkTarget($target);
 		// Only process user namespace links
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
