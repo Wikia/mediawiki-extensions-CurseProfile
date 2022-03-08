@@ -15,6 +15,8 @@ namespace CurseProfile;
 
 use Html;
 use HydraCore;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Session\CsrfTokenSet;
 use Parser;
 use RequestContext;
 use SpecialPage;
@@ -39,12 +41,13 @@ class CommentDisplay {
 			return 'Invalid user ID given';
 		}
 
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '';
 
-		$boardOwner = User::newFromId($userId);
+		$boardOwner = $userFactory->newFromId($userId);
 		$html .= self::newCommentForm($boardOwner, false);
 
-		$board = new CommentBoard(User::newFromId($userId));
+		$board = new CommentBoard($userFactory->newFromId($userId));
 		$comments = $board->getComments($wgUser);
 
 		foreach ($comments as $comment) {
@@ -65,10 +68,11 @@ class CommentDisplay {
 	 * @return string	html fragment or empty string
 	 */
 	public static function newCommentForm(User $owner, bool $hidden = false) {
-		global $wgUser;
+		global $wgRequest, $wgUser;
 
 		$comment = Comment::newWithOwner($owner);
 		if ($comment->canComment($wgUser)) {
+			$tokenSet = new CsrfTokenSet($wgRequest);
 			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
 			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
 			$page = Title::newFromText("Special:AddComment/" . $owner->getId());
@@ -79,12 +83,14 @@ class CommentDisplay {
 					<form action="' . $page->getFullUrl() . '" method="post">
 						<textarea name="message" maxlength="' . Comment::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
 						<button name="inreplyto" class="submit wds-button" value="0">' . wfMessage('commentaction')->escaped() . '</button>
-						' . Html::hidden('token', $wgUser->getEditToken()) . '
+						' . Html::hidden('token', $tokenSet->getToken()) . '
 					</form>
 				</div>
 			</div>';
 		} else {
-			return "<div class='errorbox'>" . wfMessage('no-perm-profile-addcomment', \Linker::linkKnown(Title::newFromText('Special:ConfirmEmail'), wfMessage('no-perm-validate-email')->text()))->text() . "</div>";
+			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+			$link = $linkRenderer->makeKnownLink(Title::newFromText('Special:ConfirmEmail'), wfMessage('no-perm-validate-email')->text());
+			return "<div class='errorbox'>" . wfMessage('no-perm-profile-addcomment', $link)->text() . "</div>";
 		}
 	}
 
@@ -161,7 +167,7 @@ class CommentDisplay {
 				// force parsing this message because MW won't replace plurals as expected
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
-				$viewReplies = Parser::stripOuterParagraph($wgOut->parse(wfMessage('viewearlierreplies', $comment->getTotalReplies($wgUser) - count($replies))->escaped()));
+				$viewReplies = Parser::stripOuterParagraph($wgOut->parseAsContent(wfMessage('viewearlierreplies', $comment->getTotalReplies($wgUser) - count($replies))->escaped()));
 				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
@@ -225,13 +231,13 @@ class CommentDisplay {
 	/**
 	 * Unlike the previous comments function, this will create a new CommentBoard instance to fetch the data for you
 	 *
-	 * @param  integer $userId    the id of the user the parent comment belongs to
-	 * @param  integer $commentId the id of the comment for which replies need to be loaded
-	 * @return string	html for display
+	 * @param Comment $comment The comment for which replies need to be loaded
+	 * @param User $actor The user the parent comment belongs to
+	 * @return string HTML for display
 	 */
 	public static function repliesTo(Comment $comment, User $actor) {
-		if ($userId < 1) {
-			return 'Invalid user ID given';
+		if ($actor->getId() < 1) {
+			return 'Invalid user given';
 		}
 		$html = '';
 

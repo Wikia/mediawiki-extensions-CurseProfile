@@ -13,8 +13,7 @@
 
 namespace CurseProfile;
 
-use Linker;
-use Title;
+use MediaWiki\MediaWikiServices;
 use User;
 
 /**
@@ -83,16 +82,17 @@ class CP {
 	 * @return string	html anchor tag fragment
 	 */
 	public static function userLink($user, $class = false) {
-		if ($user instanceof \User) {
+		if ($user instanceof User) {
 			$user_id = $user->getId();
 		} else {
 			$user_id = $user;
-			$user = User::newFromId($user);
+			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user);
 		}
 		$customAttribs = [];
 		if ($class && is_string($class)) {
 			$customAttribs['class'] = $class;
 		}
-		return Linker::linkKnown($user->getUserPage(), $user->getName(), $customAttribs); // htmlspecialchars($user->getName())
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		return $linkRenderer->makeKnownLink($user->getUserPage(), $user->getName(), $customAttribs); // htmlspecialchars($user->getName())
 	}
 }

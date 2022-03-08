@@ -13,6 +13,7 @@
 
 namespace CurseProfile;
 
+use MediaWiki\MediaWikiServices;
 use TemplateCommentBoard;
 use UnlistedSpecialPage;
 use User;
@@ -39,9 +40,10 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		if (!$comment || !$comment->canView($this->getUser())) {
 			$purged = CommentBoard::getPurgedCommentById($commentId);
 			if ($purged) {
-				$user = User::newFromId($purged['ubpa_user_id']);
+				$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+				$user = $userFactory->newFromId($purged['ubpa_user_id']);
 				$user->load();
-				$admin_user = User::newFromId($purged['ubpa_admin_id']);
+				$admin_user = $userFactory->newFromId($purged['ubpa_admin_id']);
 				$admin_user->load();
 				$wgOut->setPageTitle(wfMessage('commentboard-purged-title', $user->getName())->plain());
 				$wgOut->addWikiMsg('commentboard-purged', $purged['ubpa_reason'], $admin_user->getName(), (new ProfileData($admin_user))->getProfilePageUrl());

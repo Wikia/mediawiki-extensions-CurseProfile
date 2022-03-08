@@ -42,7 +42,7 @@ class SetProfilePreference extends Maintenance {
 		}
 
 		$onOrOff = self::$preferences[$newSetting];
-		$db = wfGetDB(DB_MASTER);
+		$db = wfGetDB(DB_PRIMARY);
 
 		// delete existing profile settings
 		$db->delete('user_properties', ['up_property' => 'profile-pref'], __METHOD__);

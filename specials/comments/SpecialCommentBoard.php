@@ -14,9 +14,9 @@
 namespace CurseProfile;
 
 use HydraCore;
+use MediaWiki\MediaWikiServices;
 use TemplateCommentBoard;
 use UnlistedSpecialPage;
-use User;
 
 class SpecialCommentBoard extends UnlistedSpecialPage {
 	public function __construct() {
@@ -41,7 +41,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
 		list($userId, $user_name) = explode('/', $path);
-		$user = User::newFromId($userId);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('commentboard-invalid');

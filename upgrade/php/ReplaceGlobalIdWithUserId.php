@@ -12,6 +12,7 @@ namespace CurseProfile\Maintenance;
 
 use HydraAuthUser;
 use LoggedUpdateMaintenance;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . '/maintenance/Maintenance.php';
@@ -92,7 +93,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			"Beginning cleanup of $table\n"
 		);
 
-		$dbw = $this->getDB(DB_MASTER);
+		$dbw = $this->getDB(DB_PRIMARY);
 		$next = '1=1';
 		$count = 0;
 		while (true) {
@@ -145,7 +146,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 
 			list($next, $display) = $this->makeNextCond($dbw, $orderby, $row);
 			$this->output("... $display\n");
-			wfWaitForSlaves();
+			MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->waitForReplication();
 		}
 
 		$this->output(

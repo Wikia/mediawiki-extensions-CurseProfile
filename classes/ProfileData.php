@@ -15,9 +15,7 @@ namespace CurseProfile;
 
 use Fandom\Includes\Util\UrlUtilityService;
 use Fandom\WikiConfig\WikiVariablesDataService;
-use Hooks;
 use Html;
-use HydraCore;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MWException;
@@ -125,7 +123,7 @@ class ProfileData {
 	/**
 	 * Create a new ProfileData instance
 	 *
-	 * @param User $user local user ID or User instance
+	 * @param int|User $user local user ID or User instance
 	 */
 	public function __construct($user) {
 		if (is_a($user, 'User')) {
@@ -137,7 +135,7 @@ class ProfileData {
 				// if a user hasn't saved a profile yet, just use the default values
 				$this->user_id = 0;
 			}
-			$this->user = User::newFromId($user);
+			$this->user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user);
 		}
 	}
 
@@ -299,7 +297,7 @@ class ProfileData {
 			}
 		}
 
-		if ($wgUser->isBlocked()) {
+		if ($wgUser->getBlock() !== null) {
 			foreach (self::getValidEditFields() as $field) {
 				$preferences[$field]['help-message'] = 'profile-blocked';
 				$preferences[$field]['disabled'] = true;
@@ -341,16 +339,24 @@ class ProfileData {
 	public static function processPreferenceSave($user, &$preferences) {
 		global $wgUser;
 
+		$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		// don't allow blocked users to change their about me text
 		// Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
-		if ($user->isSafeToLoad() && $wgUser !== null && $user->isBlocked() && isset($preferences['profile-aboutme']) && $preferences['profile-aboutme'] != $user->getOption('profile-aboutme')) {
-			$preferences['profile-aboutme'] = $user->getOption('profile-aboutme');
+		if (
+			$user->isSafeToLoad() &&
+			$wgUser !== null &&
+			$user->getBlock() !== null &&
+			isset($preferences['profile-aboutme']) &&
+			$preferences['profile-aboutme'] != $optionsLookup->getOption($user, 'profile-aboutme')
+		) {
+			$preferences['profile-aboutme'] = $optionsLookup->getOption($user, 'profile-aboutme');
 		}
 
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 		// run hooks on profile preferences (mostly for achievements)
 		foreach (self::getValidEditFields() as $field) {
 			if (!empty($preferences[$field])) {
-				Hooks::run('CurseProfileEdited', [$user, $field, $preferences[$field]]);
+				$hookContainer->run('CurseProfileEdited', [$user, $field, $preferences[$field]]);
 			}
 		}
 
@@ -538,7 +544,7 @@ class ProfileData {
 	public function isViewingSelf() {
 		global $wgUser;
 
-		return $wgUser->isLoggedIn() && $wgUser->getID() == $this->user->getID();
+		return $wgUser->isRegistered() && $wgUser->getID() == $this->user->getID();
 	}
 
 	/**

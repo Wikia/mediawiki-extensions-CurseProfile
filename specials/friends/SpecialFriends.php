@@ -14,6 +14,7 @@
 namespace CurseProfile;
 
 use HydraCore;
+use MediaWiki\MediaWikiServices;
 use TemplateManageFriends;
 use Title;
 use UnlistedSpecialPage;
@@ -54,7 +55,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 		$userId = isset($parts[0]) ? intval($parts[0]) : 0;
 		$userName = isset($parts[1]) ? $parts[1] : null;
 
-		$user = User::newFromId($userId);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$user->load();
 		if (!$user || $user->isAnon()) {
 			$wgOut->addWikiMsg('friendsboard-invalid');

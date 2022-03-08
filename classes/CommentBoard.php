@@ -14,8 +14,8 @@
 namespace CurseProfile;
 
 use Exception;
-use Hooks;
 use ManualLogEntry;
+use MediaWiki\MediaWikiServices;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;
 use Title;
@@ -74,7 +74,7 @@ class CommentBoard {
 	 * @throws Exception
 	 */
 	public function __construct(User $owner, $type = self::BOARDTYPE_RECENT) {
-		$this->DB = CP::getDb(DB_MASTER);
+		$this->DB = CP::getDb(DB_PRIMARY);
 		$this->owner = $owner;
 		$this->type = intval($type);
 	}
@@ -186,7 +186,7 @@ class CommentBoard {
 			return [];
 		}
 
-		$DB = CP::getDb(DB_MASTER);
+		$DB = CP::getDb(DB_PRIMARY);
 		$result = $DB->select(
 			['user_board_purge_archive'],
 			['*'],
@@ -259,9 +259,10 @@ class CommentBoard {
 		if ($newCommentId) {
 			$action = $inReplyTo > 0 ? 'replied' : 'created';
 
-			Hooks::run('CurseProfileAddComment', [$fromUser, $this->owner, $inReplyTo, $commentText]);
+			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+			$hookContainer->run('CurseProfileAddComment', [$fromUser, $this->owner, $inReplyTo, $commentText]);
 			if ($inReplyTo) {
-				Hooks::run('CurseProfileAddCommentReply', [$fromUser, $this->owner, $inReplyTo, $commentText]);
+				$hookContainer->run('CurseProfileAddCommentReply', [$fromUser, $this->owner, $inReplyTo, $commentText]);
 			}
 
 			$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
@@ -559,7 +560,7 @@ class CommentBoard {
 		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::makeTitle(NS_USER_PROFILE, $toUser->getName());
 
-		$db = CP::getDb(DB_MASTER);
+		$db = CP::getDb(DB_PRIMARY);
 		// save comment to archive for forensics
 		$success = $db->insert(
 			'user_board_purge_archive',

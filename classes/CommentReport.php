@@ -13,9 +13,9 @@
 
 namespace CurseProfile;
 
+use MediaWiki\MediaWikiServices;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;
-use Throwable;
 use Title;
 use User;
 
@@ -303,7 +303,7 @@ class CommentReport {
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
-		$db = CP::getDb(DB_MASTER);
+		$db = CP::getDb(DB_PRIMARY);
 		$db->insert(
 			'user_board_report_archives',
 			[
@@ -344,7 +344,7 @@ class CommentReport {
 	 * @return void
 	 */
 	private function addReportFrom(User $fromUser) {
-		$commentAuthor = User::newFromId($this->data['comment']['author']);
+		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->data['comment']['author']);
 
 		if (!isset($this->id) || $fromUser->isAnon()) {
 			// Can't add to a comment that hasn't been archived yet.
@@ -357,7 +357,7 @@ class CommentReport {
 		];
 
 		// Add new report row to the local database.
-		$db = CP::getDb(DB_MASTER);
+		$db = CP::getDb(DB_PRIMARY);
 		$db->insert(
 			'user_board_reports',
 			[
@@ -444,7 +444,7 @@ class CommentReport {
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
-		$db = CP::getDb(DB_MASTER);
+		$db = CP::getDb(DB_PRIMARY);
 		$result = $db->update(
 			'user_board_report_archives',
 			[

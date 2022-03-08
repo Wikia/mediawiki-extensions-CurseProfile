@@ -1,6 +1,6 @@
 {
 	"name": "Curse Profile",
-	"version": "1.6.2",
+	"version": "1.6.3",
 	"author": [
 		"Noah Manneschmidt",
 		"Hydra Wiki Platform Team"
@@ -9,9 +9,9 @@
 	"descriptionmsg": "curseprofile_description",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.29.0",
+		"MediaWiki": ">= 1.37.0",
 		"extensions": {
-			"Cheevos": ">= 1.0.0",
+			"Cheevos": ">= 1.0.2",
 			"HydraCore": ">= 3.0.0",
 			"RedisCache": "*",
 			"Reverb": "*"

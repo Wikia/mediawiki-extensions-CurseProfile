@@ -13,10 +13,10 @@
 
 namespace CurseProfile;
 
-use ApiBase;
 use HydraApiBase;
+use MediaWiki\MediaWikiServices;
 use RequestContext;
-use User;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Class that allows friendship actions to be performed by AJAX calls.
@@ -33,8 +33,8 @@ class FriendApi extends HydraApiBase {
 			'postRequired' => true,
 			'params' => [
 				'user_id' => [
-					ApiBase::PARAM_TYPE => 'string',
-					ApiBase::PARAM_REQUIRED => true
+					ParamValidator::PARAM_TYPE => 'string',
+					ParamValidator::PARAM_REQUIRED => true
 				]
 			]
 		];
@@ -50,8 +50,8 @@ class FriendApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'name' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true
 					]
 				]
 			]
@@ -76,7 +76,7 @@ class FriendApi extends HydraApiBase {
 	protected function doDirectreq() {
 		$wgUser = RequestContext::getMain()->getUser();
 
-		$targetUser = User::newFromName($this->getMain()->getVal('name'));
+		$targetUser = MediaWikiServices::getInstance()->getUserFactory()->newFromName($this->getMain()->getVal('name'));
 		if (!$targetUser) {
 			$this->dieWithError(wfMessage('friendrequest-direct-notfound'), 'friendrequest-direct-notfound');
 		}
@@ -103,7 +103,7 @@ class FriendApi extends HydraApiBase {
 	 */
 	protected function doSend() {
 		$userId = $this->getInt('user_id');
-		$toUser = User::newFromId($userId);
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$result = $this->f->sendRequest($toUser);
 		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
 		$this->getResult()->addValue(null, 'result', $result);
@@ -117,7 +117,7 @@ class FriendApi extends HydraApiBase {
 	 */
 	protected function doConfirm() {
 		$userId = $this->getInt('user_id');
-		$toUser = User::newFromId($userId);
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$result = $this->f->acceptRequest($toUser);
 		$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
 		$this->getResult()->addValue(null, 'result', $result);
@@ -131,7 +131,7 @@ class FriendApi extends HydraApiBase {
 	 */
 	protected function doIgnore() {
 		$userId = $this->getInt('user_id');
-		$toUser = User::newFromId($userId);
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$rel = $this->f->getRelationship($toUser);
 		$result = $this->f->ignoreRequest($toUser);
 		if ($rel == Friendship::REQUEST_RECEIVED) {
@@ -147,7 +147,7 @@ class FriendApi extends HydraApiBase {
 	 */
 	protected function doRemove() {
 		$userId = $this->getInt('user_id');
-		$toUser = User::newFromId($userId);
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 		$result = $this->f->removeFriend($toUser);
 		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
 		$this->getResult()->addValue(null, 'result', $result);

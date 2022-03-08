@@ -14,6 +14,7 @@
 use CurseProfile\CommentReport;
 use CurseProfile\CP;
 use CurseProfile\ProfilePage;
+use MediaWiki\MediaWikiServices;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -62,12 +63,13 @@ class TemplateCommentModeration {
 	 * @return string	HTML fragment
 	 */
 	public function renderComments($reports) {
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '
 				<div id="commentmoderation" class="comments">';
 
 		foreach ($reports as $report) {
 			$rep = $report->data;
-			$author = User::newFromId($rep['comment']['author']);
+			$author = $userFactory->newFromId($rep['comment']['author']);
 			if ($author) { // handle failures where central ID doesn't exist on local wiki
 				$html .= '
 					<div class="report-item" data-key="' . $report->reportKey() . '">';
@@ -107,7 +109,7 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken($rep) {
-		$user = User::newFromId($rep->data['action_taken_by_user_id']);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($rep->data['action_taken_by_user_id']);
 		switch ($rep->data['action_taken']) {
 			case CommentReport::ACTION_DISMISS:
 				$action = 'dis';
@@ -117,7 +119,11 @@ class TemplateCommentModeration {
 				$action = 'del';
 			break;
 		}
-		return Html::rawElement('span', ['class' => 'action-taken ' . $action], wfMessage('report-actiontaken-' . $action, $user->getName())->text() . ' ' . CP::timeTag($rep->data['action_taken_at']));
+		return Html::rawElement(
+			'span',
+			['class' => 'action-taken ' . $action],
+			wfMessage('report-actiontaken-' . $action, $user->getName())->text() . ' ' . CP::timeTag($rep->data['action_taken_at'])
+		);
 	}
 
 	/**
@@ -141,10 +147,11 @@ class TemplateCommentModeration {
 	 * @return string	HTML fragment
 	 */
 	private function reporterIcons($reports) {
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '';
 		$iter = 0;
 		foreach ($reports as $rep) {
-			$reporter = User::newFromId($rep['reporter']);
+			$reporter = $userFactory->newFromId($rep['reporter']);
 			$title = htmlspecialchars($reporter->getName(), ENT_QUOTES);
 			$html .= Html::rawElement(
 				'a',

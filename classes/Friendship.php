@@ -15,7 +15,7 @@ namespace CurseProfile;
 
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
-use Hooks;
+use MediaWiki\MediaWikiServices;
 use MWException;
 use Reverb\Notification\NotificationBroadcast;
 use SpecialPage;
@@ -120,11 +120,11 @@ class Friendship {
 			return false;
 		}
 
-		if ($this->user->isBlocked()) {
+		if ($this->user->getBlock() !== null) {
 			return ['error' => 'friendrequest-blocked'];
 		}
 
-		if ($toUser->isBlocked()) {
+		if ($toUser->getBlock() !== null) {
 			return ['error' => 'friendrequest-blocked-other'];
 		}
 
@@ -177,7 +177,8 @@ class Friendship {
 			$broadcast->transmit();
 		}
 
-		Hooks::run('CurseProfileAddFriend', [$this->user, $toUser]);
+		MediaWikiServices::getInstance()->getHookContainer()
+			->run('CurseProfileAddFriend', [$this->user, $toUser]);
 		return true;
 	}
 
@@ -246,7 +247,8 @@ class Friendship {
 			return false;
 		}
 
-		Hooks::run('CurseProfileRemoveFriend', [$this->user, $toUser]);
+		MediaWikiServices::getInstance()->getHookContainer()
+			->run('CurseProfileRemoveFriend', [$this->user, $toUser]);
 
 		return true;
 	}

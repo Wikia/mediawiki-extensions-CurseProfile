@@ -13,8 +13,8 @@
 
 namespace CurseProfile;
 
+use MediaWiki\MediaWikiServices;
 use UnlistedSpecialPage;
-use User;
 
 class SpecialAddComment extends UnlistedSpecialPage {
 	public function __construct() {
@@ -31,10 +31,11 @@ class SpecialAddComment extends UnlistedSpecialPage {
 		$wgOut = $this->getOutput();
 		$wgUser = $wgOut->getUser();
 
-		$toUser = User::newFromId($toUserId);
-		if ($wgRequest->wasPosted() && $wgUser->matchEditToken($wgRequest->getVal('token'))) {
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($toUserId);
+		$tokenSet = $this->getContext()->getCsrfTokenSet();
+		if ($wgRequest->wasPosted() && $tokenSet->matchToken($wgRequest->getVal('token'))) {
 			$board = new CommentBoard($toUser);
-			$newCommentId = $board->addComment($wgRequest->getVal('message'), $wgUser, $wgRequest->getInt('inreplyto'));
+			$board->addComment($wgRequest->getVal('message'), $wgUser, $wgRequest->getInt('inreplyto'));
 		}
 
 		$wgOut->redirect((new ProfileData($toUser))->getProfilePageUrl());

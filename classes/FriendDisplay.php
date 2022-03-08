@@ -14,6 +14,7 @@
 namespace CurseProfile;
 
 use Html;
+use MediaWiki\MediaWikiServices;
 use Parser;
 use User;
 
@@ -147,7 +148,7 @@ class FriendDisplay {
 	 * @return integer Number of friends.
 	 */
 	public static function count(?Parser $parser = null, int $userId) {
-		$user = User::newFromId($userId);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 
 		if (!$user) {
 			return 0;
@@ -168,7 +169,7 @@ class FriendDisplay {
 	 * @return array Parser compatible HTML array.
 	 */
 	public static function friendList(?Parser &$parser = null, int $userId) {
-		$user = User::newFromId($userId);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
 
 		if (!$user) {
 			return 0;
