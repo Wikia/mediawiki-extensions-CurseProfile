@@ -13,9 +13,11 @@
 
 namespace CurseProfile;
 
-use ApiBase;
 use HydraApiBase;
+use MediaWiki\MediaWikiServices;
 use MWException;
+use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
 /**
  * Class that allows manipulation of basic profile data
@@ -33,9 +35,9 @@ class ProfileApi extends HydraApiBase {
 				'postRequired' => false,
 				'params' => [
 					'user_name' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_MIN => 1,
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						IntegerDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					]
 				]
 			],
@@ -44,31 +46,31 @@ class ProfileApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'field' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_MIN => 1,
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						IntegerDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
 			'getWikisByString' => [
 				'params' => [
 					'search' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_MIN => 1,
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						IntegerDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
 			'getWiki' => [
 				'params' => [
 					'hash' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_MIN => 1,
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						IntegerDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -77,17 +79,17 @@ class ProfileApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'field' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						ApiBase::PARAM_TYPE		=> 'integer',
-						ApiBase::PARAM_MIN			=> 1,
-						ApiBase::PARAM_REQUIRED	=> true,
+						ParamValidator::PARAM_TYPE		=> 'integer',
+						IntegerDef::PARAM_MIN			=> 1,
+						ParamValidator::PARAM_REQUIRED	=> true,
 					],
 					'text' => [
-						ApiBase::PARAM_TYPE		=> 'string',
-						ApiBase::PARAM_REQUIRED	=> false,
+						ParamValidator::PARAM_TYPE		=> 'string',
+						ParamValidator::PARAM_REQUIRED	=> false,
 					],
 				],
 			],
@@ -96,13 +98,13 @@ class ProfileApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'data' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						ApiBase::PARAM_TYPE		=> 'integer',
-						ApiBase::PARAM_MIN			=> 1,
-						ApiBase::PARAM_REQUIRED	=> true,
+						ParamValidator::PARAM_TYPE		=> 'integer',
+						IntegerDef::PARAM_MIN			=> 1,
+						ParamValidator::PARAM_REQUIRED	=> true,
 					],
 
 				],
@@ -158,7 +160,7 @@ class ProfileApi extends HydraApiBase {
 	 */
 	public function doGetPublicProfile() {
 		$userName = $this->getRequest()->getText('user_name');
-		$user = \User::newFromName($userName);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName($userName);
 		if (!$user || !$user->getId()) {
 			$this->getResult()->addValue(null, 'result', 'failure');
 			$this->getResult()->addValue(null, 'errormsg', 'Invalid user.');

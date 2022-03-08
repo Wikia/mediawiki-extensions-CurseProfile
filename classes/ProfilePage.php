@@ -19,18 +19,15 @@ use Cheevos\Cheevos;
 use Cheevos\CheevosAchievement;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
-use Cheevos\Points\PointLevels;
 use Cheevos\Points\PointsDisplay;
 use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
 use Hydra\Subscription;
 use HydraCore;
 use IContextSource;
-use Linker;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
 use Message;
-use MessageCache;
-use Revision;
 use SpecialPage;
 use Title;
 use User;
@@ -107,17 +104,19 @@ class ProfilePage extends Article {
 	 */
 	public function __construct($title, $context = null) {
 		parent::__construct($title);
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+
 		if ($context) {
 			$this->setContext($context);
 		}
 		$this->actionIsView = Action::getActionName($this->getContext()) == 'view';
 		$this->userName = Hooks::resolveUsername($title);
-		$this->user = User::newFromName($this->userName);
+		$this->user = $userFactory->newFromName($this->userName);
 		if ($this->user) {
 			$this->user->load();
 			$this->getContext()->getSkin()->setRelevantUser($this->getUser());
 		} else {
-			$this->user = User::newFromId(0);
+			$this->user = $userFactory->newAnonymous();
 		}
 
 		$skin = $this->getContext()->getSkin();
@@ -154,7 +153,7 @@ class ProfilePage extends Article {
 		$userStats = $this->userStats();
 		$layout = str_replace('<USERSTATS>', $userStats, $layout);
 
-		$outputString = MessageCache::singleton()->parse($layout, $this->getTitle());
+		$outputString = MediaWikiServices::getInstance()->getMessageCache()->parse($layout, $this->getTitle());
 		if ($outputString instanceof \ParserOutput) {
 			$outputString = $outputString->getText();
 		}
@@ -169,7 +168,7 @@ class ProfilePage extends Article {
 	 *
 	 * @return object	User
 	 */
-	public function getUser($audience = Revision::FOR_PUBLIC, User $user = null) {
+	public function getUser($audience = RevisionRecord::FOR_PUBLIC, User $user = null) {
 		return $this->user;
 	}
 
@@ -181,7 +180,7 @@ class ProfilePage extends Article {
 	 *
 	 * @return User
 	 */
-	public function getCreator($audience = Revision::FOR_PUBLIC, User $user = null) {
+	public function getCreator($audience = RevisionRecord::FOR_PUBLIC, User $user = null) {
 		return $this->user;
 	}
 
@@ -391,6 +390,7 @@ class ProfilePage extends Article {
 			return '';
 		}
 
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		$specialListUsersTitle = SpecialPage::getTitleFor('Listusers');
 		$html = '<ul class="grouptags">';
 		foreach ($groups as $group) {
@@ -399,17 +399,21 @@ class ProfilePage extends Article {
 			}
 			$groupMessage = new Message('group-' . $group);
 			if ($groupMessage->exists()) {
-				$html .= '<li>' . Linker::linkKnown($specialListUsersTitle, $groupMessage->text(), [], ['group' => $group]) . '</li>';
+				$html .= '<li>' . $linkRenderer->makeKnownLink($specialListUsersTitle, $groupMessage->text(), [], ['group' => $group]) . '</li>';
 			} else {
 				// Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
 				$html .= '<li>' . mb_convert_case(str_replace("_", " ", htmlspecialchars($group)), MB_CASE_TITLE, "UTF-8") . '</li>';
 			}
 		}
 		// Check the rights of the person viewing this page.
-		$cGroups = $wgUser->changeableGroups();
+		$cGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getGroupsChangeableBy( $wgUser );
 		if (!empty($cGroups['add']) || !empty($cGroups['remove'])) {
-			$link = Linker::linkKnown(Title::newFromText('Special:UserRights/' . $this->user->getName()), self::PENCIL_ICON_SVG, [ 'class' => 'is-icon' ] );
-			$html .= "<li class=\"edit\">" . $link . "</li>";
+			$link = $linkRenderer->makeKnownLink(
+				Title::newFromText('Special:UserRights/' . $this->user->getName()),
+				self::PENCIL_ICON_SVG,
+				[ 'class' => 'is-icon' ]
+			);
+			$html .= "<li class=\"edit\">$link</li>";
 		}
 		$html .= '</ul>';
 

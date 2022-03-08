@@ -14,10 +14,9 @@
 namespace CurseProfile;
 
 use EditPage;
-use Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
-use MWNamespace;
+use MediaWiki\MediaWikiServices;
 use SpecialPage;
 use Status;
 use Title;
@@ -212,7 +211,7 @@ class Hooks {
 		if (!in_array($target->getNamespace(), [NS_USER, NS_USER_PROFILE]) || $target->isSubpage()) {
 			return true;
 		}
-		$user = User::newFromName($target->getText());
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName($target->getText());
 		// Override user links based on enhanced user profile preference
 		$profileData = new ProfileData($user);
 		if ($profileData->getProfileTypePreference()) {
@@ -254,7 +253,7 @@ class Hooks {
 	 * Resolve href without red link
 	 *
 	 * @param array  $attribs
-	 * @param string $target
+	 * @param LinkTarget $target
 	 *
 	 * @return string
 	 */
@@ -434,7 +433,8 @@ class Hooks {
 	public static function onSkinSubPageSubtitle(&$subpages, $skinTemplate, $output) {
 		if (self::$profilePage && ((self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred()) || (self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred()))) {
 			$title = $output->getTitle();
-			if ($output->isArticle() && MWNamespace::hasSubpages($title->getNamespace())) {
+			$nsInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
+			if ($output->isArticle() && $nsInfo->hasSubpages($title->getNamespace())) {
 				$ptext = $title->getPrefixedText();
 				if (strpos($ptext, '/') !== false) {
 					$links = explode('/', $ptext);
@@ -444,13 +444,14 @@ class Hooks {
 					$display = '';
 					$lang = $skinTemplate->getLanguage();
 
+					$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 					foreach ($links as $link) {
 						$growinglink .= $link;
 						$display .= $link;
 						$linkObj = Title::newFromText($growinglink);
 
 						if (is_object($linkObj) && $linkObj->isKnown()) {
-							$getlink = Linker::linkKnown(
+							$getlink = $linkRenderer->makeKnownLink(
 								$linkObj,
 								htmlspecialchars($display),
 								[],
@@ -567,7 +568,7 @@ class Hooks {
 	 * @return boolean	True
 	 */
 	public static function onPreferencesFormPreSave($formData, $form, $user, &$result) {
-		$untouchedUser = User::newFromId($user->getId());
+		$untouchedUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user->getId());
 
 		if (!$untouchedUser || !$untouchedUser->getId()) {
 			return true;
@@ -576,11 +577,12 @@ class Hooks {
 		$profileData = new ProfileData($user);
 		$canEdit = $profileData->canEdit($user);
 		if ($canEdit !== true) {
+			$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 			$result = Status::newFatal($canEdit);
 			foreach ($formData as $key => $value) {
-				if (strpos($key, 'profile-') === 0 && $value != $untouchedUser->getOption($key)) {
+				if (strpos($key, 'profile-') === 0 && $value != $optionsLookup->getOption($untouchedUser, $key)) {
 					// Reset profile data to its previous state.
-					$user->setOption($key, $untouchedUser->getOption($key));
+					$user->setOption($key, $optionsLookup->getOption($untouchedUser, $key));
 				}
 			}
 		}
@@ -627,7 +629,7 @@ class Hooks {
 		if (strpos($username, '/') > 0) {
 			$username = explode('/', $username);
 			$username = array_shift($username);
-			$canonical = User::getCanonicalName($username);
+			$canonical = MediaWikiServices::getInstance()->getUserNameUtils()->getCanonical($username);
 			$username = $canonical ? $canonical : $username;
 		}
 

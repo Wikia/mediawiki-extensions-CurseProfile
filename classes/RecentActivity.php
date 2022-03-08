@@ -14,10 +14,9 @@
 namespace CurseProfile;
 
 use ActorMigration;
-use Linker;
+use MediaWiki\MediaWikiServices;
 use RequestContext;
 use Title;
-use User;
 
 /**
  * A class to manage displaying a list of recent activity on a user profile
@@ -39,20 +38,21 @@ class RecentActivity {
 		}
 		$activity = self::fetchRecentRevisions($user_id);
 		if (count($activity) == 0) {
-			$user = User::newFromId($user_id);
+			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user_id);
 			$user->load();
 			return wfMessage('emptyactivity')->params($user->getName(), $wgUser->getName())->text();
 		}
 
 		$html = '
 		<ul>';
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		foreach ($activity as $rev) {
 			$title = Title::newFromID($rev['rev_page']);
 			if ($title) {
 				$action = $rev['rev_parent_id'] ? 'edited' : 'created';
 				$history = [
 					wfMessage('profileactivity-' . $action)->params($wgUser->getName()),
-					Linker::link($title),
+					$linkRenderer->makeLink($title),
 					self::diffHistLinks($title, $rev),
 					CP::timeTag($rev['rev_timestamp'])
 				];
@@ -78,9 +78,10 @@ class RecentActivity {
 	 * @return string
 	 */
 	public static function diffHistLinks($title, $rev) {
-		$html = Linker::link($title, 'diff', [], ['diff' => $rev['rev_id']]);
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		$html = $linkRenderer->makeLink($title, 'diff', [], ['diff' => $rev['rev_id']]);
 		$html .= ' | ';
-		$html .= Linker::link($title, 'hist', [], ['action' => 'history']);
+		$html .= $linkRenderer->makeLink($title, 'hist', [], ['action' => 'history']);
 		return '(' . $html . ')';
 	}
 
@@ -102,7 +103,7 @@ class RecentActivity {
 
 		// Add in ActorMigration query
 		$actorQuery = ActorMigration::newMigration()
-		->getWhere($db, 'rev_user', User::newFromId($user_id, false));
+		->getWhere($db, 'rev_user', MediaWikiServices::getInstance()->getUserFactory()->newFromId($user_id, false));
 		$revQuery['tables'] += $actorQuery['tables'];
 		$revQuery['conds'][] = $actorQuery['conds'];
 		$revQuery['joins'] += $actorQuery['joins'];

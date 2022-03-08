@@ -1,6 +1,7 @@
 <?php
 use CurseProfile\CommentBoard;
 use CurseProfile\CommentReport;
+use MediaWiki\MediaWikiServices;
 
 /**
  * @group  CurseProfile
@@ -10,15 +11,15 @@ use CurseProfile\CommentReport;
  */
 class CommentReportTest extends MediaWikiTestCase {
 	public function addDBData() {
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$testUsers = [
 			'Commenter' => null,
 			'Commentee' => null,
 		];
 		foreach ($testUsers as $username => &$u) {
-			$u = User::newFromName($username);
+			$u = $userFactory->newFromName($username);
 			if ($u->getId() == 0) {
 				$u->addToDatabase();
-				$u->setPassword('password');
 				$u->saveSettings();
 			}
 		}
@@ -32,8 +33,9 @@ class CommentReportTest extends MediaWikiTestCase {
 
 	protected function setUp() {
 		parent::setUp();
-		$this->commenter = User::newFromName('Commenter');
-		$this->commentee = User::newFromName('Commentee');
+		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+		$this->commenter = $userFactory->newFromName('Commenter');
+		$this->commentee = $userFactory->newFromName('Commentee');
 		$this->commentBoard = new CommentBoard($this->commentee->getId());
 	}
 

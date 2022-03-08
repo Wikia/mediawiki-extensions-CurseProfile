@@ -13,11 +13,11 @@
 
 namespace CurseProfile;
 
-use ApiBase;
 use ApiMain;
 use DerivativeRequest;
 use HydraApiBase;
-use User;
+use MediaWiki\MediaWikiServices;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
@@ -35,8 +35,8 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -46,8 +46,8 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -57,8 +57,8 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -68,16 +68,16 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'user_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true
 					],
 					'text' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'inReplyTo' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_DEFAULT => 0,
 					],
 				]
 			],
@@ -87,12 +87,12 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => false,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'reason' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					]
 				],
 			],
@@ -102,8 +102,8 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => false,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -113,12 +113,12 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'text' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
 			],
@@ -128,20 +128,20 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'user_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true
 					],
 					'title' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'text' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'inReplyTo' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_DFLT => 0,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_DEFAULT => 0,
 					],
 				]
 			],
@@ -151,8 +151,8 @@ class CommentApi extends HydraApiBase {
 				'postRequired' => true,
 				'params' => [
 					'comment_id' => [
-						ApiBase::PARAM_TYPE => 'integer',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				]
 			],
@@ -163,15 +163,15 @@ class CommentApi extends HydraApiBase {
 				'permissionRequired' => 'profile-moderate',
 				'params' => [
 					'reportKey' => [
-						ApiBase::PARAM_TYPE => 'string',
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'byUser' => [
-						ApiBase::PARAM_TYPE => 'integer',
+						ParamValidator::PARAM_TYPE => 'integer',
 					],
 					'withAction' => [ // string param with two possible enumerated values:
-						ApiBase::PARAM_TYPE => ['delete', 'dismiss'],
-						ApiBase::PARAM_REQUIRED => true,
+						ParamValidator::PARAM_TYPE => ['delete', 'dismiss'],
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 				]
 			],
@@ -183,14 +183,14 @@ class CommentApi extends HydraApiBase {
 	 * depending on what the user has chosen as their default user page.
 	 */
 	public function doAddToDefault() {
-		$user = User::newFromId($this->getMain()->getVal('user_id'));
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->getMain()->getVal('user_id'));
 		if (!$user || $user->isAnon()) {
 			return $this->dieWithError(['comment-invaliduser']);
 		}
 		$text = $this->getMain()->getVal('text');
 		$inreply = $this->getInt('inReplyTo');
 
-		if ($user->getIntOption('comment-pref')) {
+		if (MediaWikiServices::getInstance()->getUserOptionsLookup()->getIntOption($user, 'comment-pref')) {
 			$board = new CommentBoard($user);
 			$commentSuccess = $board->addComment($text, $this->getUser(), $inreply);
 			$this->getResult()->addValue(null, 'result', ($commentSuccess ? 'success' : 'failure'));
@@ -219,7 +219,7 @@ class CommentApi extends HydraApiBase {
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
 	public function doAdd() {
-		$toUser = User::newFromId($this->getInt('user_id'));
+		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->getInt('user_id'));
 		if (!$toUser || !$toUser->isAnon()) {
 				$this->getResult()->addValue(null, 'result', 'failure');
 				return;
@@ -310,7 +310,7 @@ class CommentApi extends HydraApiBase {
 	 * @return boolean	Success
 	 */
 	public function doResolveReport() {
-		if (!$this->getUser()->isLoggedIn()) {
+		if (!$this->getUser()->isRegistered()) {
 			return false;
 		}
 

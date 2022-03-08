@@ -11,7 +11,7 @@
 
 namespace CurseProfile;
 
-use Hooks;
+use MediaWiki\MediaWikiServices;
 use MWException;
 use MWTimestamp;
 use Sanitizer;
@@ -127,7 +127,7 @@ class Comment {
 	 * @return boolean Save Success
 	 */
 	public function save(): bool {
-		$db = wfGetDB(DB_MASTER);
+		$db = wfGetDB(DB_PRIMARY);
 		$success = false;
 
 		$db->startAtomic(__METHOD__);
@@ -282,19 +282,20 @@ class Comment {
 
 		if ($fromUser->getId()) {
 			if ($fromUser->getId() == $toUser->getId()) {
-				if (!$fromUser->isBlocked()) {
+				if (!$fromUser->getBlock()) {
 					return true;
 				} else {
 					return false;
 				}
 			}
-			if (!Hooks::run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
+			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+			if (!$hookContainer->run('CurseProfileCanComment', [$fromUser, $toUser, $wgCPEditsToComment])) {
 				return false;
 			}
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
-		return !$noEmailAuth && $fromUser->isLoggedIn() && !$fromUser->isBlocked() && (!$toUser->isBlocked() || $fromUser->isAllowed('block'));
+		return !$noEmailAuth && $fromUser->isRegistered() && !$fromUser->getBlock() && (!$toUser->getBlock() || $fromUser->isAllowed('block'));
 	}
 
 	/**
@@ -330,7 +331,7 @@ class Comment {
 	 */
 	public function canRemove(User $actor) {
 		// user must not be blocked, comment must either be authored by current user or on user's profile
-		return $this->getType() !== self::DELETED_MESSAGE && !$actor->isBlocked() &&
+		return $this->getType() !== self::DELETED_MESSAGE && !$actor->getBlock() &&
 			($this->getBoardOwnerUserId() === $actor->getId()
 				|| ($this->getActorUserId() === $actor->getId())
 				|| $actor->isAllowed('profile-moderate'));
@@ -447,7 +448,7 @@ class Comment {
 	 * @return User
 	 */
 	public function getActorUser(): User {
-		return User::newFromId($this->getActorUserId());
+		return MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->getActorUserId());
 	}
 
 	/**
@@ -488,7 +489,7 @@ class Comment {
 	 * @return User
 	 */
 	public function getBoardOwnerUser(): User {
-		return User::newFromId($this->getBoardOwnerUserId());
+		return MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->getBoardOwnerUserId());
 	}
 
 	/**
@@ -529,7 +530,7 @@ class Comment {
 	 * @return User
 	 */
 	public function getAdminActedUser(): User {
-		return User::newFromId($this->getAdminActedUserId());
+		return MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->getAdminActedUserId());
 	}
 
 	/**

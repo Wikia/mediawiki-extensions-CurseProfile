@@ -6,9 +6,7 @@
 namespace CurseProfile;
 
 use Job;
-use JobQueueGroup;
-use User;
-use Wikimedia\Rdbms\DBConnectionError;
+use MediaWiki\MediaWikiServices;
 
 class ResolveComment extends Job {
 	/**
@@ -23,7 +21,7 @@ class ResolveComment extends Job {
 	 */
 	public static function queue(array $parameters = []) {
 		$job = new self(__CLASS__, $parameters);
-		JobQueueGroup::singleton()->push($job);
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push($job);
 	}
 
 	/**
@@ -39,7 +37,7 @@ class ResolveComment extends Job {
 			return true;
 		}
 
-		$user = User::newFromId($args['byUser']);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($args['byUser']);
 		$result = $report->resolve($args['action'], $user);
 
 		if (!$result) {

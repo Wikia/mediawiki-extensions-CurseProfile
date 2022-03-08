@@ -54,7 +54,7 @@ class TemplateCommentBoard {
 	 * Comments display.
 	 *
 	 * @param array   $comments   Array of comments
-	 * @param integer $user       User instance to who this comment list belongs to.
+	 * @param User    $user       User instance to who this comment list belongs to.
 	 * @param string  $pagination [Optional] Built HTML fragment for pagination.
 	 *
 	 * @return string Built HTML
