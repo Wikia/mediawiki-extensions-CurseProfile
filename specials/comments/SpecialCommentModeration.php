@@ -9,7 +9,7 @@
  * @copyright (c) 2015 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ **/
 
 namespace CurseProfile;
 
@@ -21,7 +21,7 @@ class SpecialCommentModeration extends SpecialPage {
 	private $sortStyle;
 
 	public function __construct() {
-		parent::__construct('CommentModeration', 'profile-moderate');
+		parent::__construct( 'CommentModeration', 'profile-moderate' );
 	}
 
 	/**
@@ -38,45 +38,57 @@ class SpecialCommentModeration extends SpecialPage {
 	 *
 	 * @param string $sortBy Mixed: parameter(s) passed to the page or null
 	 */
-	public function execute($sortBy) {
+	public function execute( $sortBy ) {
 		$this->checkPermissions();
-		$wgRequest = $this->getRequest();
+		$request = $this->getRequest();
+		$output = $this->getOutput();
 
-		$this->output->setPageTitle(wfMessage('commentmoderation-title')->escaped());
+		$output->setPageTitle( wfMessage( 'commentmoderation-title' )->escaped() );
 
-		$this->output->addModuleStyles(['ext.curseprofile.commentmoderation.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.comments.styles']);
-		$this->output->addModules(['ext.curseprofile.commentmoderation.scripts']);
+		$output->addModuleStyles(
+			[
+				'ext.curseprofile.commentmoderation.styles',
+				'ext.hydraCore.pagination.styles',
+				'ext.curseprofile.comments.styles',
+			]
+		);
+		$output->addModules( [ 'ext.curseprofile.commentmoderation.scripts' ] );
 
-		$templateCommentModeration = new TemplateCommentModeration;
+		$templateCommentModeration = new TemplateCommentModeration();
 		$this->setHeaders();
 
 		$this->sortStyle = $sortBy;
-		if (!$this->sortStyle) {
+		if ( !$this->sortStyle ) {
 			$this->sortStyle = 'byVolume';
 		}
 
-		$start = $wgRequest->getInt('st');
+		$start = $request->getInt( 'st' );
 		$itemsPerPage = 25;
 
-		$reports = CommentReport::getReports($this->sortStyle, $itemsPerPage, $start);
+		$reports = CommentReport::getReports( $this->sortStyle, $itemsPerPage, $start );
 
-		if (!count($reports)) {
-			$this->output->addWikiMsg('commentmoderation-empty');
+		if ( !count( $reports ) ) {
+			$output->addWikiMsg( 'commentmoderation-empty' );
 			return;
 		} else {
-			$content = $templateCommentModeration->renderComments($reports);
+			$content = $templateCommentModeration->renderComments( $reports );
 		}
 
-		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($reports), $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml(
+			$this->getFullTitle(),
+			count( $reports ),
+			$itemsPerPage,
+			$start
+		);
 
-		$this->output->addHTML($templateCommentModeration->sortStyleSelector($this->sortStyle));
-		$this->output->addHTML($pagination);
-		$this->output->addHTML($content);
-		$this->output->addHTML($pagination);
+		$output->addHTML( $templateCommentModeration->sortStyleSelector( $this->sortStyle ) );
+		$output->addHTML( $pagination );
+		$output->addHTML( $content );
+		$output->addHTML( $pagination );
 	}
 
 	private function countModQueue() {
 		// TODO: pass extra param for byWiki or byUser
-		return CommentReport::getCount($this->sortStyle);
+		return CommentReport::getCount( $this->sortStyle );
 	}
 }

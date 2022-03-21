@@ -22,10 +22,10 @@ class TemplateCommentModeration {
 	/**
 	 * Renders the group and sort "tabs" at the top of the CommentModeration page
 	 *
-	 * @param  currentStyle $currentStyle string indicating the current sort style
+	 * @param  string $currentStyle string indicating the current sort style
 	 * @return string HTML fragment
 	 */
-	public function sortStyleSelector($currentStyle) {
+	public function sortStyleSelector(string $currentStyle) {
 		$styles = [
 			'byVolume' => ['commentmoderation-byvolume', 'default'],
 			// 'byWiki' => ['By Origin Wiki'],
