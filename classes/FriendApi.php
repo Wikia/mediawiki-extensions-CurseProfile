@@ -9,13 +9,12 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
- */
+**/
 
 namespace CurseProfile;
 
 use ApiBase;
 use HydraApiBase;
-use MediaWiki\MediaWikiServices;
 use RequestContext;
 use User;
 
@@ -65,7 +64,7 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function execute() {
-		$this->f = new Friendship( $this->getUser() );
+		$this->f = new Friendship($this->getUser());
 		parent::execute();
 	}
 
@@ -77,24 +76,24 @@ class FriendApi extends HydraApiBase {
 	protected function doDirectreq() {
 		$wgUser = RequestContext::getMain()->getUser();
 
-		$targetUser = User::newFromName( $this->getMain()->getVal( 'name' ) );
-		if ( !$targetUser ) {
-			$this->dieWithError( wfMessage( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
+		$targetUser = User::newFromName($this->getMain()->getVal('name'));
+		if (!$targetUser) {
+			$this->dieWithError(wfMessage('friendrequest-direct-notfound'), 'friendrequest-direct-notfound');
 		}
 		$targetUser->load();
-		if ( $targetUser->isAnon() ) {
-			$this->dieWithError( wfMessage( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
+		if ($targetUser->isAnon()) {
+			$this->dieWithError(wfMessage('friendrequest-direct-notfound'), 'friendrequest-direct-notfound');
 		}
 
-		$result = $this->f->sendRequest( $targetUser );
-		if ( is_array( $result ) && isset( $result['error'] ) ) {
-			$this->dieWithError( wfMessage( $result['error'] )->params( $targetUser->getName(), $wgUser->getName() ), $result['error'] );
-		} elseif ( !$result ) {
-			$this->dieWithError( wfMessage( 'friendrequestsend-error' ), 'friendrequestsend-error' );
+		$result = $this->f->sendRequest($targetUser);
+		if (is_array($result) && isset($result['error'])) {
+			$this->dieWithError(wfMessage($result['error'])->params($targetUser->getName(), $wgUser->getName()), $result['error']);
+		} elseif (!$result) {
+			$this->dieWithError(wfMessage('friendrequestsend-error'), 'friendrequestsend-error');
 		}
-		$html = wfMessage( 'friendrequest-direct-success' )->text();
-		$this->getResult()->addValue( null, 'result', $result );
-		$this->getResult()->addValue( null, 'html', $html );
+		$html = wfMessage('friendrequest-direct-success')->text();
+		$this->getResult()->addValue(null, 'result', $result);
+		$this->getResult()->addValue(null, 'html', $html);
 	}
 
 	/**
@@ -103,13 +102,12 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doSend() {
-		$userId = $this->getInt( 'user_id' );
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$toUser = $userFactory->newFromId( $userId );
-		$result = $this->f->sendRequest( $toUser );
-		$html = FriendDisplay::friendButtons( $toUser, $this->getUser() );
-		$this->getResult()->addValue( null, 'result', $result );
-		$this->getResult()->addValue( null, 'html', $html );
+		$userId = $this->getInt('user_id');
+		$toUser = User::newFromId($userId);
+		$result = $this->f->sendRequest($toUser);
+		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
+		$this->getResult()->addValue(null, 'result', $result);
+		$this->getResult()->addValue(null, 'html', $html);
 	}
 
 	/**
@@ -118,13 +116,12 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doConfirm() {
-		$userId = $this->getInt( 'user_id' );
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$toUser = $userFactory->newFromId( $userId );
-		$result = $this->f->acceptRequest( $toUser );
-		$html = wfMessage( $result ? 'alreadyfriends' : 'friendrequestconfirm-error' )->plain();
-		$this->getResult()->addValue( null, 'result', $result );
-		$this->getResult()->addValue( null, 'html', $html );
+		$userId = $this->getInt('user_id');
+		$toUser = User::newFromId($userId);
+		$result = $this->f->acceptRequest($toUser);
+		$html = wfMessage($result ? 'alreadyfriends' : 'friendrequestconfirm-error')->plain();
+		$this->getResult()->addValue(null, 'result', $result);
+		$this->getResult()->addValue(null, 'html', $html);
 	}
 
 	/**
@@ -133,15 +130,14 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doIgnore() {
-		$userId = $this->getInt( 'user_id' );
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$toUser = $userFactory->newFromId( $userId );
-		$rel = $this->f->getRelationship( $toUser );
-		$result = $this->f->ignoreRequest( $toUser );
-		if ( $rel == Friendship::REQUEST_RECEIVED ) {
-			$this->getResult()->addValue( null, 'remove', true );
+		$userId = $this->getInt('user_id');
+		$toUser = User::newFromId($userId);
+		$rel = $this->f->getRelationship($toUser);
+		$result = $this->f->ignoreRequest($toUser);
+		if ($rel == Friendship::REQUEST_RECEIVED) {
+			$this->getResult()->addValue(null, 'remove', true);
 		}
-		$this->getResult()->addValue( null, 'result', $result );
+		$this->getResult()->addValue(null, 'result', $result);
 	}
 
 	/**
@@ -150,12 +146,11 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doRemove() {
-		$userId = $this->getInt( 'user_id' );
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$toUser = $userFactory->newFromId( $userId );
-		$result = $this->f->removeFriend( $toUser );
-		$html = FriendDisplay::friendButtons( $toUser, $this->getUser() );
-		$this->getResult()->addValue( null, 'result', $result );
-		$this->getResult()->addValue( null, 'html', $html );
+		$userId = $this->getInt('user_id');
+		$toUser = User::newFromId($userId);
+		$result = $this->f->removeFriend($toUser);
+		$html = FriendDisplay::friendButtons($toUser, $this->getUser());
+		$this->getResult()->addValue(null, 'result', $result);
+		$this->getResult()->addValue(null, 'html', $html);
 	}
 }
