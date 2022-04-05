@@ -22,6 +22,7 @@ use Cheevos\CheevosHelper;
 use Cheevos\Points\PointsDisplay;
 use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
+use HtmlArmor;
 use Hydra\Subscription;
 use HydraCore;
 use IContextSource;
@@ -410,7 +411,7 @@ class ProfilePage extends Article {
 		if (!empty($cGroups['add']) || !empty($cGroups['remove'])) {
 			$link = $linkRenderer->makeKnownLink(
 				Title::newFromText('Special:UserRights/' . $this->user->getName()),
-				self::PENCIL_ICON_SVG,
+				new HtmlArmor(self::PENCIL_ICON_SVG),
 				[ 'class' => 'is-icon' ]
 			);
 			$html .= "<li class=\"edit\">$link</li>";
