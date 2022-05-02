@@ -319,6 +319,7 @@
 		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
 		"SkinSubPageSubtitle": "CurseProfile\\Hooks::onSkinSubPageSubtitle",
 		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
+		"TitleExists": "CurseProfile\\Hooks::onTitleExists",
 		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
 		"userCan": "CurseProfile\\Hooks::onUserCan",
 		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
