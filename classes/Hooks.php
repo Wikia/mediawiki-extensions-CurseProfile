@@ -687,14 +687,4 @@ class Hooks {
 
 		return true;
 	}
-
-	public static function onTitleExists( Title $title, bool &$exists ) {
-		if ( $title->getNamespace() !== NS_USER_PROFILE ) {
-			return;
-		}
-		$user = User::newFromname( $title->getText() );
-		if ( $user->getId() > 0 ) {
-			$exists = true;
-		}
-	}
 }
