@@ -28,7 +28,7 @@ class CommentApi extends HydraApiBase {
 	 *
 	 * @return array
 	 */
-	public function getActions() {
+	public function getActions(): array {
 		return [
 			'restore' => [
 				'tokenRequired' => true,

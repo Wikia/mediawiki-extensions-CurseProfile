@@ -27,7 +27,7 @@ class FriendApi extends HydraApiBase {
 	 *
 	 * @return array
 	 */
-	public function getActions() {
+	public function getActions(): array {
 		$basicAction = [
 			'tokenRequired' => true,
 			'postRequired' => true,

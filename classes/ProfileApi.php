@@ -28,7 +28,7 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return array	API Actions
 	 */
-	public function getActions() {
+	public function getActions(): array {
 		return [
 			'getPublicProfile' => [
 				'tokenRequired' => false,
