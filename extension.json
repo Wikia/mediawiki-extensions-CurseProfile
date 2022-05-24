@@ -92,6 +92,7 @@
 		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
 		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
 		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
+		"CurseProfile\\UserPrefersProfilePage": "classes/UserPrefersProfilePage.php",
 		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
 		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
 		"TemplateManageFriends": "templates/TemplateManageFriends.php",

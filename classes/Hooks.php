@@ -246,7 +246,7 @@ class Hooks {
 			return self::renderProfile($title, $article);
 		}
 
-		return self::renderUserPages($title);
+		return self::renderUserPages($title, $article);
 	}
 
 	/**
@@ -333,10 +333,11 @@ class Hooks {
 	 * Handle the user and talk page
 	 *
 	 * @param Title $title
+	 * @param Article $article
 	 *
 	 * @return boolean
 	 */
-	private static function renderUserPages(&$title) {
+	private static function renderUserPages(&$title, &$article) {
 		global $wgRequest, $wgOut;
 		// Check if we are on a base page
 		$username = self::resolveUsername($title);
@@ -357,15 +358,13 @@ class Hooks {
 			empty($wgRequest->getVal('oldid')) &&
 			empty($wgRequest->getVal('diff'))
 		) {
-			return $wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
+			$wgOut->redirect(self::$profilePage->getUserProfileTitle()->getFullURL());
+			return true;
 		}
 
 		// Warn visitors about user's preference
 		if (self::shouldWarn($wgRequest) && $preferProfile && !$title->isRedirect()) {
-			$wgOut->wrapWikiMsg(
-				"<div class=\"curseprofile-userprefersprofile error\">\n$1\n</div>",
-				[$key, wfEscapeWikiText($username)]
-			);
+			$article = new UserPrefersProfilePage($title, $key, $username);
 		}
 
 		return true;
