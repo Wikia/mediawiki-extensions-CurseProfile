@@ -131,11 +131,8 @@ class ProfileData {
 			$this->user_id = $user->getId();
 		} else {
 			$this->user_id = intval($user);
-			if ($this->user_id < 1) {
-				// if a user hasn't saved a profile yet, just use the default values
-				$this->user_id = 0;
-			}
-			$this->user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user);
+			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+			$this->user = $this->user_id < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId($this->user_id);
 		}
 	}
 
