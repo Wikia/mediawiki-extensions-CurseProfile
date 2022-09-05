@@ -251,7 +251,7 @@ class Comment {
 	 */
 	public function canView(User $user) {
 		// Early check for admin status.
-		if ($user->isAllowed('profile-moderate')) {
+		if ($user->isAllowed('profile-comments-moderate')) {
 			return true;
 		}
 
@@ -334,7 +334,7 @@ class Comment {
 		return $this->getType() !== self::DELETED_MESSAGE && !$actor->getBlock() &&
 			($this->getBoardOwnerUserId() === $actor->getId()
 				|| ($this->getActorUserId() === $actor->getId())
-				|| $actor->isAllowed('profile-moderate'));
+				|| $actor->isAllowed('profile-comments-moderate'));
 	}
 
 	/**
@@ -348,7 +348,7 @@ class Comment {
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $this->getType() === self::DELETED_MESSAGE &&
 			(
-				$actor->isAllowed('profile-moderate')
+				$actor->isAllowed('profile-comments-moderate')
 				|| $this->getBoardOwnerUserId() === $actor->getId()
 				&& $this->getAdminActedUserId() === $actor->getId()
 			);

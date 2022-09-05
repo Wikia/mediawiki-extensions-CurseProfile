@@ -160,7 +160,7 @@ class CommentApi extends HydraApiBase {
 			'resolveReport' => [
 				'tokenRequired' => true,
 				'postRequired' => true,
-				'permissionRequired' => 'profile-moderate',
+				'permissionRequired' => 'profile-comments-moderate',
 				'params' => [
 					'reportKey' => [
 						ParamValidator::PARAM_TYPE => 'string',
