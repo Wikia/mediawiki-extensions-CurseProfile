@@ -19,18 +19,21 @@
 	},
 	"AvailableRights": [
 		"profile-moderate",
+		"profile-comments-moderate",
 		"profile-purgecomments",
 		"profile-stats"
 	],
 	"GroupPermissions": {
 		"sysop": {
 			"profile-moderate": true,
+			"profile-comments-moderate": true,
 			"profile-purgecomments": true
 		}
 	},
 	"GrantPermissions": {
 		"curseprofile": {
 			"profile-moderate": true,
+			"profile-comments-moderate": true,
 			"profile-purgecomments": true
 		}
 	},

@@ -21,7 +21,7 @@ class SpecialCommentModeration extends SpecialPage {
 	private $sortStyle;
 
 	public function __construct() {
-		parent::__construct('CommentModeration', 'profile-moderate');
+		parent::__construct('CommentModeration', 'profile-comments-moderate');
 	}
 
 	/**

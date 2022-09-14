@@ -156,7 +156,7 @@ class CommentBoard {
 	 * @return string A single SQL condition entirely enclosed in parenthesis.
 	 */
 	public static function visibleClause(User $actor) {
-		if ($actor->isAllowed('profile-moderate')) {
+		if ($actor->isAllowed('profile-comments-moderate')) {
 			// admins see everything
 			$sql = '1=1';
 		} else {

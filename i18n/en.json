@@ -261,6 +261,7 @@
 	"apihelp-profile-summary": "Allows basic profile data actions to be modified.",
 	"apihelp-friend-summary": "Allows friending actions to be taken.",
 	"right-profile-moderate": "Moderate user profiles",
+	"right-profile-comments-moderate": "Moderate comments on user profiles",
 	"right-profile-purgecomments": "Purge comments on user profiles",
 	"right-profile-stats": "View profile statistics",
 	"grant-curseprofile": "Moderate user profiles and comments",
