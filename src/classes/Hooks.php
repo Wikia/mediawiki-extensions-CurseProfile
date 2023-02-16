@@ -103,12 +103,12 @@ class Hooks {
 			$parser->setFunctionHook( 'profilefield',		[ self::$profilePage, 'fieldBlock' ] );
 			$parser->setFunctionHook( 'profilelinks',		[ self::$profilePage, 'profileLinks' ] );
 			$parser->setFunctionHook( 'userlevel',			[ self::$profilePage, 'userLevel' ] );
-			$parser->setFunctionHook( 'avatar',				'CurseProfile\ProfilePage::userAvatar' );
-			$parser->setFunctionHook( 'comments',			'CurseProfile\CommentDisplay::comments' );
-			$parser->setFunctionHook( 'friendadd',			'CurseProfile\FriendDisplay::addFriendLink' );
-			$parser->setFunctionHook( 'friendcount',			'CurseProfile\FriendDisplay::count' );
-			$parser->setFunctionHook( 'friendlist',			'CurseProfile\FriendDisplay::friendList' );
-			$parser->setFunctionHook( 'recentactivity',		'CurseProfile\RecentActivity::parserHook' );
+			$parser->setFunctionHook( 'avatar',				'CurseProfile\Classes\ProfilePage::userAvatar' );
+			$parser->setFunctionHook( 'comments',			'CurseProfile\Classes\CommentDisplay::comments' );
+			$parser->setFunctionHook( 'friendadd',			'CurseProfile\Classes\FriendDisplay::addFriendLink' );
+			$parser->setFunctionHook( 'friendcount',		'CurseProfile\Classes\FriendDisplay::count' );
+			$parser->setFunctionHook( 'friendlist',			'CurseProfile\Classes\FriendDisplay::friendList' );
+			$parser->setFunctionHook( 'recentactivity',		'CurseProfile\Classes\RecentActivity::parserHook' );
 		}
 		return true;
 	}
@@ -489,7 +489,7 @@ class Hooks {
 	 * @return bool true
 	 */
 	public static function onLoadExtensionSchemaUpdates( $updater ) {
-		$extDir = dirname( __DIR__ );
+		$extDir = dirname( __DIR__ ) . '/..';
 
 		// Add tables that may exist for previous users of SocialProfile.
 		$updater->addExtensionUpdate( [ 'addTable', 'user_board', "{$extDir}/install/sql/table_user_board.sql", true ] );

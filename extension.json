@@ -38,12 +38,12 @@
 		}
 	},
 	"SpecialPages": {
-		"ManageFriends": "CurseProfile\\SpecialManageFriends",
-		"Friends": "CurseProfile\\SpecialFriends",
-		"AddComment": "CurseProfile\\SpecialAddComment",
-		"CommentBoard": "CurseProfile\\SpecialCommentBoard",
-		"CommentPermalink": "CurseProfile\\SpecialCommentPermalink",
-		"CommentModeration": "CurseProfile\\SpecialCommentModeration"
+		"ManageFriends": "CurseProfile\\Specials\\Friends\\SpecialManageFriends",
+		"Friends": "CurseProfile\\Specials\\Friends\\SpecialFriends",
+		"AddComment": "CurseProfile\\Specials\\Comments\\SpecialAddComment",
+		"CommentBoard": "CurseProfile\\Specials\\Comments\\SpecialCommentBoard",
+		"CommentPermalink": "CurseProfile\\Specials\\Comments\\SpecialCommentPermalink",
+		"CommentModeration": "CurseProfile\\Specials\\Comments\\SpecialCommentModeration"
 	},
 	"LogTypes": {
 		"curseprofile": "curseprofile"
@@ -55,12 +55,12 @@
 		"curseprofile": "curseprofile_log_description"
 	},
 	"LogActionsHandlers": {
-		"curseprofile/comment-created": "\\CurseProfile\\CommentLogFormatter",
-		"curseprofile/comment-replied": "\\CurseProfile\\CommentLogFormatter",
-		"curseprofile/comment-edited": "\\CurseProfile\\CommentLogFormatter",
-		"curseprofile/comment-deleted": "\\CurseProfile\\CommentLogFormatter",
-		"curseprofile/comment-purged": "\\CurseProfile\\CommentLogFormatter",
-		"curseprofile/profile-edited": "\\CurseProfile\\ProfileLogFormatter"
+		"curseprofile/comment-created": "\\CurseProfile\\Classes\\CommentLogFormatter",
+		"curseprofile/comment-replied": "\\CurseProfile\\Classes\\CommentLogFormatter",
+		"curseprofile/comment-edited": "\\CurseProfile\\Classes\\CommentLogFormatter",
+		"curseprofile/comment-deleted": "\\CurseProfile\\Classes\\CommentLogFormatter",
+		"curseprofile/comment-purged": "\\CurseProfile\\Classes\\CommentLogFormatter",
+		"curseprofile/profile-edited": "\\CurseProfile\\Classes\\ProfileLogFormatter"
 	},
 	"MessagesDirs": {
 		"CurseProfile": [
@@ -72,39 +72,13 @@
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
 	"JobClasses": {
-		"CurseProfile\\ResolveComment": "CurseProfile\\ResolveComment"
+		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment"
+	},
+	"AutoloadNamespaces": {
+		"CurseProfile\\": "src/"
 	},
 	"AutoloadClasses": {
-		"CurseProfile\\Comment": "classes/Comment.php",
-		"CurseProfile\\CommentApi": "classes/CommentApi.php",
-		"CurseProfile\\CommentBoard": "classes/CommentBoard.php",
-		"CurseProfile\\CommentDisplay": "classes/CommentDisplay.php",
-		"CurseProfile\\CommentLogFormatter": "classes/CommentLogFormatter.php",
-		"CurseProfile\\CommentReport": "classes/CommentReport.php",
-		"CurseProfile\\CP": "classes/CP.php",
-		"CurseProfile\\FriendApi": "classes/FriendApi.php",
-		"CurseProfile\\FriendDisplay": "classes/FriendDisplay.php",
-		"CurseProfile\\Friendship": "classes/Friendship.php",
-		"CurseProfile\\Hooks": "classes/Hooks.php",
-		"CurseProfile\\Maintenance\\ReplaceGlobalIdWithUserId": "upgrade/php/ReplaceGlobalIdWithUserId.php",
-		"CurseProfile\\NoProfilePage": "classes/NoProfilePage.php",
-		"CurseProfile\\ProfileApi": "classes/ProfileApi.php",
-		"CurseProfile\\ProfileData": "classes/ProfileData.php",
-		"CurseProfile\\ProfileLogFormatter": "classes/ProfileLogFormatter.php",
-		"CurseProfile\\ProfilePage": "classes/ProfilePage.php",
-		"CurseProfile\\RecentActivity": "classes/RecentActivity.php",
-		"CurseProfile\\ResolveComment": "classes/jobs/ResolveComment.php",
-		"CurseProfile\\ResourceLoaderModule": "classes/ResourceLoaderModule.php",
-		"CurseProfile\\UserPrefersProfilePage": "classes/UserPrefersProfilePage.php",
-		"TemplateCommentBoard": "templates/TemplateCommentBoard.php",
-		"TemplateCommentModeration": "templates/TemplateCommentModeration.php",
-		"TemplateManageFriends": "templates/TemplateManageFriends.php",
-		"CurseProfile\\SpecialManageFriends": "specials/friends/SpecialManageFriends.php",
-		"CurseProfile\\SpecialFriends": "specials/friends/SpecialFriends.php",
-		"CurseProfile\\SpecialAddComment": "specials/comments/SpecialAddComment.php",
-		"CurseProfile\\SpecialCommentBoard": "specials/comments/SpecialCommentBoard.php",
-		"CurseProfile\\SpecialCommentPermalink": "specials/comments/SpecialCommentPermalink.php",
-		"CurseProfile\\SpecialCommentModeration": "specials/comments/SpecialCommentModeration.php"
+		"CurseProfile\\Maintenance\\ReplaceGlobalIdWithUserId": "upgrade/php/ReplaceGlobalIdWithUserId.php"
 	},
 	"ResourceModules": {
 		"ext.curseprofile.noprofile.scripts": {
@@ -296,7 +270,7 @@
 			]
 		},
 		"ext.curseprofile.customskin.styles": {
-			"class": "CurseProfile\\ResourceLoaderModule",
+			"class": "CurseProfile\\Classes\\ResourceLoaderModule",
 			"targets": [
 				"desktop",
 				"mobile"
@@ -308,33 +282,33 @@
 		"remoteExtPath": "CurseProfile"
 	},
 	"Hooks": {
-		"ArticleFromTitle": "CurseProfile\\Hooks::onArticleFromTitle",
-		"ArticleViewRedirect": "CurseProfile\\Hooks::onArticleViewRedirect",
-		"BeforeInitialize": "CurseProfile\\Hooks::onBeforeInitialize",
-		"BeforePageDisplay": "CurseProfile\\Hooks::onBeforePageDisplay",
-		"CanonicalNamespaces": "CurseProfile\\Hooks::onCanonicalNamespaces",
-		"EditPage::importFormData": "CurseProfile\\Hooks::onEditPageImportFormData",
-		"GetPreferences": "CurseProfile\\Hooks::onGetPreferences",
-		"HtmlPageLinkRendererEnd": "CurseProfile\\Hooks::onHtmlPageLinkRendererEnd",
-		"LoadExtensionSchemaUpdates": "CurseProfile\\Hooks::onLoadExtensionSchemaUpdates",
-		"NamespaceIsMovable": "CurseProfile\\Hooks::onNamespaceIsMovable",
-		"ParserFirstCallInit": "CurseProfile\\Hooks::onParserFirstCall",
-		"PreferencesFormPreSave": "CurseProfile\\Hooks::onPreferencesFormPreSave",
-		"SkinMinervaDefaultModules": "CurseProfile\\Hooks::onSkinMinervaDefaultModules",
-		"SkinSubPageSubtitle": "CurseProfile\\Hooks::onSkinSubPageSubtitle",
-		"SkinTemplateNavigation": "CurseProfile\\Hooks::onSkinTemplateNavigation",
-		"UnitTestsList": "CurseProfile\\Hooks::onUnitTestsList",
-		"userCan": "CurseProfile\\Hooks::onUserCan",
-		"UserGetDefaultOptions": "CurseProfile\\Hooks::onUserGetDefaultOptions",
-		"FandomUserSaveOptions": "CurseProfile\\Hooks::onFandomUserSaveOptions",
-		"WantedPages::getQueryInfo": "CurseProfile\\Hooks::onWantedPagesGetQueryInfo"
+		"ArticleFromTitle": "CurseProfile\\Classes\\Hooks::onArticleFromTitle",
+		"ArticleViewRedirect": "CurseProfile\\Classes\\Hooks::onArticleViewRedirect",
+		"BeforeInitialize": "CurseProfile\\Classes\\Hooks::onBeforeInitialize",
+		"BeforePageDisplay": "CurseProfile\\Classes\\Hooks::onBeforePageDisplay",
+		"CanonicalNamespaces": "CurseProfile\\Classes\\Hooks::onCanonicalNamespaces",
+		"EditPage::importFormData": "CurseProfile\\Classes\\Hooks::onEditPageImportFormData",
+		"GetPreferences": "CurseProfile\\Classes\\Hooks::onGetPreferences",
+		"HtmlPageLinkRendererEnd": "CurseProfile\\Classes\\Hooks::onHtmlPageLinkRendererEnd",
+		"LoadExtensionSchemaUpdates": "CurseProfile\\Classes\\Hooks::onLoadExtensionSchemaUpdates",
+		"NamespaceIsMovable": "CurseProfile\\Classes\\Hooks::onNamespaceIsMovable",
+		"ParserFirstCallInit": "CurseProfile\\Classes\\Hooks::onParserFirstCall",
+		"PreferencesFormPreSave": "CurseProfile\\Classes\\Hooks::onPreferencesFormPreSave",
+		"SkinMinervaDefaultModules": "CurseProfile\\Classes\\Hooks::onSkinMinervaDefaultModules",
+		"SkinSubPageSubtitle": "CurseProfile\\Classes\\Hooks::onSkinSubPageSubtitle",
+		"SkinTemplateNavigation": "CurseProfile\\Classes\\Hooks::onSkinTemplateNavigation",
+		"UnitTestsList": "CurseProfile\\Classes\\Hooks::onUnitTestsList",
+		"userCan": "CurseProfile\\Classes\\Hooks::onUserCan",
+		"UserGetDefaultOptions": "CurseProfile\\Classes\\Hooks::onUserGetDefaultOptions",
+		"FandomUserSaveOptions": "CurseProfile\\Classes\\Hooks::onFandomUserSaveOptions",
+		"WantedPages::getQueryInfo": "CurseProfile\\Classes\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
-		"profile": "CurseProfile\\ProfileApi",
-		"friend": "CurseProfile\\FriendApi",
-		"comment": "CurseProfile\\CommentApi"
+		"profile": "CurseProfile\\Classes\\ProfileApi",
+		"friend": "CurseProfile\\Classes\\FriendApi",
+		"comment": "CurseProfile\\Classes\\CommentApi"
 	},
-	"callback": "CurseProfile\\Hooks::onRegistration",
+	"callback": "CurseProfile\\Classes\\Hooks::onRegistration",
 	"config": {
 		"CPEditsToComment": {
 			"value": 1,

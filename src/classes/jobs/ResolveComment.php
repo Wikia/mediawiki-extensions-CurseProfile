@@ -10,6 +10,7 @@ use Job;
 use MediaWiki\MediaWikiServices;
 
 class ResolveComment extends Job {
+	private const COMMAND = "CurseProfile\\ResolveComment";
 	/**
 	 * Queue a new job.
 	 *
@@ -21,7 +22,7 @@ class ResolveComment extends Job {
 	 * @return void
 	 */
 	public static function queue( array $parameters = [] ) {
-		$job = new self( __CLASS__, $parameters );
+		$job = new self( self::COMMAND, $parameters );
 		MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
 	}
 
