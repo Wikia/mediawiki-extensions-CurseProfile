@@ -1,7 +1,8 @@
 <?php
-use CurseProfile\CommentBoard;
-use CurseProfile\CommentReport;
+
 use MediaWiki\MediaWikiServices;
+use CurseProfile\Classes\CommentBoard;
+use CurseProfile\Classes\CommentReport;
 
 /**
  * @group  CurseProfile

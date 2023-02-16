@@ -1,5 +1,6 @@
 <?php
-use CurseProfile\ProfilePage;
+
+use CurseProfile\Classes\ProfilePage;
 
 class StatsDLExposer extends ProfilePage {
 	public function __construct() {
@@ -9,7 +10,7 @@ class StatsDLExposer extends ProfilePage {
 
 /**
  * @group  CurseProfile
- * @covers CurseProfile\ProfilePage
+ * @covers \src\classes\ProfilePage
  */
 class GenerateStatsDLTest extends MediaWikiTestCase {
 	protected $stats;
