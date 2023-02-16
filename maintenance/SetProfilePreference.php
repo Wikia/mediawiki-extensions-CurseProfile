@@ -31,13 +31,19 @@ class SetProfilePreference extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Overwrites the preference for profile vs. wiki pages for all users on a wiki' );
-		$this->addArg( 'newPref', 'What the new user preference should be. One of: ' . implode( ', ', array_keys( self::$preferences ) ), true );
+		$this->addArg(
+			'newPref',
+			'What the new user preference should be. One of: ' . implode( ', ', array_keys( self::$preferences ) ),
+			true
+		);
 	}
 
 	public function execute() {
 		$newSetting = $this->getArg();
-		if ( !in_array( $newSetting, array_keys( self::$preferences ) ) ) {
-			$this->error( 'Invalid new preference provided. Must be one of: ' . implode( ', ', array_keys( self::$preferences ) ) );
+		if ( !array_key_exists( $newSetting, self::$preferences ) ) {
+			$this->error(
+				'Invalid new preference provided. Must be one of: ' . implode( ', ', array_keys( self::$preferences ) )
+			);
 			return;
 		}
 

@@ -48,9 +48,9 @@ class Comment {
 	/**
 	 * Message visibility constants
 	 */
-	const DELETED_MESSAGE = -1;
-	const PUBLIC_MESSAGE = 0;
-	const PRIVATE_MESSAGE = 1;
+	public const DELETED_MESSAGE = -1;
+	public const PUBLIC_MESSAGE = 0;
+	public const PRIVATE_MESSAGE = 1;
 
 	/**
 	 * Setup and validate data for this class.
@@ -257,7 +257,9 @@ class Comment {
 
 		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
 		return $this->getType() === self::PUBLIC_MESSAGE
-			|| ( $this->getType() === self::PRIVATE_MESSAGE && $this->getBoardOwnerUser() === $user->getId() && $this->getActorUserId() === $user->getId() )
+			|| ( $this->getType() === self::PRIVATE_MESSAGE &&
+				$this->getBoardOwnerUser() === $user->getId() &&
+				$this->getActorUserId() === $user->getId() )
 			|| ( $this->getType() === self::DELETED_MESSAGE && $this->getActorUserId() == $user->getId() );
 	}
 
@@ -278,7 +280,9 @@ class Comment {
 
 		$editCount = $fromUser->getEditCount();
 
-		$noEmailAuth = ( $wgEmailAuthentication && ( !boolval( $fromUser->getEmailAuthenticationTimestamp() ) || !Sanitizer::validateEmail( $fromUser->getEmail() ) ) );
+		$noEmailAuth = ( $wgEmailAuthentication &&
+			( !boolval( $fromUser->getEmailAuthenticationTimestamp() ) ||
+				!Sanitizer::validateEmail( $fromUser->getEmail() ) ) );
 
 		if ( $fromUser->getId() ) {
 			if ( $fromUser->getId() == $toUser->getId() ) {
@@ -295,7 +299,10 @@ class Comment {
 		}
 
 		// User must be logged in, must not be blocked, and target must not be blocked (with exception for admins).
-		return !$noEmailAuth && $fromUser->isRegistered() && !$fromUser->getBlock() && ( !$toUser->getBlock() || $fromUser->isAllowed( 'block' ) );
+		return !$noEmailAuth &&
+			$fromUser->isRegistered() &&
+			!$fromUser->getBlock() &&
+			( !$toUser->getBlock() || $fromUser->isAllowed( 'block' ) );
 	}
 
 	/**
@@ -374,7 +381,9 @@ class Comment {
 	 */
 	public function canReport( User $actor ) {
 		// user must be logged-in to report and comment must be public (not deleted)
-		return !$actor->isAnon() && $this->getActorUserId() !== $actor->getId() && $this->getType() === self::PUBLIC_MESSAGE;
+		return !$actor->isAnon() &&
+			$this->getActorUserId() !== $actor->getId() &&
+			$this->getType() === self::PUBLIC_MESSAGE;
 	}
 
 	/**
@@ -454,8 +463,6 @@ class Comment {
 	/**
 	 * Set the user ID and user name from an User instance of the user that made the comment.
 	 *
-	 * @param integer User ID
-	 *
 	 * @return null
 	 */
 	public function setActorUser( User $user ) {
@@ -475,8 +482,6 @@ class Comment {
 	/**
 	 * Set the user ID of the user that made the comment.
 	 *
-	 * @param integer User ID
-	 *
 	 * @return null
 	 */
 	public function setActorUserId( int $userId ) {
@@ -494,8 +499,6 @@ class Comment {
 
 	/**
 	 * Set the user ID from an User instance of the user board that this comment belongs to.
-	 *
-	 * @param integer User ID
 	 *
 	 * @return null
 	 */
@@ -516,7 +519,7 @@ class Comment {
 	/**
 	 * Set the user ID of the user board that this comment belongs to.
 	 *
-	 * @param integer User ID
+	 * @param int $userId User ID
 	 *
 	 * @return null
 	 */
@@ -534,9 +537,10 @@ class Comment {
 	}
 
 	/**
-	 * Set the user ID from an User instance of the the administrator that performed an administrative action on this comment.
+	 * Set the user ID from an User instance of the the administrator
+	 * that performed an administrative action on this comment.
 	 *
-	 * @param integer User ID
+	 * @param int $user User ID
 	 *
 	 * @return null
 	 */
@@ -555,10 +559,6 @@ class Comment {
 
 	/**
 	 * Set the user ID of the the administrator that performed an administrative action on this comment.
-	 *
-	 * @param integer User ID
-	 *
-	 * @return null
 	 */
 	public function setAdminActedUserId( ?int $userId = null ) {
 		$this->data['ub_admin_acted_user_id'] = $userId;
@@ -576,7 +576,7 @@ class Comment {
 	/**
 	 * Set the post(creation) timestamp.
 	 *
-	 * @param integer|null
+	 * @param int|null $timestamp
 	 *
 	 * @return null
 	 */
@@ -596,7 +596,7 @@ class Comment {
 	/**
 	 * Set the edit timestamp.
 	 *
-	 * @param integer|null
+	 * @param int|null $timestamp
 	 *
 	 * @return null
 	 */
@@ -616,7 +616,7 @@ class Comment {
 	/**
 	 * Set the last reply timestamp.
 	 *
-	 * @param integer|null
+	 * @param int|null $timestamp
 	 *
 	 * @return null
 	 */
@@ -636,7 +636,7 @@ class Comment {
 	/**
 	 * Set the timestamp for an administrator performed an action on this comment.
 	 *
-	 * @param integer|null
+	 * @param int|null $timestamp
 	 *
 	 * @return null
 	 */
@@ -688,7 +688,7 @@ class Comment {
 	/**
 	 * Set the comment ID of the parent comment to this one.
 	 *
-	 * @param integer [Optional] Parent Comment ID
+	 * @param int $parentId [Optional] Parent Comment ID
 	 *
 	 * @return null
 	 */

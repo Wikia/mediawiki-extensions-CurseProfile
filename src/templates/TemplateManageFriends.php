@@ -34,7 +34,7 @@ class TemplateManageFriends {
 	 * @param string $pagination Pagination HTML
 	 * @param int $itemsPerPage Items Per Page
 	 * @param int $start Start Offset
-	 * @return void
+	 * @return string
 	 */
 	public function display( $friends, $pagination, $itemsPerPage, $start ) {
 		$this->HTML = '<h2>' . wfMessage( 'friends' ) . '</h2>';
@@ -52,7 +52,8 @@ class TemplateManageFriends {
 	 * Displays a management page for friends
 	 *
 	 * @param User $actor The User performing friend management actions.
-	 * @param array $friendTypes Association of friend types(accepted friends, sent requests, received requests) to User objects.
+	 * @param array $friendTypes
+	 * Association of friend types(accepted friends, sent requests, received requests) to User objects.
 	 * @param int $itemsPerPage Items Per Page
 	 * @param int $start Start Offset
 	 *
@@ -89,7 +90,14 @@ class TemplateManageFriends {
 		}
 
 		$this->HTML .= '<h3>' . wfMessage( 'senddirectrequest' ) . '</h3>';
-		$this->HTML .= Html::element( 'input', [ 'type' => 'text', 'id' => 'directfriendreq', 'placeholder' => wfMessage( 'directfriendreqplaceholder' )->text() ] );
+		$this->HTML .= Html::element(
+			'input',
+			[
+				'type' => 'text',
+				'id' => 'directfriendreq',
+				'placeholder' => wfMessage( 'directfriendreqplaceholder' )->text()
+			]
+		);
 		$this->HTML .= Html::element( 'button', [ 'id' => 'senddirectreq' ], wfMessage( 'sendrequest' )->text() );
 
 		return '<div id="managefriends">' . $this->HTML . '</div>';

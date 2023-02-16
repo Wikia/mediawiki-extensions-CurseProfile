@@ -30,7 +30,9 @@ class CommentReportTest extends MediaWikiTestCase {
 		$commentBoard = new CommentBoard( $testUsers['Commentee']->getId() );
 	}
 
-	protected $commenter, $commentee, $commentBoard;
+	protected $commenter;
+	protected $commentee;
+	protected $commentBoard;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -57,6 +59,10 @@ class CommentReportTest extends MediaWikiTestCase {
 		$this->assertInstanceOf( 'CommentReport', $report, "Comments should be reportable by logged-in users." );
 
 		$newReports = CommentReport::getReports();
-		$this->assertGreaterThan( count( $reports ), count( $newReports ), 'A new report should be returned after one has been submitted.' );
+		$this->assertGreaterThan(
+			count( $reports ),
+			count( $newReports ),
+			'A new report should be returned after one has been submitted.'
+		);
 	}
 }

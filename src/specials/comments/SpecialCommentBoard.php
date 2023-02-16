@@ -30,12 +30,12 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 	 * @param string $path Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $path ) {
-		$wgRequest = $this->getRequest();
-		$wgOut = $this->getOutput();
+		$request = $this->getRequest();
+		$output = $this->getOutput();
 		$this->setHeaders();
 		if ( empty( $path ) ) {
-			$wgOut->addWikiMsg( 'commentboard-invalid' );
-			$wgOut->setStatusCode( 404 );
+			$output->addWikiMsg( 'commentboard-invalid' );
+			$output->setStatusCode( 404 );
 			return;
 		}
 
@@ -45,8 +45,8 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
 		$user->load();
 		if ( !$user || $user->isAnon() ) {
-			$wgOut->addWikiMsg( 'commentboard-invalid' );
-			$wgOut->setStatusCode( 404 );
+			$output->addWikiMsg( 'commentboard-invalid' );
+			$output->setStatusCode( 404 );
 			return;
 		}
 
@@ -57,30 +57,34 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 				// don't destroy any extra params
 				$fixedPath .= '?' . $_SERVER['QUERY_STRING'];
 			}
-			$wgOut->redirect( $fixedPath );
+			$output->redirect( $fixedPath );
 			return;
 		}
 
-		$start = $wgRequest->getInt( 'st' );
+		$start = $request->getInt( 'st' );
 		$itemsPerPage = 50;
-		$wgOut->setPageTitle( wfMessage( 'commentboard-title', $user->getName() )->plain() );
-		$wgOut->addModuleStyles( [ 'ext.curseprofile.comments.styles', 'ext.hydraCore.pagination.styles', 'ext.hydraCore.font-awesome.styles' ] );
-		$wgOut->addModules( [ 'ext.curseprofile.comments.scripts' ] );
+		$output->setPageTitle( $this->msg( 'commentboard-title', $user->getName() )->plain() );
+		$output->addModuleStyles( [
+			'ext.curseprofile.comments.styles',
+			'ext.hydraCore.pagination.styles',
+			'ext.hydraCore.font-awesome.styles'
+		] );
+		$output->addModules( [ 'ext.curseprofile.comments.scripts' ] );
 		$templateCommentBoard = new TemplateCommentBoard;
 
-		$wgOut->addHTML( $templateCommentBoard->header( $user, $wgOut->getPageTitle() ) );
+		$output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
 
 		$board = new CommentBoard( $user, CommentBoard::BOARDTYPE_ARCHIVES );
 
 		$total = $board->countComments( $this->getUser() );
 		if ( $total == 0 ) {
-			$wgOut->addWikiMsg( 'commentboard-empty', $user->getName() );
+			$output->addWikiMsg( 'commentboard-empty', $user->getName() );
 			return;
 		}
 
 		$comments = $board->getComments( $this->getUser(), $start, $itemsPerPage, -1 );
 		$pagination = HydraCore::generatePaginationHtml( $this->getFullTitle(), $total, $itemsPerPage, $start );
 
-		$wgOut->addHTML( $templateCommentBoard->comments( $comments, $user, $pagination ) );
+		$output->addHTML( $templateCommentBoard->comments( $comments, $user, $pagination ) );
 	}
 }

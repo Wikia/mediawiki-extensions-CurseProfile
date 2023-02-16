@@ -25,7 +25,7 @@ class RecentActivity {
 	/**
 	 * Handle parser hook call
 	 *
-	 * @param object &$parser
+	 * @param mixed &$parser
 	 * @param string $user_id
 	 *
 	 * @return mixed

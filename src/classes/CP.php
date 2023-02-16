@@ -31,7 +31,7 @@ class CP {
 	 * Overrides the MW db connections used by CurseProfile objects.
 	 * Useful for operating on child wikis from master wiki context.
 	 *
-	 * @param object $db mw DB connection
+	 * @param mixed $db mw DB connection
 	 */
 	public static function setDb( $db ) {
 		self::$db = $db;
@@ -41,7 +41,7 @@ class CP {
 	 * Returns a db connection to use
 	 *
 	 * @param int $id mw db id (DB_MASTER or DB_SLAVE)
-	 * @return object mw db connection
+	 * @return mixed mw db connection
 	 */
 	public static function getDb( $id ) {
 		if ( isset( self::$db ) ) {
@@ -93,6 +93,7 @@ class CP {
 			$customAttribs['class'] = $class;
 		}
 		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-		return $linkRenderer->makeKnownLink( $user->getUserPage(), $user->getName(), $customAttribs ); // htmlspecialchars($user->getName())
+		// htmlspecialchars($user->getName())
+		return $linkRenderer->makeKnownLink( $user->getUserPage(), $user->getName(), $customAttribs );
 	}
 }

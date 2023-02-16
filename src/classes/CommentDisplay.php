@@ -30,7 +30,7 @@ class CommentDisplay {
 	/**
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
-	 * @param object &$parser parser instance
+	 * @param mixed &$parser parser instance
 	 * @param int $userId id of the user whose recent comments should be displayed
 	 * @return array with html at index 0
 	 */
@@ -78,18 +78,26 @@ class CommentDisplay {
 			$page = Title::newFromText( "Special:AddComment/" . $owner->getId() );
 			return '
 			<div class="commentdisplay add-comment' . ( $hidden ? ' hidden' : '' ) . '">
-				<div class="avatar">' . ProfilePage::userAvatar( null, 48, $wgUser->getEmail(), $wgUser->getName() )[0] . '</div>
+				<div class="avatar">' .
+				ProfilePage::userAvatar( null, 48, $wgUser->getEmail(), $wgUser->getName() )[0] .
+				'</div>
 				<div class="entryform">
 					<form action="' . $page->getFullUrl() . '" method="post">
-						<textarea name="message" maxlength="' . Comment::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
-						<button name="inreplyto" class="submit wds-button" value="0">' . wfMessage( 'commentaction' )->escaped() . '</button>
+						<textarea name="message" maxlength="' . Comment::MAX_LENGTH .
+				'" data-replyplaceholder="' . $replyPlaceholder .
+				'" placeholder="' . $commentPlaceholder . '"></textarea>
+						<button name="inreplyto" class="submit wds-button" value="0">' .
+				wfMessage( 'commentaction' )->escaped() . '</button>
 						' . Html::hidden( 'token', $tokenSet->getToken() ) . '
 					</form>
 				</div>
 			</div>';
 		} else {
 			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-			$link = $linkRenderer->makeKnownLink( Title::newFromText( 'Special:ConfirmEmail' ), wfMessage( 'no-perm-validate-email' )->text() );
+			$link = $linkRenderer->makeKnownLink(
+				Title::newFromText( 'Special:ConfirmEmail' ),
+				wfMessage( 'no-perm-validate-email' )->text()
+			);
 			return "<div class='errorbox'>" . wfMessage( 'no-perm-profile-addcomment', $link )->text() . "</div>";
 		}
 	}
@@ -134,18 +142,57 @@ class CommentDisplay {
 		<div class="commentdisplay ' . $type . '" data-id="' . $comment->getId() . '">
 			<a name="comment' . $comment->getId() . '"></a>
 			<div class="commentblock">
-				<div class="avatar">' . ProfilePage::userAvatar( null, $avatarSize, $cUser->getEmail(), $cUser->getName() )[0] . '</div>
+				<div class="avatar">' . ProfilePage::userAvatar(
+					null,
+					$avatarSize,
+					$cUser->getEmail(),
+					$cUser->getName()
+			)[0] . '</div>
 				<div class="commentheader">';
 		$html .= '
 					<div class="right">'
 				. ( $comment->getAdminActedUserId() ? self::adminAction( $comment ) . ', ' : '' )
-				. Html::rawElement( 'a', [ 'href' => SpecialPage::getTitleFor( 'CommentPermalink', $comment->getId(), 'comment' . $comment->getId() )->getLinkURL() ], self::timestamp( $comment ) ) . ' '
-				. ( $comment->canReply( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon newreply', 'title' => wfMessage( 'replylink-tooltip' ) ], HydraCore::awesomeIcon( 'reply' ) ) . ' ' : '' )
-				. ( $comment->canEdit( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon edit', 'title' => wfMessage( 'commenteditlink-tooltip' ) ], HydraCore::awesomeIcon( 'pencil-alt' ) ) . ' ' : '' )
-				. ( $comment->canRemove( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon remove', 'title' => wfMessage( 'removelink-tooltip' ) ], HydraCore::awesomeIcon( 'trash' ) ) : '' )
-				. ( $comment->canRestore( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon restore', 'title' => wfMessage( 'restorelink-tooltip' ) ], HydraCore::awesomeIcon( 'undo' ) ) : '' )
-				. ( $comment->canPurge( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon purge', 'title' => wfMessage( 'purgelink-tooltip' ) ], HydraCore::awesomeIcon( 'eraser' ) ) : '' )
-				. ( $comment->canReport( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon report', 'title' => wfMessage( 'reportlink-tooltip' ) ], HydraCore::awesomeIcon( 'flag' ) ) : '' )
+				. Html::rawElement(
+					'a',
+					[
+						'href' => SpecialPage::getTitleFor(
+							'CommentPermalink',
+							$comment->getId(),
+							'comment' . $comment->getId()
+						)->getLinkURL()
+					],
+					self::timestamp( $comment )
+			) . ' '
+				. ( $comment->canReply( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon newreply', 'title' => wfMessage( 'replylink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'reply' ) ) . ' ' : '' )
+				. ( $comment->canEdit( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon edit', 'title' => wfMessage( 'commenteditlink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'pencil-alt' ) ) . ' ' : '' )
+				. ( $comment->canRemove( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon remove', 'title' => wfMessage( 'removelink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'trash' ) ) : '' )
+				. ( $comment->canRestore( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon restore', 'title' => wfMessage( 'restorelink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'undo' ) ) : '' )
+				. ( $comment->canPurge( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon purge', 'title' => wfMessage( 'purgelink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'eraser' ) ) : '' )
+				. ( $comment->canReport( $wgUser ) ?
+				Html::rawElement(
+					'a',
+					[ 'href' => '#', 'class' => 'icon report', 'title' => wfMessage( 'reportlink-tooltip' ) ],
+					HydraCore::awesomeIcon( 'flag' ) ) : '' )
 				. '
 					</div>'
 				. CP::userLink( $comment->getActorUserId(), "commentUser" );
@@ -167,7 +214,14 @@ class CommentDisplay {
 				// force parsing this message because MW won't replace plurals as expected
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
-				$viewReplies = Parser::stripOuterParagraph( $wgOut->parseAsContent( wfMessage( 'viewearlierreplies', $comment->getTotalReplies( $wgUser ) - count( $replies ) )->escaped() ) );
+				$viewReplies = Parser::stripOuterParagraph(
+					$wgOut->parseAsContent(
+						wfMessage(
+							'viewearlierreplies',
+							$comment->getTotalReplies( $wgUser ) - count( $replies )
+						)->escaped()
+					)
+				);
 				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
@@ -195,7 +249,8 @@ class CommentDisplay {
 			return '';
 		}
 
-		return wfMessage( 'cp-commentmoderated', $admin->getName() )->text() . ' ' . CP::timeTag( $comment->getAdminActionTimestamp() );
+		return wfMessage( 'cp-commentmoderated', $admin->getName() )->text() .
+			' ' . CP::timeTag( $comment->getAdminActionTimestamp() );
 	}
 
 	/**

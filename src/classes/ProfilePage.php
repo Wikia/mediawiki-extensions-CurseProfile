@@ -40,7 +40,7 @@ use User;
  */
 class ProfilePage extends Article {
 
-	const PENCIL_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 18 18"><defs><path id="pencil-small" d="M14 8.586L9.414 4 11 2.414 15.586 7 14 8.586zM6.586 16H2v-4.586l6-6L12.586 10l-6 6zm11.121-9.707l-6-6a.999.999 0 0 0-1.414 0l-9.999 10a.99.99 0 0 0-.217.325A.991.991 0 0 0 0 11v6a1 1 0 0 0 1 1h6c.13 0 .26-.026.382-.077a.99.99 0 0 0 .326-.217l9.999-9.999a.999.999 0 0 0 0-1.414z"/></defs><use fill-rule="evenodd" xlink:href="#pencil-small"/></svg>';
+	public const PENCIL_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 18 18"><defs><path id="pencil-small" d="M14 8.586L9.414 4 11 2.414 15.586 7 14 8.586zM6.586 16H2v-4.586l6-6L12.586 10l-6 6zm11.121-9.707l-6-6a.999.999 0 0 0-1.414 0l-9.999 10a.99.99 0 0 0-.217.325A.991.991 0 0 0 0 11v6a1 1 0 0 0 1 1h6c.13 0 .26-.026.382-.077a.99.99 0 0 0 .326-.217l9.999-9.999a.999.999 0 0 0 0-1.414z"/></defs><use fill-rule="evenodd" xlink:href="#pencil-small"/></svg>';
 
 	/**
 	 * @var string
@@ -168,7 +168,7 @@ class ProfilePage extends Article {
 	 * @param mixed $audience
 	 * @param User|null $user
 	 *
-	 * @return object User
+	 * @return mixed User
 	 */
 	public function getUser( $audience = RevisionRecord::FOR_PUBLIC, User $user = null ) {
 		return $this->user;
@@ -284,7 +284,9 @@ class ProfilePage extends Article {
 
 		$profileTitle = $this->isProfilePage( $title ) ? $title : Title::makeTitle( NS_USER_PROFILE, $userName );
 		$userPageTitle = $this->isUserPage( $title ) ? $title : Title::makeTitle( NS_USER, $title->getDBKey() );
-		$userTalkPageTitle = $this->isUserTalkPage( $title ) ? $title : Title::makeTitle( NS_USER_TALK, $title->getDBKey() );
+		$userTalkPageTitle = $this->isUserTalkPage( $title ) ?
+			$title :
+			Title::makeTitle( NS_USER_TALK, $title->getDBKey() );
 
 		$links['namespaces'] = [];
 
@@ -373,7 +375,8 @@ class ProfilePage extends Article {
 		}
 
 		return [
-			"<img src='//www.gravatar.com/avatar/" . $email . "?d=mm&amp;s=$size' height='$size' width='$size' alt='" . wfMessage( 'avataralt', $userName )->escaped() . "' $attributeString />",
+			"<img src='//www.gravatar.com/avatar/" . $email . "?d=mm&amp;s=$size' height='$size' width='$size' alt='" .
+			wfMessage( 'avataralt', $userName )->escaped() . "' $attributeString />",
 			'isHTML' => true,
 		];
 	}
@@ -396,15 +399,26 @@ class ProfilePage extends Article {
 		$specialListUsersTitle = SpecialPage::getTitleFor( 'Listusers' );
 		$html = '<ul class="grouptags">';
 		foreach ( $groups as $group ) {
-			if ( in_array( $group, $this->hiddenGroups ) || ( $group == "sysop" && in_array( "wiki_guardian", $groups ) ) ) {
+			if ( in_array( $group, $this->hiddenGroups ) ||
+				( $group == "sysop" && in_array( "wiki_guardian", $groups ) ) ) {
 				continue;
 			}
 			$groupMessage = new Message( 'group-' . $group );
 			if ( $groupMessage->exists() ) {
-				$html .= '<li>' . $linkRenderer->makeKnownLink( $specialListUsersTitle, $groupMessage->text(), [], [ 'group' => $group ] ) . '</li>';
+				$html .= '<li>' . $linkRenderer->makeKnownLink(
+					$specialListUsersTitle,
+					$groupMessage->text(),
+					[],
+					[ 'group' => $group ]
+					) . '</li>';
 			} else {
-				// Legacy fall back to make the group name appear pretty.  This handles cases of user groups that are central to one wiki and are not localized.
-				$html .= '<li>' . mb_convert_case( str_replace( "_", " ", htmlspecialchars( $group ) ), MB_CASE_TITLE, "UTF-8" ) . '</li>';
+				// Legacy fall back to make the group name appear pretty.
+				// This handles cases of user groups that are central to one wiki and are not localized.
+				$html .= '<li>' . mb_convert_case(
+					str_replace( "_", " ", htmlspecialchars( $group ) ),
+					MB_CASE_TITLE,
+					"UTF-8"
+					) . '</li>';
 			}
 		}
 		// Check the rights of the person viewing this page.
@@ -481,7 +495,6 @@ class ProfilePage extends Article {
 	/**
 	 * Creates the HTML for profile links that have a tooltip
 	 *
-	 * @param  String Service name
 	 * @return string HTML string
 	 */
 	private static function generateProfileTooltipHTML( $serviceName, $escapedText, $profileLink ) {
@@ -489,7 +502,9 @@ class ProfilePage extends Article {
 
 		if ( $profileLink === false ) {
 			$item .= "<a class='profile-icon'></a>";
-			$item .= "<div class=\"profile-icon-tooltip\"><div class=\"profile-tooltip-service\">" . wfMessage( 'profile-' . $serviceName . '-name' )->text() . ": </div><div class=\"profile-text\">{$escapedText}</div><button data-profile-text=\"$escapedText\"><i class=\"far fa-copy\"></i></button></div>";
+			$item .= "<div class=\"profile-icon-tooltip\"><div class=\"profile-tooltip-service\">" .
+				wfMessage( 'profile-' . $serviceName . '-name' )->text() .
+				": </div><div class=\"profile-text\">{$escapedText}</div><button data-profile-text=\"$escapedText\"><i class=\"far fa-copy\"></i></button></div>";
 		} else {
 			$item = Html::element( 'a', [ 'alt' => '','href' => $profileLink, 'target' => '_blank' ] );
 		}
@@ -581,10 +596,14 @@ class ProfilePage extends Article {
 			$statsOutput = [
 				'wikisedited' => $wikisEdited,
 				'totalcontribs' => [
-					'totalcreations'   => ( isset( $stats[$userId]['article_create'] ) ? $stats[$userId]['article_create']['count'] : 0 ),
-					'totaledits'   => ( isset( $stats[$userId]['article_edit'] ) ? $stats[$userId]['article_edit']['count'] : 0 ),
-					'totaldeletes' => ( isset( $stats[$userId]['article_delete'] ) ? $stats[$userId]['article_delete']['count'] : 0 ),
-					'totalpatrols' => ( isset( $stats[$userId]['admin_patrol'] ) ? $stats[$userId]['admin_patrol']['count'] : 0 ),
+					'totalcreations' =>
+						( isset( $stats[$userId]['article_create'] ) ? $stats[$userId]['article_create']['count'] : 0 ),
+					'totaledits' =>
+						( isset( $stats[$userId]['article_edit'] ) ? $stats[$userId]['article_edit']['count'] : 0 ),
+					'totaldeletes' =>
+						( isset( $stats[$userId]['article_delete'] ) ? $stats[$userId]['article_delete']['count'] : 0 ),
+					'totalpatrols' =>
+						( isset( $stats[$userId]['admin_patrol'] ) ? $stats[$userId]['admin_patrol']['count'] : 0 ),
 				],
 				'localrank' => '',
 				'globalrank' => '', // data for these fills in below
@@ -651,7 +670,8 @@ class ProfilePage extends Article {
 					// might have a roll-up total for the sub-list's header
 					if ( array_key_exists( 0, $value ) ) {
 						$output .= "<dd>" . $this->generateStatsDL( $value[0] ) . "</dd>";
-						// Discard the value for the sublist header so it isn't printed a second time as a member of the sublist
+						// Discard the value for the sublist header so
+						// it isn't printed a second time as a member of the sublist
 						array_shift( $value );
 					}
 					// generate the sub-list
@@ -717,7 +737,16 @@ class ProfilePage extends Article {
 
 			if ( $type === 'general' ) {
 				try {
-					$progresses = Cheevos::getAchievementProgress( [ 'site_key' => $dsSiteKey, 'earned' => true, 'special' => false, 'shown_on_all_sites' => true, 'limit' => intval( $limit ) ], $this->user );
+					$progresses = Cheevos::getAchievementProgress(
+						[
+							'site_key' => $dsSiteKey,
+							'earned' => true,
+							'special' => false,
+							'shown_on_all_sites' => true,
+							'limit' => intval( $limit )
+						],
+						$this->user
+					);
 				} catch ( CheevosException $e ) {
 					wfDebug( "Encountered Cheevos API error getting Achievement Progress." );
 				}
@@ -725,12 +754,22 @@ class ProfilePage extends Article {
 
 			if ( $type === 'special' ) {
 				try {
-					$progresses = Cheevos::getAchievementProgress( [ 'earned' => true, 'special' => true, 'shown_on_all_sites' => true, 'limit' => intval( $limit ) ], $this->user );
+					$progresses =
+						Cheevos::getAchievementProgress(
+							[
+								'earned' => true,
+								'special' => true,
+								'shown_on_all_sites' => true,
+								'limit' => intval( $limit )
+							],
+							$this->user
+						);
 				} catch ( CheevosException $e ) {
 					wfDebug( "Encountered Cheevos API error getting Achievement Progress." );
 				}
 			}
-			list( $achievements, $progresses ) = CheevosAchievement::pruneAchievements( [ $achievements, $progresses ], true, true );
+			list( $achievements, $progresses ) =
+				CheevosAchievement::pruneAchievements( [ $achievements, $progresses ], true, true );
 		}
 
 		if ( empty( $progresses ) ) {
@@ -759,7 +798,11 @@ class ProfilePage extends Article {
 						'src'	=> $ach->getImageUrl(),
 						'title'	=> $ach->getName() . "\n" . $ach->getDescription()
 					]
-				) . ( $type == 'special' ? Html::rawElement( 'span', [ 'title' => $ach->getName( $progress->getSite_Key() ) . "\n" . $ach->getDescription() ], $ach->getName( $progress->getSite_Key() ) ) : null )
+				) . ( $type == 'special' ? Html::rawElement(
+					'span',
+					[ 'title' => $ach->getName( $progress->getSite_Key() ) . "\n" . $ach->getDescription() ],
+					$ach->getName( $progress->getSite_Key() )
+				) : null )
 			);
 		}
 		return [
@@ -771,7 +814,7 @@ class ProfilePage extends Article {
 	/**
 	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
 	 *
-	 * @param object &$parser parser reference
+	 * @param mixed &$parser parser reference
 	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
 	public function userLevel( &$parser ) {
@@ -827,7 +870,8 @@ class ProfilePage extends Article {
 			$html .= Html::element(
 				'button',
 				[
-					'data-href'	=> Title::newFromText( 'Special:Preferences' )->getFullURL() . '#mw-prefsection-personal',
+					'data-href'	=> Title::newFromText( 'Special:Preferences' )
+							->getFullURL() . '#mw-prefsection-personal',
 					'class'		=> 'linksub wds-button wds-is-secondary'
 				],
 				wfMessage( 'cp-editprofile' )->plain()
@@ -869,10 +913,13 @@ class ProfilePage extends Article {
 	<div class="leftcolumn">
 		' . $tabsMarkup . '
 		<div class="userinfo borderless section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' .
+			( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
+			' | ' . $this->user->getName() . '}}</div>
 			<div class="profile-info">
 				<div class="headline">
-					<h1' . ( $classes !== false ? ' class="' . implode( ' ', $classes ) . '"' : '' ) . '>' . $this->user->getName() . '</h1>
+					<h1' . ( $classes !== false ? ' class="' . implode( ' ', $classes ) . '"' : '' ) .
+			'>' . $this->user->getName() . '</h1>
 					{{#groups:}}
 				</div>
 				<div id="profile-user-fields">
@@ -885,12 +932,15 @@ class ProfilePage extends Article {
 			</div>
 		</div>
 		<div class="activity section">
-			<p class="rightfloat">[[Special:Contributions/' . $this->user->getName() . '|' . wfMessage( 'contributions' )->text() . ']]</p>
+			<p class="rightfloat">[[Special:Contributions/' . $this->user->getName() . '|' .
+			wfMessage( 'contributions' )->text() . ']]</p>
 			<h3>' . wfMessage( 'cp-recentactivitysection' ) . '</h3>
 			{{#recentactivity: ' . $this->user->getID() . '}}
 		</div>
 		<div class="comments section">
-			<p class="rightfloat">[[Special:CommentBoard/' . $this->user->getID() . '/' . $this->user->getTitleKey() . '|' . wfMessage( 'commentarchivelink' )->plain() . ']]</p>
+			<p class="rightfloat">[[Special:CommentBoard/' . $this->user->getID() .
+			'/' . $this->user->getTitleKey() . '|' .
+			wfMessage( 'commentarchivelink' )->plain() . ']]</p>
 			<h3>' . wfMessage( 'cp-recentcommentssection' ) . '</h3>
 			{{#comments: ' . $this->user->getID() . '}}
 		</div>
@@ -911,14 +961,21 @@ class ProfilePage extends Article {
 		<div class="section friends">
 			<h3>' . wfMessage( 'cp-friendssection' )->plain() . '</h3>
 			{{#friendlist: ' . $this->user->getID() . '}}
-			<div style="float: right;">' . wfMessage( 'cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey() )->plain() . '</div>
+			<div style="float: right;">' .
+			wfMessage(
+				'cp-friendssection-all',
+				$this->user->getId(),
+				$wgUser->getId(),
+				$this->user->getTitleKey()
+			)->plain() . '</div>
 		</div>
 		<div class="section achievements">
 			<h3>' . wfMessage( 'cp-achievementssection' )->plain() . '</h3>
 			{{#achievements:general}}
 			{{#achievements:special}}
 			<div style="clear: both;"></div>
-			<div style="float: right; clear: both;">' . wfMessage( 'cp-achievementssection-all', $this->user->getName() )->plain() . '</div>
+			<div style="float: right; clear: both;">' .
+			wfMessage( 'cp-achievementssection-all', $this->user->getName() )->plain() . '</div>
 		</div>
 	</div>
 	{{#if: ' . ( $this->user->isBlocked() ? 'true' : '' ) . ' | <div class="blocked"></div> }}
@@ -939,7 +996,9 @@ __NOINDEX__
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
 		<div class="userinfo section">
-			<div class="mainavatar">{{#avatar: 96 | ' . ( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) . ' | ' . $this->user->getName() . '}}</div>
+			<div class="mainavatar">{{#avatar: 96 | ' .
+			( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
+			' | ' . $this->user->getName() . '}}</div>
 			<div class="usericons rightfloat">
 				<div class="score">{{#Points:' . $this->user->getName() . '|1|global|badged}}</div>
 				{{#profilelinks:}}
@@ -953,20 +1012,28 @@ __NOINDEX__
 		<USERSTATS>
 		<h1>' . wfMessage( 'cp-friendssection' )->plain() . '</h1>
 		{{#friendlist: ' . $this->user->getID() . '}}
-		<div style="float: right;">' . wfMessage( 'cp-friendssection-all', $this->user->getId(), $wgUser->getId(), $this->user->getTitleKey() )->plain() . '</div>
+		<div style="float: right;">' .
+			wfMessage(
+				'cp-friendssection-all',
+				$this->user->getId(),
+				$wgUser->getId(),
+				$this->user->getTitleKey()
+			)->plain() . '</div>
 		<h1>' . wfMessage( 'cp-achievementssection' )->plain() . '</h1>
 		<div class="section achievements">
 			{{#achievements:general}}
 			{{#achievements:special}}
 			<div style="clear: both;"></div>
-			<div style="float: right; clear: both;">' . wfMessage( 'cp-achievementssection-all', $this->user->getName() )->plain() . '</div>
+			<div style="float: right; clear: both;">' .
+			wfMessage( 'cp-achievementssection-all', $this->user->getName() )->plain() . '</div>
 		</div>
 		<h1>' . wfMessage( 'cp-recentactivitysection' ) . '</h1>
 		<p>[[Special:Contributions/' . $this->user->getName() . '|' . wfMessage( 'contributions' )->text() . ']]</p>
 		{{#recentactivity: ' . $this->user->getID() . '}}
 		<div class="comments section">
 		    <h1>' . wfMessage( 'cp-recentcommentssection' ) . '</h1>
-		    <p>[[Special:CommentBoard/' . $this->user->getID() . '/' . $this->user->getTitleKey() . '|' . wfMessage( 'commentarchivelink' ) . ']]</p>
+		    <p>[[Special:CommentBoard/' . $this->user->getID() . '/' . $this->user->getTitleKey() . '|' .
+			wfMessage( 'commentarchivelink' ) . ']]</p>
 		    {{#comments: ' . $this->user->getID() . '}}
 		</div>
 	{{#if: ' . ( $this->user->isBlocked() ? 'true' : '' ) . ' | <div class="blocked"></div> }}
@@ -985,22 +1052,27 @@ __NOINDEX__
 		$queryParam = $this->user->getIntOption( 'profile-pref' ) ? '|profile=no' : '';
 
 		$userTalkTab = $this->user->getIntOption( 'comment-pref' ) != 1 ? '<li class="user-profile-navigation__link">
-				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
+				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' .
+			wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
 			</li>' : '';
 
 		return '<ul class="user-profile-navigation">
 			<li class="user-profile-navigation__link is-active">
-				[[UserProfile:' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . ']]
+				[[UserProfile:' . $userName . '|' .
+			wfMessage( 'userprofile-userprofilenavigation-link-profile' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				[{{fullurl:User:' . $userName . $queryParam . '}} ' . wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']
+				[{{fullurl:User:' . $userName . $queryParam . '}} ' .
+			wfMessage( 'userprofile-userprofilenavigation-link-about' )->plain() . ']
 			</li>'
 			. $userTalkTab . '
 			<li class="user-profile-navigation__link">
-				[[Special:Contributions/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
+				[[Special:Contributions/' . $userName . '|' .
+			wfMessage( 'userprofile-userprofilenavigation-link-contributions' )->plain() . ']]
 			</li>
 			<li class="user-profile-navigation__link">
-				[[Special:UserProfileActivity/' . $userName . '|' . wfMessage( 'userprofile-userprofilenavigation-link-activity' )->plain() . ']]
+				[[Special:UserProfileActivity/' . $userName . '|' .
+			wfMessage( 'userprofile-userprofilenavigation-link-activity' )->plain() . ']]
 			</li>
 		</ul>';
 	}

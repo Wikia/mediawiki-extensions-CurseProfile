@@ -22,12 +22,12 @@ use SpecialPage;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
-	const MAX_REPORTER_AVATARS = 3;
+	private const MAX_REPORTER_AVATARS = 3;
 
 	/**
 	 * Renders the group and sort "tabs" at the top of the CommentModeration page
 	 *
-	 * @param currentStyle $currentStyle string indicating the current sort style
+	 * @param string $currentStyle indicating the current sort style
 	 * @return string HTML fragment
 	 */
 	public function sortStyleSelector( $currentStyle ) {
@@ -82,15 +82,21 @@ class TemplateCommentModeration {
 				$html .= '
 						<div class="reported-comment">
 							<div class="commentdisplay">
-								<div class="avatar">' . ProfilePage::userAvatar( null, 48, $author->getEmail(), $author->getName() )[ 0 ] . '</div>
-								<div><div class="right">' . $this->permalink( $rep ) . '</div>' . CP::userLink( $author ) . '</div>
+								<div class="avatar">' .
+					ProfilePage::userAvatar( null, 48, $author->getEmail(), $author->getName() )[ 0 ] . '</div>
+								<div><div class="right">' .
+					$this->permalink( $rep ) . '</div>' . CP::userLink( $author ) . '</div>
 								<div class="commentbody">' . htmlspecialchars( $rep[ 'comment' ][ 'text' ] ) . '</div>
 							</div>';
 
 				if ( $report->data[ 'action_taken' ] == CommentReport::ACTION_NONE ) {
 					$html .= '
 							<div class="moderation-actions">
-								<div class="actions"><a class="del">' . wfMessage( 'commentmoderation-delete' )->text() . '</a> <a class="dis">' . wfMessage( 'commentmoderation-dismiss' )->text() . '</a></div>
+								<div class="actions"><a class="del">' .
+						wfMessage( 'commentmoderation-delete' )->text() .
+						'</a> <a class="dis">' .
+						wfMessage( 'commentmoderation-dismiss' )->text() .
+						'</a></div>
 								<div class="confirm"><a></a></div>
 							</div>';
 				} else {
@@ -113,7 +119,8 @@ class TemplateCommentModeration {
 	}
 
 	private function actionTaken( $rep ) {
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $rep->data[ 'action_taken_by_user_id' ] );
+		$user = MediaWikiServices::getInstance()->getUserFactory()
+			->newFromId( $rep->data[ 'action_taken_by_user_id' ] );
 		switch ( $rep->data[ 'action_taken' ] ) {
 			case CommentReport::ACTION_DISMISS:
 				$action = 'dis';
@@ -126,28 +133,38 @@ class TemplateCommentModeration {
 		return Html::rawElement(
 			'span',
 			[ 'class' => 'action-taken ' . $action ],
-			wfMessage( 'report-actiontaken-' . $action, $user->getName() )->text() . ' ' . CP::timeTag( $rep->data[ 'action_taken_at' ] )
+			wfMessage( 'report-actiontaken-' . $action, $user->getName() )->text() .
+			' ' . CP::timeTag( $rep->data[ 'action_taken_at' ] )
 		);
 	}
 
 	/**
 	 * Produces the introduction line above a reported comment "First reporteded X time ago by [user]:"
 	 *
-	 * @param rep    array CommentReport data
+	 * @param array $rep CommentReport data
 	 * @return string HTML fragment
 	 */
 	private function itemLine( $rep ) {
 		if ( count( $rep[ 'reports' ] ) <= self::MAX_REPORTER_AVATARS ) {
-			return wfMessage( 'commentmoderation-item', CP::timeTag( $rep[ 'first_reported' ] ), $this->reporterIcons( $rep[ 'reports' ] ) )->text();
+			return wfMessage(
+				'commentmoderation-item',
+				CP::timeTag( $rep[ 'first_reported' ] ),
+				$this->reporterIcons( $rep[ 'reports' ] )
+			)->text();
 		} else {
-			return wfMessage( 'commentmoderation-item-andothers', CP::timeTag( $rep[ 'first_reported' ] ), $this->reporterIcons( $rep[ 'reports' ] ), count( $rep[ 'reports' ] ) - self::MAX_REPORTER_AVATARS )->text();
+			return wfMessage(
+				'commentmoderation-item-andothers',
+				CP::timeTag( $rep[ 'first_reported' ] ),
+				$this->reporterIcons( $rep[ 'reports' ] ),
+				count( $rep[ 'reports' ] ) - self::MAX_REPORTER_AVATARS
+			)->text();
 		}
 	}
 
 	/**
 	 * Creates the small user icons indicating who has reported a comment
 	 *
-	 * @param array    Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
+	 * @param array $reports Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
 	 * @return string HTML fragment
 	 */
 	private function reporterIcons( $reports ) {
@@ -173,11 +190,19 @@ class TemplateCommentModeration {
 	/**
 	 * Returns a permalink to a comment on its origin wiki.
 	 *
-	 * @param object    CommentReport instance
+	 * @param mixed $rep CommentReport instance
 	 * @return string HTML fragment
 	 */
 	private function permalink( $rep ) {
-		$commentPermanentLink = SpecialPage::getTitleFor( 'CommentPermalink', $rep[ 'comment' ][ 'cid' ], 'comment' . $rep[ 'comment' ][ 'cid' ] )->getFullURL();
-		return Html::rawElement( 'a', [ 'href' => $commentPermanentLink ], 'content as posted ' . CP::timeTag( $rep[ 'comment' ][ 'last_touched' ] ) );
+		$commentPermanentLink = SpecialPage::getTitleFor(
+			'CommentPermalink',
+			$rep[ 'comment' ][ 'cid' ],
+			'comment' . $rep[ 'comment' ][ 'cid' ]
+		)->getFullURL();
+		return Html::rawElement(
+			'a',
+			[ 'href' => $commentPermanentLink ],
+			'content as posted ' . CP::timeTag( $rep[ 'comment' ][ 'last_touched' ] )
+		);
 	}
 }

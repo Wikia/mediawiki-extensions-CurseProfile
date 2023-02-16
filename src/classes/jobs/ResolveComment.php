@@ -11,6 +11,7 @@ use MediaWiki\MediaWikiServices;
 
 class ResolveComment extends Job {
 	private const COMMAND = "CurseProfile\\ResolveComment";
+
 	/**
 	 * Queue a new job.
 	 *

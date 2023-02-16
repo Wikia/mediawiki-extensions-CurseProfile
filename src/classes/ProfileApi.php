@@ -182,7 +182,8 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetRawField() {
-		if ( $this->getUser()->getId() === $this->getRequest()->getInt( 'user_id' ) || $this->getUser()->isAllowed( 'profile-moderate' ) ) {
+		if ( $this->getUser()->getId() === $this->getRequest()->getInt( 'user_id' ) ||
+			$this->getUser()->isAllowed( 'profile-moderate' ) ) {
 			$field = strtolower( $this->getRequest()->getText( 'field' ) );
 			$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
 			try {
@@ -252,7 +253,11 @@ class ProfileApi extends HydraApiBase {
 
 		try {
 			foreach ( $data as $field => $text ) {
-				$text = ProfileData::validateExternalProfile( str_replace( 'link-', '', $field ), preg_replace( '/\s+\#/', '#', trim( $text ) ) );
+				$text = ProfileData::validateExternalProfile(
+					str_replace( 'link-', '', $field ),
+					preg_replace( '/\s+\#/', '#',
+						trim( $text ) )
+				);
 				if ( $text === false ) {
 					$text = '';
 				}

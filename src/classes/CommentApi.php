@@ -246,7 +246,11 @@ class CommentApi extends HydraApiBase {
 
 	public function doGetRaw() {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
-		$this->getResult()->addValue( null, 'text', $comment->canView( $this->getUser() ) ? $comment->getMessage() : '' );
+		$this->getResult()->addValue(
+			null,
+			'text',
+			$comment->canView( $this->getUser() ) ? $comment->getMessage() : ''
+		);
 	}
 
 	public function doEdit() {

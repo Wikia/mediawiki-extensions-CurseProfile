@@ -26,20 +26,20 @@ class SpecialAddComment extends UnlistedSpecialPage {
 	/**
 	 * Show the special page
 	 *
-	 * @param string $toUser Mixed: parameter(s) passed to the page or null
+	 * @param string $toUserId Mixed: parameter(s) passed to the page or null
 	 */
 	public function execute( $toUserId ) {
-		$wgRequest = $this->getRequest();
-		$wgOut = $this->getOutput();
-		$wgUser = $wgOut->getUser();
+		$request = $this->getRequest();
+		$output = $this->getOutput();
+		$user = $output->getUser();
 
 		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $toUserId );
 		$tokenSet = $this->getContext()->getCsrfTokenSet();
-		if ( $wgRequest->wasPosted() && $tokenSet->matchToken( $wgRequest->getVal( 'token' ) ) ) {
+		if ( $request->wasPosted() && $tokenSet->matchToken( $request->getVal( 'token' ) ) ) {
 			$board = new CommentBoard( $toUser );
-			$board->addComment( $wgRequest->getVal( 'message' ), $wgUser, $wgRequest->getInt( 'inreplyto' ) );
+			$board->addComment( $request->getVal( 'message' ), $user, $request->getInt( 'inreplyto' ) );
 		}
 
-		$wgOut->redirect( ( new ProfileData( $toUser ) )->getProfilePageUrl() );
+		$output->redirect( ( new ProfileData( $toUser ) )->getProfilePageUrl() );
 	}
 }

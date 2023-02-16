@@ -25,7 +25,7 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param int $userId User ID of the profile page being viewed
+	 * @param int $toUser User ID of the profile page being viewed
 	 * @param User $actor The User performing friend management actions.
 	 * @param array &$links reference to the links array into which the links will be inserted
 	 *
@@ -190,7 +190,7 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param array $user [Optional] User objects
+	 * @param array $users [Optional] User objects
 	 * @param bool $manageButtons [Optional] signature: callback($userObj) returns string
 	 * @param User|null $actor [Optional] The User performing friend management actions.
 	 * @param int $limit [Optional] Number of results to limit.
@@ -199,7 +199,14 @@ class FriendDisplay {
 	 *
 	 * @return string HTML UL List
 	 */
-	public static function listFromArray( ?array $users = [], $manageButtons = false, ?User $actor = null, $limit = 10, $offset = 0, $sortByActivity = false ) {
+	public static function listFromArray(
+		?array $users = [],
+		$manageButtons = false,
+		?User $actor = null,
+		$limit = 10,
+		$offset = 0,
+		$sortByActivity = false
+	) {
 		if ( $limit > 0 || $offset > 0 ) {
 			$users = array_slice( $users, $offset, $limit, true );
 		}

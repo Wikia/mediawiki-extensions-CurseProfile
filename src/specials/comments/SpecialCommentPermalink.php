@@ -34,7 +34,7 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 	 * @return void
 	 */
 	public function execute( $commentId ) {
-		$wgOut = $this->getOutput();
+		$output = $this->getOutput();
 		$this->setHeaders();
 
 		// checks if comment exists and if wgUser can view it
@@ -48,28 +48,38 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 				$user->load();
 				$admin_user = $userFactory->newFromId( $purged['ubpa_admin_id'] );
 				$admin_user->load();
-				$wgOut->setPageTitle( wfMessage( 'commentboard-purged-title', $user->getName() )->plain() );
-				$wgOut->addWikiMsg( 'commentboard-purged', $purged['ubpa_reason'], $admin_user->getName(), ( new ProfileData( $admin_user ) )->getProfilePageUrl() );
-				$wgOut->setStatusCode( 404 );
+				$output->setPageTitle( $this->msg( 'commentboard-purged-title', $user->getName() )->plain() );
+				$output->addWikiMsg(
+					'commentboard-purged',
+					$purged['ubpa_reason'],
+					$admin_user->getName(),
+					( new ProfileData( $admin_user ) )->getProfilePageUrl()
+				);
+				$output->setStatusCode( 404 );
 				return;
 			}
 
-			$wgOut->setPageTitle( wfMessage( 'commentboard-invalid-title' )->plain() );
-			$wgOut->addWikiMsg( 'commentboard-invalid' );
-			$wgOut->setStatusCode( 404 );
+			$output->setPageTitle( $this->msg( 'commentboard-invalid-title' )->plain() );
+			$output->addWikiMsg( 'commentboard-invalid' );
+			$output->setStatusCode( 404 );
 			return;
 		}
 
 		$owner = $comment->getBoardOwnerUser();
 
-		$wgOut->setPageTitle( wfMessage( 'commentboard-permalink-title', $owner->getName() )->plain() );
-		$wgOut->addModuleStyles( [ 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
-		$wgOut->addModules( [ 'ext.curseprofile.comments.scripts' ] );
+		$output->setPageTitle( $this->msg( 'commentboard-permalink-title', $owner->getName() )->plain() );
+		$output->addModuleStyles( [ 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
+		$output->addModules( [ 'ext.curseprofile.comments.scripts' ] );
 		$templateCommentBoard = new TemplateCommentBoard;
 
-		$wgOut->addHTML( $templateCommentBoard->permalinkHeader( $owner, $wgOut->getPageTitle() ) );
+		$output->addHTML( $templateCommentBoard->permalinkHeader( $owner, $output->getPageTitle() ) );
 
 		// display single comment while highlighting the selected ID
-		$wgOut->addHTML( '<div class="comments">' . CommentDisplay::newCommentForm( $owner, true ) . CommentDisplay::singleComment( $comment, $comment->getId() ) . '</div>' );
+		$output->addHTML(
+			'<div class="comments">' .
+			CommentDisplay::newCommentForm( $owner, true ) .
+			CommentDisplay::singleComment( $comment, $comment->getId() ) .
+			'</div>'
+		);
 	}
 }

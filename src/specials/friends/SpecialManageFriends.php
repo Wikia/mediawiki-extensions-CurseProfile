@@ -46,27 +46,37 @@ class SpecialManageFriends extends SpecialPage {
 	public function execute( $param ) {
 		$this->setHeaders();
 		$this->outputHeader();
-		$wgRequest = $this->getRequest();
-		$wgOut = $this->getOutput();
+		$request = $this->getRequest();
+		$output = $this->getOutput();
 
 		// Fix missing or incorrect username segment in the path
 		$user = $this->getUser();
 		if ( $user->isAnon() ) {
-			throw new UserNotLoggedIn( 'exception-nologinreturn-text', 'exception-nologin', [ 'Special:ManageFriends' ] );
+			throw new UserNotLoggedIn(
+				'exception-nologinreturn-text',
+				'exception-nologin',
+				[ 'Special:ManageFriends' ]
+			);
 		}
 
-		$start = $wgRequest->getInt( 'st' );
+		$start = $request->getInt( 'st' );
 		$itemsPerPage = 25;
-		$wgOut->addModuleStyles( [ 'ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
-		$wgOut->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
+		$output->addModuleStyles( [
+			'ext.curseprofile.profilepage.styles',
+			'ext.hydraCore.pagination.styles',
+			'ext.curseprofile.customskin.styles',
+			'ext.curseprofile.comments.styles',
+			'ext.hydraCore.font-awesome.styles'
+		] );
+		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 		$templateManageFriends = new TemplateManageFriends;
 
-		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
+		// $output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
 
 		$f = new Friendship( $user );
 
 		$friendTypes = $f->getFriends();
 
-		$wgOut->addHTML( $templateManageFriends->manage( $user, $friendTypes, $itemsPerPage, $start ) );
+		$output->addHTML( $templateManageFriends->manage( $user, $friendTypes, $itemsPerPage, $start ) );
 	}
 }

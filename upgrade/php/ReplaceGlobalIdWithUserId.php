@@ -159,7 +159,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	 *
 	 * @param IDatabase $dbw
 	 * @param string[] $indexFields Fields in the index being ordered by
-	 * @param object $row Database row
+	 * @param mixed $row Database row
 	 *
 	 * @return string[] [ string $next, string $display ]
 	 */

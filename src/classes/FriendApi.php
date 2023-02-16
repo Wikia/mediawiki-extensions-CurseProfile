@@ -74,9 +74,10 @@ class FriendApi extends HydraApiBase {
 	 * @return void
 	 */
 	protected function doDirectreq() {
-		$wgUser = RequestContext::getMain()->getUser();
+		$user = RequestContext::getMain()->getUser();
 
-		$targetUser = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $this->getMain()->getVal( 'name' ) );
+		$targetUser = MediaWikiServices::getInstance()->getUserFactory()
+			->newFromName( $this->getMain()->getVal( 'name' ) );
 		if ( !$targetUser ) {
 			$this->dieWithError( wfMessage( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
 		}
@@ -87,7 +88,10 @@ class FriendApi extends HydraApiBase {
 
 		$result = $this->f->sendRequest( $targetUser );
 		if ( is_array( $result ) && isset( $result['error'] ) ) {
-			$this->dieWithError( wfMessage( $result['error'] )->params( $targetUser->getName(), $wgUser->getName() ), $result['error'] );
+			$this->dieWithError(
+				wfMessage( $result['error'] )->params( $targetUser->getName(), $user->getName() ),
+				$result['error']
+			);
 		} elseif ( !$result ) {
 			$this->dieWithError( wfMessage( 'friendrequestsend-error' ), 'friendrequestsend-error' );
 		}

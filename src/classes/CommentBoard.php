@@ -33,7 +33,7 @@ class CommentBoard {
 	private $owner;
 
 	// maximum character length of a single comment
-	const MAX_LENGTH = 5000;
+	private const MAX_LENGTH = 5000;
 
 	/**
 	 * The number of comments to load on a board before a user clicks for more
@@ -53,16 +53,16 @@ class CommentBoard {
 	 * Board type constants
 	 */
 	 // recent comments shown on a person's profile
-	const BOARDTYPE_RECENT = 1;
+	public const BOARDTYPE_RECENT = 1;
 	// archive page that shows all comments
-	const BOARDTYPE_ARCHIVES = 2;
+	public const BOARDTYPE_ARCHIVES = 2;
 
 	/**
 	 * Message visibility constants
 	 */
-	const DELETED_MESSAGE = -1;
-	const PUBLIC_MESSAGE = 0;
-	const PRIVATE_MESSAGE = 1;
+	private const DELETED_MESSAGE = -1;
+	private const PUBLIC_MESSAGE = 0;
+	private const PRIVATE_MESSAGE = 1;
 
 	/**
 	 * The user passed to the constructor is used as the main user from which the
@@ -164,7 +164,10 @@ class CommentBoard {
 			// Everyone sees public messages.
 			$conditions[] = 'user_board.ub_type = 0';
 			// See private if you are author or recipient.
-			$conditions[] = sprintf( 'user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)', $actor->getId() );
+			$conditions[] = sprintf(
+				'user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)',
+				$actor->getId()
+			);
 			// See deleted if you are the author.
 			$conditions[] = sprintf( 'user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId() );
 			$sql = '( (' . implode( ') OR (', $conditions ) . ') )';
@@ -213,7 +216,8 @@ class CommentBoard {
 			'ub_user_id'		=> $this->owner->getId()
 		];
 		if ( $maxAge >= 0 ) {
-			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' . $this->DB->addQuotes( date( 'Y-m-d H:i:s', time() - $maxAge * 86400 ) );
+			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' .
+				$this->DB->addQuotes( date( 'Y-m-d H:i:s', time() - $maxAge * 86400 ) );
 		}
 		return $this->getCommentsWithConditions( $searchConditions, $asUser, $startAt, $limit );
 	}
@@ -262,7 +266,10 @@ class CommentBoard {
 			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 			$hookContainer->run( 'CurseProfileAddComment', [ $fromUser, $this->owner, $inReplyTo, $commentText ] );
 			if ( $inReplyTo ) {
-				$hookContainer->run( 'CurseProfileAddCommentReply', [ $fromUser, $this->owner, $inReplyTo, $commentText ] );
+				$hookContainer->run(
+					'CurseProfileAddCommentReply',
+					[ $fromUser, $this->owner, $inReplyTo, $commentText ]
+				);
 			}
 
 			$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $fromUser->getName() );
@@ -272,14 +279,19 @@ class CommentBoard {
 				$parentCommenterTitle = Title::makeTitle( NS_USER_PROFILE, $parentCommenter->getName() );
 			}
 
-			$commentPermanentLink = SpecialPage::getTitleFor( 'CommentPermalink', $newCommentId, 'comment' . $newCommentId )->getFullURL();
+			$commentPermanentLink = SpecialPage::getTitleFor(
+				'CommentPermalink',
+				$newCommentId,
+				'comment' . $newCommentId
+			)->getFullURL();
 
 			$userNote = substr( $commentText, 0, 80 );
 
 			if ( $inReplyTo > 0 ) {
 				if ( $this->owner->getId() != $fromUser->getId() ) {
 					if ( !$parentCommenter->equals( $this->owner ) ) {
-						// We have to make two notifications.  One for the profile owner and one for the parent commenter.
+						// We have to make two notifications.
+						// One for the profile owner and one for the parent commenter.
 						$broadcast = NotificationBroadcast::newSingle(
 							'user-interest-profile-comment-reply-other-self',
 							$fromUser,
@@ -324,7 +336,8 @@ class CommentBoard {
 					}
 				}
 				$broadcast = NotificationBroadcast::newSingle(
-					'user-interest-profile-comment-reply-self-' . ( $parentCommenter->equals( $this->owner ) ? 'self' : 'other' ),
+					'user-interest-profile-comment-reply-self-' .
+					( $parentCommenter->equals( $this->owner ) ? 'self' : 'other' ),
 					$fromUser,
 					$parentCommenter,
 					[

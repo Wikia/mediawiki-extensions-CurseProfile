@@ -30,28 +30,40 @@ class TemplateCommentBoard {
 	/**
 	 * Header for comments archive board
 	 *
-	 * @param object $user user reference
+	 * @param mixed $user user reference
 	 * @param string $title text title of the page
 	 * @return string Built HTML
 	 */
 	public function header( $user, $title ) {
 		return '<p>' .
-			Html::element( 'a', [ 'href' => ( new ProfileData( $user->getId() ) )->getProfilePageUrl() ], wfMessage( 'commentboard-link-backtoprofile' ) ) .
+			Html::element(
+				'a',
+				[ 'href' => ( new ProfileData( $user->getId() ) )->getProfilePageUrl() ],
+				wfMessage( 'commentboard-link-backtoprofile' )
+			) .
 			'</p>';
 	}
 
 	/**
 	 * Header for single comment permalink page
 	 *
-	 * @param object $user
+	 * @param mixed $user
 	 * @param string $title
 	 * @return string
 	 */
 	public function permalinkHeader( $user, $title ) {
 		return '<p>' .
-			Html::element( 'a', [ 'href' => ( new ProfileData( $user->getId() ) )->getProfilePageUrl() ], wfMessage( 'commentboard-link-backtoprofile' ) ) .
+			Html::element(
+				'a',
+				[ 'href' => ( new ProfileData( $user->getId() ) )->getProfilePageUrl() ],
+				wfMessage( 'commentboard-link-backtoprofile' )
+			) .
 			' | ' .
-			Html::element( 'a', [ 'href' => SpecialPage::getTitleFor( 'CommentBoard', $user->getId() )->getFullURL() ], wfMessage( 'commentboard-link-backtoboard' ) ) .
+			Html::element(
+				'a',
+				[ 'href' => SpecialPage::getTitleFor( 'CommentBoard', $user->getId() )->getFullURL() ],
+				wfMessage( 'commentboard-link-backtoboard' )
+			) .
 			'</p>';
 	}
 

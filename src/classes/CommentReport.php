@@ -24,9 +24,9 @@ use User;
  */
 class CommentReport {
 	// actions to take on a report
-	const ACTION_NONE = 0;
-	const ACTION_DISMISS = 1;
-	const ACTION_DELETE = 2;
+	public const ACTION_NONE = 0;
+	public const ACTION_DISMISS = 1;
+	public const ACTION_DELETE = 2;
 
 	/**
 	 * The structured data.
@@ -104,9 +104,9 @@ class CommentReport {
 	/**
 	 * Queries the local db for reports
 	 *
-	 * @param  string	sort style
-	 * @param  integer	max number of reports to return
-	 * @param  integer	offset
+	 * @param string $sortStyle sort style
+	 * @param int $limit max number of reports to return
+	 * @param int $offset offset
 	 * @return array 0 or more CommentReport instances
 	 */
 	private static function getReportsDb( $sortStyle, $limit, $offset ) {
@@ -129,8 +129,10 @@ class CommentReport {
 
 			case 'byVolume':
 			default:
-				// @TODO alter scheme to have an incrementing count in the archive table to avoid using a slow count(*) query
-				$subTable = '(select ubr_report_archive_id, count(*) as report_count from user_board_reports group by ubr_report_archive_id) AS ubr';
+				// @TODO alter scheme to have an incrementing count
+				// in the archive table to avoid using a slow count(*) query
+				$subTable =
+					'(select ubr_report_archive_id, count(*) as report_count from user_board_reports group by ubr_report_archive_id) AS ubr';
 				$res = $db->select(
 					[
 						'user_board_report_archives AS ra',
@@ -212,7 +214,7 @@ class CommentReport {
 	 * @param Comment $comment The comment being reported.
 	 * @param User $actor User creating this report.
 	 *
-	 * @return object CommentReport instance
+	 * @return mixed CommentReport instance
 	 */
 	private static function createWithArchive( Comment $comment, User $actor ) {
 		$userFrom = $comment->getActorUser();
@@ -225,7 +227,8 @@ class CommentReport {
 			'comment' => [
 				'text' => $comment->getMessage(),
 				'cid' => $comment->getId(),
-				'last_touched' => $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp(),
+				'last_touched' =>
+					$comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp(),
 				'author' => $userFrom->getId(),
 			],
 			'reports' => [],
@@ -308,13 +311,16 @@ class CommentReport {
 			'user_board_report_archives',
 			[
 				'ra_comment_id' => $this->data['comment']['cid'],
-				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ? date( 'Y-m-d H:i:s', $this->data['comment']['last_touched'] ) : null,
+				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ?
+					date( 'Y-m-d H:i:s', $this->data['comment']['last_touched'] ) : null,
 				'ra_user_id_from' => $this->data['comment']['author'],
 				'ra_comment_text' => $this->data['comment']['text'],
-				'ra_first_reported' => $this->data['first_reported'] !== null ? date( 'Y-m-d H:i:s', $this->data['first_reported'] ) : null,
+				'ra_first_reported' => $this->data['first_reported'] !== null ?
+					date( 'Y-m-d H:i:s', $this->data['first_reported'] ) : null,
 				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
-				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ? date( 'Y-m-d H:i:s', $this->data['action_taken_at'] ) : null
+				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ?
+					date( 'Y-m-d H:i:s', $this->data['action_taken_at'] ) : null
 			],
 			__METHOD__
 		);
@@ -344,7 +350,8 @@ class CommentReport {
 	 * @return void
 	 */
 	private function addReportFrom( User $fromUser ) {
-		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->data['comment']['author'] );
+		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()
+			->newFromId( $this->data['comment']['author'] );
 
 		if ( !isset( $this->id ) || $fromUser->isAnon() ) {
 			// Can't add to a comment that hasn't been archived yet.

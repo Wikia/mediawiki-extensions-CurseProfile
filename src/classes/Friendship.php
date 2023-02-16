@@ -32,10 +32,10 @@ class Friendship {
 	/**
 	 * Relationship status constants
 	 */
-	const STRANGERS        = 1;
-	const FRIENDS          = 2;
-	const REQUEST_SENT     = 3;
-	const REQUEST_RECEIVED = 4;
+	public const STRANGERS = 1;
+	public const FRIENDS = 2;
+	public const REQUEST_SENT = 3;
+	public const REQUEST_RECEIVED = 4;
 
 	/**
 	 * The user passed to the constructor is used as the main user from which the
@@ -85,7 +85,10 @@ class Friendship {
 				'incoming_requests' => [],
 				'outgoing_requests' => []
 			];
-			$friendTypes = array_merge( $friendTypes, array_intersect_key( Cheevos::getFriends( $this->user ), $friendTypes ) );
+			$friendTypes = array_merge(
+				$friendTypes,
+				array_intersect_key( Cheevos::getFriends( $this->user ), $friendTypes )
+			);
 			foreach ( $friendTypes as $type => $data ) {
 				$friendTypes[$type] = (array)$data;
 			}

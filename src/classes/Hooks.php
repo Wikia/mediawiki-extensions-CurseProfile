@@ -118,10 +118,10 @@ class Hooks {
 	 *
 	 * @param Title &$title
 	 * @param Article &$article
-	 * @param object &$output
+	 * @param mixed &$output
 	 * @param User &$user
-	 * @param object $request
-	 * @param object $mediaWiki
+	 * @param mixed $request
+	 * @param mixed $mediaWiki
 	 *
 	 * @return void
 	 */
@@ -155,7 +155,7 @@ class Hooks {
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
 	 *
-	 * @param object $destArticle Destination Article
+	 * @param mixed $destArticle Destination Article
 	 *
 	 * @return void
 	 */
@@ -181,7 +181,8 @@ class Hooks {
 			$db = wfGetDB( DB_REPLICA );
 			foreach ( $query['conds'] as $index => $condition ) {
 				if ( strpos( $condition, 'pl_namespace NOT IN' ) === 0 ) {
-					$query['conds'][$index] = 'pl_namespace NOT IN(' . $db->makeList( [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) . ')';
+					$query['conds'][$index] =
+						'pl_namespace NOT IN(' . $db->makeList( [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) . ')';
 				}
 			}
 		}
@@ -297,7 +298,12 @@ class Hooks {
 			return $wgOut->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
 		}
 
-		$wgOut->addModuleStyles( [ 'ext.curseprofile.profilepage.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
+		$wgOut->addModuleStyles( [
+			'ext.curseprofile.profilepage.styles',
+			'ext.curseprofile.customskin.styles',
+			'ext.curseprofile.comments.styles',
+			'ext.hydraCore.font-awesome.styles'
+		] );
 		$wgOut->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 
 		if ( !self::$profilePage->getUser()->getId() ) {
@@ -375,7 +381,7 @@ class Hooks {
 	/**
 	 * Check for request variables that indicate the need to show warnings.
 	 *
-	 * @param object $request Global $wgRequest object
+	 * @param mixed $request Global $wgRequest object
 	 *
 	 * @return bool
 	 */
@@ -397,7 +403,9 @@ class Hooks {
 	 * @return bool True
 	 */
 	public static function onEditPageImportFormData( EditPage $editpage, WebRequest $request ) {
-		if ( self::$profilePage && ( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) || ( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
+		if ( self::$profilePage &&
+			( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ||
+				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
 			$request->setVal( 'wpExtraQueryRedirect', 'profile=no' );
 		}
 		return true;
@@ -406,7 +414,7 @@ class Hooks {
 	/**
 	 * Adds links to the navigation tabs.
 	 *
-	 * @param object $skin SkinTemplate
+	 * @param mixed $skin SkinTemplate
 	 * @param array &$links Link Descriptors
 	 *
 	 * @return bool True
@@ -426,13 +434,15 @@ class Hooks {
 	 * Customize subpage links to use profile=no as needed.
 	 *
 	 * @param string &$subpages Subpages HTML
-	 * @param object $skinTemplate SkinTemplate
-	 * @param object $output Output
+	 * @param mixed $skinTemplate SkinTemplate
+	 * @param mixed $output Output
 	 *
 	 * @return bool True
 	 */
 	public static function onSkinSubPageSubtitle( &$subpages, $skinTemplate, $output ) {
-		if ( self::$profilePage && ( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) || ( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
+		if ( self::$profilePage &&
+			( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ||
+				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
 			$title = $output->getTitle();
 			$nsInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
 			if ( $output->isArticle() && $nsInfo->hasSubpages( $title->getNamespace() ) ) {
@@ -462,7 +472,8 @@ class Hooks {
 							$c++;
 
 							if ( $c > 1 ) {
-								$subpages .= $lang->getDirMarkEntity() . $skinTemplate->msg( 'pipe-separator' )->escaped();
+								$subpages .= $lang->getDirMarkEntity() .
+									$skinTemplate->msg( 'pipe-separator' )->escaped();
 							} else {
 								$subpages .= '&lt; ';
 							}
@@ -484,7 +495,7 @@ class Hooks {
 	/**
 	 * Setups and Modifies Database Information
 	 *
-	 * @param object $updater DatabaseUpdater Object
+	 * @param mixed $updater DatabaseUpdater Object
 	 *
 	 * @return bool true
 	 */
@@ -492,30 +503,134 @@ class Hooks {
 		$extDir = dirname( __DIR__ ) . '/..';
 
 		// Add tables that may exist for previous users of SocialProfile.
-		$updater->addExtensionUpdate( [ 'addTable', 'user_board', "{$extDir}/install/sql/table_user_board.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addTable', 'user_board_report_archives', "{$extDir}/install/sql/table_user_board_report_archives.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addTable', 'user_board_reports', "{$extDir}/install/sql/table_user_board_reports.sql", true ] );
+		$updater->addExtensionUpdate( [
+			'addTable',
+			'user_board',
+			"{$extDir}/install/sql/table_user_board.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addTable',
+			'user_board_report_archives',
+			"{$extDir}/install/sql/table_user_board_report_archives.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addTable',
+			'user_board_reports',
+			"{$extDir}/install/sql/table_user_board_reports.sql",
+			true
+		] );
 
 		// global_id migration.
-		$updater->addExtensionUpdate( [ 'addField', 'user_board_reports', 'ubr_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'modifyField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/change_ubr_reporter_global_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addField', 'user_board_reports', 'ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_user_id', "{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'dropIndex', 'user_board_reports', 'ubr_report_archive_id_ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addField', 'user_board_report_archives', 'ra_user_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql", true ] );
-		$updater->addExtensionUpdate( [ 'modifyField', 'user_board_report_archives', 'ra_action_taken_by', "{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addField', 'user_board_report_archives', 'ra_action_taken_by_user_id', "{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'addField', 'user_board', 'ub_admin_acted_user_id', "{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'modifyField', 'user_board', 'ub_admin_acted', "{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql", true ] );
+		$updater->addExtensionUpdate( [
+			'addField',
+			'user_board_reports',
+			'ubr_id',
+			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'modifyField',
+			'user_board_reports',
+			'ubr_reporter_global_id',
+			"{$extDir}/upgrade/sql/user_board_reports/change_ubr_reporter_global_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addField',
+			'user_board_reports',
+			'ubr_reporter_user_id',
+			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addIndex',
+			'user_board_reports',
+			'ubr_report_archive_id_ubr_reporter_user_id',
+			"{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'dropIndex',
+			'user_board_reports',
+			'ubr_report_archive_id_ubr_reporter_global_id',
+			"{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addField',
+			'user_board_report_archives',
+			'ra_user_id_from',
+			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'modifyField',
+			'user_board_report_archives',
+			'ra_action_taken_by',
+			"{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addField',
+			'user_board_report_archives',
+			'ra_action_taken_by_user_id',
+			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'addField',
+			'user_board',
+			'ub_admin_acted_user_id',
+			"{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'modifyField',
+			'user_board',
+			'ub_admin_acted',
+			"{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql",
+			true
+		] );
 		$updater->addPostDatabaseUpdateMaintenance( \CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class );
 
 		// global_id migration - Second part
-		$updater->addExtensionUpdate( [ 'dropField', 'user_board_reports', 'ubr_reporter_global_id', "{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'dropField', 'user_board_report_archives', 'ra_global_id_from', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql", true ] );
-		$updater->addExtensionUpdate( [ 'dropField', 'user_board_report_archives', 'ra_action_taken_by_global_id', "{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql", true ] );
-		$updater->addExtensionUpdate( [ 'dropField', 'user_board', 'ub_admin_acted_global_id', "{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql", true ] );
+		$updater->addExtensionUpdate( [
+			'dropField',
+			'user_board_reports',
+			'ubr_reporter_global_id',
+			"{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'dropField',
+			'user_board_report_archives',
+			'ra_global_id_from',
+			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'dropField',
+			'user_board_report_archives',
+			'ra_action_taken_by_global_id',
+			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql",
+			true
+		] );
+		$updater->addExtensionUpdate( [
+			'dropField',
+			'user_board',
+			'ub_admin_acted_global_id',
+			"{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql",
+			true
+		] );
 
-		$updater->addExtensionUpdate( [ 'addTable', 'user_board_purge_archive', "{$extDir}/install/sql/table_user_board_purge_archive.sql", true ] );
+		$updater->addExtensionUpdate( [
+			'addTable',
+			'user_board_purge_archive',
+			"{$extDir}/install/sql/table_user_board_purge_archive.sql",
+			true
+		] );
 
 		return true;
 	}
@@ -548,7 +663,7 @@ class Hooks {
 	/**
 	 * Add extra preferences
 	 *
-	 * @param object $user User whose preferences are being modified
+	 * @param mixed $user User whose preferences are being modified
 	 * @param array &$preferences Preferences description object, to be fed to an HTMLForm
 	 *
 	 * @return bool true
@@ -562,8 +677,8 @@ class Hooks {
 	 * Handle modifying preferences before the form saves.
 	 *
 	 * @param array $formData array of user submitted data
-	 * @param object $form PreferencesForm object, also a ContextSource
-	 * @param object $user User object with preferences to be saved set
+	 * @param mixed $form PreferencesForm object, also a ContextSource
+	 * @param mixed $user User object with preferences to be saved set
 	 * @param bool &$result boolean indicating success
 	 *
 	 * @return bool True
@@ -640,15 +755,20 @@ class Hooks {
 	/**
 	 * Add CurseProfile CSS to Mobile Skin
 	 *
-	 * @param object $skin SkinTemplate Object
+	 * @param mixed $skin SkinTemplate Object
 	 * @param array &$modules Array of Modules to Modify
 	 *
 	 * @return bool True
 	 */
 	public static function onSkinMinervaDefaultModules( $skin, &$modules ) {
-		if ( self::$profilePage instanceof \src\classes\ProfilePage && self::$profilePage->isProfilePage() ) {
+		if ( self::$profilePage instanceof ProfilePage && self::$profilePage->isProfilePage() ) {
 			$modules = array_merge(
-				[ 'curseprofile-mobile' => [ 'a.ext.curseprofile.profilepage.mobile.styles', 'a.ext.curseprofile.profilepage.mobile.scripts' ] ],
+				[
+					'curseprofile-mobile' => [
+						'a.ext.curseprofile.profilepage.mobile.styles',
+						'a.ext.curseprofile.profilepage.mobile.scripts'
+					]
+				],
 				$modules
 			);
 		}

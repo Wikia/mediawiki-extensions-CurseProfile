@@ -41,11 +41,14 @@ class SpecialCommentModeration extends SpecialPage {
 	 */
 	public function execute( $sortBy ) {
 		$this->checkPermissions();
-		$wgRequest = $this->getRequest();
 
-		$this->output->setPageTitle( wfMessage( 'commentmoderation-title' )->escaped() );
+		$this->output->setPageTitle( $this->msg( 'commentmoderation-title' )->escaped() );
 
-		$this->output->addModuleStyles( [ 'ext.curseprofile.commentmoderation.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.comments.styles' ] );
+		$this->output->addModuleStyles( [
+			'ext.curseprofile.commentmoderation.styles',
+			'ext.hydraCore.pagination.styles',
+			'ext.curseprofile.comments.styles'
+		] );
 		$this->output->addModules( [ 'ext.curseprofile.commentmoderation.scripts' ] );
 
 		$templateCommentModeration = new TemplateCommentModeration;
@@ -56,7 +59,7 @@ class SpecialCommentModeration extends SpecialPage {
 			$this->sortStyle = 'byVolume';
 		}
 
-		$start = $wgRequest->getInt( 'st' );
+		$start = $this->getRequest()->getInt( 'st' );
 		$itemsPerPage = 25;
 
 		$reports = CommentReport::getReports( $this->sortStyle, $itemsPerPage, $start );
@@ -68,7 +71,12 @@ class SpecialCommentModeration extends SpecialPage {
 			$content = $templateCommentModeration->renderComments( $reports );
 		}
 
-		$pagination = HydraCore::generatePaginationHtml( $this->getFullTitle(), count( $reports ), $itemsPerPage, $start );
+		$pagination = HydraCore::generatePaginationHtml(
+			$this->getFullTitle(),
+			count( $reports ),
+			$itemsPerPage,
+			$start
+		);
 
 		$this->output->addHTML( $templateCommentModeration->sortStyleSelector( $this->sortStyle ) );
 		$this->output->addHTML( $pagination );

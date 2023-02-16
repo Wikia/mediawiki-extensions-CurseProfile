@@ -338,7 +338,8 @@ class ProfileData {
 
 		$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		// don't allow blocked users to change their about me text
-		// Deep in the logic of isBlocked() it tries to call on $wgUser for some unknown reason, but $wgUser can be null.
+		// Deep in the logic of isBlocked() it tries to call on $wgUser
+		// for some unknown reason, but $wgUser can be null.
 		if (
 			$user->isSafeToLoad() &&
 			$wgUser !== null &&
@@ -373,7 +374,7 @@ class ProfileData {
 	/**
 	 * Can the given user edit this profile profile?
 	 *
-	 * @param object $performer User, the performer that needs to make changes.
+	 * @param mixed $performer User, the performer that needs to make changes.
 	 * @return mixed Boolean true if allowed, otherwise error message string to display.
 	 */
 	public function canEdit( $performer ) {
@@ -393,7 +394,10 @@ class ProfileData {
 			return 'no-perm-profile-moderate';
 		}
 
-		if ( $wgEmailAuthentication && ( !boolval( $performer->getEmailAuthenticationTimestamp() ) || !\Sanitizer::validateEmail( $performer->getEmail() ) ) ) {
+		if ( $wgEmailAuthentication &&
+			( !boolval( $performer->getEmailAuthenticationTimestamp() ) ||
+				!\Sanitizer::validateEmail( $performer->getEmail() ) )
+		) {
 			// If email authentication is turned on and their email address is invalid then prevent editing.
 			return 'email-auth-required';
 		}
@@ -420,7 +424,7 @@ class ProfileData {
 	 *
 	 * @param string $field Field Name - Examples: aboutme, location, link_twitch
 	 * @param string $text the new text for the user's aboutme
-	 * @param object|null $performer [Optional] User who performed the action.  Null to use the current user.
+	 * @param mixed|null $performer [Optional] User who performed the action.  Null to use the current user.
 	 * @return void
 	 */
 	public function setField( $field, $text, $performer = null ) {
@@ -473,13 +477,21 @@ class ProfileData {
 	 */
 	public function getFieldHtml( $field ) {
 		global $wgOut;
-		$wgUser = RequestContext::getMain()->getUser();
+		$user = RequestContext::getMain()->getUser();
 
 		$fieldHtml = $wgOut->parseAsContent( $this->getField( $field ) );
 
-		if ( $this->canEdit( $wgUser ) === true ) {
+		if ( $this->canEdit( $user ) === true ) {
 			if ( empty( $fieldHtml ) ) {
-				$fieldHtml = Html::element( 'em', [], wfMessage( ( $this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod' ) )->params( $this->user->getName(), $wgUser->getName() )->text() );
+				$fieldHtml = Html::element(
+					'em',
+					[],
+					wfMessage(
+						( $this->isViewingSelf() ? 'empty-' . $field . '-text' : 'empty-' . $field . '-text-mod' )
+					)
+						->params( $this->user->getName(), $user->getName() )
+						->text()
+				);
 			}
 
 			$fieldHtml = Html::rawElement(
@@ -502,14 +514,20 @@ class ProfileData {
 	 * @return mixed Array with HTML string at index 0 or an HTML string.
 	 */
 	public function getProfileLinksHtml() {
-		$wgUser = RequestContext::getMain()->getUser();
+		$user = RequestContext::getMain()->getUser();
 
 		$profileLinks = $this->getExternalProfiles();
 
 		$html = "";
-		if ( $this->canEdit( $wgUser ) === true ) {
+		if ( $this->canEdit( $user ) === true ) {
 			if ( !count( $profileLinks ) ) {
-				$html .= "" . Html::element( 'em', [], wfMessage( ( $this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod' ) )->params( $this->user->getName(), $wgUser->getName() )->text() ) . "";
+				$html .= "" . Html::element(
+					'em',
+					[],
+					wfMessage( ( $this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod' ) )
+						->params( $this->user->getName(), $user->getName() )
+						->text()
+					) . "";
 			}
 			$html .= "" . Html::rawElement(
 				'a',
@@ -523,7 +541,8 @@ class ProfileData {
 		}
 
 		$html .= ProfilePage::generateProfileLinks( $profileLinks );
-		// Get all of the possible external profiles to shove into the data-field for Javascript to know which ones to be able to edit.
+		// Get all of the possible external profiles to shove into the data-field
+		// for Javascript to know which ones to be able to edit.
 		foreach ( self::$externalProfiles as $field => $unused ) {
 			$fields[] = 'link-' . $field;
 		}
@@ -549,8 +568,8 @@ class ProfileData {
 	 *
 	 * @param string $section Section string of the profile.  Example: profile-aboutme
 	 * @param string $comment Comment for the log, usually the text of the change.
-	 * @param object $target User targeted for the action.
-	 * @param object $performer User who performed the action.  Null to use the current user.
+	 * @param mixed $target User targeted for the action.
+	 * @param mixed $performer User who performed the action.  Null to use the current user.
 	 * @return void
 	 */
 	public static function logProfileChange( $section, $comment, User $target, User $performer ) {
@@ -591,7 +610,8 @@ class ProfileData {
 	 */
 	public function getExternalProfiles() {
 		foreach ( self::$externalProfiles as $service => $data ) {
-			$profile[$service] = self::validateExternalProfile( $service, $this->user->getOption( 'profile-link-' . $service ) );
+			$profile[$service] =
+				self::validateExternalProfile( $service, $this->user->getOption( 'profile-link-' . $service ) );
 		}
 		return array_filter( $profile );
 	}
@@ -658,6 +678,7 @@ class ProfileData {
 	}
 
 	/**
+	 * @param mixed $cityId
 	 * @param array $info Element of array returned by getListOfWikisWithVar
 	 * @return array Array used by Profile controller
 	 */

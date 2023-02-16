@@ -10,7 +10,7 @@ class StatsDLExposer extends ProfilePage {
 
 /**
  * @group  CurseProfile
- * @covers \src\classes\ProfilePage
+ * @covers ProfilePage
  */
 class GenerateStatsDLTest extends MediaWikiTestCase {
 	protected $stats;
@@ -22,7 +22,11 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 
 	public function testSimpleValues() {
 		$this->assertEquals( 1, $this->stats->generateStatsDL( 1 ), 'Small numbers should be returned unchanged' );
-		$this->assertEquals( 'Hello world', $this->stats->generateStatsDL( 'Hello world' ), 'Strings should be returned unchanged' );
+		$this->assertEquals(
+			'Hello world',
+			$this->stats->generateStatsDL( 'Hello world' ),
+			'Strings should be returned unchanged'
+		);
 		$this->assertEquals( '1,000', $this->stats->generateStatsDL( 1000 ), 'Large numbers should be formatted' );
 	}
 
