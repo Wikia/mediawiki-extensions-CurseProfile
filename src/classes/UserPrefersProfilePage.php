@@ -11,8 +11,8 @@ class UserPrefersProfilePage extends Article {
 
 	private $username;
 
-	public function __construct(Title $title, string $preferenceMsg, string $username) {
-		parent::__construct($title);
+	public function __construct( Title $title, string $preferenceMsg, string $username ) {
+		parent::__construct( $title );
 		$this->preferenceMsg = $preferenceMsg;
 		$this->username = $username;
 	}
@@ -21,7 +21,7 @@ class UserPrefersProfilePage extends Article {
 		$outputPage = $this->getContext()->getOutput();
 		$outputPage->wrapWikiMsg(
 			"<div class=\"curseprofile-userprefersprofile error\">\n$1\n</div>",
-			[$this->preferenceMsg, wfEscapeWikiText($this->username)]
+			[ $this->preferenceMsg, wfEscapeWikiText( $this->username ) ]
 		);
 
 		parent::view();

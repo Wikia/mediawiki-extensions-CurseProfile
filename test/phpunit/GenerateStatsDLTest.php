@@ -21,13 +21,13 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 	}
 
 	public function testSimpleValues() {
-		$this->assertEquals(1, $this->stats->generateStatsDL(1), 'Small numbers should be returned unchanged');
-		$this->assertEquals('Hello world', $this->stats->generateStatsDL('Hello world'), 'Strings should be returned unchanged');
-		$this->assertEquals('1,000', $this->stats->generateStatsDL(1000), 'Large numbers should be formatted');
+		$this->assertEquals( 1, $this->stats->generateStatsDL( 1 ), 'Small numbers should be returned unchanged' );
+		$this->assertEquals( 'Hello world', $this->stats->generateStatsDL( 'Hello world' ), 'Strings should be returned unchanged' );
+		$this->assertEquals( '1,000', $this->stats->generateStatsDL( 1000 ), 'Large numbers should be formatted' );
 	}
 
 	public function testNull() {
-		$this->assertEquals('0', $this->stats->generateStatsDL(null), 'Null should return zero');
+		$this->assertEquals( '0', $this->stats->generateStatsDL( null ), 'Null should return zero' );
 	}
 
 	public function testFlatArray() {
@@ -42,7 +42,7 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 				. '<dt><b></dt><dd>2,000</dd>'
 				. '<dt><c></dt><dd>3,455</dd>'
 			. '</dl>',
-			$this->stats->generateStatsDL($template),
+			$this->stats->generateStatsDL( $template ),
 			'A flat list should generate a simple definition list'
 		);
 	}
@@ -50,7 +50,7 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 	public function testNestedArrayWithRollup() {
 		$template = [
 			'a' => 10,
-			'b' => [2000,
+			'b' => [ 2000,
 				'd' => 500,
 				'e' => 1500,
 				'f' => 'nothing'
@@ -68,7 +68,7 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 				. '</dl>'
 				. '<dt><c></dt><dd>3,455</dd>'
 			. '</dl>',
-			$this->stats->generateStatsDL($template),
+			$this->stats->generateStatsDL( $template ),
 			'A nested list with a rollup should produce a nested list with a number across from its header'
 		);
 	}
@@ -94,7 +94,7 @@ class GenerateStatsDLTest extends MediaWikiTestCase {
 				. '</dl>'
 				. '<dt><c></dt><dd>3,455</dd>'
 			. '</dl>',
-			$this->stats->generateStatsDL($template),
+			$this->stats->generateStatsDL( $template ),
 			'A nested list with a rollup should produce a nested list with a number across from its header'
 		);
 	}

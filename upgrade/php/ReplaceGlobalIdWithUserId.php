@@ -6,7 +6,7 @@
  * @copyright (c) 2020 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Maintenance;
 
@@ -15,7 +15,7 @@ use LoggedUpdateMaintenance;
 use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
-require_once dirname(dirname(dirname(dirname(__DIR__)))) . '/maintenance/Maintenance.php';
+require_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/maintenance/Maintenance.php';
 
 /**
  * Maintenance script that cleans up tables that have orphaned users.
@@ -30,8 +30,8 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription('Replaces global ID with user ID in CurseProfile tables.');
-		$this->setBatchSize(100);
+		$this->addDescription( 'Replaces global ID with user ID in CurseProfile tables.' );
+		$this->setBatchSize( 100 );
 	}
 
 	/**
@@ -46,14 +46,14 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	/**
 	 * Do database updates for all tables.
 	 *
-	 * @return boolean True
+	 * @return bool True
 	 */
 	protected function doDBUpdates() {
 		$this->cleanup(
 			'user_board',
 			'ub_id',
-			['ub_admin_acted_global_id' => 'ub_admin_acted_user_id'],
-			['ub_id']
+			[ 'ub_admin_acted_global_id' => 'ub_admin_acted_user_id' ],
+			[ 'ub_id' ]
 		);
 		$this->cleanup(
 			'user_board_reports',
@@ -61,7 +61,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			[
 				'ubr_reporter_global_id' => 'ubr_reporter_user_id'
 			],
-			['ubr_id']
+			[ 'ubr_id' ]
 		);
 		$this->cleanup(
 			'user_board_report_archives',
@@ -70,7 +70,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 				'ra_global_id_from' => 'ra_user_id_from',
 				'ra_action_taken_by_global_id' => 'ra_action_taken_by_user_id'
 			],
-			['ra_id']
+			[ 'ra_id' ]
 		);
 
 		return true;
@@ -79,10 +79,10 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	/**
 	 * Cleanup a table.
 	 *
-	 * @param string $table          Table to migrate
-	 * @param string $primaryKey     Primary key of the table.
-	 * @param array  $globalIdFields Global ID field to User ID field as $key => $value relation.
-	 * @param array  $orderby        Fields to order by
+	 * @param string $table Table to migrate
+	 * @param string $primaryKey Primary key of the table.
+	 * @param array $globalIdFields Global ID field to User ID field as $key => $value relation.
+	 * @param array $orderby Fields to order by
 	 *
 	 * @return void
 	 */
@@ -93,59 +93,59 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 			"Beginning cleanup of $table\n"
 		);
 
-		$dbw = $this->getDB(DB_PRIMARY);
+		$dbw = $this->getDB( DB_PRIMARY );
 		$next = '1=1';
 		$count = 0;
-		while (true) {
-			foreach ($globalIdFields as $key => $value) {
-				if (!$dbw->fieldExists($table, $key)) {
-					unset($globalIdFields[$key]);
+		while ( true ) {
+			foreach ( $globalIdFields as $key => $value ) {
+				if ( !$dbw->fieldExists( $table, $key ) ) {
+					unset( $globalIdFields[$key] );
 				}
 			}
-			if (empty($globalIdFields)) {
-				$this->output("Skipping due to global ID fields not being present.\n");
+			if ( empty( $globalIdFields ) ) {
+				$this->output( "Skipping due to global ID fields not being present.\n" );
 				break;
 			}
 			// Fetch the rows needing update
 			$res = $dbw->select(
 				$table,
-				array_merge([$primaryKey], array_keys($globalIdFields)),
-				[$next],
+				array_merge( [ $primaryKey ], array_keys( $globalIdFields ) ),
+				[ $next ],
 				__METHOD__,
 				[
 					'ORDER BY' => $orderby,
 					'LIMIT' => $this->mBatchSize,
 				]
 			);
-			if (!$res->numRows()) {
+			if ( !$res->numRows() ) {
 				break;
 			}
 
 			// Update the existing rows
-			foreach ($res as $row) {
+			foreach ( $res as $row ) {
 				$update = [];
-				foreach ($globalIdFields as $globalIdField => $userIdField) {
-					if ($row->$globalIdField) {
-						$userId = HydraAuthUser::userIdFromGlobalId($row->$globalIdField);
-						if ($userId > 0) {
+				foreach ( $globalIdFields as $globalIdField => $userIdField ) {
+					if ( $row->$globalIdField ) {
+						$userId = HydraAuthUser::userIdFromGlobalId( $row->$globalIdField );
+						if ( $userId > 0 ) {
 							$update[$userIdField] = $userId;
 						}
 					}
 				}
 
-				if (!empty($update)) {
+				if ( !empty( $update ) ) {
 					$dbw->update(
 						$table,
 						$update,
-						[$primaryKey => $row->$primaryKey],
+						[ $primaryKey => $row->$primaryKey ],
 						__METHOD__
 					);
 					$count += $dbw->affectedRows();
 				}
 			}
 
-			list($next, $display) = $this->makeNextCond($dbw, $orderby, $row);
-			$this->output("... $display\n");
+			list( $next, $display ) = $this->makeNextCond( $dbw, $orderby, $row );
+			$this->output( "... $display\n" );
 			MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->waitForReplication();
 		}
 
@@ -158,26 +158,26 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 	 * Calculate a "next" condition and progress display string
 	 *
 	 * @param IDatabase $dbw
-	 * @param string[]  $indexFields Fields in the index being ordered by
-	 * @param object    $row         Database row
+	 * @param string[] $indexFields Fields in the index being ordered by
+	 * @param object $row Database row
 	 *
 	 * @return string[] [ string $next, string $display ]
 	 */
-	private function makeNextCond($dbw, array $indexFields, $row) {
+	private function makeNextCond( $dbw, array $indexFields, $row ) {
 		$next = '';
 		$display = [];
-		for ($i = count($indexFields) - 1; $i >= 0; $i--) {
+		for ( $i = count( $indexFields ) - 1; $i >= 0; $i-- ) {
 			$field = $indexFields[$i];
 			$display[] = $field . '=' . $row->$field;
-			$value = $dbw->addQuotes($row->$field);
-			if ($next === '') {
+			$value = $dbw->addQuotes( $row->$field );
+			if ( $next === '' ) {
 				$next = "$field > $value";
 			} else {
 				$next = "$field > $value OR $field = $value AND ($next)";
 			}
 		}
-		$display = implode(' ', array_reverse($display));
-		return [$next, $display];
+		$display = implode( ' ', array_reverse( $display ) );
+		return [ $next, $display ];
 	}
 }
 

@@ -9,7 +9,7 @@
  * @copyright (c) 2015 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -38,64 +38,64 @@ class CommentReport {
 	/**
 	 * ID from the ra_id column of user_board_report_archives.
 	 *
-	 * @var	integer
+	 * @var	int
 	 */
 	private $id = 0;
 
 	/**
 	 * Constructor used by static methods to create instances of this class.
 	 *
-	 * @param  array $data a mostly filled out data set (see newFromRow)
+	 * @param array $data a mostly filled out data set (see newFromRow)
 	 * @return void
 	 */
-	private function __construct($data) {
+	private function __construct( $data ) {
 		$this->data = $data;
 	}
 
 	/**
 	 * Gets the total count of how many comments are in a given queue
 	 *
-	 * @param  string      $sortStyle which queue to count
-	 * @param  string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
+	 * @param string $sortStyle which queue to count
+	 * @param string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
 	 * @return int
 	 */
-	public static function getCount($sortStyle, $qualifier = null) {
+	public static function getCount( $sortStyle, $qualifier = null ) {
 		return 0;
 	}
 
 	/**
 	 * Main retrieval function to get data.
 	 *
-	 * @param  string  $sortStyle [optional] default byVolume
-	 * @param  integer $limit     [optional] default 10
-	 * @param  integer $offset    [optional] default 0
+	 * @param string $sortStyle [optional] default byVolume
+	 * @param int $limit [optional] default 10
+	 * @param int $offset [optional] default 0
 	 * @return array
 	 */
-	public static function getReports($sortStyle = 'byVolume', $limit = 10, $offset = 0) {
-		return self::getReportsDb($sortStyle, $limit, $offset);
+	public static function getReports( $sortStyle = 'byVolume', $limit = 10, $offset = 0 ) {
+		return self::getReportsDb( $sortStyle, $limit, $offset );
 	}
 
 	/**
 	 * Retrieve a single report by its unique id
 	 *
-	 * @param  string $key       report key as retrieved from reportKey()
-	 * @return obj		CommentReport instance or null if report does not exist
+	 * @param string $key report key as retrieved from reportKey()
+	 * @return obj CommentReport instance or null if report does not exist
 	 */
-	public static function newFromKey($key) {
+	public static function newFromKey( $key ) {
 		// report is local
-		list($md5key, $commentId, $timestamp) = explode(':', $key);
-		$db = CP::getDb(DB_REPLICA);
+		list( $md5key, $commentId, $timestamp ) = explode( ':', $key );
+		$db = CP::getDb( DB_REPLICA );
 		$row = $db->selectRow(
 			'user_board_report_archives',
-			['*'],
+			[ '*' ],
 			[
-				'ra_comment_id' => intval($commentId),
-				'ra_last_edited' => date('Y-m-d H:i:s', $timestamp)
+				'ra_comment_id' => intval( $commentId ),
+				'ra_last_edited' => date( 'Y-m-d H:i:s', $timestamp )
 			],
 			__METHOD__
 		);
-		if ($row) {
-			return self::newFromRow((array)$row);
+		if ( $row ) {
+			return self::newFromRow( (array)$row );
 		} else {
 			return null;
 		}
@@ -107,17 +107,17 @@ class CommentReport {
 	 * @param  string	sort style
 	 * @param  integer	max number of reports to return
 	 * @param  integer	offset
-	 * @return array	0 or more CommentReport instances
+	 * @return array 0 or more CommentReport instances
 	 */
-	private static function getReportsDb($sortStyle, $limit, $offset) {
-		$db = CP::getDb(DB_REPLICA);
+	private static function getReportsDb( $sortStyle, $limit, $offset ) {
+		$db = CP::getDb( DB_REPLICA );
 		$reports = [];
-		switch ($sortStyle) {
+		switch ( $sortStyle ) {
 			case 'byActionDate':
 				$res = $db->select(
-					['user_board_report_archives'],
-					['*'],
-					['ra_action_taken != 0'],
+					[ 'user_board_report_archives' ],
+					[ '*' ],
+					[ 'ra_action_taken != 0' ],
 					__METHOD__,
 					[
 						'ORDER BY' => 'ra_action_taken_at DESC',
@@ -136,8 +136,8 @@ class CommentReport {
 						'user_board_report_archives AS ra',
 						$subTable,
 					],
-					['ra.*', 'report_count'],
-					['ra_action_taken' => 0],
+					[ 'ra.*', 'report_count' ],
+					[ 'ra_action_taken' => 0 ],
 					__METHOD__,
 					[
 						'ORDER BY' => 'report_count DESC',
@@ -147,15 +147,15 @@ class CommentReport {
 					[
 						$subTable => [
 							'LEFT JOIN',
-							['ra_id = ubr_report_archive_id']
+							[ 'ra_id = ubr_report_archive_id' ]
 						]
 					]
 				);
 				break;
 		}
-		if ($res) {
-			foreach ($res as $row) {
-					$reports[] = self::newFromRow((array)$row);
+		if ( $res ) {
+			foreach ( $res as $row ) {
+					$reports[] = self::newFromRow( (array)$row );
 			}
 		}
 		return $reports;
@@ -166,41 +166,41 @@ class CommentReport {
 	 * Assumes $wgUser is the acting reporter
 	 *
 	 * @param Comment $comment The comment being reported.
-	 * @param User    $actor   User creating this report.
+	 * @param User $actor User creating this report.
 	 *
 	 * @return mixed CommentReport instance that is already saved or false on failure.
 	 */
-	public static function newUserReport(Comment $comment, User $actor) {
-		$db = CP::getDb(DB_REPLICA);
+	public static function newUserReport( Comment $comment, User $actor ) {
+		$db = CP::getDb( DB_REPLICA );
 
-		if ($comment->getId() < 1) {
+		if ( $comment->getId() < 1 ) {
 			return false;
 		}
 
 		// check for existing reports// Look up the target comment
 		$lastTouched = $comment->getEditTimestamp() ? $comment->getEditTimestamp() : $comment->getPostTimestamp();
 		$res = $db->select(
-			['user_board_report_archives'],
-			['*'],
+			[ 'user_board_report_archives' ],
+			[ '*' ],
 			[
 				"ra_comment_id" => $comment->getId(),
-				"ra_last_edited" => date('Y-m-d H:i:s', $lastTouched)
+				"ra_last_edited" => date( 'Y-m-d H:i:s', $lastTouched )
 			],
 			__METHOD__
 		);
 		$reportRow = $res->fetchRow();
 		$res->free();
 
-		if (!$reportRow) {
+		if ( !$reportRow ) {
 			// create new report item if never reported before
-			$report = self::createWithArchive($comment, $actor);
-		} elseif ($reportRow['ra_action_taken']) {
+			$report = self::createWithArchive( $comment, $actor );
+		} elseif ( $reportRow['ra_action_taken'] ) {
 			// comment has already been moderated
-			return self::newFromRow($reportRow);
+			return self::newFromRow( $reportRow );
 		} else {
 			// add report to existing archive
 			// $report = self::addReportTo($reportRow['ra_id']); //?_?  Never implemented?
-			return self::newFromRow($reportRow);
+			return self::newFromRow( $reportRow );
 		}
 
 		return $report;
@@ -210,13 +210,13 @@ class CommentReport {
 	 * Archive the contents of a comment into a new report
 	 *
 	 * @param Comment $comment The comment being reported.
-	 * @param User    $actor   User creating this report.
+	 * @param User $actor User creating this report.
 	 *
 	 * @return object CommentReport instance
 	 */
-	private static function createWithArchive(Comment $comment, User $actor) {
+	private static function createWithArchive( Comment $comment, User $actor ) {
 		$userFrom = $comment->getActorUser();
-		if (!$userFrom) {
+		if ( !$userFrom ) {
 			return false;
 		}
 
@@ -234,13 +234,13 @@ class CommentReport {
 			'action_taken_at' => null,
 			'first_reported' => time(),
 		];
-		$report = new self($data);
+		$report = new self( $data );
 		$report->initialLocalInsert();
-		if ($report->id == 0) {
+		if ( $report->id == 0 ) {
 			return false;
 		}
 
-		$report->addReportFrom($actor);
+		$report->addReportFrom( $actor );
 
 		return $report;
 	}
@@ -252,21 +252,21 @@ class CommentReport {
 	 *
 	 * @return CommentReport
 	 */
-	private static function newFromRow($report) {
+	private static function newFromRow( $report ) {
 		$data = [
 			'comment' => [
 				'text' => $report['ra_comment_text'],
 				'cid' => $report['ra_comment_id'],
-				'last_touched' => strtotime($report['ra_last_edited']),
+				'last_touched' => strtotime( $report['ra_last_edited'] ),
 				'author' => $report['ra_user_id_from'],
 			],
-			'reports' => self::getReportsForId($report['ra_id']),
+			'reports' => self::getReportsForId( $report['ra_id'] ),
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by_user_id'],
-			'action_taken_at' => strtotime($report['ra_action_taken_at']),
-			'first_reported' => strtotime($report['ra_first_reported']),
+			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ),
+			'first_reported' => strtotime( $report['ra_first_reported'] ),
 		];
-		$cr = new self($data);
+		$cr = new self( $data );
 		$cr->id = $report['ra_id'];
 		return $cr;
 	}
@@ -274,23 +274,23 @@ class CommentReport {
 	/**
 	 * Loads individual user reports for a given comment report.
 	 *
-	 * @param integer $id The ra_comment_id from the user_board_report_archives table
+	 * @param int $id The ra_comment_id from the user_board_report_archives table
 	 *
 	 * @return array With sub arrays for each report having keys reporter => user_id, timestamp
 	 */
-	private static function getReportsForId($id) {
-		$db = CP::getDb(DB_REPLICA);
+	private static function getReportsForId( $id ) {
+		$db = CP::getDb( DB_REPLICA );
 		$res = $db->select(
-			['user_board_reports'],
-			['ubr_reporter_user_id as reporter', 'ubr_reported as timestamp'],
-			['ubr_report_archive_id = ' . intval($id)],
+			[ 'user_board_reports' ],
+			[ 'ubr_reporter_user_id as reporter', 'ubr_reported as timestamp' ],
+			[ 'ubr_report_archive_id = ' . intval( $id ) ],
 			__METHOD__,
-			['ORDER BY' => 'ubr_reported ASC']
+			[ 'ORDER BY' => 'ubr_reported ASC' ]
 		);
 		$reports = [];
-		foreach ($res as $row) {
+		foreach ( $res as $row ) {
 			$report = (array)$row;
-			$report['timestamp'] = strtotime($report['timestamp']);
+			$report['timestamp'] = strtotime( $report['timestamp'] );
 			$reports[] = $report;
 		}
 		return $reports;
@@ -303,18 +303,18 @@ class CommentReport {
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
-		$db = CP::getDb(DB_PRIMARY);
+		$db = CP::getDb( DB_PRIMARY );
 		$db->insert(
 			'user_board_report_archives',
 			[
 				'ra_comment_id' => $this->data['comment']['cid'],
-				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ? date('Y-m-d H:i:s', $this->data['comment']['last_touched']) : null,
+				'ra_last_edited' => $this->data['comment']['last_touched'] !== null ? date( 'Y-m-d H:i:s', $this->data['comment']['last_touched'] ) : null,
 				'ra_user_id_from' => $this->data['comment']['author'],
 				'ra_comment_text' => $this->data['comment']['text'],
-				'ra_first_reported' => $this->data['first_reported'] !== null ? date('Y-m-d H:i:s', $this->data['first_reported']) : null,
+				'ra_first_reported' => $this->data['first_reported'] !== null ? date( 'Y-m-d H:i:s', $this->data['first_reported'] ) : null,
 				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
-				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ? date('Y-m-d H:i:s', $this->data['action_taken_at']) : null
+				'ra_action_taken_at' => $this->data['action_taken_at'] !== null ? date( 'Y-m-d H:i:s', $this->data['action_taken_at'] ) : null
 			],
 			__METHOD__
 		);
@@ -330,7 +330,7 @@ class CommentReport {
 		// Generating a dumb MD5 for backwards capatibility and not breaking old reports.
 		return sprintf(
 			'%s:%s:%s',
-			md5($this->data['comment']['cid']),
+			md5( $this->data['comment']['cid'] ),
 			$this->data['comment']['cid'],
 			$this->data['comment']['last_touched']
 		);
@@ -343,10 +343,10 @@ class CommentReport {
 	 *
 	 * @return void
 	 */
-	private function addReportFrom(User $fromUser) {
-		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()->newFromId($this->data['comment']['author']);
+	private function addReportFrom( User $fromUser ) {
+		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->data['comment']['author'] );
 
-		if (!isset($this->id) || $fromUser->isAnon()) {
+		if ( !isset( $this->id ) || $fromUser->isAnon() ) {
 			// Can't add to a comment that hasn't been archived yet.
 			return false;
 		}
@@ -357,27 +357,27 @@ class CommentReport {
 		];
 
 		// Add new report row to the local database.
-		$db = CP::getDb(DB_PRIMARY);
+		$db = CP::getDb( DB_PRIMARY );
 		$db->insert(
 			'user_board_reports',
 			[
 				'ubr_report_archive_id' => $this->id,
 				'ubr_reporter_user_id' => $fromUser->getId(),
-				'ubr_reported' => date('Y-m-d H:i:s', $newReport['timestamp'])
+				'ubr_reported' => date( 'Y-m-d H:i:s', $newReport['timestamp'] )
 			],
 			__METHOD__
 		);
 
 		$toLocalUsers = [];
-		$toLocalUsersObject = User::findUsersByGroup(['sysop']);
-		foreach ($toLocalUsersObject as $user) {
-			if ($user) {
+		$toLocalUsersObject = User::findUsersByGroup( [ 'sysop' ] );
+		foreach ( $toLocalUsersObject as $user ) {
+			if ( $user ) {
 				$toLocalUsers[] = $user;
 			}
 		}
 
-		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $fromUser->getName());
-		$canonicalUrl = SpecialPage::getTitleFor('CommentModeration/' . $this->data['comment']['cid'])->getFullURL();
+		$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $fromUser->getName() );
+		$canonicalUrl = SpecialPage::getTitleFor( 'CommentModeration/' . $this->data['comment']['cid'] )->getFullURL();
 		$broadcast = NotificationBroadcast::newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
@@ -408,7 +408,7 @@ class CommentReport {
 				]
 			]
 		);
-		if ($broadcast) {
+		if ( $broadcast ) {
 			$broadcast->transmit();
 		}
 	}
@@ -417,44 +417,44 @@ class CommentReport {
 	 * Dismiss or delete a reported comment.
 	 *
 	 * @param string $action Action to take on the reported comment. either 'delete' or 'dismiss'
-	 * @param User   $actor  [Optional] User object of the acting user, defaults to|null $wgUser
+	 * @param User $actor [Optional] User object of the acting user, defaults to|null $wgUser
 	 *
-	 * @return boolean True if successful
+	 * @return bool True if successful
 	 */
-	public function resolve(string $action, User $actor) {
-		if ($this->data['action_taken']) {
+	public function resolve( string $action, User $actor ) {
+		if ( $this->data['action_taken'] ) {
 			return false;
 		}
 
 		// update internal data
-		$this->data['action_taken']		= ($action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS);
+		$this->data['action_taken']		= ( $action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS );
 		$this->data['action_taken_by']	= $actor->getId();
 		$this->data['action_taken_at']	= time();
 
 		// update data stores
-		$comment = Comment::newFromId($this->data['comment']['cid']);
-		return ($action == 'dismiss' || CommentBoard::removeComment($comment, $actor))
+		$comment = Comment::newFromId( $this->data['comment']['cid'] );
+		return ( $action == 'dismiss' || CommentBoard::removeComment( $comment, $actor ) )
 			&& $this->resolveInDb();
 	}
 
 	/**
 	 * Marks a report as archived in the local database
 	 *
-	 * @return boolean Success
+	 * @return bool Success
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
-		$db = CP::getDb(DB_PRIMARY);
+		$db = CP::getDb( DB_PRIMARY );
 		$result = $db->update(
 			'user_board_report_archives',
 			[
 				'ra_action_taken' => $this->data['action_taken'],
 				'ra_action_taken_by_user_id' => $this->data['action_taken_by'],
-				'ra_action_taken_at' => date('Y-m-d H:i:s', $this->data['action_taken_at']),
+				'ra_action_taken_at' => date( 'Y-m-d H:i:s', $this->data['action_taken_at'] ),
 			],
 			[
-				'ra_comment_id' => intval($this->data['comment']['cid']),
-				'ra_last_edited' => date('Y-m-d H:i:s', $this->data['comment']['last_touched'])
+				'ra_comment_id' => intval( $this->data['comment']['cid'] ),
+				'ra_last_edited' => date( 'Y-m-d H:i:s', $this->data['comment']['last_touched'] )
 			],
 			__METHOD__
 		);

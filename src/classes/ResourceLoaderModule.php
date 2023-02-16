@@ -9,7 +9,7 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -22,16 +22,17 @@ use ResourceLoaderWikiModule;
 class ResourceLoaderModule extends ResourceLoaderWikiModule {
 
 	/* Protected Methods */
+
 	/**
 	 * Gets list of pages used by this module
 	 *
 	 * @param ResourceLoaderContext $context
 	 *
-	 * @return Array List of pages
+	 * @return array List of pages
 	 */
-	protected function getPages(ResourceLoaderContext $context) {
+	protected function getPages( ResourceLoaderContext $context ) {
 		$pages = [
-			'MediaWiki:CurseProfile.css' => ['type' => 'style']
+			'MediaWiki:CurseProfile.css' => [ 'type' => 'style' ]
 		];
 		return $pages;
 	}
@@ -41,7 +42,7 @@ class ResourceLoaderModule extends ResourceLoaderWikiModule {
 	/**
 	 * Gets group name
 	 *
-	 * @return String Name of group
+	 * @return string Name of group
 	 */
 	public function getGroup() {
 		return 'site';

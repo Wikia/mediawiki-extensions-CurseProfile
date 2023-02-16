@@ -20,29 +20,29 @@ class ResolveComment extends Job {
 	 *
 	 * @return void
 	 */
-	public static function queue(array $parameters = []) {
-		$job = new self(__CLASS__, $parameters);
-		MediaWikiServices::getInstance()->getJobQueueGroup()->push($job);
+	public static function queue( array $parameters = [] ) {
+		$job = new self( __CLASS__, $parameters );
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
 	}
 
 	/**
 	 * Resolve a reported comment by deleting the comment or ignoring it by marking the report dismissed.
 	 *
-	 * @return boolean Success
+	 * @return bool Success
 	 */
 	public function run() {
 		$args = $this->getParams();
 
-		$report = CommentReport::newFromKey($args['reportKey'], true);
-		if (!$report) {
+		$report = CommentReport::newFromKey( $args['reportKey'], true );
+		if ( !$report ) {
 			return true;
 		}
 
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($args['byUser']);
-		$result = $report->resolve($args['action'], $user);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $args['byUser'] );
+		$result = $report->resolve( $args['action'], $user );
 
-		if (!$result) {
-			$this->setLastError("Resolve action encountered an error.");
+		if ( !$result ) {
+			$this->setLastError( "Resolve action encountered an error." );
 			return false;
 		}
 		return true;

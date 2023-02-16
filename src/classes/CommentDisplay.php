@@ -9,7 +9,7 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -30,28 +30,28 @@ class CommentDisplay {
 	/**
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
-	 * @param  object  &$parser parser instance
-	 * @param  integer $userId  id of the user whose recent comments should be displayed
-	 * @return array	with html at index 0
+	 * @param object &$parser parser instance
+	 * @param int $userId id of the user whose recent comments should be displayed
+	 * @return array with html at index 0
 	 */
-	public static function comments(&$parser, int $userId) {
+	public static function comments( &$parser, int $userId ) {
 		global $wgUser;
 
-		if ($userId < 1) {
+		if ( $userId < 1 ) {
 			return 'Invalid user ID given';
 		}
 
 		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '';
 
-		$boardOwner = $userFactory->newFromId($userId);
-		$html .= self::newCommentForm($boardOwner, false);
+		$boardOwner = $userFactory->newFromId( $userId );
+		$html .= self::newCommentForm( $boardOwner, false );
 
-		$board = new CommentBoard($userFactory->newFromId($userId));
-		$comments = $board->getComments($wgUser);
+		$board = new CommentBoard( $userFactory->newFromId( $userId ) );
+		$comments = $board->getComments( $wgUser );
 
-		foreach ($comments as $comment) {
-			$html .= self::singleComment($comment, false);
+		foreach ( $comments as $comment ) {
+			$html .= self::singleComment( $comment, false );
 		}
 
 		return [
@@ -63,52 +63,52 @@ class CommentDisplay {
 	/**
 	 * Returns the HTML text for a comment entry form if the current user is logged in and not blocked
 	 *
-	 * @param  User $owner  User whose comment board will receive a new comment via this form
-	 * @param  bool $hidden If true, the form will have an added class to be hidden by css/
-	 * @return string	html fragment or empty string
+	 * @param User $owner User whose comment board will receive a new comment via this form
+	 * @param bool $hidden If true, the form will have an added class to be hidden by css/
+	 * @return string html fragment or empty string
 	 */
-	public static function newCommentForm(User $owner, bool $hidden = false) {
+	public static function newCommentForm( User $owner, bool $hidden = false ) {
 		global $wgRequest, $wgUser;
 
-		$comment = Comment::newWithOwner($owner);
-		if ($comment->canComment($wgUser)) {
-			$tokenSet = new CsrfTokenSet($wgRequest);
-			$commentPlaceholder = wfMessage('commentplaceholder')->escaped();
-			$replyPlaceholder = wfMessage('commentreplyplaceholder')->escaped();
-			$page = Title::newFromText("Special:AddComment/" . $owner->getId());
+		$comment = Comment::newWithOwner( $owner );
+		if ( $comment->canComment( $wgUser ) ) {
+			$tokenSet = new CsrfTokenSet( $wgRequest );
+			$commentPlaceholder = wfMessage( 'commentplaceholder' )->escaped();
+			$replyPlaceholder = wfMessage( 'commentreplyplaceholder' )->escaped();
+			$page = Title::newFromText( "Special:AddComment/" . $owner->getId() );
 			return '
-			<div class="commentdisplay add-comment' . ($hidden ? ' hidden' : '') . '">
-				<div class="avatar">' . ProfilePage::userAvatar(null, 48, $wgUser->getEmail(), $wgUser->getName())[0] . '</div>
+			<div class="commentdisplay add-comment' . ( $hidden ? ' hidden' : '' ) . '">
+				<div class="avatar">' . ProfilePage::userAvatar( null, 48, $wgUser->getEmail(), $wgUser->getName() )[0] . '</div>
 				<div class="entryform">
 					<form action="' . $page->getFullUrl() . '" method="post">
 						<textarea name="message" maxlength="' . Comment::MAX_LENGTH . '" data-replyplaceholder="' . $replyPlaceholder . '" placeholder="' . $commentPlaceholder . '"></textarea>
-						<button name="inreplyto" class="submit wds-button" value="0">' . wfMessage('commentaction')->escaped() . '</button>
-						' . Html::hidden('token', $tokenSet->getToken()) . '
+						<button name="inreplyto" class="submit wds-button" value="0">' . wfMessage( 'commentaction' )->escaped() . '</button>
+						' . Html::hidden( 'token', $tokenSet->getToken() ) . '
 					</form>
 				</div>
 			</div>';
 		} else {
 			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-			$link = $linkRenderer->makeKnownLink(Title::newFromText('Special:ConfirmEmail'), wfMessage('no-perm-validate-email')->text());
-			return "<div class='errorbox'>" . wfMessage('no-perm-profile-addcomment', $link)->text() . "</div>";
+			$link = $linkRenderer->makeKnownLink( Title::newFromText( 'Special:ConfirmEmail' ), wfMessage( 'no-perm-validate-email' )->text() );
+			return "<div class='errorbox'>" . wfMessage( 'no-perm-profile-addcomment', $link )->text() . "</div>";
 		}
 	}
 
 	/**
 	 * Returns html display for a single profile comment
 	 *
-	 * @param  Comment $comment   Comment instance to pull data from.
-	 * @param  integer $highlight [optional] ID of a comment to highlight from among those displayed.
-	 * @return string	html for display
+	 * @param Comment $comment Comment instance to pull data from.
+	 * @param int $highlight [optional] ID of a comment to highlight from among those displayed.
+	 * @return string html for display
 	 */
-	public static function singleComment(Comment $comment, $highlight = false) {
+	public static function singleComment( Comment $comment, $highlight = false ) {
 		global $wgOut, $wgUser;
 
 		$html = '';
 		$cUser = $comment->getActorUser();
 
 		$type = '';
-		switch ($comment->getType()) {
+		switch ( $comment->getType() ) {
 			case Comment::PRIVATE_MESSAGE:
 				$type = 'private';
 				break;
@@ -120,11 +120,11 @@ class CommentDisplay {
 				break;
 		}
 
-		if ($highlight === $comment->getId()) {
+		if ( $highlight === $comment->getId() ) {
 			$type .= ' highlighted';
 		}
 
-		if (HydraCore::isMobileSkin(RequestContext::getMain()->getSkin())) {
+		if ( HydraCore::isMobileSkin( RequestContext::getMain()->getSkin() ) ) {
 			$avatarSize = 36;
 		} else {
 			$avatarSize = 48;
@@ -134,45 +134,45 @@ class CommentDisplay {
 		<div class="commentdisplay ' . $type . '" data-id="' . $comment->getId() . '">
 			<a name="comment' . $comment->getId() . '"></a>
 			<div class="commentblock">
-				<div class="avatar">' . ProfilePage::userAvatar(null, $avatarSize, $cUser->getEmail(), $cUser->getName())[0] . '</div>
+				<div class="avatar">' . ProfilePage::userAvatar( null, $avatarSize, $cUser->getEmail(), $cUser->getName() )[0] . '</div>
 				<div class="commentheader">';
 		$html .= '
 					<div class="right">'
-				. ($comment->getAdminActedUserId() ? self::adminAction($comment) . ', ' : '')
-				. Html::rawElement('a', ['href' => SpecialPage::getTitleFor('CommentPermalink', $comment->getId(), 'comment' . $comment->getId())->getLinkURL()], self::timestamp($comment)) . ' '
-				. ($comment->canReply($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon newreply', 'title' => wfMessage('replylink-tooltip')], HydraCore::awesomeIcon('reply')) . ' ' : '')
-				. ($comment->canEdit($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon edit', 'title' => wfMessage('commenteditlink-tooltip')], HydraCore::awesomeIcon('pencil-alt')) . ' ' : '')
-				. ($comment->canRemove($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon remove', 'title' => wfMessage('removelink-tooltip')], HydraCore::awesomeIcon('trash')) : '')
-				. ($comment->canRestore($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon restore', 'title' => wfMessage('restorelink-tooltip')], HydraCore::awesomeIcon('undo')) : '')
-				. ($comment->canPurge($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon purge', 'title' => wfMessage('purgelink-tooltip')], HydraCore::awesomeIcon('eraser')) : '')
-				. ($comment->canReport($wgUser) ? Html::rawElement('a', ['href' => '#', 'class' => 'icon report', 'title' => wfMessage('reportlink-tooltip')], HydraCore::awesomeIcon('flag')) : '')
+				. ( $comment->getAdminActedUserId() ? self::adminAction( $comment ) . ', ' : '' )
+				. Html::rawElement( 'a', [ 'href' => SpecialPage::getTitleFor( 'CommentPermalink', $comment->getId(), 'comment' . $comment->getId() )->getLinkURL() ], self::timestamp( $comment ) ) . ' '
+				. ( $comment->canReply( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon newreply', 'title' => wfMessage( 'replylink-tooltip' ) ], HydraCore::awesomeIcon( 'reply' ) ) . ' ' : '' )
+				. ( $comment->canEdit( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon edit', 'title' => wfMessage( 'commenteditlink-tooltip' ) ], HydraCore::awesomeIcon( 'pencil-alt' ) ) . ' ' : '' )
+				. ( $comment->canRemove( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon remove', 'title' => wfMessage( 'removelink-tooltip' ) ], HydraCore::awesomeIcon( 'trash' ) ) : '' )
+				. ( $comment->canRestore( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon restore', 'title' => wfMessage( 'restorelink-tooltip' ) ], HydraCore::awesomeIcon( 'undo' ) ) : '' )
+				. ( $comment->canPurge( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon purge', 'title' => wfMessage( 'purgelink-tooltip' ) ], HydraCore::awesomeIcon( 'eraser' ) ) : '' )
+				. ( $comment->canReport( $wgUser ) ? Html::rawElement( 'a', [ 'href' => '#', 'class' => 'icon report', 'title' => wfMessage( 'reportlink-tooltip' ) ], HydraCore::awesomeIcon( 'flag' ) ) : '' )
 				. '
 					</div>'
-				. CP::userLink($comment->getActorUserId(), "commentUser");
+				. CP::userLink( $comment->getActorUserId(), "commentUser" );
 		$html .= '
 				</div>
 				<div class="commentbody">
-					' . self::sanitizeComment($comment->getMessage()) . '
+					' . self::sanitizeComment( $comment->getMessage() ) . '
 				</div>
 			</div>';
-		$replies = $comment->getReplies($wgUser);
-		if (!empty($replies)) {
+		$replies = $comment->getReplies( $wgUser );
+		if ( !empty( $replies ) ) {
 			$html .= '<div class="replyset">';
 
 			// perhaps there are more replies not yet loaded
-			if ($comment->getTotalReplies($wgUser) > count($replies)) {
-				if (!isset($repliesTooltip)) {
-					$repliesTooltip = htmlspecialchars(wfMessage('repliestooltip')->plain(), ENT_QUOTES);
+			if ( $comment->getTotalReplies( $wgUser ) > count( $replies ) ) {
+				if ( !isset( $repliesTooltip ) ) {
+					$repliesTooltip = htmlspecialchars( wfMessage( 'repliestooltip' )->plain(), ENT_QUOTES );
 				}
 				// force parsing this message because MW won't replace plurals as expected
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
-				$viewReplies = Parser::stripOuterParagraph($wgOut->parseAsContent(wfMessage('viewearlierreplies', $comment->getTotalReplies($wgUser) - count($replies))->escaped()));
+				$viewReplies = Parser::stripOuterParagraph( $wgOut->parseAsContent( wfMessage( 'viewearlierreplies', $comment->getTotalReplies( $wgUser ) - count( $replies ) )->escaped() ) );
 				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
-			foreach ($replies as $reply) {
-				$html .= self::singleComment($reply, $highlight);
+			foreach ( $replies as $reply ) {
+				$html .= self::singleComment( $reply, $highlight );
 			}
 			$html .= '</div>';
 		}
@@ -187,15 +187,15 @@ class CommentDisplay {
 	 *
 	 * @param Comment $comment
 	 *
-	 * @return string	HTML fragment
+	 * @return string HTML fragment
 	 */
-	private static function adminAction(Comment $comment) {
+	private static function adminAction( Comment $comment ) {
 		$admin = $comment->getAdminActedUser();
-		if (!$admin->getName()) {
+		if ( !$admin->getName() ) {
 			return '';
 		}
 
-		return wfMessage('cp-commentmoderated', $admin->getName())->text() . ' ' . CP::timeTag($comment->getAdminActionTimestamp());
+		return wfMessage( 'cp-commentmoderated', $admin->getName() )->text() . ' ' . CP::timeTag( $comment->getAdminActionTimestamp() );
 	}
 
 	/**
@@ -203,13 +203,13 @@ class CommentDisplay {
 	 *
 	 * @param Comment $comment
 	 *
-	 * @return string	HTML fragment
+	 * @return string HTML fragment
 	 */
-	private static function timestamp(Comment $comment) {
-		if ($comment->getEditTimestamp() === null) {
-			return wfMessage('cp-commentposted')->text() . ' ' . CP::timeTag($comment->getPostTimestamp());
+	private static function timestamp( Comment $comment ) {
+		if ( $comment->getEditTimestamp() === null ) {
+			return wfMessage( 'cp-commentposted' )->text() . ' ' . CP::timeTag( $comment->getPostTimestamp() );
 		} else {
-			return wfMessage('cp-commentedited')->text() . ' ' . CP::timeTag($comment->getEditTimestamp());
+			return wfMessage( 'cp-commentedited' )->text() . ' ' . CP::timeTag( $comment->getEditTimestamp() );
 		}
 	}
 
@@ -218,13 +218,13 @@ class CommentDisplay {
 	 *
 	 * @param Comment $comment
 	 *
-	 * @return string	HTML fragment
+	 * @return string HTML fragment
 	 */
-	private static function mobileTimestamp(Comment $comment) {
-		if ($comment->getEditTimestamp() === null) {
-			return CP::timeTag($comment->getPostTimestamp(), true);
+	private static function mobileTimestamp( Comment $comment ) {
+		if ( $comment->getEditTimestamp() === null ) {
+			return CP::timeTag( $comment->getPostTimestamp(), true );
 		} else {
-			return CP::timeTag($comment->getEditTimestamp(), true);
+			return CP::timeTag( $comment->getEditTimestamp(), true );
 		}
 	}
 
@@ -235,19 +235,19 @@ class CommentDisplay {
 	 * @param User $actor The user the parent comment belongs to
 	 * @return string HTML for display
 	 */
-	public static function repliesTo(Comment $comment, User $actor) {
-		if ($actor->getId() < 1) {
+	public static function repliesTo( Comment $comment, User $actor ) {
+		if ( $actor->getId() < 1 ) {
 			return 'Invalid user given';
 		}
 		$html = '';
 
-		$comments = $comment->getReplies($actor, -1);
+		$comments = $comment->getReplies( $actor, -1 );
 
-		if (empty($comments)) {
-			$html = wfMessage('cp-nocommentreplies');
+		if ( empty( $comments ) ) {
+			$html = wfMessage( 'cp-nocommentreplies' );
 		} else {
-			foreach ($comments as $comment) {
-				$html .= self::singleComment($comment);
+			foreach ( $comments as $comment ) {
+				$html .= self::singleComment( $comment );
 			}
 		}
 
@@ -257,14 +257,14 @@ class CommentDisplay {
 	/**
 	 * Sanitizes a comment for display in HTML.
 	 *
-	 * @param  string $comment Comment as typed by user.
-	 * @return string	Comment sanitized for usage in HTML.
+	 * @param string $comment Comment as typed by user.
+	 * @return string Comment sanitized for usage in HTML.
 	 */
-	public static function sanitizeComment($comment) {
+	public static function sanitizeComment( $comment ) {
 		global $wgOut, $wgParser;
 
 		$popts = $wgOut->parserOptions();
-		$oldIncludeSize = $popts->setMaxIncludeSize(0);
+		$oldIncludeSize = $popts->setMaxIncludeSize( 0 );
 
 		$parserOutput = $wgParser->getFreshParser()->parse(
 			str_replace(
@@ -284,13 +284,13 @@ class CommentDisplay {
 					"'",
 					'"'
 				],
-				htmlentities($comment, ENT_QUOTES)
+				htmlentities( $comment, ENT_QUOTES )
 			),
 			$wgOut->getTitle(),
 			$popts
 		);
 
-		$popts->setMaxIncludeSize($oldIncludeSize);
+		$popts->setMaxIncludeSize( $oldIncludeSize );
 		return $parserOutput->getText();
 	}
 }

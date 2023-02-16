@@ -9,14 +9,14 @@
  * @copyright (c) 2014 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Specials\Friends;
 
-use HydraCore;
-use MediaWiki\MediaWikiServices;
 use CurseProfile\Classes\Friendship;
 use CurseProfile\Templates\TemplateManageFriends;
+use HydraCore;
+use MediaWiki\MediaWikiServices;
 use Title;
 use UnlistedSpecialPage;
 
@@ -31,7 +31,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 	 * @return void
 	 */
 	public function __construct() {
-		parent::__construct('Friends');
+		parent::__construct( 'Friends' );
 	}
 
 	/**
@@ -39,60 +39,60 @@ class SpecialFriends extends UnlistedSpecialPage {
 	 *
 	 * @param string $path - Mixed: parameter(s) passed to the page or null.
 	 */
-	public function execute($path) {
+	public function execute( $path ) {
 		$wgRequest = $this->getRequest();
 		$wgOut = $this->getOutput();
 		$this->setHeaders();
-		if (empty($path)) {
-			$wgOut->addWikiMsg('friendsboard-invalid');
-			$wgOut->setStatusCode(404);
+		if ( empty( $path ) ) {
+			$wgOut->addWikiMsg( 'friendsboard-invalid' );
+			$wgOut->setStatusCode( 404 );
 			return;
 		}
 
 		// parse path segment for special page url similar to:
 		// /Special:Friends/4/Cathadan
-		$parts = explode('/', $path);
-		$userId = isset($parts[0]) ? intval($parts[0]) : 0;
-		$userName = isset($parts[1]) ? $parts[1] : null;
+		$parts = explode( '/', $path );
+		$userId = isset( $parts[0] ) ? intval( $parts[0] ) : 0;
+		$userName = isset( $parts[1] ) ? $parts[1] : null;
 
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($userId);
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
 		$user->load();
-		if (!$user || $user->isAnon()) {
-			$wgOut->addWikiMsg('friendsboard-invalid');
-			$wgOut->setStatusCode(404);
+		if ( !$user || $user->isAnon() ) {
+			$wgOut->addWikiMsg( 'friendsboard-invalid' );
+			$wgOut->setStatusCode( 404 );
 			return;
 		}
 
 		// when viewing your own friends list, use the manage page
-		if ($this->getUser()->getId() == $user->getId()) {
-			$specialManageFriends = Title::newFromText('Special:ManageFriends');
-			$wgOut->redirect($specialManageFriends->getFullURL());
+		if ( $this->getUser()->getId() == $user->getId() ) {
+			$specialManageFriends = Title::newFromText( 'Special:ManageFriends' );
+			$wgOut->redirect( $specialManageFriends->getFullURL() );
 			return;
 		}
 
 		// Fix missing or incorrect username segment in the path
-		if ($user->getTitleKey() != $userName) {
-			$specialFriends = Title::newFromText('Special:Friends/' . $userId . '/' . $user->getTitleKey());
-			if (!empty($_SERVER['QUERY_STRING'])) {
+		if ( $user->getTitleKey() != $userName ) {
+			$specialFriends = Title::newFromText( 'Special:Friends/' . $userId . '/' . $user->getTitleKey() );
+			if ( !empty( $_SERVER['QUERY_STRING'] ) ) {
 				// don't destroy any extra params
 				$query = '?' . $_SERVER['QUERY_STRING'];
 			}
-			$wgOut->redirect($specialFriends->getFullURL() . $query);
+			$wgOut->redirect( $specialFriends->getFullURL() . $query );
 			return;
 		}
 
-		$start = $wgRequest->getInt('st');
+		$start = $wgRequest->getInt( 'st' );
 		$itemsPerPage = 25;
-		$wgOut->setPageTitle(wfMessage('friendsboard-title', $user->getName())->plain());
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
-		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
+		$wgOut->setPageTitle( wfMessage( 'friendsboard-title', $user->getName() )->plain() );
+		$wgOut->addModuleStyles( [ 'ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
+		$wgOut->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 		$templateManageFriends = new TemplateManageFriends;
 
-		$f = new Friendship($user);
+		$f = new Friendship( $user );
 
 		$friendTypes = $f->getFriends();
-		$pagination = HydraCore::generatePaginationHtml($this->getFullTitle(), count($friendTypes['friends']), $itemsPerPage, $start);
+		$pagination = HydraCore::generatePaginationHtml( $this->getFullTitle(), count( $friendTypes['friends'] ), $itemsPerPage, $start );
 
-		$wgOut->addHTML($templateManageFriends->display($friendTypes['friends'], $pagination, $itemsPerPage, $start));
+		$wgOut->addHTML( $templateManageFriends->display( $friendTypes['friends'], $pagination, $itemsPerPage, $start ) );
 	}
 }

@@ -9,7 +9,7 @@
  * @copyright (c) 2015 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -26,7 +26,7 @@ class ProfileApi extends HydraApiBase {
 	/**
 	 * Allowed API actions.
 	 *
-	 * @return array	API Actions
+	 * @return array API Actions
 	 */
 	public function getActions(): array {
 		return [
@@ -118,10 +118,10 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetWikisByString() {
-		$search = $this->getMain()->getVal('search');
-		$returnGet = ProfileData::getWikiSitesSearch($search);
+		$search = $this->getMain()->getVal( 'search' );
+		$returnGet = ProfileData::getWikiSitesSearch( $search );
 		$return = [];
-		foreach ($returnGet as $hash => $r) {
+		foreach ( $returnGet as $hash => $r ) {
 			// curated data return.
 			$return[$hash] = [
 				'wiki_name' => $r['wiki_name'],
@@ -130,8 +130,8 @@ class ProfileApi extends HydraApiBase {
 				'md5_key' => $r['md5_key']
 			];
 		}
-		$this->getResult()->addValue(null, 'result', 'success');
-		$this->getResult()->addValue(null, 'data', $return);
+		$this->getResult()->addValue( null, 'result', 'success' );
+		$this->getResult()->addValue( null, 'data', $return );
 	}
 
 	/**
@@ -140,16 +140,16 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetWiki() {
-		$hash = $this->getMain()->getVal('hash');
-		$wiki = ProfileData::getWikiSite($hash);
+		$hash = $this->getMain()->getVal( 'hash' );
+		$wiki = ProfileData::getWikiSite( $hash );
 
-		if (!empty($wiki)) {
-			$this->getResult()->addValue(null, 'result', 'success');
-			$this->getResult()->addValue(null, 'data', $wiki);
+		if ( !empty( $wiki ) ) {
+			$this->getResult()->addValue( null, 'result', 'success' );
+			$this->getResult()->addValue( null, 'data', $wiki );
 		} else {
-			$this->getResult()->addValue(null, 'result', 'error');
-			$this->getResult()->addValue(null, 'message', 'no result found for hash ' . $hash);
-			$this->getResult()->addValue(null, 'data', []);
+			$this->getResult()->addValue( null, 'result', 'error' );
+			$this->getResult()->addValue( null, 'message', 'no result found for hash ' . $hash );
+			$this->getResult()->addValue( null, 'data', [] );
 		}
 	}
 
@@ -159,21 +159,21 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetPublicProfile() {
-		$userName = $this->getRequest()->getText('user_name');
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName($userName);
-		if (!$user || !$user->getId()) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'Invalid user.');
+		$userName = $this->getRequest()->getText( 'user_name' );
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $userName );
+		if ( !$user || !$user->getId() ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', 'Invalid user.' );
 			return;
 		}
-		$profileData = new ProfileData($user->getId());
+		$profileData = new ProfileData( $user->getId() );
 		$validFields = $profileData::getValidEditFields();
-		$userFields = ['username' => $userName];
-		foreach ($validFields as $field) {
-			$field = str_replace('profile-', '', $field);
-			$userFields[$field] = $profileData->getField($field);
+		$userFields = [ 'username' => $userName ];
+		foreach ( $validFields as $field ) {
+			$field = str_replace( 'profile-', '', $field );
+			$userFields[$field] = $profileData->getField( $field );
 		}
-		$this->getResult()->addValue(null, 'profile', $userFields);
+		$this->getResult()->addValue( null, 'profile', $userFields );
 	}
 
 	/**
@@ -182,18 +182,18 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doGetRawField() {
-		if ($this->getUser()->getId() === $this->getRequest()->getInt('user_id') || $this->getUser()->isAllowed('profile-moderate')) {
-			$field = strtolower($this->getRequest()->getText('field'));
-			$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
+		if ( $this->getUser()->getId() === $this->getRequest()->getInt( 'user_id' ) || $this->getUser()->isAllowed( 'profile-moderate' ) ) {
+			$field = strtolower( $this->getRequest()->getText( 'field' ) );
+			$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
 			try {
-				$fieldText = $profileData->getField($field);
-			} catch (MWException $e) {
-				$this->getResult()->addValue(null, 'result', 'failure');
-				$this->getResult()->addValue(null, 'errormsg', 'Invalid profile field.');
+				$fieldText = $profileData->getField( $field );
+			} catch ( MWException $e ) {
+				$this->getResult()->addValue( null, 'result', 'failure' );
+				$this->getResult()->addValue( null, 'errormsg', 'Invalid profile field.' );
 				return;
 			}
 
-			$this->getResult()->addValue(null, $field, $profileData->getField($field));
+			$this->getResult()->addValue( null, $field, $profileData->getField( $field ) );
 		}
 	}
 
@@ -203,27 +203,27 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doEditField() {
-		$field = strtolower($this->getRequest()->getText('field'));
-		$text = $this->getMain()->getVal('text');
-		$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
+		$field = strtolower( $this->getRequest()->getText( 'field' ) );
+		$text = $this->getMain()->getVal( 'text' );
+		$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
 
-		$canEdit = $profileData->canEdit($this->getUser());
-		if ($canEdit !== true) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', $canEdit);
+		$canEdit = $profileData->canEdit( $this->getUser() );
+		if ( $canEdit !== true ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', $canEdit );
 			return;
 		}
 
 		try {
-			$profileData->setField($field, $text, $this->getUser());
-			$fieldText = $profileData->getFieldHtml($field);
-			$this->getResult()->addValue(null, 'result', 'success');
+			$profileData->setField( $field, $text, $this->getUser() );
+			$fieldText = $profileData->getFieldHtml( $field );
+			$this->getResult()->addValue( null, 'result', 'success' );
 			// Add parsed text to result.
-			$this->getResult()->addValue(null, 'parsedContent', $fieldText);
+			$this->getResult()->addValue( null, 'parsedContent', $fieldText );
 			return;
-		} catch (MWException $e) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
+		} catch ( MWException $e ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', $e->getMessage() );
 			return;
 		}
 	}
@@ -234,38 +234,38 @@ class ProfileApi extends HydraApiBase {
 	 * @return void
 	 */
 	public function doEditSocialFields() {
-		$odata = $this->getRequest()->getText('data');
-		$data = json_decode($odata, 1);
-		if (!$data) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', 'Failed to decode data sent. (' . $odata . ')');
+		$odata = $this->getRequest()->getText( 'data' );
+		$data = json_decode( $odata, 1 );
+		if ( !$data ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', 'Failed to decode data sent. (' . $odata . ')' );
 			return;
 		}
 
-		$profileData = new ProfileData($this->getRequest()->getInt('user_id'));
-		$canEdit = $profileData->canEdit($this->getUser());
-		if ($canEdit !== true) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', $canEdit);
+		$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
+		$canEdit = $profileData->canEdit( $this->getUser() );
+		if ( $canEdit !== true ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', $canEdit );
 			return;
 		}
 
 		try {
-			foreach ($data as $field => $text) {
-				$text = ProfileData::validateExternalProfile(str_replace('link-', '', $field), preg_replace('/\s+\#/', '#', trim($text)));
-				if ($text === false) {
+			foreach ( $data as $field => $text ) {
+				$text = ProfileData::validateExternalProfile( str_replace( 'link-', '', $field ), preg_replace( '/\s+\#/', '#', trim( $text ) ) );
+				if ( $text === false ) {
 					$text = '';
 				}
-				if ($profileData->getField($field) != $text) {
-					$profileData->setField($field, $text, $this->getUser());
+				if ( $profileData->getField( $field ) != $text ) {
+					$profileData->setField( $field, $text, $this->getUser() );
 				}
 			}
-			$this->getResult()->addValue(null, 'result', 'success');
-			$this->getResult()->addValue(null, 'parsedContent', $profileData->getProfileLinksHtml());
+			$this->getResult()->addValue( null, 'result', 'success' );
+			$this->getResult()->addValue( null, 'parsedContent', $profileData->getProfileLinksHtml() );
 			return;
-		} catch (MWException $e) {
-			$this->getResult()->addValue(null, 'result', 'failure');
-			$this->getResult()->addValue(null, 'errormsg', $e->getMessage());
+		} catch ( MWException $e ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', $e->getMessage() );
 			return;
 		}
 	}

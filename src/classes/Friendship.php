@@ -9,7 +9,7 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -43,9 +43,9 @@ class Friendship {
 	 *
 	 * @param User $user
 	 */
-	public function __construct(User $user) {
-		if (!$user->getId()) {
-			throw new MWException('Anonymous user object passed.');
+	public function __construct( User $user ) {
+		if ( !$user->getId() ) {
+			throw new MWException( 'Anonymous user object passed.' );
 		}
 		$this->user = $user;
 	}
@@ -55,20 +55,20 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return integer -1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
+	 * @return int -1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
-	public function getRelationship(User $toUser) {
-		if (!$this->checkIfValidUserRelation($toUser)) {
+	public function getRelationship( User $toUser ) {
+		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return -1;
 		}
 
 		try {
-			$status = Cheevos::getFriendStatus($this->user, $toUser);
-			if ($status['status']) {
+			$status = Cheevos::getFriendStatus( $this->user, $toUser );
+			if ( $status['status'] ) {
 				return $status['status'];
 			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 		}
 		return -1;
 	}
@@ -85,13 +85,13 @@ class Friendship {
 				'incoming_requests' => [],
 				'outgoing_requests' => []
 			];
-			$friendTypes = array_merge($friendTypes, array_intersect_key(Cheevos::getFriends($this->user), $friendTypes));
-			foreach ($friendTypes as $type => $data) {
+			$friendTypes = array_merge( $friendTypes, array_intersect_key( Cheevos::getFriends( $this->user ), $friendTypes ) );
+			foreach ( $friendTypes as $type => $data ) {
 				$friendTypes[$type] = (array)$data;
 			}
 			return $friendTypes;
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 			// Return default array after Cheevos Exception.
 			return $friendTypes;
 		}
@@ -100,12 +100,12 @@ class Friendship {
 	/**
 	 * Returns the number of friends a user has
 	 *
-	 * @return integer Number of friends
+	 * @return int Number of friends
 	 */
 	public function getFriendCount() {
 		// my god look how efficient this is
 		$friendTypes = $this->getFriends();
-		return count($friendTypes['friends']);
+		return count( $friendTypes['friends'] );
 	}
 
 	/**
@@ -113,40 +113,40 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return boolean True on success, False on failure.
+	 * @return bool True on success, False on failure.
 	 */
-	public function sendRequest(User $toUser) {
-		if (!$this->checkIfValidUserRelation($toUser)) {
+	public function sendRequest( User $toUser ) {
+		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
 
-		if ($this->user->getBlock() !== null) {
-			return ['error' => 'friendrequest-blocked'];
+		if ( $this->user->getBlock() !== null ) {
+			return [ 'error' => 'friendrequest-blocked' ];
 		}
 
-		if ($toUser->getBlock() !== null) {
-			return ['error' => 'friendrequest-blocked-other'];
+		if ( $toUser->getBlock() !== null ) {
+			return [ 'error' => 'friendrequest-blocked-other' ];
 		}
 
-		$relationShip = $this->getRelationship($toUser);
+		$relationShip = $this->getRelationship( $toUser );
 
-		if ($relationShip == -1) {
-			return ['error' => 'friendrequest-status-unavailable'];
+		if ( $relationShip == -1 ) {
+			return [ 'error' => 'friendrequest-status-unavailable' ];
 		}
 
-		if ($relationShip !== self::STRANGERS) {
-			return ['error' => 'friendrequest-already-friends'];
+		if ( $relationShip !== self::STRANGERS ) {
+			return [ 'error' => 'friendrequest-already-friends' ];
 		}
 
 		try {
-			$makeFriend = Cheevos::createFriendRequest($this->user, $toUser);
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+			$makeFriend = Cheevos::createFriendRequest( $this->user, $toUser );
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 			return false;
 		}
 
-		$fromUserTitle = Title::makeTitle(NS_USER_PROFILE, $this->user->getName());
-		$canonicalUrl = SpecialPage::getTitleFor('ManageFriends')->getFullURL();
+		$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $this->user->getName() );
+		$canonicalUrl = SpecialPage::getTitleFor( 'ManageFriends' )->getFullURL();
 		$broadcast = NotificationBroadcast::newSingle(
 			'user-interest-profile-friendship',
 			$this->user,
@@ -173,12 +173,12 @@ class Friendship {
 				]
 			]
 		);
-		if ($broadcast) {
+		if ( $broadcast ) {
 			$broadcast->transmit();
 		}
 
 		MediaWikiServices::getInstance()->getHookContainer()
-			->run('CurseProfileAddFriend', [$this->user, $toUser]);
+			->run( 'CurseProfileAddFriend', [ $this->user, $toUser ] );
 		return true;
 	}
 
@@ -187,20 +187,20 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return boolean True on success, False on failure.
+	 * @return bool True on success, False on failure.
 	 */
-	public function acceptRequest(User $toUser) {
-		if (!$this->checkIfValidUserRelation($toUser)) {
+	public function acceptRequest( User $toUser ) {
+		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
 
 		try {
-			$res = Cheevos::acceptFriendRequest($this->user, $toUser);
-			if ($res['message'] == "success") {
+			$res = Cheevos::acceptFriendRequest( $this->user, $toUser );
+			if ( $res['message'] == "success" ) {
 				return true;
 			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 		}
 		return false;
 	}
@@ -210,20 +210,20 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return boolean True on success, False on failure.
+	 * @return bool True on success, False on failure.
 	 */
-	public function ignoreRequest(User $toUser) {
-		if (!$this->checkIfValidUserRelation($toUser)) {
+	public function ignoreRequest( User $toUser ) {
+		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
 
 		try {
-			$res = Cheevos::cancelFriendRequest($this->user, $toUser);
-			if ($res['message'] == "success") {
+			$res = Cheevos::cancelFriendRequest( $this->user, $toUser );
+			if ( $res['message'] == "success" ) {
 				return true;
 			}
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 		}
 		return false;
 	}
@@ -233,22 +233,22 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return boolean True on success, False on failure.
+	 * @return bool True on success, False on failure.
 	 */
-	public function removeFriend(User $toUser) {
-		if (!$this->checkIfValidUserRelation($toUser)) {
+	public function removeFriend( User $toUser ) {
+		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
 
 		try {
-			Cheevos::cancelFriendRequest($this->user, $toUser);
-		} catch (CheevosException $e) {
-			wfDebug(__METHOD__ . ": Caught CheevosException - " . $e->getMessage());
+			Cheevos::cancelFriendRequest( $this->user, $toUser );
+		} catch ( CheevosException $e ) {
+			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 			return false;
 		}
 
 		MediaWikiServices::getInstance()->getHookContainer()
-			->run('CurseProfileRemoveFriend', [$this->user, $toUser]);
+			->run( 'CurseProfileRemoveFriend', [ $this->user, $toUser ] );
 
 		return true;
 	}
@@ -258,22 +258,22 @@ class Friendship {
 	 *
 	 * @param User|null $to
 	 *
-	 * @return boolean All checks passed.
+	 * @return bool All checks passed.
 	 */
-	private function checkIfValidUserRelation(?User $to): bool {
+	private function checkIfValidUserRelation( ?User $to ): bool {
 		$from = $this->user;
 		// No null users.
-		if (!$from || !$to) {
+		if ( !$from || !$to ) {
 			return false;
 		}
 
 		// Not the same user.
-		if ($from->getId() === $to->getId()) {
+		if ( $from->getId() === $to->getId() ) {
 			return false;
 		}
 
 		// No anonymous users.
-		if ($from->isAnon() || $to->isAnon()) {
+		if ( $from->isAnon() || $to->isAnon() ) {
 			return false;
 		}
 		return true;

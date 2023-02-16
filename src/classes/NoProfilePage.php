@@ -9,7 +9,7 @@
  * @license   GPL-2.0-or-later
  * @package   CurseProfile
  * @link      https://gitlab.com/hydrawiki
- **/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -23,9 +23,9 @@ class NoProfilePage extends Article {
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
-		$output->setPageTitle($this->getTitle()->getPrefixedText());
+		$output->setPageTitle( $this->getTitle()->getPrefixedText() );
 		$outputString = $this->getOutput();
-		$output->addHTML($outputString);
+		$output->addHTML( $outputString );
 	}
 
 	/**
@@ -35,8 +35,8 @@ class NoProfilePage extends Article {
 	 */
 	private function getOutput() {
 		$username = $this->getTitle()->getText();
-		$text = wfMessage('cp-user-does-not-exist', wfEscapeWikiText($username))->text();
-		$text .= ' ' . wfMessage('cp-enhanced-profile-unavailable')->text();
+		$text = wfMessage( 'cp-user-does-not-exist', wfEscapeWikiText( $username ) )->text();
+		$text .= ' ' . wfMessage( 'cp-enhanced-profile-unavailable' )->text();
 		$html = '<div class="curseprofile">';
 		$html .= '<h1>User:' . $username . '</h1>';
 		$html .= '<div class="mw-userpage-userdoesnotexist error">' . $text . '</div>';

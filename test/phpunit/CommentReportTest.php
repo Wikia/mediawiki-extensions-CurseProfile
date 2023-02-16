@@ -1,8 +1,8 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\CommentReport;
+use MediaWiki\MediaWikiServices;
 
 /**
  * @group  CurseProfile
@@ -17,46 +17,46 @@ class CommentReportTest extends MediaWikiTestCase {
 			'Commenter' => null,
 			'Commentee' => null,
 		];
-		foreach ($testUsers as $username => &$u) {
-			$u = $userFactory->newFromName($username);
-			if ($u->getId() == 0) {
+		foreach ( $testUsers as $username => &$u ) {
+			$u = $userFactory->newFromName( $username );
+			if ( $u->getId() == 0 ) {
 				$u->addToDatabase();
 				$u->saveSettings();
 			}
 		}
 
-		$this->setMwGlobals('wgUser', $testUsers['Commenter']);
+		$this->setMwGlobals( 'wgUser', $testUsers['Commenter'] );
 
-		$commentBoard = new CommentBoard($testUsers['Commentee']->getId());
+		$commentBoard = new CommentBoard( $testUsers['Commentee']->getId() );
 	}
 
 	protected $commenter, $commentee, $commentBoard;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$this->commenter = $userFactory->newFromName('Commenter');
-		$this->commentee = $userFactory->newFromName('Commentee');
-		$this->commentBoard = new CommentBoard($this->commentee->getId());
+		$this->commenter = $userFactory->newFromName( 'Commenter' );
+		$this->commentee = $userFactory->newFromName( 'Commentee' );
+		$this->commentBoard = new CommentBoard( $this->commentee->getId() );
 	}
 
 	public function testGetReports() {
 		$reports = CommentReport::getReports();
-		$this->assertInternalType('array', $reports, 'CommentReport::getReports should return an array');
+		$this->assertIsArray( $reports, 'CommentReport::getReports should return an array' );
 		return $reports;
 	}
 
 	/**
 	 * @depends testGetReports
 	 */
-	public function testReportComment($reports) {
-		$this->commentBoard->addComment('Hello world!');
+	public function testReportComment( $reports ) {
+		$this->commentBoard->addComment( 'Hello world!' );
 		$comments = $this->commentBoard->getComments();
 
-		$report = CommentReport::newUserReport($comments[0]['ub_id']);
-		$this->assertInstanceOf('CommentReport', $report, "Comments should be reportable by logged-in users.");
+		$report = CommentReport::newUserReport( $comments[0]['ub_id'] );
+		$this->assertInstanceOf( 'CommentReport', $report, "Comments should be reportable by logged-in users." );
 
 		$newReports = CommentReport::getReports();
-		$this->assertGreaterThan(count($reports), count($newReports), 'A new report should be returned after one has been submitted.');
+		$this->assertGreaterThan( count( $reports ), count( $newReports ), 'A new report should be returned after one has been submitted.' );
 	}
 }

@@ -9,13 +9,13 @@
  * @copyright (c) 2014 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Specials\Friends;
 
-use SpecialPage;
 use CurseProfile\Classes\Friendship;
 use CurseProfile\Templates\TemplateManageFriends;
+use SpecialPage;
 use UserNotLoggedIn;
 
 /**
@@ -25,7 +25,7 @@ use UserNotLoggedIn;
  */
 class SpecialManageFriends extends SpecialPage {
 	public function __construct() {
-		parent::__construct('ManageFriends');
+		parent::__construct( 'ManageFriends' );
 	}
 
 	/**
@@ -40,10 +40,10 @@ class SpecialManageFriends extends SpecialPage {
 	/**
 	 * Execute
 	 *
-	 * @param  array $param
+	 * @param array $param
 	 * @return void
 	 */
-	public function execute($param) {
+	public function execute( $param ) {
 		$this->setHeaders();
 		$this->outputHeader();
 		$wgRequest = $this->getRequest();
@@ -51,22 +51,22 @@ class SpecialManageFriends extends SpecialPage {
 
 		// Fix missing or incorrect username segment in the path
 		$user = $this->getUser();
-		if ($user->isAnon()) {
-			throw new UserNotLoggedIn('exception-nologinreturn-text', 'exception-nologin', ['Special:ManageFriends']);
+		if ( $user->isAnon() ) {
+			throw new UserNotLoggedIn( 'exception-nologinreturn-text', 'exception-nologin', [ 'Special:ManageFriends' ] );
 		}
 
-		$start = $wgRequest->getInt('st');
+		$start = $wgRequest->getInt( 'st' );
 		$itemsPerPage = 25;
-		$wgOut->addModuleStyles(['ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles']);
-		$wgOut->addModules(['ext.curseprofile.profilepage.scripts']);
+		$wgOut->addModuleStyles( [ 'ext.curseprofile.profilepage.styles', 'ext.hydraCore.pagination.styles', 'ext.curseprofile.customskin.styles', 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
+		$wgOut->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 		$templateManageFriends = new TemplateManageFriends;
 
 		// $wgOut->addHTML($templateCommentBoard->header($user, $wgOut->getPageTitle()));
 
-		$f = new Friendship($user);
+		$f = new Friendship( $user );
 
 		$friendTypes = $f->getFriends();
 
-		$wgOut->addHTML($templateManageFriends->manage($user, $friendTypes, $itemsPerPage, $start));
+		$wgOut->addHTML( $templateManageFriends->manage( $user, $friendTypes, $itemsPerPage, $start ) );
 	}
 }

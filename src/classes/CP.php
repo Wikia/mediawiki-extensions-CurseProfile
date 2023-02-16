@@ -9,7 +9,7 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile\Classes;
 
@@ -23,7 +23,7 @@ class CP {
 	/**
 	 * The db connection override for comment reporting actions
 	 *
-	 * @var object	mw DB connection
+	 * @var object mw DB connection
 	 */
 	private static $db;
 
@@ -33,66 +33,66 @@ class CP {
 	 *
 	 * @param object $db mw DB connection
 	 */
-	public static function setDb($db) {
+	public static function setDb( $db ) {
 		self::$db = $db;
 	}
 
 	/**
 	 * Returns a db connection to use
 	 *
-	 * @param  integer $id mw db id (DB_MASTER or DB_SLAVE)
-	 * @return object	mw db connection
+	 * @param int $id mw db id (DB_MASTER or DB_SLAVE)
+	 * @return object mw db connection
 	 */
-	public static function getDb($id) {
-		if (isset(self::$db)) {
+	public static function getDb( $id ) {
+		if ( isset( self::$db ) ) {
 			return self::$db;
 		}
-		return wfGetDB($id);
+		return wfGetDB( $id );
 	}
 
 	/**
 	 * Creates a time tag that can be converted to a dynamic relative time
 	 * after adding timeago.yarp.com to the page
 	 *
-	 * @param  string $timestamp
-	 * @param  bool   $mobile
+	 * @param string $timestamp
+	 * @param bool $mobile
 	 * @return string
 	 */
-	public static function timeTag($timestamp, $mobile = false) {
+	public static function timeTag( $timestamp, $mobile = false ) {
 		// quick sanity check to see if the argument might already be a unix timestamp
-		if (!is_numeric($timestamp) || $timestamp < 100000 || $timestamp > 3000000000) {
-			$timestamp = strtotime($timestamp);
+		if ( !is_numeric( $timestamp ) || $timestamp < 100000 || $timestamp > 3000000000 ) {
+			$timestamp = strtotime( $timestamp );
 		}
-		$iso8601 = date('c', $timestamp);
+		$iso8601 = date( 'c', $timestamp );
 
-		if ($mobile) {
-			$readableTime = date('h:i d-t-Y (e)', $timestamp);
+		if ( $mobile ) {
+			$readableTime = date( 'h:i d-t-Y (e)', $timestamp );
 			return '<time class="timeago" datetime="' . $iso8601 . '">' . $readableTime . '</time>';
 		}
 
-		$readableTime = date('H:i, d F Y (e)', $timestamp);
+		$readableTime = date( 'H:i, d F Y (e)', $timestamp );
 		return '<time class="timeago" datetime="' . $iso8601 . '">at ' . $readableTime . '</time>';
 	}
 
 	/**
 	 * Returns an HTML string linking to the user page with the given ID
 	 *
-	 * @param  mixed  $user  user id or user object
-	 * @param  string $class classes to add, if defined
-	 * @return string	html anchor tag fragment
+	 * @param mixed $user user id or user object
+	 * @param string $class classes to add, if defined
+	 * @return string html anchor tag fragment
 	 */
-	public static function userLink($user, $class = false) {
-		if ($user instanceof User) {
+	public static function userLink( $user, $class = false ) {
+		if ( $user instanceof User ) {
 			$user_id = $user->getId();
 		} else {
 			$user_id = $user;
-			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId($user);
+			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $user );
 		}
 		$customAttribs = [];
-		if ($class && is_string($class)) {
+		if ( $class && is_string( $class ) ) {
 			$customAttribs['class'] = $class;
 		}
 		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-		return $linkRenderer->makeKnownLink($user->getUserPage(), $user->getName(), $customAttribs); // htmlspecialchars($user->getName())
+		return $linkRenderer->makeKnownLink( $user->getUserPage(), $user->getName(), $customAttribs ); // htmlspecialchars($user->getName())
 	}
 }

@@ -8,7 +8,7 @@
  * @copyright (c) 2017 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
- **/
+ */
 
 require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 
@@ -23,7 +23,7 @@ class MigrateFriendsToCheevos extends Maintenance {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription('Migrate friends from redis to cheevos');
+		$this->addDescription( 'Migrate friends from redis to cheevos' );
 	}
 
 	/**
@@ -34,28 +34,28 @@ class MigrateFriendsToCheevos extends Maintenance {
 	public function execute() {
 		global $wgRedisServers;
 
-		$redis = RedisCache::getClient('cache');
-		$keys = $redis->keys('friendlist:*');
+		$redis = RedisCache::getClient( 'cache' );
+		$keys = $redis->keys( 'friendlist:*' );
 		$prefix = $wgRedisServers['cache']['options']['prefix'];
 
-		foreach ($keys as $dumbRedisName) {
+		foreach ( $keys as $dumbRedisName ) {
 			$far = $prefix . "friendlist:";
-			$actualUsableRedisKey = str_replace($prefix, '', $dumbRedisName);
+			$actualUsableRedisKey = str_replace( $prefix, '', $dumbRedisName );
 
-			$user_id = intval(str_replace($far, '', $dumbRedisName));
-			$friendIds = $redis->sMembers($actualUsableRedisKey);
-			foreach ($friendIds as $friend) {
-				$friend = intval($friend);
-				$this->output("$user_id => $friend -- ");
+			$user_id = intval( str_replace( $far, '', $dumbRedisName ) );
+			$friendIds = $redis->sMembers( $actualUsableRedisKey );
+			foreach ( $friendIds as $friend ) {
+				$friend = intval( $friend );
+				$this->output( "$user_id => $friend -- " );
 				try {
-					Cheevos::createFriendRequest($user_id, $friend);
-					$this->output("Relationship Created");
-				} catch (CheevosException $e) {
-					$this->output("Error");
-					var_dump($e->getMessage());
+					Cheevos::createFriendRequest( $user_id, $friend );
+					$this->output( "Relationship Created" );
+				} catch ( CheevosException $e ) {
+					$this->output( "Error" );
+					var_dump( $e->getMessage() );
 				}
-				$status = Cheevos::getFriendStatus($user_id, $friend);
-				$this->output(" -- Status: " . $status['status_name'] . "\n");
+				$status = Cheevos::getFriendStatus( $user_id, $friend );
+				$this->output( " -- Status: " . $status['status_name'] . "\n" );
 			}
 		}
 	}

@@ -9,7 +9,7 @@
  * @copyright (c) 2013 Curse Inc.
  * @license   GPL-2.0-or-later
  * @link      https://gitlab.com/hydrawiki
-**/
+ */
 
 namespace CurseProfile;
 
@@ -30,29 +30,29 @@ class SetProfilePreference extends Maintenance {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription('Overwrites the preference for profile vs. wiki pages for all users on a wiki');
-		$this->addArg('newPref', 'What the new user preference should be. One of: ' . implode(', ', array_keys(self::$preferences)), true);
+		$this->addDescription( 'Overwrites the preference for profile vs. wiki pages for all users on a wiki' );
+		$this->addArg( 'newPref', 'What the new user preference should be. One of: ' . implode( ', ', array_keys( self::$preferences ) ), true );
 	}
 
 	public function execute() {
 		$newSetting = $this->getArg();
-		if (!in_array($newSetting, array_keys(self::$preferences))) {
-			$this->error('Invalid new preference provided. Must be one of: ' . implode(', ', array_keys(self::$preferences)));
+		if ( !in_array( $newSetting, array_keys( self::$preferences ) ) ) {
+			$this->error( 'Invalid new preference provided. Must be one of: ' . implode( ', ', array_keys( self::$preferences ) ) );
 			return;
 		}
 
 		$onOrOff = self::$preferences[$newSetting];
-		$db = wfGetDB(DB_PRIMARY);
+		$db = wfGetDB( DB_PRIMARY );
 
 		// delete existing profile settings
-		$db->delete('user_properties', ['up_property' => 'profile-pref'], __METHOD__);
-		$this->output("Existing user preferences have been removed.\n");
+		$db->delete( 'user_properties', [ 'up_property' => 'profile-pref' ], __METHOD__ );
+		$this->output( "Existing user preferences have been removed.\n" );
 
 		// lookup all user ids
-		$res = $db->select('user', ['user_id'], [], __METHOD__);
+		$res = $db->select( 'user', [ 'user_id' ], [], __METHOD__ );
 
-		foreach ($res as $row) {
-			$this->output("Inserting preference row for user ID " . $row->user_id . "\n");
+		foreach ( $res as $row ) {
+			$this->output( "Inserting preference row for user ID " . $row->user_id . "\n" );
 			$db->insert(
 				'user_properties',
 				[
@@ -64,7 +64,7 @@ class SetProfilePreference extends Maintenance {
 			);
 		}
 
-		$this->output("New user preferences have been saved.\n");
+		$this->output( "New user preferences have been saved.\n" );
 	}
 }
 
