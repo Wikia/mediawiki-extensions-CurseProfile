@@ -14,47 +14,40 @@ require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
+use MediaWiki\MediaWikiServices;
 
 class MigrateFriendsToCheevos extends Maintenance {
-	/**
-	 * Constructor
-	 *
-	 * @return void
-	 */
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Migrate friends from redis to cheevos' );
 	}
 
-	/**
-	 * Migrate Location Fields
-	 *
-	 * @return void
-	 */
 	public function execute() {
-		global $wgRedisServers;
+		$redisServers = $this->getConfig()->get( 'RedisServers' );
 
-		$redis = RedisCache::getClient( 'cache' );
+		$services = MediaWikiServices::getInstance();
+		$userFactory = $services->getUserFactory();
+		$redis = $services->getService( RedisCache::class )->getConnection( 'cache' );
+
 		$keys = $redis->keys( 'friendlist:*' );
-		$prefix = $wgRedisServers['cache']['options']['prefix'];
+		$prefix = $redisServers['cache']['options']['prefix'];
 
 		foreach ( $keys as $dumbRedisName ) {
 			$far = $prefix . "friendlist:";
 			$actualUsableRedisKey = str_replace( $prefix, '', $dumbRedisName );
 
-			$user_id = intval( str_replace( $far, '', $dumbRedisName ) );
+			$userId = (int)str_replace( $far, '', $dumbRedisName );
 			$friendIds = $redis->sMembers( $actualUsableRedisKey );
 			foreach ( $friendIds as $friend ) {
-				$friend = intval( $friend );
-				$this->output( "$user_id => $friend -- " );
+				$friend = (int)$friend;
+				$this->output( "$userId => $friend -- " );
 				try {
-					Cheevos::createFriendRequest( $user_id, $friend );
+					Cheevos::createFriendRequest( $userFactory->newFromId( $userId ), $userFactory->newFromId( $friend ) );
 					$this->output( "Relationship Created" );
 				} catch ( CheevosException $e ) {
-					$this->output( "Error" );
-					var_dump( $e->getMessage() );
+					$this->output( "Error\n{$e->getMessage()}\n{$e->getTraceAsString()}\n" );
 				}
-				$status = Cheevos::getFriendStatus( $user_id, $friend );
+				$status = Cheevos::getFriendStatus( $userFactory->newFromId( $userId ), $userFactory->newFromId( $friend ) );
 				$this->output( " -- Status: " . $status['status_name'] . "\n" );
 			}
 		}

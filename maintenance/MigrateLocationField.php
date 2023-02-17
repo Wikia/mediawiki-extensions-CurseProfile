@@ -10,30 +10,23 @@
  * @link      https://gitlab.com/hydrawiki
  */
 
+use MediaWiki\MediaWikiServices;
+
 require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 
 class MigrateLocationField extends Maintenance {
-	/**
-	 * Constructor
-	 *
-	 * @return void
-	 */
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Migrate profile-city, profile-city, and profile-country into profile-location.' );
 	}
 
-	/**
-	 * Migrate Location Fields
-	 *
-	 * @return void
-	 */
 	public function execute() {
-		$redis = RedisCache::getClient( 'cache' );
+		$redis = MediaWikiServices::getInstance()->getService( RedisCache::class )->getConnection( 'cache' );
+
 		$keys = $redis->keys( 'useroptions:*' );
 		foreach ( $keys as $key ) {
 			$key = str_replace( 'Hydra:', '', $key );
-			list( , $globalId ) = explode( ':', $key );
+			[ , $globalId ] = explode( ':', $key );
 			if ( $globalId < 1 ) {
 				continue;
 			}
