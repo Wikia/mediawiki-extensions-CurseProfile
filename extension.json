@@ -72,7 +72,7 @@
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
 	"JobClasses": {
-		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment"
+		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment::newInstance"
 	},
 	"AutoloadNamespaces": {
 		"CurseProfile\\": "src/"

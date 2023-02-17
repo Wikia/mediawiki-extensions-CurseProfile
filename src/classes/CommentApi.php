@@ -320,22 +320,17 @@ class CommentApi extends HydraApiBase {
 		}
 
 		$reportKey = $this->getMain()->getVal( 'reportKey' );
-		$jobArgs = [
-			'reportKey' => $reportKey,
-			'action' => $this->getMain()->getVal( 'withAction' ),
-			'byUser' => $this->getInt( 'byUser', $this->getUser()->getId() ),
-		];
 
-		ResolveComment::queue( $jobArgs );
+		ResolveComment::queue(
+			$reportKey,
+			$this->getMain()->getVal( 'withAction' ),
+			$this->getInt( 'byUser', $this->getUser()->getId() )
+		);
 		$this->getResult()->addValue( null, 'result', 'queued' );
 		return true;
 	}
 
-	/**
-	 * Indicates whether this module requires write mode
-	 *
-	 * @return bool
-	 */
+	/** @inheritDoc */
 	public function isWriteMode() {
 		return true;
 	}

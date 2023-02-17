@@ -7,10 +7,31 @@ namespace CurseProfile\Classes\Jobs;
 
 use CurseProfile\Classes\CommentReport;
 use Job;
+use JobSpecification;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
+use Title;
 
 class ResolveComment extends Job {
 	private const COMMAND = "CurseProfile\\ResolveComment";
+	private const REPORT_KEY_PARAM = 'reportKey';
+	private const ACTION_PARAM = 'action';
+	private const BY_USER_PARAM = 'byUser';
+
+	private string $reportKey;
+	private string $action;
+	private int $byUser;
+
+	public function __construct( array $params, private UserFactory $userFactory ) {
+		parent::__construct( self::COMMAND, $params );
+		$this->reportKey = $params[self::REPORT_KEY_PARAM];
+		$this->action = $params[self::ACTION_PARAM];
+		$this->byUser = $params[self::BY_USER_PARAM];
+	}
+
+	public static function newInstance( ?Title $title, array $params ): self {
+		return new self( $params, MediaWikiServices::getInstance()->getUserFactory() );
+	}
 
 	/**
 	 * Queue a new job.
@@ -22,8 +43,12 @@ class ResolveComment extends Job {
 	 *
 	 * @return void
 	 */
-	public static function queue( array $parameters = [] ) {
-		$job = new self( self::COMMAND, $parameters );
+	public static function queue( string $reportKey, string $action, int $byUser ): void {
+		$job = new JobSpecification( self::COMMAND, [
+			self::REPORT_KEY_PARAM => $reportKey,
+			self::ACTION_PARAM => $action,
+			self::BY_USER_PARAM => $byUser,
+		] );
 		MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
 	}
 
@@ -33,15 +58,13 @@ class ResolveComment extends Job {
 	 * @return bool Success
 	 */
 	public function run() {
-		$args = $this->getParams();
-
-		$report = CommentReport::newFromKey( $args['reportKey'], true );
+		$report = CommentReport::newFromKey( $this->reportKey );
 		if ( !$report ) {
 			return true;
 		}
 
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $args['byUser'] );
-		$result = $report->resolve( $args['action'], $user );
+		$user = $this->userFactory->newFromId( $this->byUser );
+		$result = $report->resolve( $this->action, $user );
 
 		if ( !$result ) {
 			$this->setLastError( "Resolve action encountered an error." );
