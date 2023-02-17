@@ -16,7 +16,9 @@ namespace CurseProfile\Specials\Friends;
 use CurseProfile\Classes\Friendship;
 use CurseProfile\Templates\TemplateManageFriends;
 use HydraCore;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserIdentityLookup;
+use SpecialPage;
 use Title;
 use UnlistedSpecialPage;
 
@@ -25,25 +27,19 @@ use UnlistedSpecialPage;
  * Redirects to ManageFriends when viewing one's own friends page.
  */
 class SpecialFriends extends UnlistedSpecialPage {
-	/**
-	 * Main Constructor
-	 *
-	 * @return void
-	 */
-	public function __construct() {
+	public function __construct( private UserFactory $userFactory, private UserIdentityLookup $userIdentityLookup ) {
 		parent::__construct( 'Friends' );
 	}
 
 	/**
-	 * Show the special page
-	 *
-	 * @param string $path - Mixed: parameter(s) passed to the page or null.
+	 * @inheritDoc
+	 * @param ?string $subPage userId/userName - missing or mismatching username will be fixed automatically
 	 */
-	public function execute( $path ) {
+	public function execute( $subPage ) {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
-		if ( empty( $path ) ) {
+		if ( empty( $subPage ) ) {
 			$output->addWikiMsg( 'friendsboard-invalid' );
 			$output->setStatusCode( 404 );
 			return;
@@ -51,38 +47,32 @@ class SpecialFriends extends UnlistedSpecialPage {
 
 		// parse path segment for special page url similar to:
 		// /Special:Friends/4/Cathadan
-		$parts = explode( '/', $path );
-		$userId = isset( $parts[0] ) ? intval( $parts[0] ) : 0;
-		$userName = isset( $parts[1] ) ? $parts[1] : null;
+		[ $userId, $userName ] = explode( '/', $subPage );
 
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$user->load();
-		if ( !$user || $user->isAnon() ) {
+		$userIdentity = $this->userIdentityLookup->getUserIdentityByUserId( (int)$userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			$output->addWikiMsg( 'friendsboard-invalid' );
 			$output->setStatusCode( 404 );
 			return;
 		}
 
 		// when viewing your own friends list, use the manage page
-		if ( $this->getUser()->getId() == $user->getId() ) {
-			$specialManageFriends = Title::newFromText( 'Special:ManageFriends' );
-			$output->redirect( $specialManageFriends->getFullURL() );
+		if ( $this->getUser()->getId() === $userIdentity->getId() ) {
+			$output->redirect( SpecialPage::getTitleFor( 'ManageFriends' )->getFullURL() );
 			return;
 		}
+
+		$user = $this->userFactory->newFromUserIdentity( $userIdentity );
 
 		// Fix missing or incorrect username segment in the path
 		if ( $user->getTitleKey() != $userName ) {
-			$specialFriends = Title::newFromText( 'Special:Friends/' . $userId . '/' . $user->getTitleKey() );
-			if ( !empty( $_SERVER['QUERY_STRING'] ) ) {
-				// don't destroy any extra params
-				$query = '?' . $_SERVER['QUERY_STRING'];
-			}
-			$output->redirect( $specialFriends->getFullURL() . $query );
+			$fixedPath = SpecialPage::getTitleFor( 'Friends', "$userId/{$user->getTitleKey()}" )->getFullURL();
+			// Preserve query params
+			$query = $request->getRawQueryString();
+			$output->redirect( empty( $query ) ? $fixedPath : "$fixedPath?$query" );
 			return;
 		}
 
-		$start = $request->getInt( 'st' );
-		$itemsPerPage = 25;
 		$output->setPageTitle( $this->msg( 'friendsboard-title', $user->getName() )->plain() );
 		$output->addModuleStyles( [
 			'ext.curseprofile.profilepage.styles',
@@ -92,11 +82,12 @@ class SpecialFriends extends UnlistedSpecialPage {
 			'ext.hydraCore.font-awesome.styles'
 		] );
 		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
-		$templateManageFriends = new TemplateManageFriends;
+		$templateManageFriends = new TemplateManageFriends();
 
-		$f = new Friendship( $user );
-
-		$friendTypes = $f->getFriends();
+		$start = $request->getInt( 'st' );
+		$itemsPerPage = 25;
+		$friendship = new Friendship( $user );
+		$friendTypes = $friendship->getFriends();
 		$pagination = HydraCore::generatePaginationHtml(
 			$this->getFullTitle(),
 			count( $friendTypes['friends'] ),

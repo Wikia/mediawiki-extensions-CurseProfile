@@ -19,23 +19,29 @@ use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\ProfileData;
 use CurseProfile\Templates\TemplateCommentBoard;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 use UnlistedSpecialPage;
 
 class SpecialCommentPermalink extends UnlistedSpecialPage {
-	public function __construct() {
+	public function __construct( private UserFactory $userFactory ) {
 		parent::__construct( 'CommentPermalink' );
 	}
 
 	/**
-	 * Show the special page
-	 *
-	 * @param string $commentId extra string added to the page request path (/Special:CommentPermalink/12345) -> "12345"
-	 *
-	 * @return void
+	 * @inheritDoc
+	 * @param ?string $subPage commentId
 	 */
-	public function execute( $commentId ) {
+	public function execute( $subPage ) {
 		$output = $this->getOutput();
 		$this->setHeaders();
+
+		if ( empty( $subPage ) ) {
+			$output->setPageTitle( $this->msg( 'commentboard-invalid-title' )->plain() );
+			$output->addWikiMsg( 'commentboard-invalid' );
+			return;
+		}
+
+		$commentId = (int)$subPage;
 
 		// checks if comment exists and if wgUser can view it
 		$comment = Comment::newFromId( $commentId );
@@ -43,17 +49,14 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		if ( !$comment || !$comment->canView( $this->getUser() ) ) {
 			$purged = CommentBoard::getPurgedCommentById( $commentId );
 			if ( $purged ) {
-				$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-				$user = $userFactory->newFromId( $purged['ubpa_user_id'] );
-				$user->load();
-				$admin_user = $userFactory->newFromId( $purged['ubpa_admin_id'] );
-				$admin_user->load();
+				$user = $this->userFactory->newFromId( $purged['ubpa_user_id'] );
+				$adminUser = $this->userFactory->newFromId( $purged['ubpa_admin_id'] );
 				$output->setPageTitle( $this->msg( 'commentboard-purged-title', $user->getName() )->plain() );
 				$output->addWikiMsg(
 					'commentboard-purged',
 					$purged['ubpa_reason'],
-					$admin_user->getName(),
-					( new ProfileData( $admin_user ) )->getProfilePageUrl()
+					$adminUser->getName(),
+					( new ProfileData( $adminUser ) )->getProfilePageUrl()
 				);
 				$output->setStatusCode( 404 );
 				return;
@@ -70,7 +73,7 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 		$output->setPageTitle( $this->msg( 'commentboard-permalink-title', $owner->getName() )->plain() );
 		$output->addModuleStyles( [ 'ext.curseprofile.comments.styles', 'ext.hydraCore.font-awesome.styles' ] );
 		$output->addModules( [ 'ext.curseprofile.comments.scripts' ] );
-		$templateCommentBoard = new TemplateCommentBoard;
+		$templateCommentBoard = new TemplateCommentBoard();
 
 		$output->addHTML( $templateCommentBoard->permalinkHeader( $owner, $output->getPageTitle() ) );
 

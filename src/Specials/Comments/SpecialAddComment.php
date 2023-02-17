@@ -15,25 +15,25 @@ namespace CurseProfile\Specials\Comments;
 
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\ProfileData;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 use UnlistedSpecialPage;
 
 class SpecialAddComment extends UnlistedSpecialPage {
-	public function __construct() {
+	public function __construct( private UserFactory $userFactory ) {
 		parent::__construct( 'AddComment' );
 	}
 
-	/**
-	 * Show the special page
-	 *
-	 * @param string $toUserId Mixed: parameter(s) passed to the page or null
-	 */
-	public function execute( $toUserId ) {
+	public function execute( $subPage ) {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$user = $output->getUser();
 
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $toUserId );
+		if ( empty( $subPage ) || !is_numeric( $subPage ) ) {
+			$output->addWikiMsg( 'comment-invaliduser' );
+			return;
+		}
+
+		$toUser = $this->userFactory->newFromId( (int)$subPage );
 		$tokenSet = $this->getContext()->getCsrfTokenSet();
 		if ( $request->wasPosted() && $tokenSet->matchToken( $request->getVal( 'token' ) ) ) {
 			$board = new CommentBoard( $toUser );

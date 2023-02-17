@@ -17,23 +17,25 @@ use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Templates\TemplateCommentBoard;
 use HydraCore;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserIdentityLookup;
+use SpecialPage;
 use UnlistedSpecialPage;
 
 class SpecialCommentBoard extends UnlistedSpecialPage {
-	public function __construct() {
+	public function __construct( private UserFactory $userFactory, private UserIdentityLookup $userIdentityLookup ) {
 		parent::__construct( 'CommentBoard' );
 	}
 
 	/**
-	 * Show the special page
-	 *
-	 * @param string $path Mixed: parameter(s) passed to the page or null
+	 * @param ?string $subPage userId/username - missing or mismatching username will be fixed automatically
 	 */
-	public function execute( $path ) {
+	public function execute( $subPage ) {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
-		if ( empty( $path ) ) {
+
+		if ( empty( $subPage ) ) {
 			$output->addWikiMsg( 'commentboard-invalid' );
 			$output->setStatusCode( 404 );
 			return;
@@ -41,23 +43,22 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		// parse path segment for special page url similar to:
 		// /Special:CommentBoard/4/Cathadan
-		list( $userId, $user_name ) = explode( '/', $path );
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$user->load();
-		if ( !$user || $user->isAnon() ) {
+		[ $userId, $userName ] = explode( '/', $subPage );
+		$userIdentity = $this->userIdentityLookup->getUserIdentityByUserId( (int)$userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			$output->addWikiMsg( 'commentboard-invalid' );
 			$output->setStatusCode( 404 );
 			return;
 		}
 
+		$user = $this->userFactory->newFromUserIdentity( $userIdentity );
+
 		// Fix missing or incorrect username segment in the path
-		if ( $user->getTitleKey() != $user_name ) {
-			$fixedPath = '/Special:CommentBoard/' . $userId . '/' . $user->getTitleKey();
-			if ( !empty( $_SERVER['QUERY_STRING'] ) ) {
-				// don't destroy any extra params
-				$fixedPath .= '?' . $_SERVER['QUERY_STRING'];
-			}
-			$output->redirect( $fixedPath );
+		if ( $user->getTitleKey() !== $userName ) {
+			$fixedPath = SpecialPage::getSafeTitleFor( 'CommentBoard', "$userId/{$user->getTitleKey()}" )->getFullURL();
+			// Preserve query params
+			$query = $request->getRawQueryString();
+			$output->redirect( empty( $query ) ? $fixedPath : "$fixedPath?$query" );
 			return;
 		}
 
@@ -70,7 +71,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 			'ext.hydraCore.font-awesome.styles'
 		] );
 		$output->addModules( [ 'ext.curseprofile.comments.scripts' ] );
-		$templateCommentBoard = new TemplateCommentBoard;
+		$templateCommentBoard = new TemplateCommentBoard();
 
 		$output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
 

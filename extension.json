@@ -39,10 +39,22 @@
 	},
 	"SpecialPages": {
 		"ManageFriends": "CurseProfile\\Specials\\Friends\\SpecialManageFriends",
-		"Friends": "CurseProfile\\Specials\\Friends\\SpecialFriends",
-		"AddComment": "CurseProfile\\Specials\\Comments\\SpecialAddComment",
-		"CommentBoard": "CurseProfile\\Specials\\Comments\\SpecialCommentBoard",
-		"CommentPermalink": "CurseProfile\\Specials\\Comments\\SpecialCommentPermalink",
+		"Friends": {
+			"class": "CurseProfile\\Specials\\Friends\\SpecialFriends",
+			"services": ["UserFactory", "UserIdentityLookup"]
+		},
+		"AddComment": {
+			"class": "CurseProfile\\Specials\\Comments\\SpecialAddComment",
+			"services": ["UserFactory"]
+		},
+		"CommentBoard": {
+			"class": "CurseProfile\\Specials\\Comments\\SpecialCommentBoard",
+			"services": ["UserFactory", "UserIdentityLookup"]
+		},
+		"CommentPermalink": {
+			"class": "CurseProfile\\Specials\\Comments\\SpecialCommentPermalink",
+			"services": ["UserFactory"]
+		},
 		"CommentModeration": "CurseProfile\\Specials\\Comments\\SpecialCommentModeration"
 	},
 	"LogTypes": {

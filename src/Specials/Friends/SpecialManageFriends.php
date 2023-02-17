@@ -28,22 +28,16 @@ class SpecialManageFriends extends SpecialPage {
 		parent::__construct( 'ManageFriends' );
 	}
 
-	/**
-	 * Return the group name for this special page.
-	 *
-	 * @return string
-	 */
+	/** @inheritDoc */
 	protected function getGroupName() {
 		return 'users';
 	}
 
 	/**
-	 * Execute
-	 *
-	 * @param array $param
-	 * @return void
+	 * @inheritDoc
+	 * @param ?string $subPage unused
 	 */
-	public function execute( $param ) {
+	public function execute( $subPage ) {
 		$this->setHeaders();
 		$this->outputHeader();
 		$request = $this->getRequest();
@@ -59,8 +53,6 @@ class SpecialManageFriends extends SpecialPage {
 			);
 		}
 
-		$start = $request->getInt( 'st' );
-		$itemsPerPage = 25;
 		$output->addModuleStyles( [
 			'ext.curseprofile.profilepage.styles',
 			'ext.hydraCore.pagination.styles',
@@ -69,13 +61,14 @@ class SpecialManageFriends extends SpecialPage {
 			'ext.hydraCore.font-awesome.styles'
 		] );
 		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
-		$templateManageFriends = new TemplateManageFriends;
+		$templateManageFriends = new TemplateManageFriends();
 
 		// $output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
 
-		$f = new Friendship( $user );
-
-		$friendTypes = $f->getFriends();
+		$start = $request->getInt( 'st' );
+		$itemsPerPage = 25;
+		$friendship = new Friendship( $user );
+		$friendTypes = $friendship->getFriends();
 
 		$output->addHTML( $templateManageFriends->manage( $user, $friendTypes, $itemsPerPage, $start ) );
 	}
