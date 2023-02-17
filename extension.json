@@ -304,9 +304,18 @@
 		"WantedPages::getQueryInfo": "CurseProfile\\Classes\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
-		"profile": "CurseProfile\\Api\\ProfileApi",
-		"friend": "CurseProfile\\Api\\FriendApi",
-		"comment": "CurseProfile\\Api\\CommentApi"
+		"profile": {
+			"class": "CurseProfile\\Api\\ProfileApi",
+			"services": ["UserFactory"]
+		},
+		"friend": {
+			"class": "CurseProfile\\Api\\FriendApi",
+			"services": ["UserFactory"]
+		},
+		"comment": {
+			"class": "CurseProfile\\Api\\CommentApi",
+			"services": ["UserFactory", "UserOptionsLookup", "UserIdentityLookup"]
+		}
 	},
 	"callback": "CurseProfile\\Classes\\Hooks::onRegistration",
 	"config": {

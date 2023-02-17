@@ -20,18 +20,26 @@ use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\Jobs\ResolveComment;
 use DerivativeRequest;
 use HydraApiBase;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserIdentityLookup;
+use MediaWiki\User\UserOptionsLookup;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Class that allows commenting actions to be performed by AJAX calls.
  */
 class CommentApi extends HydraApiBase {
-	/**
-	 * Get Actions
-	 *
-	 * @return array
-	 */
+	public function __construct(
+		ApiMain $main,
+		$action,
+		private UserFactory $userFactory,
+		private UserOptionsLookup $userOptionsLookup,
+		private UserIdentityLookup $userIdentityLookup
+	) {
+		parent::__construct( $main, $action );
+	}
+
+	/** @inheritDoc */
 	public function getActions(): array {
 		return [
 			'restore' => [
@@ -186,54 +194,58 @@ class CommentApi extends HydraApiBase {
 	 * Adds a comment to a user's Curse Profile page or adds a new section on their talk page,
 	 * depending on what the user has chosen as their default user page.
 	 */
-	public function doAddToDefault() {
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->getMain()->getVal( 'user_id' ) );
-		if ( !$user || $user->isAnon() ) {
-			return $this->dieWithError( [ 'comment-invaliduser' ] );
+	public function doAddToDefault(): void {
+		$userIdentity = $this->userIdentityLookup->getUserIdentityByUserId( $this->getMain()->getVal( 'user_id' ) );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
+			$this->dieWithError( [ 'comment-invaliduser' ] );
 		}
-		$text = $this->getMain()->getVal( 'text' );
-		$inreply = $this->getInt( 'inReplyTo' );
 
-		if ( MediaWikiServices::getInstance()->getUserOptionsLookup()->getIntOption( $user, 'comment-pref' ) ) {
+		$user = $this->userFactory->newFromUserIdentity( $userIdentity );
+		$text = $this->getMain()->getVal( 'text' );
+		$inReply = $this->getInt( 'inReplyTo' );
+
+		if ( $this->userOptionsLookup->getIntOption( $user, 'comment-pref' ) ) {
 			$board = new CommentBoard( $user );
-			$commentSuccess = $board->addComment( $text, $this->getUser(), $inreply );
+			$commentSuccess = $board->addComment( $text, $this->getUser(), $inReply );
 			$this->getResult()->addValue( null, 'result', ( $commentSuccess ? 'success' : 'failure' ) );
-		} else {
-			// the recommended way of editing a local article was with WikiPage::doEditContent
-			// however there didn't seem to be an easy way to add a section rather than editing the entire content
-			$params = new DerivativeRequest(
-				$this->getRequest(),
-				[
-					'title' => 'User_talk:' . $user->getName(),
-					'action' => 'edit',
-					'section' => 'new',
-					'summary' => $this->getMain()->getVal( 'title' ),
-					'text' => $text,
-					'token' => $this->getMain()->getVal( 'token' ),
-				]
-			);
-			$api = new ApiMain( $params, true );
-			$api->execute();
-			// TODO: check the result object from the internal API call to determine success/failure status
-			$this->getResult()->addValue( null, 'result', 'success' );
+			return;
 		}
+
+		// the recommended way of editing a local article was with WikiPage::doEditContent
+		// however there didn't seem to be an easy way to add a section rather than editing the entire content
+		$params = new DerivativeRequest(
+			$this->getRequest(),
+			[
+				'title' => 'User_talk:' . $user->getName(),
+				'action' => 'edit',
+				'section' => 'new',
+				'summary' => $this->getMain()->getVal( 'title' ),
+				'text' => $text,
+				'token' => $this->getMain()->getVal( 'token' ),
+			]
+		);
+		$api = new ApiMain( $params, true );
+		$api->execute();
+		// TODO: check the result object from the internal API call to determine success/failure status
+		$this->getResult()->addValue( null, 'result', 'success' );
 	}
 
 	/**
 	 * Adds a new comment to a user's comment board on their Curse Profile page
 	 */
-	public function doAdd() {
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->getInt( 'user_id' ) );
-		if ( !$toUser || !$toUser->isAnon() ) {
-				$this->getResult()->addValue( null, 'result', 'failure' );
-				return;
+	public function doAdd(): void {
+		$userIdentity = $this->userIdentityLookup->getUserIdentityByUserId( $this->getInt( 'user_id' ) );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			return;
 		}
 
+		$toUser = $this->userFactory->newFromUserIdentity( $userIdentity );
 		$text = $this->getMain()->getVal( 'text' );
-		$inreply = $this->getInt( 'inReplyTo' );
+		$inReply = $this->getInt( 'inReplyTo' );
 
 		$board = new CommentBoard( $toUser );
-		$commentSuccess = $board->addComment( $text, $this->getUser(), $inreply );
+		$commentSuccess = $board->addComment( $text, $this->getUser(), $inReply );
 
 		$this->getResult()->addValue( null, 'result', ( $commentSuccess ? 'success' : 'failure' ) );
 	}
@@ -241,13 +253,13 @@ class CommentApi extends HydraApiBase {
 	/**
 	 * Returns all replies to a specific comment
 	 */
-	public function doGetReplies() {
+	public function doGetReplies(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		$replies = CommentDisplay::repliesTo( $comment, $this->getUser() );
 		$this->getResult()->addValue( null, 'html', $replies );
 	}
 
-	public function doGetRaw() {
+	public function doGetRaw(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		$this->getResult()->addValue(
 			null,
@@ -256,68 +268,68 @@ class CommentApi extends HydraApiBase {
 		);
 	}
 
-	public function doEdit() {
+	public function doEdit(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
-		$text = $this->getMain()->getVal( 'text' );
-		if ( $comment ) {
-			$res = CommentBoard::editComment( $comment, $this->getUser(), $text );
-			$this->getResult()->addValue( null, 'result', 'success' );
-			// add parsed text to result
-			$this->getResult()->addValue( null, 'parsedContent', CommentDisplay::sanitizeComment( $text ) );
-		} else {
+		if ( !$comment ) {
 			$this->dieWithError( [ 'comment-invalidaction' ] );
 		}
+
+		$text = $this->getMain()->getVal( 'text' );
+		$success = CommentBoard::editComment( $comment, $this->getUser(), $text );
+		$this->getResult()->addValue( null, 'result', $success ? 'success' : 'failure' );
+		// add parsed text to result
+		$this->getResult()->addValue( null, 'parsedContent', CommentDisplay::sanitizeComment( $text ) );
 	}
 
-	public function doRestore() {
+	public function doRestore(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
-		if ( $comment ) {
-			CommentBoard::restoreComment( $comment, $this->getUser() );
-			$this->getResult()->addValue( null, 'result', 'success' );
-			$this->getResult()->addValue( null, 'html', wfMessage( 'comment-adminremoved' ) );
-		} else {
-			return $this->dieWithError( [ 'comment-invalidaction' ] );
+		if ( !$comment ) {
+			$this->dieWithError( [ 'comment-invalidaction' ] );
 		}
+
+		$success = CommentBoard::restoreComment( $comment, $this->getUser() );
+		$this->getResult()->addValue( null, 'result', $success ? 'success' : 'failure' );
+		$this->getResult()->addValue( null, 'html', $this->msg( 'comment-adminremoved' ) );
 	}
 
-	public function doRemove() {
+	public function doRemove(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
-		if ( $comment ) {
-			CommentBoard::removeComment( $comment, $this->getUser() );
-			$this->getResult()->addValue( null, 'result', 'success' );
-			$this->getResult()->addValue( null, 'html', wfMessage( 'comment-adminremoved' ) );
-		} else {
-			return $this->dieWithError( [ 'comment-invalidaction' ] );
+		if ( !$comment ) {
+			$this->dieWithError( [ 'comment-invalidaction' ] );
 		}
+
+		$success = CommentBoard::removeComment( $comment, $this->getUser() );
+		$this->getResult()->addValue( null, 'result', $success ? 'success' : 'failure' );
+		$this->getResult()->addValue( null, 'html', $this->msg( 'comment-adminremoved' ) );
 	}
 
-	public function doPurge() {
+	public function doPurge(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
+		if ( !$comment ) {
+			$this->dieWithError( [ 'comment-invalidaction' ] );
+		}
+
 		$reason = $this->getMain()->getVal( 'reason' );
-		if ( $comment ) {
-			CommentBoard::purgeComment( $comment, $this->getUser(), $reason );
-			$this->getResult()->addValue( null, 'result', 'success' );
-		} else {
-			return $this->dieWithError( [ 'comment-invalidaction' ] );
-		}
+		$success = CommentBoard::purgeComment( $comment, $this->getUser(), $reason );
+		$this->getResult()->addValue( null, 'result', $success ? 'success' : 'failure' );
 	}
 
-	public function doReport() {
+	public function doReport(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
-		if ( $comment ) {
-			$result = CommentBoard::reportComment( $comment, $this->getUser() );
-			$this->getResult()->addValue( null, 'result', $result ? 'success' : 'error' );
-		} else {
-			return $this->dieWithError( [ 'comment-invalidaction' ] );
+		if ( !$comment ) {
+			$this->dieWithError( [ 'comment-invalidaction' ] );
 		}
+
+		$result = CommentBoard::reportComment( $comment, $this->getUser() );
+		$this->getResult()->addValue( null, 'result', $result ? 'success' : 'error' );
 	}
 
 	/**
-	 * Resolve Report API End Point
+	 * Schedule job to resolve Report API End Point
 	 *
 	 * @return bool Success
 	 */
-	public function doResolveReport() {
+	public function doResolveReport(): bool {
 		if ( !$this->getUser()->isRegistered() ) {
 			return false;
 		}

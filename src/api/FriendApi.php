@@ -13,22 +13,22 @@
 
 namespace CurseProfile\Api;
 
+use ApiMain;
 use CurseProfile\Classes\FriendDisplay;
 use CurseProfile\Classes\Friendship;
 use HydraApiBase;
-use MediaWiki\MediaWikiServices;
-use RequestContext;
+use MediaWiki\User\UserFactory;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Class that allows friendship actions to be performed by AJAX calls.
  */
 class FriendApi extends HydraApiBase {
-	/**
-	 * Get Actions
-	 *
-	 * @return array
-	 */
+	public function __construct( ApiMain $main, $action, private UserFactory $userFactory ) {
+		parent::__construct( $main, $action );
+	}
+
+	/** @inheritDoc */
 	public function getActions(): array {
 		$basicAction = [
 			'tokenRequired' => true,
@@ -60,101 +60,69 @@ class FriendApi extends HydraApiBase {
 		];
 	}
 
-	/**
-	 * Execute
-	 *
-	 * @return void
-	 */
-	public function execute() {
-		$this->f = new Friendship( $this->getUser() );
-		parent::execute();
-	}
+	protected function doDirectreq(): void {
+		$user = $this->getUser();
 
-	/**
-	 * Do Direct Req
-	 *
-	 * @return void
-	 */
-	protected function doDirectreq() {
-		$user = RequestContext::getMain()->getUser();
-
-		$targetUser = MediaWikiServices::getInstance()->getUserFactory()
-			->newFromName( $this->getMain()->getVal( 'name' ) );
+		$targetUser = $this->userFactory->newFromName( $this->getMain()->getVal( 'name' ) );
 		if ( !$targetUser ) {
-			$this->dieWithError( wfMessage( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
-		}
-		$targetUser->load();
-		if ( $targetUser->isAnon() ) {
-			$this->dieWithError( wfMessage( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
+			$this->dieWithError( $this->msg( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
 		}
 
-		$result = $this->f->sendRequest( $targetUser );
+		if ( $targetUser->isAnon() ) {
+			$this->dieWithError( $this->msg( 'friendrequest-direct-notfound' ), 'friendrequest-direct-notfound' );
+		}
+
+		$friendship = new Friendship( $user );
+		$result = $friendship->sendRequest( $targetUser );
 		if ( is_array( $result ) && isset( $result['error'] ) ) {
 			$this->dieWithError(
-				wfMessage( $result['error'] )->params( $targetUser->getName(), $user->getName() ),
+				$this->msg( $result['error'] )->params( $targetUser->getName(), $user->getName() ),
 				$result['error']
 			);
-		} elseif ( !$result ) {
-			$this->dieWithError( wfMessage( 'friendrequestsend-error' ), 'friendrequestsend-error' );
 		}
-		$html = wfMessage( 'friendrequest-direct-success' )->text();
+
+		if ( !$result ) {
+			$this->dieWithError( $this->msg( 'friendrequestsend-error' ), 'friendrequestsend-error' );
+		}
+
+		$html = $this->msg( 'friendrequest-direct-success' )->text();
 		$this->getResult()->addValue( null, 'result', $result );
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
-	/**
-	 * Do Send
-	 *
-	 * @return void
-	 */
-	protected function doSend() {
-		$userId = $this->getInt( 'user_id' );
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$result = $this->f->sendRequest( $toUser );
+	protected function doSend(): void {
+		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
+		$friendship = new Friendship( $this->getUser() );
+		$result = $friendship->sendRequest( $toUser );
 		$html = FriendDisplay::friendButtons( $toUser, $this->getUser() );
 		$this->getResult()->addValue( null, 'result', $result );
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
-	/**
-	 * Do Confirm
-	 *
-	 * @return void
-	 */
-	protected function doConfirm() {
-		$userId = $this->getInt( 'user_id' );
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$result = $this->f->acceptRequest( $toUser );
-		$html = wfMessage( $result ? 'alreadyfriends' : 'friendrequestconfirm-error' )->plain();
+	protected function doConfirm(): void {
+		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
+		$friendship = new Friendship( $this->getUser() );
+		$result = $friendship->acceptRequest( $toUser );
+		$html = $this->msg( $result ? 'alreadyfriends' : 'friendrequestconfirm-error' )->plain();
 		$this->getResult()->addValue( null, 'result', $result );
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
-	/**
-	 * Do Ignore
-	 *
-	 * @return void
-	 */
-	protected function doIgnore() {
-		$userId = $this->getInt( 'user_id' );
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$rel = $this->f->getRelationship( $toUser );
-		$result = $this->f->ignoreRequest( $toUser );
+	protected function doIgnore(): void {
+		$friendship = new Friendship( $this->getUser() );
+		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
+		$rel = $friendship->getRelationship( $toUser );
+		$result = $friendship->ignoreRequest( $toUser );
 		if ( $rel == Friendship::REQUEST_RECEIVED ) {
 			$this->getResult()->addValue( null, 'remove', true );
 		}
 		$this->getResult()->addValue( null, 'result', $result );
 	}
 
-	/**
-	 * Do Remove
-	 *
-	 * @return void
-	 */
-	protected function doRemove() {
-		$userId = $this->getInt( 'user_id' );
-		$toUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-		$result = $this->f->removeFriend( $toUser );
+	protected function doRemove(): void {
+		$friendship = new Friendship( $this->getUser() );
+		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
+		$result = $friendship->removeFriend( $toUser );
 		$html = FriendDisplay::friendButtons( $toUser, $this->getUser() );
 		$this->getResult()->addValue( null, 'result', $result );
 		$this->getResult()->addValue( null, 'html', $html );

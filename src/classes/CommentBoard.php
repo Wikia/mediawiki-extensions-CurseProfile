@@ -558,6 +558,7 @@ class CommentBoard {
 				self::performPurge( $actor, $reply, $reason );
 			}
 		}
+		return true;
 	}
 
 	/**

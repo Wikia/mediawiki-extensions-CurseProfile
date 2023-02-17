@@ -13,22 +13,23 @@
 
 namespace CurseProfile\Api;
 
+use ApiMain;
 use CurseProfile\Classes\ProfileData;
 use HydraApiBase;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 use MWException;
 use Wikimedia\ParamValidator\ParamValidator;
-use Wikimedia\ParamValidator\TypeDef\IntegerDef;
+use Wikimedia\ParamValidator\TypeDef\NumericDef;
 
 /**
  * Class that allows manipulation of basic profile data
  */
 class ProfileApi extends HydraApiBase {
-	/**
-	 * Allowed API actions.
-	 *
-	 * @return array API Actions
-	 */
+	public function __construct( ApiMain $main, $action, private UserFactory $userFactory ) {
+		parent::__construct( $main, $action );
+	}
+
+	/** @inheritDoc */
 	public function getActions(): array {
 		return [
 			'getPublicProfile' => [
@@ -37,7 +38,7 @@ class ProfileApi extends HydraApiBase {
 				'params' => [
 					'user_name' => [
 						ParamValidator::PARAM_TYPE => 'string',
-						IntegerDef::PARAM_MIN => 1,
+						NumericDef::PARAM_MIN => 1,
 						ParamValidator::PARAM_REQUIRED => true,
 					]
 				]
@@ -52,7 +53,7 @@ class ProfileApi extends HydraApiBase {
 					],
 					'user_id' => [
 						ParamValidator::PARAM_TYPE => 'integer',
-						IntegerDef::PARAM_MIN => 1,
+						NumericDef::PARAM_MIN => 1,
 						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
@@ -61,7 +62,7 @@ class ProfileApi extends HydraApiBase {
 				'params' => [
 					'search' => [
 						ParamValidator::PARAM_TYPE => 'string',
-						IntegerDef::PARAM_MIN => 1,
+						NumericDef::PARAM_MIN => 1,
 						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
@@ -70,7 +71,7 @@ class ProfileApi extends HydraApiBase {
 				'params' => [
 					'hash' => [
 						ParamValidator::PARAM_TYPE => 'string',
-						IntegerDef::PARAM_MIN => 1,
+						NumericDef::PARAM_MIN => 1,
 						ParamValidator::PARAM_REQUIRED => true,
 					],
 				],
@@ -84,13 +85,13 @@ class ProfileApi extends HydraApiBase {
 						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						ParamValidator::PARAM_TYPE		=> 'integer',
-						IntegerDef::PARAM_MIN			=> 1,
-						ParamValidator::PARAM_REQUIRED	=> true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						NumericDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'text' => [
-						ParamValidator::PARAM_TYPE		=> 'string',
-						ParamValidator::PARAM_REQUIRED	=> false,
+						ParamValidator::PARAM_TYPE => 'string',
+						ParamValidator::PARAM_REQUIRED => false,
 					],
 				],
 			],
@@ -103,9 +104,9 @@ class ProfileApi extends HydraApiBase {
 						ParamValidator::PARAM_REQUIRED => true,
 					],
 					'user_id' => [
-						ParamValidator::PARAM_TYPE		=> 'integer',
-						IntegerDef::PARAM_MIN			=> 1,
-						ParamValidator::PARAM_REQUIRED	=> true,
+						ParamValidator::PARAM_TYPE => 'integer',
+						NumericDef::PARAM_MIN => 1,
+						ParamValidator::PARAM_REQUIRED => true,
 					],
 
 				],
@@ -118,7 +119,7 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doGetWikisByString() {
+	public function doGetWikisByString(): void {
 		$search = $this->getMain()->getVal( 'search' );
 		$returnGet = ProfileData::getWikiSitesSearch( $search );
 		$return = [];
@@ -140,7 +141,7 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doGetWiki() {
+	public function doGetWiki(): void {
 		$hash = $this->getMain()->getVal( 'hash' );
 		$wiki = ProfileData::getWikiSite( $hash );
 
@@ -159,16 +160,16 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doGetPublicProfile() {
+	public function doGetPublicProfile(): void {
 		$userName = $this->getRequest()->getText( 'user_name' );
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $userName );
-		if ( !$user || !$user->getId() ) {
+		$user = $this->userFactory->newFromName( $userName );
+		if ( !$user || $user->isAnon() ) {
 			$this->getResult()->addValue( null, 'result', 'failure' );
 			$this->getResult()->addValue( null, 'errormsg', 'Invalid user.' );
 			return;
 		}
-		$profileData = new ProfileData( $user->getId() );
-		$validFields = $profileData::getValidEditFields();
+		$profileData = new ProfileData( $user );
+		$validFields = ProfileData::getValidEditFields();
 		$userFields = [ 'username' => $userName ];
 		foreach ( $validFields as $field ) {
 			$field = str_replace( 'profile-', '', $field );
@@ -182,20 +183,20 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doGetRawField() {
-		if ( $this->getUser()->getId() === $this->getRequest()->getInt( 'user_id' ) ||
-			$this->getUser()->isAllowed( 'profile-moderate' ) ) {
-			$field = strtolower( $this->getRequest()->getText( 'field' ) );
-			$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
-			try {
-				$fieldText = $profileData->getField( $field );
-			} catch ( MWException $e ) {
-				$this->getResult()->addValue( null, 'result', 'failure' );
-				$this->getResult()->addValue( null, 'errormsg', 'Invalid profile field.' );
-				return;
-			}
+	public function doGetRawField(): void {
+		if ( $this->getUser()->getId() !== $this->getRequest()->getInt( 'user_id' ) &&
+			!$this->getUser()->isAllowed( 'profile-moderate' ) ) {
+			return;
+		}
 
-			$this->getResult()->addValue( null, $field, $profileData->getField( $field ) );
+		$field = strtolower( $this->getRequest()->getText( 'field' ) );
+		$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
+		try {
+			$fieldText = $profileData->getField( $field );
+			$this->getResult()->addValue( null, $field, $fieldText );
+		} catch ( MWException $e ) {
+			$this->getResult()->addValue( null, 'result', 'failure' );
+			$this->getResult()->addValue( null, 'errormsg', 'Invalid profile field.' );
 		}
 	}
 
@@ -204,7 +205,7 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doEditField() {
+	public function doEditField(): void {
 		$field = strtolower( $this->getRequest()->getText( 'field' ) );
 		$text = $this->getMain()->getVal( 'text' );
 		$profileData = new ProfileData( $this->getRequest()->getInt( 'user_id' ) );
@@ -235,9 +236,9 @@ class ProfileApi extends HydraApiBase {
 	 *
 	 * @return void
 	 */
-	public function doEditSocialFields() {
+	public function doEditSocialFields(): void {
 		$odata = $this->getRequest()->getText( 'data' );
-		$data = json_decode( $odata, 1 );
+		$data = json_decode( $odata, true );
 		if ( !$data ) {
 			$this->getResult()->addValue( null, 'result', 'failure' );
 			$this->getResult()->addValue( null, 'errormsg', 'Failed to decode data sent. (' . $odata . ')' );
@@ -256,8 +257,7 @@ class ProfileApi extends HydraApiBase {
 			foreach ( $data as $field => $text ) {
 				$text = ProfileData::validateExternalProfile(
 					str_replace( 'link-', '', $field ),
-					preg_replace( '/\s+\#/', '#',
-						trim( $text ) )
+					preg_replace( '/\s+\#/', '#', trim( $text ) )
 				);
 				if ( $text === false ) {
 					$text = '';
