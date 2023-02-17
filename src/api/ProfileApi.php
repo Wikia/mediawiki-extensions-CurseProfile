@@ -11,8 +11,9 @@
  * @link      https://gitlab.com/hydrawiki
  */
 
-namespace CurseProfile\Classes;
+namespace CurseProfile\Api;
 
+use CurseProfile\Classes\ProfileData;
 use HydraApiBase;
 use MediaWiki\MediaWikiServices;
 use MWException;

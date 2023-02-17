@@ -304,9 +304,9 @@
 		"WantedPages::getQueryInfo": "CurseProfile\\Classes\\Hooks::onWantedPagesGetQueryInfo"
 	},
 	"APIModules": {
-		"profile": "CurseProfile\\Classes\\ProfileApi",
-		"friend": "CurseProfile\\Classes\\FriendApi",
-		"comment": "CurseProfile\\Classes\\CommentApi"
+		"profile": "CurseProfile\\Api\\ProfileApi",
+		"friend": "CurseProfile\\Api\\FriendApi",
+		"comment": "CurseProfile\\Api\\CommentApi"
 	},
 	"callback": "CurseProfile\\Classes\\Hooks::onRegistration",
 	"config": {

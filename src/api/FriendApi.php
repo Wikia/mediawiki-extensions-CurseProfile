@@ -11,8 +11,10 @@
  * @link      https://gitlab.com/hydrawiki
  */
 
-namespace CurseProfile\Classes;
+namespace CurseProfile\Api;
 
+use CurseProfile\Classes\FriendDisplay;
+use CurseProfile\Classes\Friendship;
 use HydraApiBase;
 use MediaWiki\MediaWikiServices;
 use RequestContext;

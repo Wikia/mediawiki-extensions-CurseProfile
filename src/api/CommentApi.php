@@ -11,9 +11,12 @@
  * @link      https://gitlab.com/hydrawiki
  */
 
-namespace CurseProfile\Classes;
+namespace CurseProfile\Api;
 
 use ApiMain;
+use CurseProfile\Classes\Comment;
+use CurseProfile\Classes\CommentBoard;
+use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\Jobs\ResolveComment;
 use DerivativeRequest;
 use HydraApiBase;
