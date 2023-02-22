@@ -21,30 +21,12 @@ use User;
  */
 class CP {
 	/**
-	 * The db connection override for comment reporting actions
-	 */
-	private static $db;
-
-	/**
-	 * Overrides the MW db connections used by CurseProfile objects.
-	 * Useful for operating on child wikis from master wiki context.
-	 *
-	 * @param mixed $db mw DB connection
-	 */
-	public static function setDb( $db ) {
-		self::$db = $db;
-	}
-
-	/**
 	 * Returns a db connection to use
 	 *
 	 * @param int $id mw db id (DB_MASTER or DB_SLAVE)
 	 * @return mixed mw db connection
 	 */
 	public static function getDb( $id ) {
-		if ( isset( self::$db ) ) {
-			return self::$db;
-		}
 		return MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( $id );
 	}
 

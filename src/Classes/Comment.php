@@ -12,6 +12,7 @@
 namespace CurseProfile\Classes;
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserIdentity;
 use MWException;
 use MWTimestamp;
 use Sanitizer;
@@ -43,7 +44,7 @@ class Comment {
 	];
 
 	// Maximum character length of a single comment.
-	const MAX_LENGTH = 5000;
+	public const MAX_LENGTH = 5000;
 
 	/**
 	 * Message visibility constants
@@ -91,12 +92,8 @@ class Comment {
 
 	/**
 	 * Get a new unsaved comment with an attached board owner.
-	 *
-	 * @param User $owner The board owner.
-	 *
-	 * @return Comment
 	 */
-	public static function newWithOwner( User $owner ): self {
+	public static function newWithOwner( UserIdentity $owner ): self {
 		$comment = new self();
 		$comment->setBoardOwnerUser( $owner );
 		return $comment;
@@ -484,7 +481,7 @@ class Comment {
 	/**
 	 * Set the user ID from an User instance of the user board that this comment belongs to.
 	 */
-	public function setBoardOwnerUser( User $user ): void {
+	public function setBoardOwnerUser( UserIdentity $user ): void {
 		$this->data['ub_user_id'] = $user->getId();
 		$this->data['ub_user_name'] = $user->getName();
 	}

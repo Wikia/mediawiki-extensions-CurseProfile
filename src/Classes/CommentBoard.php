@@ -20,21 +20,17 @@ use Reverb\Notification\NotificationBroadcastFactory;
 use SpecialPage;
 use Title;
 use User;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Class that manages a 'wall' of comments on a user profile page
  */
 class CommentBoard {
-	/**
-	 * Board type constants
-	 */
-	// recent comments shown on a person's profile
-	public const BOARDTYPE_RECENT = 1;
-	// archive page that shows all comments
-	public const BOARDTYPE_ARCHIVES = 2;
 
-	public function __construct( private User $owner, private int $type = self::BOARDTYPE_RECENT ) {
-		$this->DB = CP::getDb( DB_PRIMARY );
+	private ILoadBalancer $lb;
+
+	public function __construct( private User $owner ) {
+		$this->lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 	}
 
 	/**
@@ -75,7 +71,7 @@ class CommentBoard {
 	 */
 	private function getCommentsWithConditions( array $conditions, User $asUser, $startAt = 0, $limit = 100 ) {
 		// Fetch top level comments.
-		$results = $this->DB->select(
+		$results = $this->lb->getConnection( DB_PRIMARY )->select(
 			[ 'user_board' ],
 			[
 				'*',
@@ -141,14 +137,13 @@ class CommentBoard {
 	 * @return array An array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
-	public static function getPurgedCommentById( $commentId ) {
+	public function getPurgedCommentById( $commentId ) {
 		$commentId = (int)$commentId;
 		if ( $commentId < 1 ) {
 			return [];
 		}
 
-		$DB = CP::getDb( DB_PRIMARY );
-		$result = $DB->select(
+		$result = $this->lb->getConnection( DB_PRIMARY )->select(
 			[ 'user_board_purge_archive' ],
 			[ '*' ],
 			[ 'ubpa_comment_id' => (int)$commentId ],
@@ -175,7 +170,7 @@ class CommentBoard {
 		];
 		if ( $maxAge >= 0 ) {
 			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' .
-				$this->DB->addQuotes( date( 'Y-m-d H:i:s', time() - $maxAge * 86400 ) );
+				$this->lb->getConnection( DB_REPLICA )->addQuotes( date( 'Y-m-d H:i:s', time() - $maxAge * 86400 ) );
 		}
 		return $this->getCommentsWithConditions( $searchConditions, $asUser, $startAt, $limit );
 	}
@@ -184,12 +179,12 @@ class CommentBoard {
 	 * Add a public comment to the board
 	 *
 	 * @param string $commentText Comment Text
-	 * @param User|null $fromUser User of user posting.
+	 * @param User $fromUser User of user posting.
 	 * @param int $inReplyTo [Optional] ID of a board post that this will be in reply to.
 	 *
 	 * @return int ID of the newly created comment, or 0 for failure
 	 */
-	public function addComment( string $commentText, User $fromUser = null, int $inReplyTo = 0 ) {
+	public function addComment( string $commentText, User $fromUser, int $inReplyTo = 0 ) {
 		if ( empty( $commentText ) ) {
 			return false;
 		}

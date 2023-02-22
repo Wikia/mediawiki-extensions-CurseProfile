@@ -13,7 +13,6 @@
 
 namespace CurseProfile\Classes;
 
-use ActorMigration;
 use MediaWiki\MediaWikiServices;
 use RequestContext;
 use Title;
@@ -31,7 +30,7 @@ class RecentActivity {
 	 * @return mixed
 	 */
 	public static function parserHook( &$parser, $userId = '' ) {
-		$wgUser = RequestContext::getMain()->getUser();
+		$contextUser = RequestContext::getMain()->getUser();
 		$userId = (int)$userId;
 		if ( $userId < 1 ) {
 			return 'Invalid user ID given';
@@ -40,7 +39,7 @@ class RecentActivity {
 		if ( count( $activity ) == 0 ) {
 			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
 			$user->load();
-			return wfMessage( 'emptyactivity' )->params( $user->getName(), $wgUser->getName() )->text();
+			return wfMessage( 'emptyactivity' )->params( $user->getName(), $contextUser->getName() )->text();
 		}
 
 		$html = '
@@ -51,7 +50,7 @@ class RecentActivity {
 			if ( $title ) {
 				$action = $rev['rev_parent_id'] ? 'edited' : 'created';
 				$history = [
-					wfMessage( 'profileactivity-' . $action )->params( $wgUser->getName() ),
+					wfMessage( 'profileactivity-' . $action )->params( $contextUser->getName() ),
 					$linkRenderer->makeLink( $title ),
 					self::diffHistLinks( $title, $rev ),
 					CP::timeTag( $rev['rev_timestamp'] )
@@ -89,29 +88,15 @@ class RecentActivity {
 	 *
 	 * @return array
 	 */
-	private static function fetchRecentRevisions( $userId ) {
+	private static function fetchRecentRevisions( int $userId ): array {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		$revQuery = [
-			'tables' => [ 'revision' ],
-			'fields' => [ 'rev_page', 'rev_timestamp', 'rev_id', 'rev_parent_id' ],
-			'conds' => [],
-			'joins' => [],
-		];
-
-		// Add in ActorMigration query
-		$actorQuery = ActorMigration::newMigration()
-		->getWhere( $db, 'rev_user', MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId ) );
-		$revQuery['tables'] += $actorQuery['tables'];
-		$revQuery['conds'][] = $actorQuery['conds'];
-		$revQuery['joins'] += $actorQuery['joins'];
-
 		$results = $db->select(
-			$revQuery['tables'],
-			$revQuery['fields'],
-			$revQuery['conds'],
+			[ 'revision', 'actor' ],
+			[ 'rev_page', 'rev_timestamp', 'rev_id', 'rev_parent_id' ],
+			[ 'actor_user' => $userId ],
 			__METHOD__,
 			[ 'ORDER BY' => 'rev_timestamp DESC', 'LIMIT' => 10 ],
-			$revQuery['joins']
+			[ 'actor' => [ 'JOIN', 'rev_actor = actor_id' ] ]
 		);
 
 		$rows = [];
