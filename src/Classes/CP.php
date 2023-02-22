@@ -22,8 +22,6 @@ use User;
 class CP {
 	/**
 	 * The db connection override for comment reporting actions
-	 *
-	 * @var object mw DB connection
 	 */
 	private static $db;
 
@@ -47,7 +45,7 @@ class CP {
 		if ( isset( self::$db ) ) {
 			return self::$db;
 		}
-		return wfGetDB( $id );
+		return MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( $id );
 	}
 
 	/**
@@ -82,10 +80,7 @@ class CP {
 	 * @return string html anchor tag fragment
 	 */
 	public static function userLink( $user, $class = false ) {
-		if ( $user instanceof User ) {
-			$user_id = $user->getId();
-		} else {
-			$user_id = $user;
+		if ( !$user instanceof User ) {
 			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $user );
 		}
 		$customAttribs = [];

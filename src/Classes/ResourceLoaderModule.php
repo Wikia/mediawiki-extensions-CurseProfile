@@ -21,29 +21,12 @@ use ResourceLoaderWikiModule;
  */
 class ResourceLoaderModule extends ResourceLoaderWikiModule {
 
-	/* Protected Methods */
-
-	/**
-	 * Gets list of pages used by this module
-	 *
-	 * @param ResourceLoaderContext $context
-	 *
-	 * @return array List of pages
-	 */
-	protected function getPages( ResourceLoaderContext $context ) {
-		$pages = [
-			'MediaWiki:CurseProfile.css' => [ 'type' => 'style' ]
-		];
-		return $pages;
+	/** @inheritDoc */
+	protected function getPages( ResourceLoaderContext $context ): array {
+		return [ 'MediaWiki:CurseProfile.css' => [ 'type' => 'style' ] ];
 	}
 
-	/* Methods */
-
-	/**
-	 * Gets group name
-	 *
-	 * @return string Name of group
-	 */
+	/** @inheritDoc */
 	public function getGroup() {
 		return 'site';
 	}

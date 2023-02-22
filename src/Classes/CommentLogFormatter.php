@@ -23,8 +23,7 @@ use SpecialPage;
 class CommentLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for comments.
-	 *
-	 * @return array Extract and parsed parameters.
+	 * @inheritDoc
 	 */
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
@@ -38,10 +37,10 @@ class CommentLogFormatter extends LogFormatter {
 					$parameters[3],
 					'comment' . $parameters[3]
 				)->getLinkURL() ],
-				wfMessage( 'logentry-curseprofile-comment' )->text()
+				$this->msg( 'logentry-curseprofile-comment' )->text()
 			) ];
 		} else {
-			$parameters[3] = wfMessage( 'logentry-curseprofile-comment' )->text();
+			$parameters[3] = $this->msg( 'logentry-curseprofile-comment' )->text();
 		}
 
 		return $parameters;

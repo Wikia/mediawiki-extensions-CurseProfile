@@ -18,22 +18,15 @@ use Article;
 class NoProfilePage extends Article {
 	/**
 	 * Primary rendering function for mediawiki's Article
-	 *
-	 * @return void
+	 * @inheritDoc
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle( $this->getTitle()->getPrefixedText() );
-		$outputString = $this->getOutput();
-		$output->addHTML( $outputString );
+		$output->addHTML( $this->getOutputHtml() );
 	}
 
-	/**
-	 * Get the HTML output
-	 *
-	 * @return string
-	 */
-	private function getOutput() {
+	private function getOutputHtml(): string {
 		$username = $this->getTitle()->getText();
 		$text = wfMessage( 'cp-user-does-not-exist', wfEscapeWikiText( $username ) )->text();
 		$text .= ' ' . wfMessage( 'cp-enhanced-profile-unavailable' )->text();

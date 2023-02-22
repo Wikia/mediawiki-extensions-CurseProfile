@@ -16,7 +16,7 @@ namespace CurseProfile\Classes;
 use Exception;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
-use Reverb\Notification\NotificationBroadcast;
+use Reverb\Notification\NotificationBroadcastFactory;
 use SpecialPage;
 use Title;
 use User;
@@ -26,57 +26,15 @@ use User;
  */
 class CommentBoard {
 	/**
-	 * The User object to whom this comment board belongs to
-	 *
-	 * @var User $user
-	 */
-	private $owner;
-
-	// maximum character length of a single comment
-	private const MAX_LENGTH = 5000;
-
-	/**
-	 * The number of comments to load on a board before a user clicks for more
-	 *
-	 * @var int
-	 */
-	protected static $commentsPerPage = 5;
-
-	/**
-	 * One of the below constants
-	 *
-	 * @var int
-	 */
-	public $type;
-
-	/**
 	 * Board type constants
 	 */
-	 // recent comments shown on a person's profile
+	// recent comments shown on a person's profile
 	public const BOARDTYPE_RECENT = 1;
 	// archive page that shows all comments
 	public const BOARDTYPE_ARCHIVES = 2;
 
-	/**
-	 * Message visibility constants
-	 */
-	private const DELETED_MESSAGE = -1;
-	private const PUBLIC_MESSAGE = 0;
-	private const PRIVATE_MESSAGE = 1;
-
-	/**
-	 * The user passed to the constructor is used as the main user from which the
-	 * perspective of the SENT/RECEIVED status are determined.
-	 *
-	 * @param User $owner The owner of this board.
-	 * @param string $type
-	 *
-	 * @throws Exception
-	 */
-	public function __construct( User $owner, $type = self::BOARDTYPE_RECENT ) {
+	public function __construct( private User $owner, private int $type = self::BOARDTYPE_RECENT ) {
 		$this->DB = CP::getDb( DB_PRIMARY );
-		$this->owner = $owner;
-		$this->type = intval( $type );
 	}
 
 	/**
@@ -94,8 +52,8 @@ class CommentBoard {
 			[ 'count(*) as total' ],
 			[
 				self::visibleClause( $asUser ),
-				'ub_in_reply_to'	=> $inReplyTo,
-				'ub_user_id'		=> $this->owner->getId()
+				'ub_in_reply_to' => $inReplyTo,
+				'ub_user_id' => $this->owner->getId()
 			],
 			__METHOD__
 		);
@@ -184,7 +142,7 @@ class CommentBoard {
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
 	public static function getPurgedCommentById( $commentId ) {
-		$commentId = intval( $commentId );
+		$commentId = (int)$commentId;
 		if ( $commentId < 1 ) {
 			return [];
 		}
@@ -193,7 +151,7 @@ class CommentBoard {
 		$result = $DB->select(
 			[ 'user_board_purge_archive' ],
 			[ '*' ],
-			[ 'ubpa_comment_id' => intval( $commentId ) ],
+			[ 'ubpa_comment_id' => (int)$commentId ],
 			__METHOD__
 		);
 
@@ -212,8 +170,8 @@ class CommentBoard {
 	 */
 	public function getComments( User $asUser, $startAt = 0, $limit = 100, $maxAge = 30 ) {
 		$searchConditions = [
-			'ub_in_reply_to'	=> 0,
-			'ub_user_id'		=> $this->owner->getId()
+			'ub_in_reply_to' => 0,
+			'ub_user_id' => $this->owner->getId()
 		];
 		if ( $maxAge >= 0 ) {
 			$searchConditions[] = 'IFNULL(ub_last_reply, ub_date) >= ' .
@@ -260,6 +218,8 @@ class CommentBoard {
 			$newCommentId = 0;
 		}
 
+		$notificationBroadcastFactory = MediaWikiServices::getInstance()
+			->getService( NotificationBroadcastFactory::class );
 		if ( $newCommentId ) {
 			$action = $inReplyTo > 0 ? 'replied' : 'created';
 
@@ -292,7 +252,7 @@ class CommentBoard {
 					if ( !$parentCommenter->equals( $this->owner ) ) {
 						// We have to make two notifications.
 						// One for the profile owner and one for the parent commenter.
-						$broadcast = NotificationBroadcast::newSingle(
+						$broadcast = $notificationBroadcastFactory->newSingle(
 							'user-interest-profile-comment-reply-other-self',
 							$fromUser,
 							$this->owner,
@@ -335,7 +295,7 @@ class CommentBoard {
 						}
 					}
 				}
-				$broadcast = NotificationBroadcast::newSingle(
+				$broadcast = $notificationBroadcastFactory->newSingle(
 					'user-interest-profile-comment-reply-self-' .
 					( $parentCommenter->equals( $this->owner ) ? 'self' : 'other' ),
 					$fromUser,
@@ -378,7 +338,7 @@ class CommentBoard {
 					$broadcast->transmit();
 				}
 			} else {
-				$broadcast = NotificationBroadcast::newSingle(
+				$broadcast = $notificationBroadcastFactory->newSingle(
 					'user-interest-profile-comment',
 					$fromUser,
 					$this->owner,
@@ -439,36 +399,30 @@ class CommentBoard {
 	 *
 	 * @return bool Success
 	 */
-	public static function editComment( Comment $comment, User $actor, string $message ) {
-		$success = false;
-
+	public static function editComment( Comment $comment, User $actor, string $message ): bool {
 		if ( !$comment->canEdit( $actor ) ) {
 			return false;
 		}
 
 		$comment->setMessage( $message );
 		$comment->setEditTimestamp( time() );
-		$success = $comment->save();
-
-		if ( $success ) {
-			$toUser = $comment->getBoardOwnerUser();
-			$title = Title::newFromURL( 'UserProfile:' . $toUser->getName() );
-			$fromUser = $actor;
-
-			$log = new ManualLogEntry( 'curseprofile', 'comment-edited' );
-			$log->setPerformer( $fromUser );
-			$log->setTarget( $title );
-			$log->setComment( null );
-			$log->setParameters(
-				[
-					'4:comment_id' => $comment->getId()
-				]
-			);
-			$logId = $log->insert();
-			$log->publish( $logId );
+		if ( !$comment->save() ) {
+			return false;
 		}
 
-		return $success;
+		$toUser = $comment->getBoardOwnerUser();
+		$title = Title::newFromURL( 'UserProfile:' . $toUser->getName() );
+		$fromUser = $actor;
+
+		$log = new ManualLogEntry( 'curseprofile', 'comment-edited' );
+		$log->setPerformer( $fromUser );
+		$log->setTarget( $title );
+		$log->setComment( null );
+		$log->setParameters( [ '4:comment_id' => $comment->getId() ] );
+		$logId = $log->insert();
+		$log->publish( $logId );
+
+		return true;
 	}
 
 	/**
@@ -479,9 +433,7 @@ class CommentBoard {
 	 *
 	 * @return bool Success
 	 */
-	public static function removeComment( Comment $comment, User $actor ) {
-		$success = false;
-
+	public static function removeComment( Comment $comment, User $actor ): bool {
 		if ( !$comment->canRemove( $actor ) ) {
 			return false;
 		}
@@ -489,26 +441,26 @@ class CommentBoard {
 		$comment->markAsDeleted();
 		$comment->setAdminActionTimestamp( time() );
 		$comment->setAdminActedUser( $actor );
-		$success = $comment->save();
-
-		if ( $success ) {
-			$toUser = $comment->getBoardOwnerUser();
-			$title = Title::makeTitle( NS_USER_PROFILE, $toUser->getName() );
-
-			$log = new ManualLogEntry( 'curseprofile', 'comment-deleted' );
-			$log->setPerformer( $actor );
-			$log->setTarget( $title );
-			$log->setComment( null );
-			$log->setParameters(
-				[
-					'4:comment_id' => $comment->getId()
-				]
-			);
-			$logId = $log->insert();
-			$log->publish( $logId );
+		if ( !$comment->save() ) {
+			return false;
 		}
 
-		return $success;
+		$toUser = $comment->getBoardOwnerUser();
+		$title = Title::makeTitle( NS_USER_PROFILE, $toUser->getName() );
+
+		$log = new ManualLogEntry( 'curseprofile', 'comment-deleted' );
+		$log->setPerformer( $actor );
+		$log->setTarget( $title );
+		$log->setComment( null );
+		$log->setParameters(
+			[
+				'4:comment_id' => $comment->getId()
+			]
+		);
+		$logId = $log->insert();
+		$log->publish( $logId );
+
+		return true;
 	}
 
 	/**
@@ -519,9 +471,7 @@ class CommentBoard {
 	 *
 	 * @return bool Success
 	 */
-	public static function restoreComment( Comment $comment, User $actor ) {
-		$success = false;
-
+	public static function restoreComment( Comment $comment, User $actor ): bool {
 		if ( !$comment->canRestore( $actor ) ) {
 			return false;
 		}
@@ -529,9 +479,7 @@ class CommentBoard {
 		$comment->markAsPublic();
 		$comment->setAdminActionTimestamp( time() );
 		$comment->setAdminActedUser( $actor );
-		$success = $comment->save();
-
-		return $success;
+		return $comment->save();
 	}
 
 	/**
@@ -544,19 +492,15 @@ class CommentBoard {
 	 * @return bool Success
 	 */
 	public static function purgeComment( Comment $comment, User $actor, string $reason ) {
-		$success = false;
-
 		if ( !$comment->canPurge( $actor ) ) {
 			return false;
 		}
 
-		if ( $comment ) {
-			self::performPurge( $actor, $comment, $reason );
-			$replies = $comment->getReplies( $actor );
+		self::performPurge( $actor, $comment, $reason );
+		$replies = $comment->getReplies( $actor );
 
-			foreach ( $replies as $reply ) {
-				self::performPurge( $actor, $reply, $reason );
-			}
+		foreach ( $replies as $reply ) {
+			self::performPurge( $actor, $reply, $reason );
 		}
 		return true;
 	}
@@ -599,11 +543,7 @@ class CommentBoard {
 		$log->setPerformer( $actor );
 		$log->setTarget( $title );
 		$log->setComment( $reason );
-		$log->setParameters(
-			[
-				'4:comment_id' => $comment->getId()
-			]
-		);
+		$log->setParameters( [ '4:comment_id' => $comment->getId() ] );
 		$logId = $log->insert();
 		$log->publish( $logId );
 
@@ -620,7 +560,7 @@ class CommentBoard {
 	 * @param Comment $comment The comment to report
 	 * @param User $actor User performing this action.
 	 *
-	 * @return CommentReport Object or false for failure.
+	 * @return CommentReport|false Object or false for failure.
 	 */
 	public static function reportComment( Comment $comment, User $actor ) {
 		if ( !$comment->canReport( $actor ) ) {

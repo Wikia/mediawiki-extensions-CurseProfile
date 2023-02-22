@@ -6,15 +6,8 @@ use Article;
 use Title;
 
 class UserPrefersProfilePage extends Article {
-
-	private $preferenceMsg;
-
-	private $username;
-
-	public function __construct( Title $title, string $preferenceMsg, string $username ) {
+	public function __construct( Title $title, private string $preferenceMsg, private string $username ) {
 		parent::__construct( $title );
-		$this->preferenceMsg = $preferenceMsg;
-		$this->username = $username;
 	}
 
 	public function view() {

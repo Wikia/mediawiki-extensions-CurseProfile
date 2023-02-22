@@ -15,9 +15,11 @@ namespace CurseProfile\Classes;
 
 use Cheevos\Cheevos;
 use Cheevos\CheevosException;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 use MWException;
-use Reverb\Notification\NotificationBroadcast;
+use Reverb\Notification\NotificationBroadcastFactory;
+use Reverb\Notification\NotificationFactory;
 use SpecialPage;
 use Title;
 use User;
@@ -27,8 +29,6 @@ use User;
  * All relationships statuses are then described from the perspective of that user.
  */
 class Friendship {
-	private $user;
-
 	/**
 	 * Relationship status constants
 	 */
@@ -37,17 +37,22 @@ class Friendship {
 	public const REQUEST_SENT = 3;
 	public const REQUEST_RECEIVED = 4;
 
+	private NotificationFactory $notificationBroadcastFactory;
+	private HookContainer $hookContainer;
+
 	/**
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
 	 * @param User $user
 	 */
-	public function __construct( User $user ) {
-		if ( !$user->getId() ) {
+	public function __construct( private User $user ) {
+		if ( !$user->isRegistered() ) {
 			throw new MWException( 'Anonymous user object passed.' );
 		}
-		$this->user = $user;
+		$services = MediaWikiServices::getInstance();
+		$this->notificationBroadcastFactory = $services->getService( NotificationBroadcastFactory::class );
+		$this->hookContainer = $services->getHookContainer();
 	}
 
 	/**
@@ -116,7 +121,7 @@ class Friendship {
 	 *
 	 * @param User $toUser
 	 *
-	 * @return bool True on success, False on failure.
+	 * @return bool|array True on success, False on failure.
 	 */
 	public function sendRequest( User $toUser ) {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
@@ -150,7 +155,7 @@ class Friendship {
 
 		$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $this->user->getName() );
 		$canonicalUrl = SpecialPage::getTitleFor( 'ManageFriends' )->getFullURL();
-		$broadcast = NotificationBroadcast::newSingle(
+		$broadcast = $this->notificationBroadcastFactory->newSingle(
 			'user-interest-profile-friendship',
 			$this->user,
 			$toUser,
@@ -180,8 +185,7 @@ class Friendship {
 			$broadcast->transmit();
 		}
 
-		MediaWikiServices::getInstance()->getHookContainer()
-			->run( 'CurseProfileAddFriend', [ $this->user, $toUser ] );
+		$this->hookContainer->run( 'CurseProfileAddFriend', [ $this->user, $toUser ] );
 		return true;
 	}
 
@@ -192,7 +196,7 @@ class Friendship {
 	 *
 	 * @return bool True on success, False on failure.
 	 */
-	public function acceptRequest( User $toUser ) {
+	public function acceptRequest( User $toUser ): bool {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
@@ -215,7 +219,7 @@ class Friendship {
 	 *
 	 * @return bool True on success, False on failure.
 	 */
-	public function ignoreRequest( User $toUser ) {
+	public function ignoreRequest( User $toUser ): bool {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
@@ -238,7 +242,7 @@ class Friendship {
 	 *
 	 * @return bool True on success, False on failure.
 	 */
-	public function removeFriend( User $toUser ) {
+	public function removeFriend( User $toUser ): bool {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
@@ -250,8 +254,7 @@ class Friendship {
 			return false;
 		}
 
-		MediaWikiServices::getInstance()->getHookContainer()
-			->run( 'CurseProfileRemoveFriend', [ $this->user, $toUser ] );
+		$this->hookContainer->run( 'CurseProfileRemoveFriend', [ $this->user, $toUser ] );
 
 		return true;
 	}
@@ -264,19 +267,17 @@ class Friendship {
 	 * @return bool All checks passed.
 	 */
 	private function checkIfValidUserRelation( ?User $to ): bool {
-		$from = $this->user;
-		// No null users.
-		if ( !$from || !$to ) {
+		if ( !$to ) {
 			return false;
 		}
 
 		// Not the same user.
-		if ( $from->getId() === $to->getId() ) {
+		if ( $this->user->getId() === $to->getId() ) {
 			return false;
 		}
 
 		// No anonymous users.
-		if ( $from->isAnon() || $to->isAnon() ) {
+		if ( $this->user->isAnon() || $to->isAnon() ) {
 			return false;
 		}
 		return true;

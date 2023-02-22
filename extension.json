@@ -86,6 +86,13 @@
 	"JobClasses": {
 		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment::newInstance"
 	},
+	"namespaces": [
+		{
+			"id": 202,
+			"constant": "NS_USER_PROFILE",
+			"name": "UserProfile"
+		}
+	],
 	"AutoloadNamespaces": {
 		"CurseProfile\\": "src/"
 	},

@@ -18,6 +18,8 @@ use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserIdentity;
+use MediaWiki\User\UserOptionsLookup;
 use MWException;
 use RequestContext;
 use Title;
@@ -120,17 +122,21 @@ class ProfileData {
 		]
 	];
 
+	private UserOptionsLookup $userOptionsLookup;
+
 	/**
 	 * Create a new ProfileData instance
 	 *
 	 * @param int|User $user local user ID or User instance
 	 */
 	public function __construct( $user ) {
+		$services = MediaWikiServices::getInstance();
+		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		if ( is_a( $user, 'User' ) ) {
 			$this->user = $user;
 			$this->user_id = $user->getId();
 		} else {
-			$this->user_id = intval( $user );
+			$this->user_id = (int)$user;
 			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 			$this->user = $this->user_id < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId( $this->user_id );
 		}
@@ -153,20 +159,14 @@ class ProfileData {
 	 * @return string|bool URL to the external profile or false.
 	 */
 	public static function getExternalProfileLink( $service, $text ) {
-		if ( !isset( ( self::$externalProfiles[$service]['link'] ) ) ) {
+		if ( !isset( self::$externalProfiles[$service]['link'] ) ) {
 			return false;
 		}
 		return sprintf( self::$externalProfiles[$service]['link'], urlencode( $text ) );
 	}
 
-	/**
-	 * Returns the canonical URL path to a user's profile.
-	 *
-	 * @return string
-	 */
-	public function getProfilePageUrl() {
-		$title = Title::newFromText( 'UserProfile:' . $this->user->getTitleKey() );
-		return $title->getFullURL();
+	public function getProfilePageUrl(): string {
+		return Title::makeTitle( NS_USER_PROFILE, $this->user->getTitleKey() )->getFullURL();
 	}
 
 	/**
@@ -328,14 +328,11 @@ class ProfileData {
 
 	/**
 	 * Runs when the user saves their preferences.
-	 *
-	 * @param User $user User
-	 * @param array &$preferences User Preferences
-	 * @return null
 	 */
-	public static function processPreferenceSave( $user, &$preferences ) {
+	public static function processPreferenceSave( UserIdentity $userIdentity, array &$preferences ) {
 		global $wgUser;
 
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
 		$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		// don't allow blocked users to change their about me text
 		// Deep in the logic of isBlocked() it tries to call on $wgUser
@@ -741,7 +738,7 @@ class ProfileData {
 		if ( $this->user_id == 0 ) {
 			return false;
 		}
-		return $this->user->getIntOption( 'profile-pref' );
+		return $this->userOptionsLookup->getIntOption( $this->user, 'profile-pref' );
 	}
 
 	/**
@@ -754,6 +751,6 @@ class ProfileData {
 		if ( $this->user_id == 0 ) {
 			return false;
 		}
-		return $this->user->getIntOption( 'comment-pref' );
+		return $this->userOptionsLookup->getIntOption( $this->user, 'comment-pref' );
 	}
 }

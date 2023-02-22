@@ -14,10 +14,12 @@
 namespace CurseProfile\Classes;
 
 use Article;
+use CurseProfile\Maintenance\ReplaceGlobalIdWithUserId;
 use EditPage;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserIdentity;
 use OutputPage;
 use Parser;
 use Skin;
@@ -593,7 +595,7 @@ class Hooks {
 			"{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql",
 			true
 		] );
-		$updater->addPostDatabaseUpdateMaintenance( \CurseProfile\Maintenance\ReplaceGlobalIdWithUserId::class );
+		$updater->addPostDatabaseUpdateMaintenance( ReplaceGlobalIdWithUserId::class );
 
 		// global_id migration - Second part
 		$updater->addExtensionUpdate( [
@@ -724,13 +726,11 @@ class Hooks {
 	 * @param User $user User whose preferences are being modified.
 	 * @param array &$options Preferences description object, to be fed to an HTMLForm.
 	 *
-	 * @return bool True
 	 */
-	public static function onFandomUserSaveOptions( User $user, array &$options ) {
-		if ( $user && $user->getId() ) {
+	public static function onFandomUserSaveOptions( UserIdentity $user, array &$options ) {
+		if ( $user && $user->isRegistered() ) {
 			ProfileData::processPreferenceSave( $user, $options );
 		}
-		return true;
 	}
 
 	/**

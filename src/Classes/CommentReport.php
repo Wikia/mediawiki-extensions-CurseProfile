@@ -14,7 +14,7 @@
 namespace CurseProfile\Classes;
 
 use MediaWiki\MediaWikiServices;
-use Reverb\Notification\NotificationBroadcast;
+use Reverb\Notification\NotificationFactory;
 use SpecialPage;
 use Title;
 use User;
@@ -79,26 +79,26 @@ class CommentReport {
 	 * Retrieve a single report by its unique id
 	 *
 	 * @param string $key report key as retrieved from reportKey()
-	 * @return obj CommentReport instance or null if report does not exist
+	 * @return mixed CommentReport instance or null if report does not exist
 	 */
 	public static function newFromKey( $key ) {
 		// report is local
-		list( $md5key, $commentId, $timestamp ) = explode( ':', $key );
+		[ $md5key, $commentId, $timestamp ] = explode( ':', $key );
 		$db = CP::getDb( DB_REPLICA );
 		$row = $db->selectRow(
 			'user_board_report_archives',
 			[ '*' ],
 			[
-				'ra_comment_id' => intval( $commentId ),
+				'ra_comment_id' => (int)$commentId,
 				'ra_last_edited' => date( 'Y-m-d H:i:s', $timestamp )
 			],
 			__METHOD__
 		);
 		if ( $row ) {
 			return self::newFromRow( (array)$row );
-		} else {
-			return null;
 		}
+
+		return null;
 	}
 
 	/**
@@ -355,7 +355,7 @@ class CommentReport {
 
 		if ( !isset( $this->id ) || $fromUser->isAnon() ) {
 			// Can't add to a comment that hasn't been archived yet.
-			return false;
+			return;
 		}
 
 		$newReport = [
@@ -385,7 +385,7 @@ class CommentReport {
 
 		$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $fromUser->getName() );
 		$canonicalUrl = SpecialPage::getTitleFor( 'CommentModeration/' . $this->data['comment']['cid'] )->getFullURL();
-		$broadcast = NotificationBroadcast::newMulti(
+		$broadcast = MediaWikiServices::getInstance()->getService( NotificationFactory::class )->newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
 			$toLocalUsers,
@@ -434,13 +434,13 @@ class CommentReport {
 		}
 
 		// update internal data
-		$this->data['action_taken']		= ( $action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS );
-		$this->data['action_taken_by']	= $actor->getId();
-		$this->data['action_taken_at']	= time();
+		$this->data['action_taken'] = ( $action === 'delete' ? self::ACTION_DELETE : self::ACTION_DISMISS );
+		$this->data['action_taken_by'] = $actor->getId();
+		$this->data['action_taken_at'] = time();
 
 		// update data stores
 		$comment = Comment::newFromId( $this->data['comment']['cid'] );
-		return ( $action == 'dismiss' || CommentBoard::removeComment( $comment, $actor ) )
+		return ( $action === 'dismiss' || CommentBoard::removeComment( $comment, $actor ) )
 			&& $this->resolveInDb();
 	}
 

@@ -26,19 +26,19 @@ class RecentActivity {
 	 * Handle parser hook call
 	 *
 	 * @param mixed &$parser
-	 * @param string $user_id
+	 * @param string $userId
 	 *
 	 * @return mixed
 	 */
-	public static function parserHook( &$parser, $user_id = '' ) {
+	public static function parserHook( &$parser, $userId = '' ) {
 		$wgUser = RequestContext::getMain()->getUser();
-		$user_id = intval( $user_id );
-		if ( $user_id < 1 ) {
+		$userId = (int)$userId;
+		if ( $userId < 1 ) {
 			return 'Invalid user ID given';
 		}
-		$activity = self::fetchRecentRevisions( $user_id );
+		$activity = self::fetchRecentRevisions( $userId );
 		if ( count( $activity ) == 0 ) {
-			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $user_id );
+			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
 			$user->load();
 			return wfMessage( 'emptyactivity' )->params( $user->getName(), $wgUser->getName() )->text();
 		}
@@ -63,10 +63,7 @@ class RecentActivity {
 		$html .= '
 		</ul>';
 
-		return [
-			$html,
-			'isHTML' => true,
-		];
+		return [ $html, 'isHTML' => true ];
 	}
 
 	/**
@@ -88,12 +85,12 @@ class RecentActivity {
 	/**
 	 * Fetches 10 recent revisions authored by given user id and returns as an array
 	 *
-	 * @param int $user_id
+	 * @param int $userId
 	 *
 	 * @return array
 	 */
-	private static function fetchRecentRevisions( $user_id ) {
-		$db = wfGetDB( DB_REPLICA );
+	private static function fetchRecentRevisions( $userId ) {
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$revQuery = [
 			'tables' => [ 'revision' ],
 			'fields' => [ 'rev_page', 'rev_timestamp', 'rev_id', 'rev_parent_id' ],
@@ -103,7 +100,7 @@ class RecentActivity {
 
 		// Add in ActorMigration query
 		$actorQuery = ActorMigration::newMigration()
-		->getWhere( $db, 'rev_user', MediaWikiServices::getInstance()->getUserFactory()->newFromId( $user_id, false ) );
+		->getWhere( $db, 'rev_user', MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId ) );
 		$revQuery['tables'] += $actorQuery['tables'];
 		$revQuery['conds'][] = $actorQuery['conds'];
 		$revQuery['joins'] += $actorQuery['joins'];
@@ -113,10 +110,7 @@ class RecentActivity {
 			$revQuery['fields'],
 			$revQuery['conds'],
 			__METHOD__,
-			[
-				'ORDER BY'	=> 'rev_timestamp DESC',
-				'LIMIT'		=> 10
-			],
+			[ 'ORDER BY' => 'rev_timestamp DESC', 'LIMIT' => 10 ],
 			$revQuery['joins']
 		);
 

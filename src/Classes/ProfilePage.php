@@ -20,17 +20,22 @@ use Cheevos\CheevosAchievement;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
 use Cheevos\Points\PointsDisplay;
+use Config;
 use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
 use HtmlArmor;
-use Hydra\Subscription;
 use HydraCore;
 use IContextSource;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserOptionsLookup;
 use Message;
+use MessageCache;
 use Parser;
 use SpecialPage;
+use Subscription\Subscription;
 use Title;
 use User;
 
@@ -97,6 +102,15 @@ class ProfilePage extends Article {
 	 */
 	private static $userNamespaces = [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ];
 
+	private UserOptionsLookup $userOptionsLookup;
+	private UserFactory $userFactory;
+	private UserGroupManager $userGroupManager;
+	private MessageCache $messageCache;
+//	private LinkRenderer $linkRenderer;
+	private WikiVariablesDataService $wikiVariablesDataService;
+	private Config $config;
+	private Subscription $subscription;
+
 	/**
 	 * Main Constructor
 	 *
@@ -106,19 +120,27 @@ class ProfilePage extends Article {
 	 */
 	public function __construct( $title, $context = null ) {
 		parent::__construct( $title );
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+		$services = MediaWikiServices::getInstance();
+		$this->userFactory = $services->getUserFactory();
+		$this->userOptionsLookup = $services->getUserOptionsLookup();
+		$this->userGroupManager = $services->getUserGroupManager();
+		$this->messageCache = $services->getMessageCache();
+		$this->linkRenderer = $services->getLinkRenderer();
+		$this->wikiVariablesDataService = $services->getService( WikiVariablesDataService::class );
+		$this->subscription = $services->getService( Subscription::class );
+		$this->config = $services->getMainConfig();
 
 		if ( $context ) {
 			$this->setContext( $context );
 		}
 		$this->actionIsView = Action::getActionName( $this->getContext() ) == 'view';
 		$this->userName = Hooks::resolveUsername( $title );
-		$this->user = $userFactory->newFromName( $this->userName );
+		$this->user = $this->userFactory->newFromName( $this->userName );
 		if ( $this->user ) {
 			$this->user->load();
 			$this->getContext()->getSkin()->setRelevantUser( $this->getUser() );
 		} else {
-			$this->user = $userFactory->newAnonymous();
+			$this->user = $this->userFactory->newAnonymous();
 		}
 
 		$skin = $this->getContext()->getSkin();
@@ -155,7 +177,7 @@ class ProfilePage extends Article {
 		$userStats = $this->userStats();
 		$layout = str_replace( '<USERSTATS>', $userStats, $layout );
 
-		$outputString = MediaWikiServices::getInstance()->getMessageCache()->parse( $layout, $this->getTitle() );
+		$outputString = $this->messageCache->parse( $layout, $this->getTitle() );
 		if ( $outputString instanceof \ParserOutput ) {
 			$outputString = $outputString->getText();
 		}
@@ -292,12 +314,10 @@ class ProfilePage extends Article {
 
 		if ( $this->isProfilePage( $title ) ) {
 			// Reset $links to prevent hidden article.
-			$links = [
-				'namespaces' => [],
-				'views' => [],
-				'actions' => [],
-				'variants' => []
-			];
+			$links['namespaces'] = [];
+			$links['views'] = [];
+			$links['actions'] = [];
+			$links['variants'] = [];
 		}
 
 		// Build Link for Profile
@@ -390,12 +410,11 @@ class ProfilePage extends Article {
 	public function groupList( &$parser ) {
 		global $wgUser;
 
-		$groups = $this->user->getEffectiveGroups();
+		$groups = $this->userGroupManager->getUserEffectiveGroups( $this->user );
 		if ( count( $groups ) == 0 ) {
 			return '';
 		}
 
-		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		$specialListUsersTitle = SpecialPage::getTitleFor( 'Listusers' );
 		$html = '<ul class="grouptags">';
 		foreach ( $groups as $group ) {
@@ -405,7 +424,7 @@ class ProfilePage extends Article {
 			}
 			$groupMessage = new Message( 'group-' . $group );
 			if ( $groupMessage->exists() ) {
-				$html .= '<li>' . $linkRenderer->makeKnownLink(
+				$html .= '<li>' . $this->linkRenderer->makeKnownLink(
 					$specialListUsersTitle,
 					$groupMessage->text(),
 					[],
@@ -422,9 +441,9 @@ class ProfilePage extends Article {
 			}
 		}
 		// Check the rights of the person viewing this page.
-		$cGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getGroupsChangeableBy( $wgUser );
+		$cGroups = $this->userGroupManager->getGroupsChangeableBy( $wgUser );
 		if ( !empty( $cGroups['add'] ) || !empty( $cGroups['remove'] ) ) {
-			$link = $linkRenderer->makeKnownLink(
+			$link = $this->linkRenderer->makeKnownLink(
 				Title::newFromText( 'Special:UserRights/' . $this->user->getName() ),
 				new HtmlArmor( self::PENCIL_ICON_SVG ),
 				[ 'class' => 'is-icon' ]
@@ -537,8 +556,7 @@ class ProfilePage extends Article {
 			return '';
 		}
 
-		$wikiConfig = MediaWikiServices::getInstance()->getService( WikiVariablesDataService::class );
-		$imgPath = $wikiConfig->getVarValueByName( 'wgGpAvatarImage', $wiki['wiki_id'], false, '' );
+		$imgPath = $this->wikiVariablesDataService->getVarValueByName( 'wgGpAvatarImage', $wiki['wiki_id'], false, '' );
 
 		if ( !empty( $imgPath ) && !empty( $wiki['md5_key'] ) ) {
 			$html = Html::element(
@@ -584,7 +602,7 @@ class ProfilePage extends Article {
 			wfDebug( "Encountered Cheevos API error getting Stat Progress." );
 		}
 		try {
-			$wikisEdited = intval( Cheevos::getUserSitesCountByStat( $this->user, 'article_edit' ) );
+			$wikisEdited = (int)Cheevos::getUserSitesCountByStat( $this->user, 'article_edit' );
 		} catch ( CheevosException $e ) {
 			wfDebug( "Encountered Cheevos API error getting getUserSitesCountByStat." );
 		}
@@ -743,7 +761,7 @@ class ProfilePage extends Article {
 							'earned' => true,
 							'special' => false,
 							'shown_on_all_sites' => true,
-							'limit' => intval( $limit )
+							'limit' => (int)$limit,
 						],
 						$this->user
 					);
@@ -760,7 +778,7 @@ class ProfilePage extends Article {
 								'earned' => true,
 								'special' => true,
 								'shown_on_all_sites' => true,
-								'limit' => intval( $limit )
+								'limit' => (int)$limit,
 							],
 							$this->user
 						);
@@ -825,8 +843,7 @@ class ProfilePage extends Article {
 
 		$userPoints = PointsDisplay::getWikiPointsForRange( $this->user );
 
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-		$levelDefinitions = $config->get( 'PointsLevels' );
+		$levelDefinitions = $this->config->get( 'PointsLevels' );
 
 		if ( !is_array( $levelDefinitions ) || empty( $levelDefinitions ) ) {
 			return '';
@@ -894,16 +911,11 @@ class ProfilePage extends Article {
 
 		$classes = false;
 		if ( !empty( $this->user ) && $this->user->getId() ) {
-			$cacheSetting = Subscription::skipCache( true );
-			$subscription = Subscription::newFromUser( $this->user );
-			if ( $subscription !== false ) {
-				$classes = $subscription->getFlairClasses();
-				if ( empty( $classes ) ) {
-					$classes = false;
-					// Enforce sanity.
-				}
+			$classes = $this->subscription->getFlairClasses( $this->user->getId() );
+			if ( empty( $classes ) ) {
+				$classes = false;
+				// Enforce sanity.
 			}
-			Subscription::skipCache( $cacheSetting );
 		}
 
 		$tabsMarkup = $this->getTabsMarkup();
@@ -914,7 +926,7 @@ class ProfilePage extends Article {
 		' . $tabsMarkup . '
 		<div class="userinfo borderless section">
 			<div class="mainavatar">{{#avatar: 96 | ' .
-			( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
+			( $this->user->getBlock() !== null ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
 			' | ' . $this->user->getName() . '}}</div>
 			<div class="profile-info">
 				<div class="headline">
@@ -978,7 +990,7 @@ class ProfilePage extends Article {
 			wfMessage( 'cp-achievementssection-all', $this->user->getName() )->plain() . '</div>
 		</div>
 	</div>
-	{{#if: ' . ( $this->user->isBlocked() ? 'true' : '' ) . ' | <div class="blocked"></div> }}
+	{{#if: ' . ( $this->user->getBlock() !== null ? 'true' : '' ) . ' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
 __NOINDEX__
@@ -997,7 +1009,7 @@ __NOINDEX__
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getID() . '">
 		<div class="userinfo section">
 			<div class="mainavatar">{{#avatar: 96 | ' .
-			( $this->user->isBlocked() ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
+			( $this->user->getBlock() !== null ? '' : self::emailToMD5Hash( $this->user->getEmail() ) ) .
 			' | ' . $this->user->getName() . '}}</div>
 			<div class="usericons rightfloat">
 				<div class="score">{{#Points:' . $this->user->getName() . '|1|global|badged}}</div>
@@ -1036,7 +1048,7 @@ __NOINDEX__
 			wfMessage( 'commentarchivelink' ) . ']]</p>
 		    {{#comments: ' . $this->user->getID() . '}}
 		</div>
-	{{#if: ' . ( $this->user->isBlocked() ? 'true' : '' ) . ' | <div class="blocked"></div> }}
+	{{#if: ' . ( $this->user->getBlock() !== null ? 'true' : '' ) . ' | <div class="blocked"></div> }}
 </div>
 __NOTOC__
 __NOINDEX__
@@ -1049,9 +1061,10 @@ __NOINDEX__
 		}
 
 		$userName = $this->user->getName();
-		$queryParam = $this->user->getIntOption( 'profile-pref' ) ? '|profile=no' : '';
+		$queryParam = $this->userOptionsLookup->getIntOption( $this->user, 'profile-pref' ) ? '|profile=no' : '';
 
-		$userTalkTab = $this->user->getIntOption( 'comment-pref' ) != 1 ? '<li class="user-profile-navigation__link">
+		$userTalkTab = $this->userOptionsLookup->getIntOption( $this->user, 'comment-pref' ) != 1 ?
+			'<li class="user-profile-navigation__link">
 				[{{fullurl:User_talk:' . $userName . $queryParam . '}} ' .
 			wfMessage( 'userprofile-userprofilenavigation-link-user-talk' )->plain() . ']
 			</li>' : '';

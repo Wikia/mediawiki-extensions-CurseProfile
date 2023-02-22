@@ -21,15 +21,14 @@ use LogFormatter;
 class ProfileLogFormatter extends LogFormatter {
 	/**
 	 * Handle custom log parameters for profile edits.
-	 *
-	 * @return array Extract and parsed parameters.
+	 * @inheritDoc
 	 */
 	protected function getMessageParameters() {
 		$parameters = parent::getMessageParameters();
 
 		// 4:section
 		if ( !empty( $parameters[3] ) ) {
-			$parameters[3] = [ 'raw' => wfMessage( 'log-' . $parameters[3] ) ];
+			$parameters[3] = [ 'raw' => $this->msg( 'log-' . $parameters[3] ) ];
 		}
 
 		return $parameters;

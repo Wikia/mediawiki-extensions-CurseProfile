@@ -85,9 +85,6 @@ class FriendDisplay {
 					'confirm' => wfMessage( 'friendrequestremove-prompt', $toUser->getName() )->plain(),
 				];
 				break;
-
-			default:
-				return;
 		}
 	}
 
@@ -166,7 +163,7 @@ class FriendDisplay {
 	 * @param Parser|null &$parser Not used, but the parser will pass it regardless.
 	 * @param int $userId Local User ID
 	 *
-	 * @return array Parser compatible HTML array.
+	 * @return array|int|string Parser compatible HTML array.
 	 */
 	public static function friendList( ?Parser &$parser = null, int $userId ) {
 		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );

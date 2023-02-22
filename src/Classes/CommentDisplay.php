@@ -54,10 +54,7 @@ class CommentDisplay {
 			$html .= self::singleComment( $comment, false );
 		}
 
-		return [
-			$html,
-			'isHTML' => true,
-		];
+		return [ $html, 'isHTML' => true ];
 	}
 
 	/**
@@ -208,9 +205,7 @@ class CommentDisplay {
 
 			// perhaps there are more replies not yet loaded
 			if ( $comment->getTotalReplies( $wgUser ) > count( $replies ) ) {
-				if ( !isset( $repliesTooltip ) ) {
-					$repliesTooltip = htmlspecialchars( wfMessage( 'repliestooltip' )->plain(), ENT_QUOTES );
-				}
+				$repliesTooltip = htmlspecialchars( wfMessage( 'repliestooltip' )->plain(), ENT_QUOTES );
 				// force parsing this message because MW won't replace plurals as expected
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
@@ -260,12 +255,12 @@ class CommentDisplay {
 	 *
 	 * @return string HTML fragment
 	 */
-	private static function timestamp( Comment $comment ) {
+	private static function timestamp( Comment $comment ): string {
 		if ( $comment->getEditTimestamp() === null ) {
 			return wfMessage( 'cp-commentposted' )->text() . ' ' . CP::timeTag( $comment->getPostTimestamp() );
-		} else {
-			return wfMessage( 'cp-commentedited' )->text() . ' ' . CP::timeTag( $comment->getEditTimestamp() );
 		}
+
+		return wfMessage( 'cp-commentedited' )->text() . ' ' . CP::timeTag( $comment->getEditTimestamp() );
 	}
 
 	/**
@@ -275,12 +270,12 @@ class CommentDisplay {
 	 *
 	 * @return string HTML fragment
 	 */
-	private static function mobileTimestamp( Comment $comment ) {
+	private static function mobileTimestamp( Comment $comment ): string {
 		if ( $comment->getEditTimestamp() === null ) {
 			return CP::timeTag( $comment->getPostTimestamp(), true );
-		} else {
-			return CP::timeTag( $comment->getEditTimestamp(), true );
 		}
+
+		return CP::timeTag( $comment->getEditTimestamp(), true );
 	}
 
 	/**
@@ -294,16 +289,16 @@ class CommentDisplay {
 		if ( $actor->getId() < 1 ) {
 			return 'Invalid user given';
 		}
+
+		$replies = $comment->getReplies( $actor, -1 );
+
+		if ( empty( $replies ) ) {
+			return wfMessage( 'cp-nocommentreplies' );
+		}
+
 		$html = '';
-
-		$comments = $comment->getReplies( $actor, -1 );
-
-		if ( empty( $comments ) ) {
-			$html = wfMessage( 'cp-nocommentreplies' );
-		} else {
-			foreach ( $comments as $comment ) {
-				$html .= self::singleComment( $comment );
-			}
+		foreach ( $replies as $reply ) {
+			$html .= self::singleComment( $reply );
 		}
 
 		return $html;
@@ -316,12 +311,12 @@ class CommentDisplay {
 	 * @return string Comment sanitized for usage in HTML.
 	 */
 	public static function sanitizeComment( $comment ) {
-		global $wgOut, $wgParser;
+		global $wgOut;
 
 		$popts = $wgOut->parserOptions();
 		$oldIncludeSize = $popts->setMaxIncludeSize( 0 );
 
-		$parserOutput = $wgParser->getFreshParser()->parse(
+		$parserOutput = MediaWikiServices::getInstance()->getParserFactory()->getInstance()->parse(
 			str_replace(
 				[
 					'&lt;nowiki&gt;',
