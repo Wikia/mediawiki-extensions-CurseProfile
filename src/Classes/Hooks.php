@@ -64,9 +64,8 @@ class Hooks implements
 	GetUserPermissionsErrorsHook
 {
 
-	private static ?ProfilePage $profilePage;
-
-	private static ?Title $title;
+	private static ?ProfilePage $profilePage = null;
+	private static ?Title $title = null;
 
 	public function __construct(
 		private UserFactory $userFactory,
@@ -104,7 +103,7 @@ class Hooks implements
 	/** @inheritDoc */
 	public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ) {
 		self::$title = $title;
-		self::$profilePage = ProfilePage::newFromTitle( $title );
+		self::$profilePage = ProfilePage::newFromTitle( $title ) ?: null;
 
 		if ( $title->equals( SpecialPage::getTitleFor( "Preferences" ) ) ) {
 			$output->addModuleStyles( [ 'ext.curseprofile.preferences.styles', 'ext.hydraCore.font-awesome.styles' ] );
@@ -131,7 +130,7 @@ class Hooks implements
 		if ( self::$title !== null && !self::$title->equals( $article->getTitle() ) ) {
 			// Reset profile context.
 			self::$title = $article->getTitle();
-			self::$profilePage = ProfilePage::newFromTitle( self::$title );
+			self::$profilePage = ProfilePage::newFromTitle( self::$title ) ?: null;
 			$this->onArticleFromTitle( self::$title, $article, RequestContext::getMain() );
 		}
 	}
@@ -220,7 +219,7 @@ class Hooks implements
 	}
 
 	/** Handle output of the profile page */
-	private function renderProfile( Title $title, Article &$article, IContextSource $context ): bool {
+	private function renderProfile( Title $title, ?Article &$article, IContextSource $context ): bool {
 		$output = $context->getOutput();
 		if ( !self::$profilePage->isActionView() || str_contains( $title->getText(), '/' ) ) {
 			$output->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
@@ -245,7 +244,7 @@ class Hooks implements
 	}
 
 	/** Handle the user and talk page */
-	private function renderUserPages( Title $title, Article &$article, IContextSource $context ): void {
+	private function renderUserPages( Title $title, ?Article &$article, IContextSource $context ): void {
 		// Check if we are on a base page
 		$username = ProfilePage::resolveUsername( $title );
 

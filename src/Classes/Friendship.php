@@ -37,7 +37,7 @@ class Friendship {
 	public const REQUEST_SENT = 3;
 	public const REQUEST_RECEIVED = 4;
 
-	private NotificationFactory $notificationBroadcastFactory;
+	private NotificationBroadcastFactory $notificationBroadcastFactory;
 	private HookContainer $hookContainer;
 
 	/**
