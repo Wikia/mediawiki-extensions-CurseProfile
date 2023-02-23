@@ -311,9 +311,9 @@ class CommentDisplay {
 	 * @return string Comment sanitized for usage in HTML.
 	 */
 	public static function sanitizeComment( $comment ) {
-		global $wgOut;
+		$output = RequestContext::getMain()->getOutput();
 
-		$popts = $wgOut->parserOptions();
+		$popts = $output->parserOptions();
 		$oldIncludeSize = $popts->setMaxIncludeSize( 0 );
 
 		$parserOutput = MediaWikiServices::getInstance()->getParserFactory()->getInstance()->parse(
@@ -336,7 +336,7 @@ class CommentDisplay {
 				],
 				htmlentities( $comment, ENT_QUOTES )
 			),
-			$wgOut->getTitle(),
+			$output->getTitle(),
 			$popts
 		);
 

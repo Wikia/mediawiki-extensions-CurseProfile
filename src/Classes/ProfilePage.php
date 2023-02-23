@@ -90,7 +90,7 @@ class ProfilePage extends Article {
 			$this->setContext( $context );
 		}
 		$this->actionIsView = Action::getActionName( $this->getContext() ) === 'view';
-		$userName = Hooks::resolveUsername( $title );
+		$userName = self::resolveUsername( $title );
 		$this->user = $userFactory->newFromName( $userName );
 		if ( $this->user ) {
 			$this->user->load();
@@ -250,7 +250,7 @@ class ProfilePage extends Article {
 	public function customizeNavBar( &$links, $title ) {
 		// Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages
 		// since the context is switched without performing a HTTP redirect.
-		$userName = Hooks::resolveUsername( $title );
+		$userName = self::resolveUsername( $title );
 
 		if ( $userName === false ) {
 			if ( $this->isProfilePage( $title ) ) {
@@ -356,6 +356,19 @@ class ProfilePage extends Article {
 		];
 	}
 
+	/** Get a username from title */
+	public static function resolveUsername( Title $title ): string {
+		$username = $title->getText();
+		if ( strpos( $username, '/' ) > 0 ) {
+			$username = explode( '/', $username );
+			$username = array_shift( $username );
+			$canonical = MediaWikiServices::getInstance()->getUserNameUtils()->getCanonical( $username );
+			$username = $canonical ?: $username;
+		}
+
+		return $username;
+	}
+
 	/**
 	 * Performs the work for the parser tag that displays the groups to which a user belongs
 	 *
@@ -431,10 +444,7 @@ class ProfilePage extends Article {
 	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
 	public function fieldBlock( &$parser, $field ) {
-		return [
-			$this->profile->getFieldHtml( $field ),
-			'isHTML' => true
-		];
+		return [ $this->profile->getFieldHtml( $field ), 'isHTML' => true ];
 	}
 
 	/**

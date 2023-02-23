@@ -15,119 +15,94 @@ namespace CurseProfile\Classes;
 
 use Article;
 use CurseProfile\Maintenance\ReplaceGlobalIdWithUserId;
-use EditPage;
+use IContextSource;
+use MediaWiki\Hook\BeforeInitializeHook;
+use MediaWiki\Hook\BeforePageDisplayHook;
+use MediaWiki\Hook\EditPage__importFormDataHook;
+use MediaWiki\Hook\NamespaceIsMovableHook;
+use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\SkinSubPageSubtitleHook;
+use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
+use MediaWiki\Hook\WantedPages__getQueryInfoHook;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
+use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
-use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserIdentity;
-use OutputPage;
-use Parser;
-use Skin;
+use MediaWiki\Page\Hook\ArticleFromTitleHook;
+use MediaWiki\Page\Hook\ArticleViewRedirectHook;
+use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
+use MediaWiki\Preferences\Hook\PreferencesFormPreSaveHook;
+use MediaWiki\User\Hook\UserGetDefaultOptionsHook;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserOptionsLookup;
+use NamespaceInfo;
+use RequestContext;
 use SpecialPage;
 use Status;
 use Title;
 use User;
-use WebRequest;
+use Wikimedia\Rdbms\ILoadBalancer;
 
-class Hooks {
-	/**
-	 * Reference to ProfilePage object
-	 *
-	 * @var object CurseProfile\ProfilePage
-	 */
-	private static $profilePage = false;
+class Hooks implements
+	ParserFirstCallInitHook,
+	BeforeInitializeHook,
+	BeforePageDisplayHook,
+	ArticleViewRedirectHook,
+	ArticleFromTitleHook,
+	WantedPages__getQueryInfoHook,
+	HtmlPageLinkRendererEndHook,
+	EditPage__importFormDataHook,
+	SkinTemplateNavigation__UniversalHook,
+	SkinSubPageSubtitleHook,
+	LoadExtensionSchemaUpdatesHook,
+	GetPreferencesHook,
+	PreferencesFormPreSaveHook,
+	UserGetDefaultOptionsHook,
+	NamespaceIsMovableHook,
+	GetUserPermissionsErrorsHook
+{
 
-	/**
-	 * Reference to the title originally parsed from this request.
-	 *
-	 * @var object Title
-	 */
-	private static $title = null;
+	private static ?ProfilePage $profilePage;
 
-	/**
-	 * Setup extra namespaces during MediaWiki setup process.
-	 *
-	 * @return bool True
-	 */
-	public static function onRegistration() {
-		global $wgExtraNamespaces, $wgReverbNotifications;
+	private static ?Title $title;
 
-		if ( !defined( 'NS_USER_PROFILE' ) ) {
-			define( 'NS_USER_PROFILE', 202 );
-		}
-		$wgExtraNamespaces[NS_USER_PROFILE] = 'UserProfile';
-
-		$reverbNotifications = [
-			"user-interest-profile-comment" => [
-				"importance" => 8
-			],
-			"user-interest-profile-comment-reply-self-self" => [
-				"importance" => 8,
-				"use-preference" => "user-interest-profile-comment"
-			],
-			"user-interest-profile-comment-reply-self-other" => [
-				"importance" => 8,
-				"use-preference" => "user-interest-profile-comment"
-			],
-			"user-interest-profile-comment-reply-other-self" => [
-				"importance" => 8,
-				"use-preference" => "user-interest-profile-comment"
-			],
-			"user-moderation-profile-comment-report" => [
-				"importance" => 1,
-				"requires" => [ "hydra_admin", "sysop" ]
-			],
-			"user-interest-profile-friendship" => [
-				"importance" => 5
-			]
-		];
-		$wgReverbNotifications = array_merge( $wgReverbNotifications, $reverbNotifications );
-
-		return true;
+	public function __construct(
+		private UserFactory $userFactory,
+		private ILoadBalancer $lb,
+		private NamespaceInfo $namespaceInfo,
+		private LinkRenderer $linkRenderer,
+		private HookContainer $hookContainer,
+		private UserOptionsLookup $userOptionsLookup
+	) {
 	}
 
-	/**
-	 * Set parser hooks for the profile pages.
-	 *
-	 * @param Parser &$parser
-	 *
-	 * @return bool True
-	 */
-	public static function onParserFirstCall( &$parser ) {
+	/** @inheritDoc */
+	public function onParserFirstCallInit( $parser ) {
 		// must check to see if profile page exists because sometimes the parser is used to parse messages
 		// for a response to an API call that doesn't ever fully initialize the MW engine, thus never touching
 		// onBeforeInitialize and not setting self::$profilePage
 		if ( self::$profilePage && self::$profilePage->isProfilePage() ) {
-			$parser->setFunctionHook( 'achievements',		[ self::$profilePage, 'recentAchievements' ] );
-			$parser->setFunctionHook( 'editorfriends',		[ self::$profilePage, 'editOrFriends' ] );
-			$parser->setFunctionHook( 'favwiki',				[ self::$profilePage, 'favoriteWiki' ] );
-			$parser->setFunctionHook( 'groups',				[ self::$profilePage, 'groupList' ] );
-			$parser->setFunctionHook( 'profilefield',		[ self::$profilePage, 'fieldBlock' ] );
-			$parser->setFunctionHook( 'profilelinks',		[ self::$profilePage, 'profileLinks' ] );
-			$parser->setFunctionHook( 'userlevel',			[ self::$profilePage, 'userLevel' ] );
-			$parser->setFunctionHook( 'avatar',				'CurseProfile\Classes\ProfilePage::userAvatar' );
-			$parser->setFunctionHook( 'comments',			'CurseProfile\Classes\CommentDisplay::comments' );
-			$parser->setFunctionHook( 'friendadd',			'CurseProfile\Classes\FriendDisplay::addFriendLink' );
-			$parser->setFunctionHook( 'friendcount',		'CurseProfile\Classes\FriendDisplay::count' );
-			$parser->setFunctionHook( 'friendlist',			'CurseProfile\Classes\FriendDisplay::friendList' );
-			$parser->setFunctionHook( 'recentactivity',		'CurseProfile\Classes\RecentActivity::parserHook' );
+			$parser->setFunctionHook( 'achievements', [ self::$profilePage, 'recentAchievements' ] );
+			$parser->setFunctionHook( 'editorfriends', [ self::$profilePage, 'editOrFriends' ] );
+			$parser->setFunctionHook( 'favwiki', [ self::$profilePage, 'favoriteWiki' ] );
+			$parser->setFunctionHook( 'groups', [ self::$profilePage, 'groupList' ] );
+			$parser->setFunctionHook( 'profilefield', [ self::$profilePage, 'fieldBlock' ] );
+			$parser->setFunctionHook( 'profilelinks', [ self::$profilePage, 'profileLinks' ] );
+			$parser->setFunctionHook( 'userlevel', [ self::$profilePage, 'userLevel' ] );
+			$parser->setFunctionHook( 'avatar', 'CurseProfile\Classes\ProfilePage::userAvatar' );
+			$parser->setFunctionHook( 'comments', 'CurseProfile\Classes\CommentDisplay::comments' );
+			$parser->setFunctionHook( 'friendadd', 'CurseProfile\Classes\FriendDisplay::addFriendLink' );
+			$parser->setFunctionHook( 'friendcount', 'CurseProfile\Classes\FriendDisplay::count' );
+			$parser->setFunctionHook( 'friendlist', 'CurseProfile\Classes\FriendDisplay::friendList' );
+			$parser->setFunctionHook( 'recentactivity', 'CurseProfile\Classes\RecentActivity::parserHook' );
 		}
 		return true;
 	}
 
-	/**
-	 * Handle setting up profile page handlers.
-	 *
-	 * @param Title &$title
-	 * @param Article &$article
-	 * @param mixed &$output
-	 * @param User &$user
-	 * @param mixed $request
-	 * @param mixed $mediaWiki
-	 *
-	 * @return void
-	 */
-	public static function onBeforeInitialize( &$title, &$article, &$output, &$user, $request, $mediaWiki ) {
+	/** @inheritDoc */
+	public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ) {
 		self::$title = $title;
 		self::$profilePage = ProfilePage::newFromTitle( $title );
 
@@ -137,50 +112,37 @@ class Hooks {
 		}
 	}
 
-	/**
-	 * @param OutputPage $output
-	 * @param Skin $skin
-	 *
-	 * @return void
-	 */
-	public static function onBeforePageDisplay( $output, $skin ) {
-		if (
-			self::$profilePage instanceof \src\classes\ProfilePage
+	/** @inheritDoc */
+	public function onBeforePageDisplay( $out, $skin ): void {
+		if ( self::$profilePage instanceof ProfilePage
 			&& self::$profilePage->isProfilePage()
 			&& $skin->getSkinName() === 'fandommobile'
 		) {
-			$output->addModules( [ 'a.ext.curseprofile.profilepage.mobile.scripts' ] );
-			$output->addModuleStyles( [ 'a.ext.curseprofile.profilepage.mobile.styles' ] );
+			$out->addModules( [ 'a.ext.curseprofile.profilepage.mobile.scripts' ] );
+			$out->addModuleStyles( [ 'a.ext.curseprofile.profilepage.mobile.styles' ] );
 		}
 	}
 
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
-	 *
-	 * @param mixed $destArticle Destination Article
-	 *
-	 * @return void
+	 * @inheritDoc
 	 */
-	public static function onArticleViewRedirect( $destArticle ) {
-		if ( self::$title !== null && !self::$title->equals( $destArticle->getTitle() ) ) {
+	public function onArticleViewRedirect( $article ) {
+		if ( self::$title !== null && !self::$title->equals( $article->getTitle() ) ) {
 			// Reset profile context.
-			self::$title = $destArticle->getTitle();
+			self::$title = $article->getTitle();
 			self::$profilePage = ProfilePage::newFromTitle( self::$title );
-			self::onArticleFromTitle( self::$title, $destArticle );
+			$this->onArticleFromTitle( self::$title, $article, RequestContext::getMain() );
 		}
 	}
 
 	/**
-	 * Hide NS_USER_PROFILE from Special:WantedPages.
-	 *
-	 * @param mixed &$wantedPages
-	 * @param mixed &$query
-	 *
-	 * @return bool True
+	 * Hide NS_USER, NS_USER_TALK, NS_USER_PROFILE from Special:WantedPages.
+	 * @inheritDoc
 	 */
-	public static function onWantedPagesGetQueryInfo( &$wantedPages, &$query ) {
+	public function onWantedPages__getQueryInfo( $wantedPages, &$query ) {
 		if ( isset( $query['conds'] ) ) {
-			$db = wfGetDB( DB_REPLICA );
+			$db = $this->lb->getConnection( DB_REPLICA );
 			foreach ( $query['conds'] as $index => $condition ) {
 				if ( strpos( $condition, 'pl_namespace NOT IN' ) === 0 ) {
 					$query['conds'][$index] =
@@ -188,46 +150,30 @@ class Hooks {
 				}
 			}
 		}
-		return true;
 	}
 
 	/**
 	 * Make links to user pages known when that user opts for a profile page
-	 *
-	 * @param LinkRenderer $linkRenderer
-	 * @param Title $target
-	 * @param bool $isKnown
-	 * @param string &$text
-	 * @param array &$attribs
-	 * @param mixed &$ret
-	 *
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public static function onHtmlPageLinkRendererEnd(
-		LinkRenderer $linkRenderer,
-		LinkTarget $target,
-		$isKnown,
-		&$text,
-		&$attribs,
-		&$ret
-	) {
+	public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
 		$target = Title::newFromLinkTarget( $target );
 		// Only process user namespace links
 		if ( !in_array( $target->getNamespace(), [ NS_USER, NS_USER_PROFILE ] ) || $target->isSubpage() ) {
 			return true;
 		}
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromName( $target->getText() );
+
 		// Override user links based on enhanced user profile preference
-		$profileData = new ProfileData( $user );
+		$profileData = new ProfileData( $this->userFactory->newFromName( $target->getText() ) );
 		if ( $profileData->getProfileTypePreference() ) {
 			$prefix = strtok( $attribs['title'], ':' );
-			$attribs['href'] = self::resolveHref( $attribs, $target );
+			$attribs['href'] = $this->resolveHref( $attribs, $target );
 			$attribs['class'] = str_replace( 'new', 'known', $attribs['class'] );
 			$attribs['title'] = $prefix . ':' . $target->getText();
 		}
 		// Override enhanced profile links if preference is standard
 		if ( !$profileData->getProfileTypePreference() && $target->getNamespace() === NS_USER_PROFILE ) {
-			$attribs['href'] = self::resolveHref( $attribs, $target );
+			$attribs['href'] = $this->resolveHref( $attribs, $target );
 			$attribs['class'] = str_replace( 'new', 'known', $attribs['class'] );
 			$attribs['title'] = 'UserProfile:' . $target->getText();
 		}
@@ -236,37 +182,27 @@ class Hooks {
 
 	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
-	 *
-	 * @param Title &$title
-	 * @param Article &$article
-	 *
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public static function onArticleFromTitle( Title &$title, &$article ) {
+	public function onArticleFromTitle( $title, &$article, $context ) {
 		if ( !self::$profilePage ) {
 			return true;
 		}
 
 		if ( $title->getNamespace() == NS_USER_PROFILE ) {
-			return self::renderProfile( $title, $article );
+			return $this->renderProfile( $title, $article, $context );
 		}
 
-		return self::renderUserPages( $title, $article );
+		$this->renderUserPages( $title, $article, $context );
+		return true;
 	}
 
-	/**
-	 * Resolve href without red link
-	 *
-	 * @param array $attribs
-	 * @param LinkTarget $target
-	 *
-	 * @return string
-	 */
-	private static function resolveHref( $attribs, $target ) {
-		$url_components = parse_url( $attribs['href'] );
+	/** Resolve href without red link */
+	private function resolveHref( array $attribs, LinkTarget $target ): string {
+		$urlComponents = parse_url( $attribs['href'] );
 		$query = [];
-		if ( isset( $url_components['query'] ) ) {
-			parse_str( $url_components['query'], $query );
+		if ( isset( $urlComponents['query'] ) ) {
+			parse_str( $urlComponents['query'], $query );
 		}
 
 		// Remove redlink and edit
@@ -274,39 +210,30 @@ class Hooks {
 			unset( $query['redlink'], $query['action'] );
 		}
 
-		if ( $target->getNamespace() === NS_USER ) {
-			// Add profile=no where needed
-			if ( strpos( $attribs['class'], 'mw-changeslist-title' ) !== false ) {
-				$query['profile'] = 'no';
-			}
+		// Add profile=no where needed
+		if ( $target->getNamespace() === NS_USER && str_contains( $attribs[ 'class' ], 'mw-changeslist-title' ) ) {
+			$query['profile'] = 'no';
 		}
 		// Rebuild query string
 		$params = count( $query ) ? '?' . http_build_query( $query ) : '';
-		return $url_components['path'] . $params;
+		return $urlComponents['path'] . $params;
 	}
 
-	/**
-	 * Handle output of the profile page
-	 *
-	 * @param Title &$title
-	 * @param Article &$article
-	 *
-	 * @return bool
-	 */
-	private static function renderProfile( &$title, &$article ) {
-		global $wgOut;
-
-		if ( !self::$profilePage->isActionView() || strpos( $title->getText(), '/' ) !== false ) {
-			return $wgOut->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
+	/** Handle output of the profile page */
+	private function renderProfile( Title $title, Article &$article, IContextSource $context ): bool {
+		$output = $context->getOutput();
+		if ( !self::$profilePage->isActionView() || str_contains( $title->getText(), '/' ) ) {
+			$output->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
+			return true;
 		}
 
-		$wgOut->addModuleStyles( [
+		$output->addModuleStyles( [
 			'ext.curseprofile.profilepage.styles',
 			'ext.curseprofile.customskin.styles',
 			'ext.curseprofile.comments.styles',
 			'ext.hydraCore.font-awesome.styles'
 		] );
-		$wgOut->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
+		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 
 		if ( !self::$profilePage->getUser()->getId() ) {
 			$article = new NoProfilePage( $title );
@@ -314,410 +241,363 @@ class Hooks {
 		}
 
 		$article = self::$profilePage;
-
 		return true;
 	}
 
-	/**
-	 * Get the correct preference based on namespace
-	 *
-	 * @param Title &$title
-	 *
-	 * @return array
-	 */
-	private static function getProfilePreference( &$title ) {
-		if ( $title->getNamespace() == NS_USER ) {
-			$preferProfile = self::$profilePage->isProfilePreferred();
-			$key = 'cp-user-prefers-profile-user';
-		}
-
-		if ( $title->getNamespace() == NS_USER_TALK ) {
-			$preferProfile = self::$profilePage->isCommentsPreferred();
-			$key = 'cp-user-prefers-profile-talk';
-		}
-
-		return [ $preferProfile, $key ];
-	}
-
-	/**
-	 * Handle the user and talk page
-	 *
-	 * @param Title &$title
-	 * @param Article &$article
-	 *
-	 * @return bool
-	 */
-	private static function renderUserPages( &$title, &$article ) {
-		global $wgRequest, $wgOut;
+	/** Handle the user and talk page */
+	private function renderUserPages( Title $title, Article &$article, IContextSource $context ): void {
 		// Check if we are on a base page
-		$username = self::resolveUsername( $title );
-		$basepage = ( $title->getText() == $username );
+		$username = ProfilePage::resolveUsername( $title );
 
 		// Make sure we are in the right namespace
-		if ( !in_array( $title->getNamespace(), [ NS_USER, NS_USER_TALK ] ) || !$basepage ) {
-			return true;
+		if (
+			!in_array( $title->getNamespace(), [ NS_USER, NS_USER_TALK ], true ) ||
+			$title->getText() !== $username
+		) {
+			return;
 		}
 
-		list( $preferProfile, $key ) = self::getProfilePreference( $title );
+		$preferredProfile = $title->getNamespace() === NS_USER ?
+			self::$profilePage->isProfilePreferred() : self::$profilePage->isCommentsPreferred();
+		$key = $title->getNamespace() === NS_USER ? 'cp-user-prefers-profile-user' : 'cp-user-prefers-profile-talk';
 
+		$request = $context->getRequest();
 		// Only redirect if we don't have "?profile=no" and they prefer the profile.
-		if ( $wgRequest->getVal( 'profile' ) !== "no" &&
-			$preferProfile &&
+		if (
+			$request->getVal( 'profile' ) !== "no" &&
+			$preferredProfile &&
 			self::$profilePage->isActionView() &&
-			strpos( $title->getText(), '/' ) === false &&
-			empty( $wgRequest->getVal( 'oldid' ) ) &&
-			empty( $wgRequest->getVal( 'diff' ) )
+			!str_contains( $title->getText(), '/' ) &&
+			empty( $request->getVal( 'oldid' ) ) &&
+			empty( $request->getVal( 'diff' ) )
 		) {
-			$wgOut->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
-			return true;
+			$context->getOutput()->redirect( self::$profilePage->getUserProfileTitle()->getFullURL() );
+			return;
 		}
 
 		// Warn visitors about user's preference
-		if ( self::shouldWarn( $wgRequest ) && $preferProfile && !$title->isRedirect() ) {
+		if ( (
+				$request->getVal( 'profile' ) === 'no' ||
+				$request->getVal( 'veaction' ) === 'edit' ||
+				$request->getVal( 'action' ) === 'edit'
+			) && $preferredProfile && !$title->isRedirect() ) {
 			$article = new UserPrefersProfilePage( $title, $key, $username );
 		}
-
-		return true;
-	}
-
-	/**
-	 * Check for request variables that indicate the need to show warnings.
-	 *
-	 * @param mixed $request Global $wgRequest object
-	 *
-	 * @return bool
-	 */
-	private static function shouldWarn( $request ) {
-		return (
-			$request->getVal( 'profile' ) == 'no' ||
-			$request->getVal( 'veaction' ) == 'edit' ||
-			$request->getVal( 'action' ) == 'edit'
-		);
 	}
 
 	/**
 	 * Handle adding profile=no to redirects after articles are created or edited in
 	 * the NS_USER and NS_USER_TALK namespaces.
-	 *
-	 * @param EditPage $editpage EditPage
-	 * @param WebRequest $request WebRequest
-	 *
-	 * @return bool True
+	 * @inheritDoc
 	 */
-	public static function onEditPageImportFormData( EditPage $editpage, WebRequest $request ) {
-		if ( self::$profilePage &&
-			( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ||
-				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
+	public function onEditPage__importFormData( $editpage, $request ) {
+		if (
+			self::$profilePage &&
+			(
+				( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ||
+				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() )
+			)
+		) {
 			$request->setVal( 'wpExtraQueryRedirect', 'profile=no' );
 		}
 		return true;
 	}
 
-	/**
-	 * Adds links to the navigation tabs.
-	 *
-	 * @param mixed $skin SkinTemplate
-	 * @param array &$links Link Descriptors
-	 *
-	 * @return bool True
-	 */
-	public static function onSkinTemplateNavigation( $skin, &$links ) {
+	/** @inheritDoc */
+	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
 		// get title and namespace from request context
-		$skinTitle = $skin->getContext()->getTitle();
-		$skinNamespace = $skin->getContext()->getTitle()->getNamespace();
+		$skinTitle = $sktemplate->getContext()->getTitle();
+		$skinNamespace = $sktemplate->getContext()->getTitle()->getNamespace();
 		// Only modify the navbar if we are on a user, user talk, or profile page
 		if ( self::$profilePage !== false && in_array( $skinNamespace, [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) ) {
 			self::$profilePage->customizeNavBar( $links, $skinTitle );
 		}
-		return true;
 	}
 
 	/**
 	 * Customize subpage links to use profile=no as needed.
-	 *
-	 * @param string &$subpages Subpages HTML
-	 * @param mixed $skinTemplate SkinTemplate
-	 * @param mixed $output Output
-	 *
-	 * @return bool True
+	 * @inheritDoc
 	 */
-	public static function onSkinSubPageSubtitle( &$subpages, $skinTemplate, $output ) {
-		if ( self::$profilePage &&
-			( ( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ||
-				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() ) ) ) {
-			$title = $output->getTitle();
-			$nsInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
-			if ( $output->isArticle() && $nsInfo->hasSubpages( $title->getNamespace() ) ) {
-				$ptext = $title->getPrefixedText();
-				if ( strpos( $ptext, '/' ) !== false ) {
-					$links = explode( '/', $ptext );
-					array_pop( $links );
-					$c = 0;
-					$growinglink = '';
-					$display = '';
-					$lang = $skinTemplate->getLanguage();
-
-					$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-					foreach ( $links as $link ) {
-						$growinglink .= $link;
-						$display .= $link;
-						$linkObj = Title::newFromText( $growinglink );
-
-						if ( is_object( $linkObj ) && $linkObj->isKnown() ) {
-							$getlink = $linkRenderer->makeKnownLink(
-								$linkObj,
-								htmlspecialchars( $display ),
-								[],
-								[ 'profile' => 'no' ]
-							);
-
-							$c++;
-
-							if ( $c > 1 ) {
-								$subpages .= $lang->getDirMarkEntity() .
-									$skinTemplate->msg( 'pipe-separator' )->escaped();
-							} else {
-								$subpages .= '&lt; ';
-							}
-
-							$subpages .= $getlink;
-							$display = '';
-						} else {
-							$display .= '/';
-						}
-						$growinglink .= '/';
-					}
-				}
-				return false;
-			}
+	public function onSkinSubPageSubtitle( &$subpages, $skin, $out ) {
+		if (
+			!self::$profilePage ||
+			!(
+				( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ) ||
+				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() )
+			) {
+			return true;
 		}
-		return true;
+
+		$title = $out->getTitle();
+		if ( !$out->isArticle() || !$this->namespaceInfo->hasSubpages( $title->getNamespace() ) ) {
+			return true;
+		}
+
+		$ptext = $title->getPrefixedText();
+		if ( !str_contains( $ptext, '/' ) ) {
+			return false;
+		}
+
+		$links = explode( '/', $ptext );
+		array_pop( $links );
+		$c = 0;
+		$growinglink = '';
+		$display = '';
+		$lang = $skin->getLanguage();
+
+		foreach ( $links as $link ) {
+			$growinglink .= $link;
+			$display .= $link;
+			$linkObj = Title::newFromText( $growinglink );
+
+			if ( $linkObj && $linkObj->isKnown() ) {
+				$getlink = $this->linkRenderer->makeKnownLink(
+					$linkObj,
+					htmlspecialchars( $display ),
+					[],
+					[ 'profile' => 'no' ]
+				);
+
+				$c++;
+
+				$subpages .= $c > 1 ?
+					$lang->getDirMarkEntity() . $skin->msg( 'pipe-separator' )->escaped() :
+					'&lt; ';
+
+				$subpages .= $getlink;
+				$display = '';
+			} else {
+				$display .= '/';
+			}
+			$growinglink .= '/';
+		}
+		return false;
 	}
 
-	/**
-	 * Setups and Modifies Database Information
-	 *
-	 * @param mixed $updater DatabaseUpdater Object
-	 *
-	 * @return bool true
-	 */
-	public static function onLoadExtensionSchemaUpdates( $updater ) {
+	/** @inheritDoc */
+	public function onLoadExtensionSchemaUpdates( $updater ) {
 		$extDir = dirname( __DIR__ ) . '/..';
 
 		// Add tables that may exist for previous users of SocialProfile.
-		$updater->addExtensionUpdate( [
-			'addTable',
-			'user_board',
-			"{$extDir}/install/sql/table_user_board.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addTable',
+		$updater->addExtensionTable( 'user_board', "{$extDir}/install/sql/table_user_board.sql" );
+		$updater->addExtensionTable(
 			'user_board_report_archives',
-			"{$extDir}/install/sql/table_user_board_report_archives.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addTable',
+			"{$extDir}/install/sql/table_user_board_report_archives.sql"
+		);
+		$updater->addExtensionTable(
 			'user_board_reports',
-			"{$extDir}/install/sql/table_user_board_reports.sql",
-			true
-		] );
+			"{$extDir}/install/sql/table_user_board_reports.sql"
+		);
 
 		// global_id migration.
-		$updater->addExtensionUpdate( [
-			'addField',
+		$updater->addExtensionField(
 			'user_board_reports',
 			'ubr_id',
-			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'modifyField',
+			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_id.sql"
+		);
+		$updater->modifyExtensionField(
 			'user_board_reports',
 			'ubr_reporter_global_id',
-			"{$extDir}/upgrade/sql/user_board_reports/change_ubr_reporter_global_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addField',
+			"{$extDir}/upgrade/sql/user_board_reports/change_ubr_reporter_global_id.sql"
+		);
+		$updater->addExtensionField(
 			'user_board_reports',
 			'ubr_reporter_user_id',
-			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addIndex',
+			"{$extDir}/upgrade/sql/user_board_reports/add_ubr_reporter_user_id.sql"
+		);
+		$updater->addExtensionIndex(
 			'user_board_reports',
 			'ubr_report_archive_id_ubr_reporter_user_id',
-			"{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'dropIndex',
+			"{$extDir}/upgrade/sql/user_board_reports/add_index_ubr_report_archive_id_ubr_reporter_user_id.sql"
+		);
+		$updater->dropExtensionIndex(
 			'user_board_reports',
 			'ubr_report_archive_id_ubr_reporter_global_id',
-			"{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addField',
+			"{$extDir}/upgrade/sql/user_board_reports/drop_index_ubr_report_archive_id_ubr_reporter_global_id.sql"
+		);
+		$updater->addExtensionField(
 			'user_board_report_archives',
 			'ra_user_id_from',
-			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'modifyField',
+			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_user_id_from.sql"
+		);
+		$updater->modifyExtensionField(
 			'user_board_report_archives',
 			'ra_action_taken_by',
-			"{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addField',
+			"{$extDir}/upgrade/sql/user_board_report_archives/rename_ra_action_taken_by.sql"
+		);
+		$updater->addExtensionField(
 			'user_board_report_archives',
 			'ra_action_taken_by_user_id',
-			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'addField',
+			"{$extDir}/upgrade/sql/user_board_report_archives/add_ra_action_taken_by_user_id.sql"
+		);
+		$updater->addExtensionField(
 			'user_board',
 			'ub_admin_acted_user_id',
-			"{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'modifyField',
+			"{$extDir}/upgrade/sql/user_board/add_ub_admin_acted_user_id.sql"
+		);
+		$updater->modifyExtensionField(
 			'user_board',
 			'ub_admin_acted',
-			"{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql",
-			true
-		] );
+			"{$extDir}/upgrade/sql/user_board/rename_ub_admin_acted.sql"
+		);
 		$updater->addPostDatabaseUpdateMaintenance( ReplaceGlobalIdWithUserId::class );
 
 		// global_id migration - Second part
-		$updater->addExtensionUpdate( [
-			'dropField',
+		$updater->dropExtensionField(
 			'user_board_reports',
 			'ubr_reporter_global_id',
-			"{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'dropField',
+			"{$extDir}/upgrade/sql/user_board_reports/drop_ubr_reporter_global_id.sql"
+		);
+		$updater->dropExtensionField(
 			'user_board_report_archives',
 			'ra_global_id_from',
-			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'dropField',
+			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_global_id_from.sql"
+		);
+		$updater->dropExtensionField(
 			'user_board_report_archives',
 			'ra_action_taken_by_global_id',
-			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql",
-			true
-		] );
-		$updater->addExtensionUpdate( [
-			'dropField',
+			"{$extDir}/upgrade/sql/user_board_report_archives/drop_ra_action_taken_by_global_id.sql"
+		);
+		$updater->dropExtensionField(
 			'user_board',
 			'ub_admin_acted_global_id',
-			"{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql",
-			true
-		] );
-
-		$updater->addExtensionUpdate( [
-			'addTable',
+			"{$extDir}/upgrade/sql/user_board/drop_ub_admin_acted_global_id.sql"
+		);
+		$updater->addExtensionTable(
 			'user_board_purge_archive',
-			"{$extDir}/install/sql/table_user_board_purge_archive.sql",
-			true
-		] );
-
-		return true;
-	}
-
-	/**
-	 * Add unit tests to the mediawiki test framework
-	 *
-	 * @param array &$files
-	 *
-	 * @return bool true
-	 */
-	public static function onUnitTestsList( &$files ) {
-		// TODO in MW >= 1.24 this can just add the /tests/phpunit subdirectory
-		$files = array_merge( $files, glob( __DIR__ . '/tests/phpunit/*Test.php' ) );
-		return true;
+			"{$extDir}/install/sql/table_user_board_purge_archive.sql"
+		);
 	}
 
 	/**
 	 * Register the canonical names for custom namespaces.
-	 *
-	 * @param array &$list namespace numbers mapped to corresponding canonical names
-	 *
-	 * @return bool true
+	 * TODO--double-check before removing
 	 */
-	public static function onCanonicalNamespaces( &$list ) {
-		$list[NS_USER_PROFILE] = 'UserProfile';
-		return true;
+	public function onCanonicalNamespaces( &$list ) {
+//		$list[NS_USER_PROFILE] = 'UserProfile';
+//		return true;
 	}
 
-	/**
-	 * Add extra preferences
-	 *
-	 * @param mixed $user User whose preferences are being modified
-	 * @param array &$preferences Preferences description object, to be fed to an HTMLForm
-	 *
-	 * @return bool true
-	 */
-	public static function onGetPreferences( $user, &$preferences ) {
-		ProfileData::insertProfilePrefs( $preferences );
-		return true;
+	/** @inheritDoc */
+	public function onGetPreferences( $user, &$preferences ) {
+		$preferences['profile-pref'] = [
+			'type' => 'select',
+			'label-message' => 'profileprefselect',
+			'section' => 'personal/info/public',
+			'options' => [
+				wfMessage( 'profilepref-profile' )->plain() => 1,
+				wfMessage( 'profilepref-wiki' )->plain() => 0,
+			],
+		];
+
+		$preferences['comment-pref'] = [
+			'type' => 'select',
+			'label-message' => 'commentprefselect',
+			'section' => 'personal/info/public',
+			'options' => [
+				wfMessage( 'commentpref-profile' )->plain() => 1,
+				wfMessage( 'commentpref-wiki' )->plain() => 0,
+			],
+		];
+
+		$preferences['profile-favwiki-display'] = [
+			'type' => 'text',
+			'label-message' => 'favoritewiki',
+			'section' => 'personal/info/public',
+		];
+
+		$preferences['profile-favwiki'] = [
+			'type' => 'text',
+			'label-message' => 'favoritewiki',
+			'cssclass' => 'profile-favwiki-hidden',
+			'section' => 'personal/info/public',
+		];
+
+		$preferences['profile-aboutme'] = [
+			'type' => 'textarea',
+			'label-message' => 'aboutme',
+			'section' => 'personal/info/public',
+			'rows' => 6,
+			'maxlength' => 5000,
+			'placeholder' => wfMessage( 'aboutmeplaceholder' )->plain(),
+			'help-message' => 'aboutmehelp',
+		];
+
+		$preferences['profile-avatar'] = [
+			'type' => 'info',
+			'label-message' => 'avatar',
+			'section' => 'personal/info/public',
+			'default' => wfMessage( 'avatar-help' )->parse(),
+			'raw' => true,
+		];
+
+		$preferences['profile-location'] = [
+			'type' => 'text',
+			'label-message' => 'locationlabel',
+			'section' => 'personal/info/location',
+		];
+
+		foreach ( ProfileData::EXTERNAL_PROFILE_FIELDS as $index => $field ) {
+			$service = str_replace( 'profile-link-', '', $field );
+			$preferences[$field] = [
+				'type' => 'text',
+				'maxlength' => 2083,
+				'label-message' => $service . 'link',
+				'section' => 'personal/info/profiles',
+				'placeholder' => wfMessage( $service . 'linkplaceholder' )->plain()
+			];
+			if ( count( ProfileData::EXTERNAL_PROFILE_FIELDS ) - 1 === $index ) {
+				$preferences[$field]['help-message'] = 'profilelink-help';
+			}
+		}
+
+		if ( $user->getBlock() !== null ) {
+			foreach ( ProfileData::getValidEditFields() as $field ) {
+				$preferences[$field]['help-message'] = 'profile-blocked';
+				$preferences[$field]['disabled'] = true;
+			}
+		}
 	}
 
-	/**
-	 * Handle modifying preferences before the form saves.
-	 *
-	 * @param array $formData array of user submitted data
-	 * @param mixed $form PreferencesForm object, also a ContextSource
-	 * @param mixed $user User object with preferences to be saved set
-	 * @param bool &$result boolean indicating success
-	 *
-	 * @return bool True
-	 */
-	public static function onPreferencesFormPreSave( $formData, $form, $user, &$result ) {
-		$untouchedUser = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $user->getId() );
-
-		if ( !$untouchedUser || !$untouchedUser->getId() ) {
-			return true;
+	/** @inheritDoc */
+	public function onPreferencesFormPreSave( $formData, $form, $user, &$result, $oldUserOptions ) {
+		if ( $user->isAnon() ) {
+			return;
 		}
 
 		$profileData = new ProfileData( $user );
 		$canEdit = $profileData->canEdit( $user );
-		if ( $canEdit !== true ) {
-			$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-			$result = Status::newFatal( $canEdit );
-			foreach ( $formData as $key => $value ) {
-				if ( strpos( $key, 'profile-' ) === 0 && $value != $optionsLookup->getOption( $untouchedUser, $key ) ) {
-					// Reset profile data to its previous state.
-					$user->setOption( $key, $optionsLookup->getOption( $untouchedUser, $key ) );
-				}
-			}
+		if ( $canEdit === true ) {
+			return;
 		}
 
-		return true;
+//		 TODO-- double-check
+		$result = Status::newFatal( $canEdit );
+		foreach ( $formData as $key => $value ) {
+			if ( $value !== $oldUserOptions[$key] && str_starts_with( $key, 'profile-' ) ) {
+				// Reset profile data to its previous state.
+				$user->setOption( $key, $oldUserOptions[$key] );
+			}
+		}
 	}
 
-	/**
-	 * Add extra preferences defaults
-	 *
-	 * @param array &$defaultOptions mapping of preference to default value
-	 *
-	 * @return bool true
-	 */
-	public static function onUserGetDefaultOptions( &$defaultOptions ) {
-		ProfileData::insertProfilePrefsDefaults( $defaultOptions );
-		return true;
+	/** @inheritDoc */
+	public function onUserGetDefaultOptions( &$defaultOptions ) {
+		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
+		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
+		$defaultOptions['echo-subscriptions-web-profile-report'] = 1;
+		$defaultOptions['echo-subscriptions-email-profile-report'] = 1;
+
+		// Allow overriding by setting the value in the global $wgDefaultUserOptions
+		if ( !isset( $defaultOptions['profile-pref'] ) ) {
+			$defaultOptions['profile-pref'] = 1;
+		}
+
+		if ( !isset( $defaultOptions['comment-pref'] ) ) {
+			$defaultOptions['comment-pref'] = 0;
+		}
 	}
 
 	/**
@@ -727,84 +607,59 @@ class Hooks {
 	 * @param array &$options Preferences description object, to be fed to an HTMLForm.
 	 *
 	 */
-	public static function onFandomUserSaveOptions( UserIdentity $user, array &$options ) {
-		if ( $user && $user->isRegistered() ) {
-			ProfileData::processPreferenceSave( $user, $options );
-		}
-	}
-
-	/**
-	 * Get a username from title
-	 *
-	 * @param Title $title
-	 *
-	 * @return string
-	 */
-	public static function resolveUsername( $title ) {
-		$username = $title->getText();
-		if ( strpos( $username, '/' ) > 0 ) {
-			$username = explode( '/', $username );
-			$username = array_shift( $username );
-			$canonical = MediaWikiServices::getInstance()->getUserNameUtils()->getCanonical( $username );
-			$username = $canonical ? $canonical : $username;
+	public function onFandomUserSaveOptions( User $user, array &$options ) {
+		if ( !$user->isRegistered() ) {
+			return;
 		}
 
-		return $username;
-	}
+		// don't allow blocked users to change their about me text
+		if (
+			$user->isSafeToLoad() &&
+			$user->getBlock() !== null &&
+			isset( $preferences['profile-aboutme'] ) &&
+			$preferences['profile-aboutme'] != $this->userOptionsLookup->getOption( $user, 'profile-aboutme' )
+		) {
+			$preferences['profile-aboutme'] = $this->userOptionsLookup->getOption( $user, 'profile-aboutme' );
+		}
 
-	/**
-	 * Add CurseProfile CSS to Mobile Skin
-	 *
-	 * @param mixed $skin SkinTemplate Object
-	 * @param array &$modules Array of Modules to Modify
-	 *
-	 * @return bool True
-	 */
-	public static function onSkinMinervaDefaultModules( $skin, &$modules ) {
-		if ( self::$profilePage instanceof ProfilePage && self::$profilePage->isProfilePage() ) {
-			$modules = array_merge(
-				[
-					'curseprofile-mobile' => [
-						'a.ext.curseprofile.profilepage.mobile.styles',
-						'a.ext.curseprofile.profilepage.mobile.scripts'
-					]
-				],
-				$modules
+		// run hooks on profile preferences (mostly for achievements)
+		foreach ( ProfileData::getValidEditFields() as $field ) {
+			if ( !empty( $preferences[$field] ) ) {
+				$this->hookContainer->run( 'CurseProfileEdited', [ $user, $field, $preferences[$field] ] );
+			}
+		}
+
+		foreach ( ProfileData::EXTERNAL_PROFILE_FIELDS as $field ) {
+			if ( !isset( $preferences[$field] ) ) {
+				continue;
+			}
+			$valid = ProfileData::validateExternalProfile(
+				str_replace( 'profile-link-', '', $field ),
+				$preferences[$field]
 			);
+			if ( $valid === false ) {
+				$preferences[$field] = '';
+				continue;
+			}
+			$preferences[$field] = $valid;
 		}
-
-		return true;
 	}
 
 	/**
 	 * Prevent UserProfile pages from being shown as movable
-	 *
-	 * @param int $index The index of the namespace being checked
-	 * @param bool &$result Whether MediaWiki currently thinks this namespace is movable
-	 *
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public static function onNamespaceIsMovable( $index, &$result ) {
-		if ( $index == NS_USER_PROFILE ) {
-			$result = false;
-		}
-
-		return true;
+	public function onNamespaceIsMovable( $index, &$result ) {
+		return $index !== NS_USER_PROFILE;
 	}
 
 	/**
 	 * Prevent UserProfile pages from being edited
-	 *
-	 * @param Title &$title Reference to the title in question
-	 * @param User &$user Reference to the current user
-	 * @param string $action Action concerning the title in question
-	 * @param bool &$result Whether MediaWiki currently thinks the action may be performed
-	 *
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public static function onUserCan( &$title, &$user, $action, &$result ) {
-		if ( $title->getNamespace() == NS_USER_PROFILE && $action === 'edit' ) {
-			$result = false;
+	public function onGetUserPermissionsErrors( $title, $user, $action, &$result ) {
+		if ( $title->getNamespace() === NS_USER_PROFILE && $action === 'edit' ) {
+			$result = 'badaccess-group0';
 			return false;
 		}
 

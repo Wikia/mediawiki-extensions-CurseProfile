@@ -300,27 +300,38 @@
 		"localBasePath": "",
 		"remoteExtPath": "CurseProfile"
 	},
+	"HookHandlers": {
+		"CurseProfileHookHandler": {
+			"class": "CurseProfile\\Classes\\Hooks",
+			"services": [
+				"UserFactory",
+				"DBLoadBalancer",
+				"NamespaceInfo",
+				"LinkRenderer",
+				"HookContainer",
+				"UserOptionsLookup"
+			]
+		}
+	},
 	"Hooks": {
-		"ArticleFromTitle": "CurseProfile\\Classes\\Hooks::onArticleFromTitle",
-		"ArticleViewRedirect": "CurseProfile\\Classes\\Hooks::onArticleViewRedirect",
-		"BeforeInitialize": "CurseProfile\\Classes\\Hooks::onBeforeInitialize",
-		"BeforePageDisplay": "CurseProfile\\Classes\\Hooks::onBeforePageDisplay",
-		"CanonicalNamespaces": "CurseProfile\\Classes\\Hooks::onCanonicalNamespaces",
-		"EditPage::importFormData": "CurseProfile\\Classes\\Hooks::onEditPageImportFormData",
-		"GetPreferences": "CurseProfile\\Classes\\Hooks::onGetPreferences",
-		"HtmlPageLinkRendererEnd": "CurseProfile\\Classes\\Hooks::onHtmlPageLinkRendererEnd",
-		"LoadExtensionSchemaUpdates": "CurseProfile\\Classes\\Hooks::onLoadExtensionSchemaUpdates",
-		"NamespaceIsMovable": "CurseProfile\\Classes\\Hooks::onNamespaceIsMovable",
-		"ParserFirstCallInit": "CurseProfile\\Classes\\Hooks::onParserFirstCall",
-		"PreferencesFormPreSave": "CurseProfile\\Classes\\Hooks::onPreferencesFormPreSave",
-		"SkinMinervaDefaultModules": "CurseProfile\\Classes\\Hooks::onSkinMinervaDefaultModules",
-		"SkinSubPageSubtitle": "CurseProfile\\Classes\\Hooks::onSkinSubPageSubtitle",
-		"SkinTemplateNavigation": "CurseProfile\\Classes\\Hooks::onSkinTemplateNavigation",
-		"UnitTestsList": "CurseProfile\\Classes\\Hooks::onUnitTestsList",
-		"userCan": "CurseProfile\\Classes\\Hooks::onUserCan",
-		"UserGetDefaultOptions": "CurseProfile\\Classes\\Hooks::onUserGetDefaultOptions",
-		"FandomUserSaveOptions": "CurseProfile\\Classes\\Hooks::onFandomUserSaveOptions",
-		"WantedPages::getQueryInfo": "CurseProfile\\Classes\\Hooks::onWantedPagesGetQueryInfo"
+		"ParserFirstCallInit": "CurseProfileHookHandler",
+		"BeforeInitialize": "CurseProfileHookHandler",
+		"BeforePageDisplay": "CurseProfileHookHandler",
+		"ArticleViewRedirect": "CurseProfileHookHandler",
+		"ArticleFromTitle": "CurseProfileHookHandler",
+		"WantedPages::getQueryInfo": "CurseProfileHookHandler",
+		"HtmlPageLinkRendererEnd": "CurseProfileHookHandler",
+		"EditPage::importFormData": "CurseProfileHookHandler",
+		"SkinTemplateNavigation::Universal": "CurseProfileHookHandler",
+		"SkinSubPageSubtitle": "CurseProfileHookHandler",
+		"LoadExtensionSchemaUpdates": "CurseProfileHookHandler",
+		"GetPreferences": "CurseProfileHookHandler",
+		"PreferencesFormPreSave": "CurseProfileHookHandler",
+		"UserGetDefaultOptions": "CurseProfileHookHandler",
+		"NamespaceIsMovable": "CurseProfileHookHandler",
+		"FandomUserSaveOptions": "CurseProfileHookHandler",
+		"getUserPermissionsErrors": "CurseProfileHookHandler",
+		"CanonicalNamespaces": "CurseProfileHookHandler"
 	},
 	"APIModules": {
 		"profile": {
@@ -336,7 +347,7 @@
 			"services": ["UserFactory", "UserOptionsLookup", "UserIdentityLookup"]
 		}
 	},
-	"callback": "CurseProfile\\Classes\\Hooks::onRegistration",
+	"callback": "CurseProfile\\OnExtensionRegistration::onRegistration",
 	"config": {
 		"CPEditsToComment": {
 			"value": 1,

@@ -18,10 +18,10 @@ use Fandom\WikiConfig\WikiVariablesDataService;
 use Html;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserOptionsLookup;
 use MWException;
 use RequestContext;
+use Sanitizer;
 use Title;
 use User;
 
@@ -30,21 +30,11 @@ use User;
  */
 class ProfileData {
 	/**
-	 * @var int
-	 */
-	protected $user_id;
-
-	/**
-	 * @var object
-	 */
-	protected $user;
-
-	/**
 	 * Basic profile fields.
 	 *
 	 * @var array
 	 */
-	private static $basicProfileFields = [
+	private const BASIC_PROFILE_FIELDS = [
 		'profile-aboutme',
 		'profile-favwiki',
 		'profile-location'
@@ -55,7 +45,7 @@ class ProfileData {
 	 *
 	 * @var array
 	 */
-	private static $externalProfileFields = [
+	public const EXTERNAL_PROFILE_FIELDS = [
 		'profile-link-battlenet',
 		'profile-link-discord',
 		'profile-link-facebook',
@@ -73,7 +63,7 @@ class ProfileData {
 	 *
 	 * @var array
 	 */
-	private static $externalProfiles = [
+	private const EXTERNAL_PROFILES = [
 		'battlenet'	=> [
 			'user'	=> '^(\w{3,12}#\d{3,6})$'
 		],
@@ -123,6 +113,7 @@ class ProfileData {
 	];
 
 	private UserOptionsLookup $userOptionsLookup;
+	private User $user;
 
 	/**
 	 * Create a new ProfileData instance
@@ -132,13 +123,12 @@ class ProfileData {
 	public function __construct( $user ) {
 		$services = MediaWikiServices::getInstance();
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
-		if ( is_a( $user, 'User' ) ) {
+		if ( $user instanceof User ) {
 			$this->user = $user;
-			$this->user_id = $user->getId();
 		} else {
-			$this->user_id = (int)$user;
+			$userId = (int)$user;
 			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-			$this->user = $this->user_id < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId( $this->user_id );
+			$this->user = $userId < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId( $userId );
 		}
 	}
 
@@ -148,7 +138,7 @@ class ProfileData {
 	 * @return array Edit Profile Fields
 	 */
 	public static function getValidEditFields() {
-		return array_merge( self::$basicProfileFields, self::$externalProfileFields );
+		return array_merge( self::BASIC_PROFILE_FIELDS, self::EXTERNAL_PROFILE_FIELDS );
 	}
 
 	/**
@@ -159,10 +149,10 @@ class ProfileData {
 	 * @return string|bool URL to the external profile or false.
 	 */
 	public static function getExternalProfileLink( $service, $text ) {
-		if ( !isset( self::$externalProfiles[$service]['link'] ) ) {
+		if ( !isset( self::EXTERNAL_PROFILES[$service]['link'] ) ) {
 			return false;
 		}
-		return sprintf( self::$externalProfiles[$service]['link'], urlencode( $text ) );
+		return sprintf( self::EXTERNAL_PROFILES[$service]['link'], urlencode( $text ) );
 	}
 
 	public function getProfilePageUrl(): string {
@@ -215,160 +205,6 @@ class ProfileData {
 	}
 
 	/**
-	 * Inserts curse profile fields into the user preferences form.
-	 *
-	 * @param array &$preferences Data for HTMLForm to generate the Special:Preferences form
-	 * @return void
-	 */
-	public static function insertProfilePrefs( &$preferences ) {
-		global $wgUser;
-
-		$preferences['profile-pref'] = [
-			'type' => 'select',
-			'label-message' => 'profileprefselect',
-			'section' => 'personal/info/public',
-			'options' => [
-				wfMessage( 'profilepref-profile' )->plain() => 1,
-				wfMessage( 'profilepref-wiki' )->plain() => 0,
-			],
-		];
-
-		$preferences['comment-pref'] = [
-			'type' => 'select',
-			'label-message' => 'commentprefselect',
-			'section' => 'personal/info/public',
-			'options' => [
-				wfMessage( 'commentpref-profile' )->plain() => 1,
-				wfMessage( 'commentpref-wiki' )->plain() => 0,
-			],
-		];
-
-		$preferences['profile-favwiki-display'] = [
-			'type' => 'text',
-			'label-message' => 'favoritewiki',
-			'section' => 'personal/info/public',
-		];
-
-		$preferences['profile-favwiki'] = [
-			'type' => 'text',
-			'label-message' => 'favoritewiki',
-			'cssclass' => 'profile-favwiki-hidden',
-			'section' => 'personal/info/public',
-		];
-
-		$preferences['profile-aboutme'] = [
-			'type' => 'textarea',
-			'label-message' => 'aboutme',
-			'section' => 'personal/info/public',
-			'rows' => 6,
-			'maxlength' => 5000,
-			'placeholder' => wfMessage( 'aboutmeplaceholder' )->plain(),
-			'help-message' => 'aboutmehelp',
-		];
-
-		$preferences['profile-avatar'] = [
-			'type' => 'info',
-			'label-message' => 'avatar',
-			'section' => 'personal/info/public',
-			'default' => wfMessage( 'avatar-help' )->parse(),
-			'raw' => true,
-		];
-
-		$preferences['profile-location'] = [
-			'type' => 'text',
-			'label-message' => 'locationlabel',
-			'section' => 'personal/info/location',
-		];
-
-		foreach ( self::$externalProfileFields as $index => $field ) {
-			$service = str_replace( 'profile-link-', '', $field );
-			$preferences[$field] = [
-				'type' => 'text',
-				'maxlength' => 2083,
-				'label-message' => $service . 'link',
-				'section' => 'personal/info/profiles',
-				'placeholder' => wfMessage( $service . 'linkplaceholder' )->plain()
-			];
-			if ( count( self::$externalProfileFields ) - 1 == $index ) {
-				$preferences[$field]['help-message'] = 'profilelink-help';
-			}
-		}
-
-		if ( $wgUser->getBlock() !== null ) {
-			foreach ( self::getValidEditFields() as $field ) {
-				$preferences[$field]['help-message'] = 'profile-blocked';
-				$preferences[$field]['disabled'] = true;
-			}
-		}
-	}
-
-	/**
-	 * Adds default values for preferences added by curse profile
-	 *
-	 * @param array &$defaultOptions Default Values
-	 * @return null
-	 */
-	public static function insertProfilePrefsDefaults( &$defaultOptions ) {
-		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
-		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
-		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
-		$defaultOptions['echo-subscriptions-email-profile-comment'] = 1;
-		$defaultOptions['echo-subscriptions-web-profile-report'] = 1;
-		$defaultOptions['echo-subscriptions-email-profile-report'] = 1;
-
-		// Allow overriding by setting the value in the global $wgDefaultUserOptions
-		if ( !isset( $defaultOptions['profile-pref'] ) ) {
-			$defaultOptions['profile-pref'] = 1;
-		}
-
-		if ( !isset( $defaultOptions['comment-pref'] ) ) {
-			$defaultOptions['comment-pref'] = 0;
-		}
-	}
-
-	/**
-	 * Runs when the user saves their preferences.
-	 */
-	public static function processPreferenceSave( UserIdentity $userIdentity, array &$preferences ) {
-		global $wgUser;
-
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
-		$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		// don't allow blocked users to change their about me text
-		// Deep in the logic of isBlocked() it tries to call on $wgUser
-		// for some unknown reason, but $wgUser can be null.
-		if (
-			$user->isSafeToLoad() &&
-			$wgUser !== null &&
-			$user->getBlock() !== null &&
-			isset( $preferences['profile-aboutme'] ) &&
-			$preferences['profile-aboutme'] != $optionsLookup->getOption( $user, 'profile-aboutme' )
-		) {
-			$preferences['profile-aboutme'] = $optionsLookup->getOption( $user, 'profile-aboutme' );
-		}
-
-		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
-		// run hooks on profile preferences (mostly for achievements)
-		foreach ( self::getValidEditFields() as $field ) {
-			if ( !empty( $preferences[$field] ) ) {
-				$hookContainer->run( 'CurseProfileEdited', [ $user, $field, $preferences[$field] ] );
-			}
-		}
-
-		foreach ( self::$externalProfileFields as $field ) {
-			if ( !isset( $preferences[$field] ) ) {
-				continue;
-			}
-			$valid = self::validateExternalProfile( str_replace( 'profile-link-', '', $field ), $preferences[$field] );
-			if ( $valid === false ) {
-				$preferences[$field] = '';
-				continue;
-			}
-			$preferences[$field] = $valid;
-		}
-	}
-
-	/**
 	 * Can the given user edit this profile profile?
 	 *
 	 * @param mixed $performer User, the performer that needs to make changes.
@@ -392,8 +228,10 @@ class ProfileData {
 		}
 
 		if ( $wgEmailAuthentication &&
-			( !boolval( $performer->getEmailAuthenticationTimestamp() ) ||
-				!\Sanitizer::validateEmail( $performer->getEmail() ) )
+			(
+				!$performer->getEmailAuthenticationTimestamp() ||
+				!Sanitizer::validateEmail( $performer->getEmail() )
+            )
 		) {
 			// If email authentication is turned on and their email address is invalid then prevent editing.
 			return 'email-auth-required';
@@ -408,12 +246,12 @@ class ProfileData {
 	 * @param string $field Field Name - Examples: aboutme, location, link_twitch
 	 * @return string
 	 */
-	public function getField( $field ) {
+	public function getField( string $field ): string {
 		$field = 'profile-' . $field;
 		if ( !in_array( $field, self::getValidEditFields() ) ) {
 			throw new MWException( __METHOD__ . ': Invalid profile field.' );
 		}
-		return (string)$this->user->getOption( $field );
+		return (string)$this->userOptionsLookup->getOption( $this->user, $field );
 	}
 
 	/**
@@ -424,7 +262,7 @@ class ProfileData {
 	 * @param mixed|null $performer [Optional] User who performed the action.  Null to use the current user.
 	 * @return void
 	 */
-	public function setField( $field, $text, $performer = null ) {
+	public function setField( string $field, string $text, ?User $performer = null ) {
 		$field = 'profile-' . $field;
 		if ( !in_array( $field, self::getValidEditFields() ) ) {
 			throw new MWException( __METHOD__ . ': Invalid profile field (' . $field . ').' );
@@ -437,7 +275,7 @@ class ProfileData {
 			$performer = $this->user;
 		}
 
-		self::logProfileChange( $field, $text, $this->user, $performer );
+		$this->logProfileChange( $field, $text, $this->user, $performer );
 	}
 
 	/**
@@ -450,11 +288,11 @@ class ProfileData {
 	public static function validateExternalProfile( $service, $test ) {
 		$service = strtolower( $service );
 
-		if ( !isset( self::$externalProfiles[$service] ) ) {
+		if ( !isset( self::EXTERNAL_PROFILES[$service] ) ) {
 			return false;
 		}
 
-		$patterns = self::$externalProfiles[$service];
+		$patterns = self::EXTERNAL_PROFILES[$service];
 
 		foreach ( $patterns as $pattern ) {
 			$result = preg_match( "#" . str_replace( '#', '\#', $pattern ) . "#", $test, $matches );
@@ -473,10 +311,9 @@ class ProfileData {
 	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
 	public function getFieldHtml( $field ) {
-		global $wgOut;
 		$user = RequestContext::getMain()->getUser();
 
-		$fieldHtml = $wgOut->parseAsContent( $this->getField( $field ) );
+		$fieldHtml = RequestContext::getMain()->getOutput()->parseAsContent( $this->getField( $field ) );
 
 		if ( $this->canEdit( $user ) === true ) {
 			if ( empty( $fieldHtml ) ) {
@@ -540,7 +377,7 @@ class ProfileData {
 		$html .= ProfilePage::generateProfileLinks( $profileLinks );
 		// Get all of the possible external profiles to shove into the data-field
 		// for Javascript to know which ones to be able to edit.
-		foreach ( self::$externalProfiles as $field => $unused ) {
+		foreach ( self::EXTERNAL_PROFILES as $field => $unused ) {
 			$fields[] = 'link-' . $field;
 		}
 		sort( $fields );
@@ -549,15 +386,9 @@ class ProfileData {
 		return $html;
 	}
 
-	/**
-	 * Check whether we are viewing the profile of the logged-in user
-	 *
-	 * @return bool
-	 */
-	public function isViewingSelf() {
-		global $wgUser;
-
-		return $wgUser->isRegistered() && $wgUser->getID() == $this->user->getID();
+	public function isViewingSelf(): bool {
+        $performer = RequestContext::getMain()->getUser();
+		return $performer && $performer->isRegistered() && $performer->getId() === $this->user->getId();
 	}
 
 	/**
@@ -569,7 +400,7 @@ class ProfileData {
 	 * @param mixed $performer User who performed the action.  Null to use the current user.
 	 * @return void
 	 */
-	public static function logProfileChange( $section, $comment, User $target, User $performer ) {
+	public function logProfileChange( string $section, string $comment, User $target, User $performer ) {
 		if ( strlen( $comment ) > 140 ) {
 			$comment = substr( $comment, 0, 140 ) . "...";
 		}
@@ -579,11 +410,7 @@ class ProfileData {
 		$log->setPerformer( $performer );
 		$log->setTarget( Title::makeTitle( NS_USER_PROFILE, $target->getName() ) );
 		$log->setComment( $comment );
-		$log->setParameters(
-			[
-				'4:section' => $section
-			]
-		);
+		$log->setParameters( [ '4:section' => $section ] );
 		$logId = $log->insert();
 		$log->publish( $logId );
 	}
@@ -593,10 +420,8 @@ class ProfileData {
 	 *
 	 * @return array Possibly including key: location
 	 */
-	public function getLocation() {
-		$profile = [
-			'location' => $this->user->getOption( 'profile-location' )
-		];
+	public function getLocation(): array {
+		$profile = [ 'location' => $this->userOptionsLookup->getOption( $this->user, 'profile-location' ) ];
 		return array_filter( $profile );
 	}
 
@@ -605,10 +430,12 @@ class ProfileData {
 	 *
 	 * @return array Possibly including keys: Twitter, Facebook, Reddit, Steam, VK, XBL, PSN
 	 */
-	public function getExternalProfiles() {
-		foreach ( self::$externalProfiles as $service => $data ) {
-			$profile[$service] =
-				self::validateExternalProfile( $service, $this->user->getOption( 'profile-link-' . $service ) );
+	public function getExternalProfiles(): array {
+		foreach ( self::EXTERNAL_PROFILES as $service => $data ) {
+			$profile[$service] = self::validateExternalProfile(
+				$service,
+				$this->userOptionsLookup->getOption( $this->user, 'profile-link-' . $service )
+			);
 		}
 		return array_filter( $profile );
 	}
@@ -619,7 +446,7 @@ class ProfileData {
 	 * @return string
 	 */
 	public function getFavoriteWikiHash() {
-		return $this->user->getOption( 'profile-favwiki' );
+		return $this->userOptionsLookup->getOption( $this->user, 'profile-favwiki' );
 	}
 
 	/**
@@ -628,10 +455,8 @@ class ProfileData {
 	 * @return array
 	 */
 	public function getFavoriteWiki() {
-		if ( $this->user->getOption( 'profile-favwiki' ) ) {
-			return self::getWikiSite( $this->user->getOption( 'profile-favwiki' ) );
-		}
-		return [];
+		$profileFavWiki = $this->userOptionsLookup->getOption( $this->user, 'profile-favwiki' );
+		return $profileFavWiki ? self::getWikiSite( $profileFavWiki ) : [];
 	}
 
 	/**
@@ -640,11 +465,12 @@ class ProfileData {
 	 * @param string $search Search Term
 	 * @return array Search Results
 	 */
-	public static function getWikiSitesSearch( $search ) {
+	public static function getWikiSitesSearch( $search ): array {
 		$wikis = self::getWikisFromCityList();
 		$result = [];
 		foreach ( $wikis as $wiki ) {
-			$domain = wfParseUrl( $wiki['wiki_url'] )['host'] ?? '';
+			$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+			$domain = $urlUtils->parse( (string)$wiki['wiki_url'] )['host'] ?? '';
 			if (
 				mb_stripos( $wiki['wiki_name_display'], $search ) === false &&
 				mb_stripos( $domain, $search ) === false
@@ -682,12 +508,11 @@ class ProfileData {
 	private static function convertCityInfoToSiteData( $cityId, $info ) {
 		$lang = mb_strtoupper( $info['city_lang'] );
 		$urlUtilityService = MediaWikiServices::getInstance()->getService( UrlUtilityService::class );
-		$url = $urlUtilityService->forceHttps( $info['city_url'] );
 		return [
 			'wiki_id' => $cityId,
 			'wiki_name' => $info['city_title'],
 			'wiki_name_display' => "{$info['city_title']} ($lang)",
-			'wiki_url' => $url,
+			'wiki_url' => $urlUtilityService->forceHttps( $info['city_url'] ),
 			'md5_key' => $info['value'],
 		];
 	}
@@ -699,7 +524,7 @@ class ProfileData {
 	private static function getWikisFromCityList( $siteKey = null ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		return $cache->getWithSetCallback(
-			$cache->makeGlobalKey( __CLASS__, 'wiki-info-v3', $siteKey ?? 'all' ),
+			$cache->makeGlobalKey( 'CurseProfile', 'wiki-info-v3', $siteKey ?? 'all' ),
 			14400,
 			function ( $oldValue, &$ttl, array &$setOpts ) use ( $siteKey ) {
 				/** @var WikiVariablesDataService $wikiVariables */
@@ -735,7 +560,7 @@ class ProfileData {
 	 */
 	public function getProfileTypePreference() {
 		// override preference for non existent user
-		if ( $this->user_id == 0 ) {
+		if ( $this->user->isAnon() ) {
 			return false;
 		}
 		return $this->userOptionsLookup->getIntOption( $this->user, 'profile-pref' );
@@ -746,11 +571,11 @@ class ProfileData {
 	 *
 	 * @return bool
 	 */
-	public function getCommentTypePreference() {
+	public function getCommentTypePreference(): bool {
 		// override preference for non existent user
-		if ( $this->user_id == 0 ) {
+		if ( $this->user->isAnon() ) {
 			return false;
 		}
-		return $this->userOptionsLookup->getIntOption( $this->user, 'comment-pref' );
+		return (bool)$this->userOptionsLookup->getIntOption( $this->user, 'comment-pref' );
 	}
 }

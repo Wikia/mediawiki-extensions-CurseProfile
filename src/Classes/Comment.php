@@ -267,15 +267,13 @@ class Comment {
 	 *
 	 * @return bool Can Comment
 	 */
-	public function canComment( User $fromUser ) {
-		global $wgCPEditsToComment, $wgEmailAuthentication, $wgUser;
+	public function canComment( User $fromUser ): bool {
+		global $wgCPEditsToComment, $wgEmailAuthentication;
 
 		$toUser = $this->getBoardOwnerUser();
 		if ( $toUser->isAnon() ) {
 			return false;
 		}
-
-		$editCount = $fromUser->getEditCount();
 
 		$noEmailAuth = ( $wgEmailAuthentication &&
 			( !$fromUser->getEmailAuthenticationTimestamp() ||
