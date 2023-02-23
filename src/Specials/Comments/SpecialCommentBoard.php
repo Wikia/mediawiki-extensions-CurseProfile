@@ -75,7 +75,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 
 		$output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
 
-		$board = new CommentBoard( $user, CommentBoard::BOARDTYPE_ARCHIVES );
+		$board = new CommentBoard( $user );
 
 		$total = $board->countComments( $this->getUser() );
 		if ( $total == 0 ) {

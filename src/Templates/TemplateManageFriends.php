@@ -21,13 +21,6 @@ use User;
 
 class TemplateManageFriends {
 	/**
-	 * Output HTML
-	 *
-	 * @var string
-	 */
-	private $HTML;
-
-	/**
 	 * Displays a list of friends.
 	 *
 	 * @param array $friends Raw friend IDs.
@@ -37,15 +30,15 @@ class TemplateManageFriends {
 	 * @return string
 	 */
 	public function display( $friends, $pagination, $itemsPerPage, $start ) {
-		$this->HTML = '<h2>' . wfMessage( 'friends' ) . '</h2>';
+		$html = '<h2>' . wfMessage( 'friends' ) . '</h2>';
 		if ( count( $friends ) ) {
-			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray( $friends, false, null, $itemsPerPage, $start );
-			$this->HTML .= $pagination;
+			$html .= $pagination;
+			$html .= FriendDisplay::listFromArray( $friends, false, null, $itemsPerPage, $start );
+			$html .= $pagination;
 		} else {
-			$this->HTML .= wfMessage( 'nofriends' )->plain();
+			$html .= wfMessage( 'nofriends' )->plain();
 		}
-		return $this->HTML;
+		return $html;
 	}
 
 	/**
@@ -64,33 +57,33 @@ class TemplateManageFriends {
 		$received = $friendTypes[ 'incoming_requests' ];
 		$sent = $friendTypes[ 'outgoing_requests' ];
 
-		$this->HTML = '';
+		$html = '';
 		$pagination = count( $friends ) ? HydraCore::generatePaginationHtml(
 			SpecialPage::getTitleFor( 'ManageFriends' ),
 			count( $friends ), $itemsPerPage, $start
 		) : '';
 
 		if ( count( $received ) ) {
-			$this->HTML .= '<h2>' . wfMessage( 'pendingrequests' ) . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray( $received, true, $actor );
+			$html .= '<h2>' . wfMessage( 'pendingrequests' ) . '</h2>';
+			$html .= FriendDisplay::listFromArray( $received, true, $actor );
 		}
 
-		$this->HTML .= '<h2>' . wfMessage( 'friends' ) . '</h2>';
+		$html .= '<h2>' . wfMessage( 'friends' ) . '</h2>';
 		if ( count( $friends ) ) {
-			$this->HTML .= $pagination;
-			$this->HTML .= FriendDisplay::listFromArray( $friends, true, $actor, $itemsPerPage, $start );
-			$this->HTML .= $pagination;
+			$html .= $pagination;
+			$html .= FriendDisplay::listFromArray( $friends, true, $actor, $itemsPerPage, $start );
+			$html .= $pagination;
 		} else {
-			$this->HTML .= wfMessage( 'soronery' )->plain();
+			$html .= wfMessage( 'soronery' )->plain();
 		}
 
 		if ( count( $sent ) ) {
-			$this->HTML .= '<h2>' . wfMessage( 'sentrequests' ) . '</h2>';
-			$this->HTML .= FriendDisplay::listFromArray( $sent, true, $actor );
+			$html .= '<h2>' . wfMessage( 'sentrequests' ) . '</h2>';
+			$html .= FriendDisplay::listFromArray( $sent, true, $actor );
 		}
 
-		$this->HTML .= '<h3>' . wfMessage( 'senddirectrequest' ) . '</h3>';
-		$this->HTML .= Html::element(
+		$html .= '<h3>' . wfMessage( 'senddirectrequest' ) . '</h3>';
+		$html .= Html::element(
 			'input',
 			[
 				'type' => 'text',
@@ -98,8 +91,8 @@ class TemplateManageFriends {
 				'placeholder' => wfMessage( 'directfriendreqplaceholder' )->text()
 			]
 		);
-		$this->HTML .= Html::element( 'button', [ 'id' => 'senddirectreq' ], wfMessage( 'sendrequest' )->text() );
+		$html .= Html::element( 'button', [ 'id' => 'senddirectreq' ], wfMessage( 'sendrequest' )->text() );
 
-		return '<div id="managefriends">' . $this->HTML . '</div>';
+		return '<div id="managefriends">' . $html . '</div>';
 	}
 }

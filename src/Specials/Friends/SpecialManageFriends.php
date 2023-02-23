@@ -63,8 +63,6 @@ class SpecialManageFriends extends SpecialPage {
 		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 		$templateManageFriends = new TemplateManageFriends();
 
-		// $output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
-
 		$start = $request->getInt( 'st' );
 		$itemsPerPage = 25;
 		$friendship = new Friendship( $user );

@@ -137,13 +137,14 @@ class CommentBoard {
 	 * @return array An array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
-	public function getPurgedCommentById( $commentId ) {
+	public static function getPurgedCommentById( $commentId ) {
 		$commentId = (int)$commentId;
 		if ( $commentId < 1 ) {
 			return [];
 		}
 
-		$result = $this->lb->getConnection( DB_PRIMARY )->select(
+		$result = MediaWikiServices::getInstance()->getDBLoadBalancer()
+			->getConnection( DB_PRIMARY )->select(
 			[ 'user_board_purge_archive' ],
 			[ '*' ],
 			[ 'ubpa_comment_id' => (int)$commentId ],

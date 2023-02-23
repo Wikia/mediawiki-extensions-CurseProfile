@@ -65,7 +65,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 		$user = $this->userFactory->newFromUserIdentity( $userIdentity );
 
 		// Fix missing or incorrect username segment in the path
-		if ( $user->getTitleKey() != $userName ) {
+		if ( $user->getTitleKey() !== $userName ) {
 			$fixedPath = SpecialPage::getTitleFor( 'Friends', "$userId/{$user->getTitleKey()}" )->getFullURL();
 			// Preserve query params
 			$query = $request->getRawQueryString();

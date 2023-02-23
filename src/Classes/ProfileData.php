@@ -165,13 +165,11 @@ class ProfileData {
 	 * @param Title $title
 	 * @return string
 	 */
-	public function getUserPageUrl( $title ) {
-		$args = [];
-		if ( $this->getProfileTypePreference() ) {
-			$args['profile'] = 'no';
-		}
-
-		return $this->getFullURL( $title, $args );
+	public function getUserPageUrl( Title $title ): string {
+		return $this->getFullURL(
+			$title,
+			$this->getProfileTypePreference() ? [ 'profile' => 'no' ] : []
+		);
 	}
 
 	/**

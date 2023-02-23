@@ -69,5 +69,5 @@ class SetProfilePreference extends Maintenance {
 	}
 }
 
-$maintClass = 'CurseProfile\SetProfilePreference';
+$maintClass = SetProfilePreference::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

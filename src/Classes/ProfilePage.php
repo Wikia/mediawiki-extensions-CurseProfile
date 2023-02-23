@@ -589,7 +589,7 @@ class ProfilePage extends Article {
 		try {
 			$statsOutput['localrank'] = Cheevos::getUserPointRank(
 				$this->user,
-				(string)$this->config->get( 'CityId' )
+				$this->config->has( 'dsSiteKey' ) ? $this->config->get( 'dsSiteKey' ) : null
 			);
 			$statsOutput['globalrank'] = Cheevos::getUserPointRank( $this->user );
 
@@ -668,9 +668,10 @@ class ProfilePage extends Article {
 	 * @return array
 	 */
 	public function recentAchievements( &$parser, $type = 'special', $limit = 0 ) {
+		$dsSiteKey = $this->config->has( 'dsSiteKey' ) ? $this->config->get( 'dsSiteKey' ) : null;
 		$achievements = [];
 		try {
-			$achievements = Cheevos::getAchievements( (string)$this->config->get( 'CityId' ) );
+			$achievements = Cheevos::getAchievements( $dsSiteKey );
 		} catch ( CheevosException $e ) {
 			wfDebug( "Encountered Cheevos API error getting site achievements." );
 		}
@@ -690,7 +691,7 @@ class ProfilePage extends Article {
 			try {
 				$progresses = Cheevos::getAchievementProgress(
 					[
-						'site_key' => (string)$this->config->get( 'CityId' ),
+						'site_key' => $dsSiteKey,
 						'earned' => true,
 						'special' => false,
 						'shown_on_all_sites' => true,

@@ -45,5 +45,5 @@ class MigrateLocationField extends Maintenance {
 	}
 }
 
-$maintClass = 'MigrateLocationField';
+$maintClass = MigrateLocationField::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -21,13 +21,6 @@ use User;
 
 class TemplateCommentBoard {
 	/**
-	 * Output HTML
-	 *
-	 * @var string
-	 */
-	private $HTML;
-
-	/**
 	 * Header for comments archive board
 	 *
 	 * @param mixed $user user reference
@@ -77,21 +70,21 @@ class TemplateCommentBoard {
 	 * @return string Built HTML
 	 */
 	public function comments( $comments, User $user, $pagination = '' ) {
-		$this->HTML = '';
-		$this->HTML .= '<div>' . $pagination . '</div>';
+		$html = '';
+		$html .= '<div>' . $pagination . '</div>';
 
-		$this->HTML .= '<div class="comments curseprofile" data-user_id="' . $user->getId() . '">';
+		$html .= '<div class="comments curseprofile" data-user_id="' . $user->getId() . '">';
 
 		// add hidden compose form, to support replies
-		$this->HTML .= CommentDisplay::newCommentForm( $user, true );
+		$html .= CommentDisplay::newCommentForm( $user, true );
 
 		foreach ( $comments as $comment ) {
-			$this->HTML .= CommentDisplay::singleComment( $comment, false );
+			$html .= CommentDisplay::singleComment( $comment, false );
 		}
 
-		$this->HTML .= '</div>';
+		$html .= '</div>';
 
-		$this->HTML .= '<div>' . $pagination . '</div>';
-		return $this->HTML;
+		$html .= '<div>' . $pagination . '</div>';
+		return $html;
 	}
 }

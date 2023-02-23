@@ -69,8 +69,8 @@ class CP {
 		if ( $class && is_string( $class ) ) {
 			$customAttribs['class'] = $class;
 		}
-		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		// htmlspecialchars($user->getName())
-		return $linkRenderer->makeKnownLink( $user->getUserPage(), $user->getName(), $customAttribs );
+		return MediaWikiServices::getInstance()->getLinkRenderer()
+			->makeKnownLink( $user->getUserPage(), $user->getName(), $customAttribs );
 	}
 }

@@ -37,22 +37,23 @@ class MigrateFriendsToCheevos extends Maintenance {
 			$actualUsableRedisKey = str_replace( $prefix, '', $dumbRedisName );
 
 			$userId = (int)str_replace( $far, '', $dumbRedisName );
+			$user = $userFactory->newFromId( $userId );
 			$friendIds = $redis->sMembers( $actualUsableRedisKey );
-			foreach ( $friendIds as $friend ) {
-				$friend = (int)$friend;
-				$this->output( "$userId => $friend -- " );
+			foreach ( $friendIds as $friendId ) {
+				$friend = $userFactory->newFromId( (int)$friendId );
+				$this->output( "$userId => $friendId -- " );
 				try {
-					Cheevos::createFriendRequest( $userFactory->newFromId( $userId ), $userFactory->newFromId( $friend ) );
+					Cheevos::createFriendRequest( $user, $friend );
 					$this->output( "Relationship Created" );
 				} catch ( CheevosException $e ) {
 					$this->output( "Error\n{$e->getMessage()}\n{$e->getTraceAsString()}\n" );
 				}
-				$status = Cheevos::getFriendStatus( $userFactory->newFromId( $userId ), $userFactory->newFromId( $friend ) );
+				$status = Cheevos::getFriendStatus( $user, $friend );
 				$this->output( " -- Status: " . $status['status_name'] . "\n" );
 			}
 		}
 	}
 }
 
-$maintClass = 'MigrateFriendsToCheevos';
+$maintClass = MigrateFriendsToCheevos::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
