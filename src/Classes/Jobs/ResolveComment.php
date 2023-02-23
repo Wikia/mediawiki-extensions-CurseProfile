@@ -33,16 +33,6 @@ class ResolveComment extends Job {
 		return new self( $params, MediaWikiServices::getInstance()->getUserFactory() );
 	}
 
-	/**
-	 * Queue a new job.
-	 *
-	 * @param array $parameters Named arguments passed by the command that queued this job.
-	 *  - reportKey: unique key identifying the reported comment
-	 *  - action: 'dismiss' or 'delete'
-	 *  - byUser: User ID of admin acting
-	 *
-	 * @return void
-	 */
 	public static function queue( string $reportKey, string $action, int $byUser ): void {
 		$job = new JobSpecification( self::COMMAND, [
 			self::REPORT_KEY_PARAM => $reportKey,

@@ -35,8 +35,6 @@ class CommentDisplay {
 	 * @return array with html at index 0
 	 */
 	public static function comments( &$parser, int $userId ) {
-		global $wgUser;
-
 		if ( $userId < 1 ) {
 			return 'Invalid user ID given';
 		}
@@ -48,7 +46,7 @@ class CommentDisplay {
 		$html .= self::newCommentForm( $boardOwner, false );
 
 		$board = new CommentBoard( $userFactory->newFromId( $userId ) );
-		$comments = $board->getComments( $wgUser );
+		$comments = $board->getComments( RequestContext::getMain()->getUser() );
 
 		foreach ( $comments as $comment ) {
 			$html .= self::singleComment( $comment, false );
@@ -65,18 +63,18 @@ class CommentDisplay {
 	 * @return string html fragment or empty string
 	 */
 	public static function newCommentForm( User $owner, bool $hidden = false ) {
-		global $wgRequest, $wgUser;
+		$requestUser = RequestContext::getMain()->getUser();
 
 		$comment = Comment::newWithOwner( $owner );
-		if ( $comment->canComment( $wgUser ) ) {
-			$tokenSet = new CsrfTokenSet( $wgRequest );
+		if ( $comment->canComment( $requestUser ) ) {
+			$tokenSet = new CsrfTokenSet( RequestContext::getMain()->getRequest() );
 			$commentPlaceholder = wfMessage( 'commentplaceholder' )->escaped();
 			$replyPlaceholder = wfMessage( 'commentreplyplaceholder' )->escaped();
 			$page = Title::newFromText( "Special:AddComment/" . $owner->getId() );
 			return '
 			<div class="commentdisplay add-comment' . ( $hidden ? ' hidden' : '' ) . '">
 				<div class="avatar">' .
-				ProfilePage::userAvatar( null, 48, $wgUser->getEmail(), $wgUser->getName() )[0] .
+				ProfilePage::userAvatar( null, 48, $requestUser->getEmail(), $requestUser->getName() )[0] .
 				'</div>
 				<div class="entryform">
 					<form action="' . $page->getFullUrl() . '" method="post">
@@ -89,14 +87,14 @@ class CommentDisplay {
 					</form>
 				</div>
 			</div>';
-		} else {
-			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-			$link = $linkRenderer->makeKnownLink(
-				Title::newFromText( 'Special:ConfirmEmail' ),
-				wfMessage( 'no-perm-validate-email' )->text()
-			);
-			return "<div class='errorbox'>" . wfMessage( 'no-perm-profile-addcomment', $link )->text() . "</div>";
 		}
+
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		$link = $linkRenderer->makeKnownLink(
+			Title::newFromText( 'Special:ConfirmEmail' ),
+			wfMessage( 'no-perm-validate-email' )->text()
+		);
+		return "<div class='errorbox'>" . wfMessage( 'no-perm-profile-addcomment', $link )->text() . "</div>";
 	}
 
 	/**
@@ -107,7 +105,8 @@ class CommentDisplay {
 	 * @return string html for display
 	 */
 	public static function singleComment( Comment $comment, $highlight = false ) {
-		global $wgOut, $wgUser;
+		$requestUser = RequestContext::getMain()->getUser();
+		$output = RequestContext::getMain()->getOutput();
 
 		$html = '';
 		$cUser = $comment->getActorUser();
@@ -160,32 +159,32 @@ class CommentDisplay {
 					],
 					self::timestamp( $comment )
 			) . ' '
-				. ( $comment->canReply( $wgUser ) ?
+				. ( $comment->canReply( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon newreply', 'title' => wfMessage( 'replylink-tooltip' ) ],
 					HydraCore::awesomeIcon( 'reply' ) ) . ' ' : '' )
-				. ( $comment->canEdit( $wgUser ) ?
+				. ( $comment->canEdit( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon edit', 'title' => wfMessage( 'commenteditlink-tooltip' ) ],
 					HydraCore::awesomeIcon( 'pencil-alt' ) ) . ' ' : '' )
-				. ( $comment->canRemove( $wgUser ) ?
+				. ( $comment->canRemove( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon remove', 'title' => wfMessage( 'removelink-tooltip' ) ],
 					HydraCore::awesomeIcon( 'trash' ) ) : '' )
-				. ( $comment->canRestore( $wgUser ) ?
+				. ( $comment->canRestore( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon restore', 'title' => wfMessage( 'restorelink-tooltip' ) ],
 					HydraCore::awesomeIcon( 'undo' ) ) : '' )
-				. ( $comment->canPurge( $wgUser ) ?
+				. ( $comment->canPurge( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon purge', 'title' => wfMessage( 'purgelink-tooltip' ) ],
 					HydraCore::awesomeIcon( 'eraser' ) ) : '' )
-				. ( $comment->canReport( $wgUser ) ?
+				. ( $comment->canReport( $requestUser ) ?
 				Html::rawElement(
 					'a',
 					[ 'href' => '#', 'class' => 'icon report', 'title' => wfMessage( 'reportlink-tooltip' ) ],
@@ -199,25 +198,26 @@ class CommentDisplay {
 					' . self::sanitizeComment( $comment->getMessage() ) . '
 				</div>
 			</div>';
-		$replies = $comment->getReplies( $wgUser );
+		$replies = $comment->getReplies( $requestUser );
 		if ( !empty( $replies ) ) {
 			$html .= '<div class="replyset">';
 
 			// perhaps there are more replies not yet loaded
-			if ( $comment->getTotalReplies( $wgUser ) > count( $replies ) ) {
+			if ( $comment->getTotalReplies( $requestUser ) > count( $replies ) ) {
 				$repliesTooltip = htmlspecialchars( wfMessage( 'repliestooltip' )->plain(), ENT_QUOTES );
 				// force parsing this message because MW won't replace plurals as expected
 				// due to this all happening inside the wfMessage()->parse() call that
 				// generates the entire profile
 				$viewReplies = Parser::stripOuterParagraph(
-					$wgOut->parseAsContent(
+					$output->parseAsContent(
 						wfMessage(
 							'viewearlierreplies',
-							$comment->getTotalReplies( $wgUser ) - count( $replies )
+							$comment->getTotalReplies( $requestUser ) - count( $replies )
 						)->escaped()
 					)
 				);
-				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' title='{$repliesTooltip}'>{$viewReplies}</button>";
+				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' " .
+					" title='{$repliesTooltip}'>{$viewReplies}</button>";
 			}
 
 			foreach ( $replies as $reply ) {

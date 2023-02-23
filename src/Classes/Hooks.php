@@ -474,8 +474,8 @@ class Hooks implements
 	 * TODO--double-check before removing
 	 */
 	public function onCanonicalNamespaces( &$list ) {
-//		$list[NS_USER_PROFILE] = 'UserProfile';
-//		return true;
+		// $list[NS_USER_PROFILE] = 'UserProfile';
+		// return true;
 	}
 
 	/** @inheritDoc */
@@ -571,7 +571,7 @@ class Hooks implements
 			return;
 		}
 
-//		 TODO-- double-check
+		// TODO-- double-check
 		$result = Status::newFatal( $canEdit );
 		foreach ( $formData as $key => $value ) {
 			if ( $value !== $oldUserOptions[$key] && str_starts_with( $key, 'profile-' ) ) {

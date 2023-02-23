@@ -131,8 +131,9 @@ class CommentReport {
 			default:
 				// @TODO alter scheme to have an incrementing count
 				// in the archive table to avoid using a slow count(*) query
-				$subTable =
-					'(select ubr_report_archive_id, count(*) as report_count from user_board_reports group by ubr_report_archive_id) AS ubr';
+				$subTable = '(select ubr_report_archive_id, count(*) as report_count ' .
+					' from user_board_reports ' .
+					' group by ubr_report_archive_id) AS ubr';
 				$res = $db->select(
 					[
 						'user_board_report_archives AS ra',

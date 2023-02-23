@@ -229,7 +229,7 @@ class ProfileData {
 			(
 				!$performer->getEmailAuthenticationTimestamp() ||
 				!Sanitizer::validateEmail( $performer->getEmail() )
-            )
+			)
 		) {
 			// If email authentication is turned on and their email address is invalid then prevent editing.
 			return 'email-auth-required';
@@ -385,7 +385,7 @@ class ProfileData {
 	}
 
 	public function isViewingSelf(): bool {
-        $performer = RequestContext::getMain()->getUser();
+		$performer = RequestContext::getMain()->getUser();
 		return $performer && $performer->isRegistered() && $performer->getId() === $this->user->getId();
 	}
 

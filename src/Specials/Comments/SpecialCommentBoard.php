@@ -16,7 +16,6 @@ namespace CurseProfile\Specials\Comments;
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Templates\TemplateCommentBoard;
 use HydraCore;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
 use SpecialPage;

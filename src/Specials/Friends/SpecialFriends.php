@@ -19,7 +19,6 @@ use HydraCore;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
 use SpecialPage;
-use Title;
 use UnlistedSpecialPage;
 
 /**

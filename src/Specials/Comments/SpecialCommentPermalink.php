@@ -18,7 +18,6 @@ use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\ProfileData;
 use CurseProfile\Templates\TemplateCommentBoard;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
 use UnlistedSpecialPage;
 
