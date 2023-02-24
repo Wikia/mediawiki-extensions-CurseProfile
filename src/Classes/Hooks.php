@@ -37,6 +37,7 @@ use MediaWiki\Preferences\Hook\PreferencesFormPreSaveHook;
 use MediaWiki\User\Hook\UserGetDefaultOptionsHook;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\User\UserOptionsManager;
 use NamespaceInfo;
 use RequestContext;
 use SpecialPage;
@@ -73,7 +74,8 @@ class Hooks implements
 		private NamespaceInfo $namespaceInfo,
 		private LinkRenderer $linkRenderer,
 		private HookContainer $hookContainer,
-		private UserOptionsLookup $userOptionsLookup
+		private UserOptionsLookup $userOptionsLookup,
+		private UserOptionsManager $userOptionsManager
 	) {
 	}
 
@@ -468,15 +470,6 @@ class Hooks implements
 		);
 	}
 
-	/**
-	 * Register the canonical names for custom namespaces.
-	 * TODO--double-check before removing
-	 */
-	public function onCanonicalNamespaces( &$list ) {
-		// $list[NS_USER_PROFILE] = 'UserProfile';
-		// return true;
-	}
-
 	/** @inheritDoc */
 	public function onGetPreferences( $user, &$preferences ) {
 		$preferences['profile-pref'] = [
@@ -570,13 +563,37 @@ class Hooks implements
 			return;
 		}
 
-		// TODO-- double-check
-		$result = Status::newFatal( $canEdit );
+		$displayWarning = false;
+		// Reset profile data to its previous state.
 		foreach ( $formData as $key => $value ) {
-			if ( $value !== $oldUserOptions[$key] && str_starts_with( $key, 'profile-' ) ) {
-				// Reset profile data to its previous state.
-				$user->setOption( $key, $oldUserOptions[$key] );
+			if ( !str_starts_with( $key, 'profile-' ) ) {
+				continue;
 			}
+
+			if ( !isset( $oldUserOptions[$key] ) && ( isset( $formData[$key] ) || isset( $form->mFieldData[$key] ) ) ) {
+				unset( $formData[$key], $form->mFieldData[$key] );
+				$displayWarning = true;
+				$this->userOptionsManager->setOption( $user, $key, $oldUserOptions[$key] );
+				continue;
+			}
+
+			// Non strict comparison is required here
+			if ( $value != $oldUserOptions[$key] ) {
+				$formData[$key] = $oldUserOptions[$key];
+				$form->mFieldData[$key] = $oldUserOptions[$key];
+				$this->userOptionsManager->setOption( $user, $key, $oldUserOptions[$key] );
+				$displayWarning = true;
+			}
+		}
+
+		if ( $displayWarning ) {
+			/**
+			 * Hook docs says that $result is an &bool type
+			 * Hook is called from @see DefaultPreferencesFactory::saveFormData which expect on of bool|Status|string
+			 * To preserve original behaviour (UCP: release-525) we had to return Status|string
+			 */
+			$result = Status::newFatal( $canEdit );
+			$this->userOptionsManager->saveOptions( $user );
 		}
 	}
 

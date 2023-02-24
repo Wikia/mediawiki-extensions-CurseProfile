@@ -19,7 +19,6 @@ use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Reverb\Notification\NotificationBroadcastFactory;
-use Reverb\Notification\NotificationFactory;
 use SpecialPage;
 use Title;
 use User;
