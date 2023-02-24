@@ -218,7 +218,7 @@ class ProfileApi extends HydraApiBase {
 		}
 
 		try {
-			$profileData->setField( $field, $text, $this->getUser() );
+			$profileData->setFields( [ $field => $text ], $this->getUser() );
 			$fieldText = $profileData->getFieldHtml( $field );
 			$this->getResult()->addValue( null, 'result', 'success' );
 			// Add parsed text to result.
@@ -254,6 +254,7 @@ class ProfileApi extends HydraApiBase {
 		}
 
 		try {
+			$fields = [];
 			foreach ( $data as $field => $text ) {
 				$text = ProfileData::validateExternalProfile(
 					str_replace( 'link-', '', $field ),
@@ -263,9 +264,11 @@ class ProfileApi extends HydraApiBase {
 					$text = '';
 				}
 				if ( $profileData->getField( $field ) != $text ) {
-					$profileData->setField( $field, $text, $this->getUser() );
+					$fields[$field] = $text;
 				}
 			}
+			$profileData->setFields( $fields, $this->getUser() );
+
 			$this->getResult()->addValue( null, 'result', 'success' );
 			$this->getResult()->addValue( null, 'parsedContent', $profileData->getProfileLinksHtml() );
 			return;

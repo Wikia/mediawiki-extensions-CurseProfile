@@ -19,6 +19,7 @@ use Html;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\User\UserOptionsManager;
 use MWException;
 use RequestContext;
 use Sanitizer;
@@ -113,6 +114,7 @@ class ProfileData {
 	];
 
 	private UserOptionsLookup $userOptionsLookup;
+	private UserOptionsManager $userOptionsManager;
 	private User $user;
 
 	/**
@@ -123,6 +125,7 @@ class ProfileData {
 	public function __construct( $user ) {
 		$services = MediaWikiServices::getInstance();
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
+		$this->userOptionsManager = $services->getUserOptionsManager();
 		if ( $user instanceof User ) {
 			$this->user = $user;
 		} else {
@@ -253,27 +256,28 @@ class ProfileData {
 	}
 
 	/**
-	 * Set a profile field.
+	 * Set profile fields.
 	 *
-	 * @param string $field Field Name - Examples: aboutme, location, link_twitch
-	 * @param string $text the new text for the user's aboutme
-	 * @param mixed|null $performer [Optional] User who performed the action.  Null to use the current user.
+	 * @param string[] $fields [ 'aboutme' => 'value' ] Field Name - Examples: aboutme, location, link_twitch
+	 * @param User $performer User who performed the action.
 	 * @return void
 	 */
-	public function setField( string $field, string $text, ?User $performer = null ) {
-		$field = 'profile-' . $field;
-		if ( !in_array( $field, self::getValidEditFields() ) ) {
-			throw new MWException( __METHOD__ . ': Invalid profile field (' . $field . ').' );
+	public function setFields( array $fields, User $performer ): void {
+		foreach ( $fields as $field => $text ) {
+			$field = 'profile-' . $field;
+			if ( !in_array( $field, self::getValidEditFields() ) ) {
+				throw new MWException( __METHOD__ . ': Invalid profile field (' . $field . ').' );
+			}
+
+			$this->userOptionsManager->setOption( $this->user, $field, $text );
 		}
+		$this->userOptionsManager->saveOptions( $this->user );
 
-		$this->user->setOption( $field, $text );
-		$this->user->saveSettings();
-
-		if ( $performer === null ) {
-			$performer = $this->user;
+		// Add logs when option save succeed
+		foreach ( $fields as $field => $text ) {
+			$field = 'profile-' . $field;
+			$this->logProfileChange( $field, $text, $this->user, $performer );
 		}
-
-		$this->logProfileChange( $field, $text, $this->user, $performer );
 	}
 
 	/**
@@ -398,7 +402,7 @@ class ProfileData {
 	 * @param mixed $performer User who performed the action.  Null to use the current user.
 	 * @return void
 	 */
-	public function logProfileChange( string $section, string $comment, User $target, User $performer ) {
+	private function logProfileChange( string $section, string $comment, User $target, User $performer ): void {
 		if ( strlen( $comment ) > 140 ) {
 			$comment = substr( $comment, 0, 140 ) . "...";
 		}
@@ -428,7 +432,7 @@ class ProfileData {
 	 *
 	 * @return array Possibly including keys: Twitter, Facebook, Reddit, Steam, VK, XBL, PSN
 	 */
-	public function getExternalProfiles(): array {
+	private function getExternalProfiles(): array {
 		foreach ( self::EXTERNAL_PROFILES as $service => $data ) {
 			$profile[$service] = self::validateExternalProfile(
 				$service,
@@ -436,15 +440,6 @@ class ProfileData {
 			);
 		}
 		return array_filter( $profile );
-	}
-
-	/**
-	 * Returns the md5_key for the wiki the user has selected as a favorite
-	 *
-	 * @return string
-	 */
-	public function getFavoriteWikiHash() {
-		return $this->userOptionsLookup->getOption( $this->user, 'profile-favwiki' );
 	}
 
 	/**
