@@ -14,7 +14,7 @@
 namespace CurseProfile\Classes;
 
 use MediaWiki\MediaWikiServices;
-use Reverb\Notification\NotificationFactory;
+use Reverb\Notification\NotificationBroadcastFactory;
 use SpecialPage;
 use Title;
 use User;
@@ -28,7 +28,7 @@ class CommentReport {
 	public const ACTION_DISMISS = 1;
 	public const ACTION_DELETE = 2;
 
-	private function __construct( private array $data, private int $id = 0 ) {
+	private function __construct( public array $data, private int $id = 0 ) {
 	}
 
 	/**
@@ -347,7 +347,7 @@ class CommentReport {
 
 		$fromUserTitle = Title::makeTitle( NS_USER_PROFILE, $fromUser->getName() );
 		$canonicalUrl = SpecialPage::getTitleFor( 'CommentModeration/' . $this->data['comment']['cid'] )->getFullURL();
-		$broadcast = MediaWikiServices::getInstance()->getService( NotificationFactory::class )->newMulti(
+		$broadcast = MediaWikiServices::getInstance()->getService( NotificationBroadcastFactory::class )->newMulti(
 			'user-moderation-profile-comment-report',
 			$fromUser,
 			$toLocalUsers,

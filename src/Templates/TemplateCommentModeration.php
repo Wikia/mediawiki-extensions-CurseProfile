@@ -120,7 +120,7 @@ class TemplateCommentModeration {
 
 	private function actionTaken( $rep ) {
 		$user = MediaWikiServices::getInstance()->getUserFactory()
-			->newFromId( $rep->data[ 'action_taken_by_user_id' ] );
+			->newFromId( (int)$rep->data[ 'action_taken_by' ] );
 		switch ( $rep->data[ 'action_taken' ] ) {
 			case CommentReport::ACTION_DISMISS:
 				$action = 'dis';

@@ -34,7 +34,7 @@
 			do: 'resolveReport',
 			reportKey: reportKey,
 			withAction: action,
-			token: mw.user.tokens.get('editToken')
+			token: mw.user.tokens.get('csrfToken')
 		}).done(function(resp) {
 			var success = resp.result === 'success' || resp.result === 'queued';
 
