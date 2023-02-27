@@ -212,8 +212,6 @@ class ProfileData {
 	 * @return mixed Boolean true if allowed, otherwise error message string to display.
 	 */
 	public function canEdit( $performer ) {
-		global $wgEmailAuthentication;
-
 		if ( $performer->isBlocked() ) {
 			return 'profile-blocked';
 		}
@@ -228,7 +226,7 @@ class ProfileData {
 			return 'no-perm-profile-moderate';
 		}
 
-		if ( $wgEmailAuthentication &&
+		if ( MediaWikiServices::getInstance()->getMainConfig()->get( 'EmailAuthentication' ) &&
 			(
 				!$performer->getEmailAuthenticationTimestamp() ||
 				!Sanitizer::validateEmail( $performer->getEmail() )
@@ -313,10 +311,13 @@ class ProfileData {
 	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
 	public function getFieldHtml( $field ) {
-		$user = RequestContext::getMain()->getUser();
+		if ( !in_array( "profile-$field", self::getValidEditFields() ) ) {
+			return '';
+		}
 
 		$fieldHtml = RequestContext::getMain()->getOutput()->parseAsContent( $this->getField( $field ) );
 
+		$user = RequestContext::getMain()->getUser();
 		if ( $this->canEdit( $user ) === true ) {
 			if ( empty( $fieldHtml ) ) {
 				$fieldHtml = Html::element(

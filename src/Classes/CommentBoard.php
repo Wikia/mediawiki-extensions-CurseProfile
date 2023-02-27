@@ -42,7 +42,7 @@ class CommentBoard {
 	 * @return int
 	 */
 	public function countComments( User $asUser, int $inReplyTo = 0 ) {
-		$db = CP::getDb( DB_REPLICA );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$results = $db->select(
 			[ 'user_board' ],
 			[ 'count(*) as total' ],
@@ -71,7 +71,7 @@ class CommentBoard {
 	 */
 	private function getCommentsWithConditions( array $conditions, User $asUser, $startAt = 0, $limit = 100 ) {
 		// Fetch top level comments.
-		$results = $this->lb->getConnection( DB_PRIMARY )->select(
+		$results = $this->lb->getConnection( DB_REPLICA )->select(
 			[ 'user_board' ],
 			[
 				'*',
@@ -255,34 +255,13 @@ class CommentBoard {
 							[
 								'url' => $commentPermanentLink,
 								'message' => [
-									[
-										'user_note',
-										$userNote
-									],
-									[
-										1,
-										$fromUser->getName()
-									],
-									[
-										2,
-										$this->owner->getName()
-									],
-									[
-										3,
-										$parentCommenter->getName()
-									],
-									[
-										4,
-										$fromUserTitle->getFullURL()
-									],
-									[
-										5,
-										$toUserTitle->getFullURL()
-									],
-									[
-										6,
-										$parentCommenterTitle->getFullURL()
-									]
+									[ 'user_note', $userNote ],
+									[ 1, $fromUser->getName() ],
+									[ 2, $this->owner->getName() ],
+									[ 3, $parentCommenter->getName() ],
+									[ 4, $fromUserTitle->getFullURL() ],
+									[ 5, $toUserTitle->getFullURL() ],
+									[ 6, $parentCommenterTitle->getFullURL() ]
 								]
 							]
 						);
@@ -299,34 +278,13 @@ class CommentBoard {
 					[
 						'url' => $commentPermanentLink,
 						'message' => [
-							[
-								'user_note',
-								$userNote
-							],
-							[
-								1,
-								$fromUser->getName()
-							],
-							[
-								2,
-								$this->owner->getName()
-							],
-							[
-								3,
-								$parentCommenter->getName()
-							],
-							[
-								4,
-								$fromUserTitle->getFullURL()
-							],
-							[
-								5,
-								$toUserTitle->getFullURL()
-							],
-							[
-								6,
-								$parentCommenterTitle->getFullURL()
-							]
+							[ 'user_note', $userNote ],
+							[ 1, $fromUser->getName() ],
+							[ 2, $this->owner->getName() ],
+							[ 3, $parentCommenter->getName() ],
+							[ 4, $fromUserTitle->getFullURL() ],
+							[ 5, $toUserTitle->getFullURL() ],
+							[ 6, $parentCommenterTitle->getFullURL() ]
 						]
 					]
 				);
@@ -341,26 +299,11 @@ class CommentBoard {
 					[
 						'url' => $commentPermanentLink,
 						'message' => [
-							[
-								'user_note',
-								$userNote
-							],
-							[
-								1,
-								$fromUser->getName()
-							],
-							[
-								2,
-								$toUserTitle->getFullText()
-							],
-							[
-								3,
-								$toUserTitle->getFullURL()
-							],
-							[
-								4,
-								$fromUserTitle->getFullURL()
-							]
+							[ 'user_note', $userNote ],
+							[ 1, $fromUser->getName() ],
+							[ 2, $toUserTitle->getFullText() ],
+							[ 3, $toUserTitle->getFullURL() ],
+							[ 4, $fromUserTitle->getFullURL() ]
 						]
 					]
 				);
@@ -373,12 +316,7 @@ class CommentBoard {
 			$log = new ManualLogEntry( 'curseprofile', 'comment-' . $action );
 			$log->setPerformer( $fromUser );
 			$log->setTarget( $toUserTitle );
-			$log->setComment( null );
-			$log->setParameters(
-				[
-					'4:comment_id' => $newCommentId
-				]
-			);
+			$log->setParameters( [ '4:comment_id' => $newCommentId ] );
 			$logId = $log->insert();
 			$log->publish( $logId );
 		}
@@ -413,7 +351,6 @@ class CommentBoard {
 		$log = new ManualLogEntry( 'curseprofile', 'comment-edited' );
 		$log->setPerformer( $fromUser );
 		$log->setTarget( $title );
-		$log->setComment( null );
 		$log->setParameters( [ '4:comment_id' => $comment->getId() ] );
 		$logId = $log->insert();
 		$log->publish( $logId );
@@ -447,12 +384,7 @@ class CommentBoard {
 		$log = new ManualLogEntry( 'curseprofile', 'comment-deleted' );
 		$log->setPerformer( $actor );
 		$log->setTarget( $title );
-		$log->setComment( null );
-		$log->setParameters(
-			[
-				'4:comment_id' => $comment->getId()
-			]
-		);
+		$log->setParameters( [ '4:comment_id' => $comment->getId() ] );
 		$logId = $log->insert();
 		$log->publish( $logId );
 
@@ -514,7 +446,7 @@ class CommentBoard {
 		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::makeTitle( NS_USER_PROFILE, $toUser->getName() );
 
-		$db = CP::getDb( DB_PRIMARY );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		// save comment to archive for forensics
 		$success = $db->insert(
 			'user_board_purge_archive',
@@ -546,7 +478,8 @@ class CommentBoard {
 		// Purge comment.
 		return $db->delete(
 			'user_board',
-			[ 'ub_id' => $comment->getId() ]
+			[ 'ub_id' => $comment->getId() ],
+			__METHOD__
 		);
 	}
 

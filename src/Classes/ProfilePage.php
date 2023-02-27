@@ -342,9 +342,14 @@ class ProfilePage extends Article {
 	 * @param string $attributeString additional html attributes to include in the IMG tag
 	 * @return array the HTML fragment containing a IMG tag
 	 */
-	public static function userAvatar( $parser, $size, $email, $userName, $attributeString = '' ) {
+	public static function userAvatar( $parser, $size = 32, $email = '', $userName = '', $attributeString = '' ) {
+		if ( empty( $email ) ) {
+			return [ '', 'isHTML' => true ];
+		}
+
 		$size = (int)$size;
 		$userName = htmlspecialchars( $userName, ENT_QUOTES );
+		$attributeString = htmlspecialchars( $attributeString, ENT_QUOTES );
 
 		// Determine if we have a hash or an email address that needs to be hashed
 		if ( strlen( $email ) != 32 && !ctype_xdigit( $email ) ) {
@@ -671,6 +676,7 @@ class ProfilePage extends Article {
 	 * @return array
 	 */
 	public function recentAchievements( &$parser, $type = 'special', $limit = 0 ) {
+		$limit = (int)$limit;
 		$dsSiteKey = $this->config->has( 'dsSiteKey' ) ? $this->config->get( 'dsSiteKey' ) : null;
 		$achievements = [];
 		try {
@@ -698,7 +704,7 @@ class ProfilePage extends Article {
 						'earned' => true,
 						'special' => false,
 						'shown_on_all_sites' => true,
-						'limit' => (int)$limit,
+						'limit' => $limit,
 					],
 					$this->user
 				);
@@ -715,7 +721,7 @@ class ProfilePage extends Article {
 							'earned' => true,
 							'special' => true,
 							'shown_on_all_sites' => true,
-							'limit' => (int)$limit,
+							'limit' => $limit,
 						],
 						$this->user
 					);
@@ -726,14 +732,13 @@ class ProfilePage extends Article {
 		[ $achievements, $progresses ] =
 			CheevosAchievement::pruneAchievements( [ $achievements, $progresses ], true, true );
 
-		if ( empty( $progresses ) ) {
+		if ( empty( $progresses ) || !is_array( $progresses ) ) {
 			return [ '', 'isHTML' => true ];
 		}
 
-		$output = '';
-		if ( count( $progresses ) ) {
-			$output .= '<h4>' . $parser->recursiveTagParse( wfMessage( 'achievements-' . $type )->text() ) . '</h4>';
-		}
+		$output = '<div class="section achievements">';
+		$output .= '<h4>' . $parser->recursiveTagParse( wfMessage( 'achievements-' . $type )->text() ) . '</h4>';
+		$count = 0;
 		foreach ( $progresses as $progress ) {
 			if ( !isset( $achievements[$progress->getAchievement_Id()] ) ) {
 				continue;
@@ -756,7 +761,16 @@ class ProfilePage extends Article {
 					$ach->getName( $progress->getSite_Key() )
 				) : null )
 			);
+			/**
+			 * Workaround: achievements-service is not respecting limit param for progress. See:
+			 * http://a.poz-dev.k8s.wikia.net/achievements-service/v2/achievements/progress/?user_id=37714864&limit=2
+			 */
+			$count++;
+			if ( $limit && $count === $limit ) {
+				break;
+			}
 		}
+		$output .= '</div>';
 		return [ $output, 'isHTML' => true ];
 	}
 
@@ -816,7 +830,7 @@ class ProfilePage extends Article {
 			);
 		}
 
-		return [ $html, 'isHTML' => true, ];
+		return [ $html, 'isHTML' => true ];
 	}
 
 	/**

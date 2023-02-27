@@ -31,21 +31,21 @@ class CommentDisplay {
 	 * Responds to the comments parser hook that displays recent comments on a profile
 	 *
 	 * @param mixed &$parser parser instance
-	 * @param int $userId id of the user whose recent comments should be displayed
-	 * @return array with html at index 0
+	 * @param mixed $userId id of the user whose recent comments should be displayed
+	 * @return array|string
 	 */
-	public static function comments( &$parser, int $userId ) {
-		if ( $userId < 1 ) {
+	public static function comments( &$parser, $userId = 0 ) {
+		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+			->getUserIdentityByUserId( (int)$userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			return 'Invalid user ID given';
 		}
 
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
-		$html = '';
+		$selectedUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
 
-		$boardOwner = $userFactory->newFromId( $userId );
-		$html .= self::newCommentForm( $boardOwner, false );
+		$html = self::newCommentForm( $selectedUser, false );
 
-		$board = new CommentBoard( $userFactory->newFromId( $userId ) );
+		$board = new CommentBoard( $selectedUser );
 		$comments = $board->getComments( RequestContext::getMain()->getUser() );
 
 		foreach ( $comments as $comment ) {

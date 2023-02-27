@@ -172,16 +172,14 @@ class Comment {
 	/**
 	 * Gets all comment replies to this comment.
 	 *
-	 * @param User|null $actor The user viewing these comments to limit visibility and give an accurate count.
+	 * @param User $actor The user viewing these comments to limit visibility and give an accurate count.
 	 * @param int $limit [Optional] Maximum number items to return (older replies will be ommitted)
 	 *
 	 * @return array Array of Comment instances.
 	 */
-	public function getReplies( User $actor = null, int $limit = 5 ) {
+	public function getReplies( User $actor, int $limit = 5 ) {
 		// Fetch comments.
-		$options = [
-			'ORDER BY'	=> 'ub_date DESC'
-		];
+		$options = [ 'ORDER BY' => 'ub_date DESC' ];
 
 		if ( $limit > 0 ) {
 			$options['LIMIT'] = $limit;
@@ -190,9 +188,7 @@ class Comment {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$results = $db->select(
 			[ 'user_board' ],
-			[
-				'*',
-			],
+			[ '*' ],
 			[
 				CommentBoard::visibleClause( $actor ),
 				'ub_in_reply_to' => $this->getId(),
@@ -221,9 +217,7 @@ class Comment {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$result = $db->select(
 			[ 'user_board' ],
-			[
-				'count(ub_in_reply_to) as total_replies',
-			],
+			[ 'count(ub_in_reply_to) as total_replies' ],
 			[
 				CommentBoard::visibleClause( $actor ),
 				'ub_in_reply_to' => $this->getId(),
@@ -428,13 +422,6 @@ class Comment {
 	}
 
 	/**
-	 * Mark this message as private.
-	 */
-	public function markAsPrivate(): void {
-		$this->data['ub_type'] = self::PRIVATE_MESSAGE;
-	}
-
-	/**
 	 * Get the User instance of the user that made the comment.
 	 *
 	 * @return User
@@ -458,13 +445,6 @@ class Comment {
 	 */
 	public function getActorUserId(): int {
 		return (int)$this->data['ub_user_id_from'];
-	}
-
-	/**
-	 * Set the user ID of the user that made the comment.
-	 */
-	public function setActorUserId( int $userId ): void {
-		$this->data['ub_user_id_from'] = $userId;
 	}
 
 	/**
@@ -494,15 +474,6 @@ class Comment {
 	}
 
 	/**
-	 * Set the user ID of the user board that this comment belongs to.
-	 *
-	 * @param int $userId User ID
-	 */
-	public function setBoardOwnerUserId( int $userId ): void {
-		$this->data['ub_user_id'] = $userId;
-	}
-
-	/**
 	 * Get the User instance of the the administrator that performed an administrative action on this comment.
 	 *
 	 * @return User
@@ -528,13 +499,6 @@ class Comment {
 	 */
 	public function getAdminActedUserId(): int {
 		return (int)$this->data['ub_admin_acted_user_id'];
-	}
-
-	/**
-	 * Set the user ID of the the administrator that performed an administrative action on this comment.
-	 */
-	public function setAdminActedUserId( ?int $userId = null ): void {
-		$this->data['ub_admin_acted_user_id'] = $userId;
 	}
 
 	/**

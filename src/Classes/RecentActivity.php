@@ -21,25 +21,19 @@ use Title;
  * A class to manage displaying a list of recent activity on a user profile
  */
 class RecentActivity {
-	/**
-	 * Handle parser hook call
-	 *
-	 * @param mixed &$parser
-	 * @param string $userId
-	 *
-	 * @return mixed
-	 */
-	public static function parserHook( &$parser, $userId = '' ) {
-		$contextUser = RequestContext::getMain()->getUser();
+
+	public static function parserHook( &$parser, $userId = 0 ) {
 		$userId = (int)$userId;
-		if ( $userId < 1 ) {
+		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+			->getUserIdentityByUserId( $userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			return 'Invalid user ID given';
 		}
+
+		$contextUser = RequestContext::getMain()->getUser();
 		$activity = self::fetchRecentRevisions( $userId );
-		if ( count( $activity ) == 0 ) {
-			$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-			$user->load();
-			return wfMessage( 'emptyactivity' )->params( $user->getName(), $contextUser->getName() )->text();
+		if ( count( $activity ) === 0 ) {
+			return wfMessage( 'emptyactivity' )->params( $userIdentity->getName(), $contextUser->getName() )->text();
 		}
 
 		$html = '

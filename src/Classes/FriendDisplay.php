@@ -140,16 +140,17 @@ class FriendDisplay {
 	 * Get the user's friend count based on their local user ID.
 	 *
 	 * @param Parser|null $parser - Not used, but the parser will pass it regardless.
-	 * @param int $userId Local User ID
+	 * @param mixed $userId Local User ID
 	 *
 	 * @return int Number of friends.
 	 */
-	public static function count( ?Parser $parser = null, int $userId ) {
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-
-		if ( !$user ) {
+	public static function count( ?Parser $parser = null, $userId = 0 ) {
+		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+			->getUserIdentityByUserId( (int)$userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			return 0;
 		}
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
 
 		$friendship = new Friendship( $user );
 		$friendTypes = $friendship->getFriends();
@@ -161,21 +162,22 @@ class FriendDisplay {
 	 * Get the user's friends based on their local user ID.
 	 *
 	 * @param Parser|null &$parser Not used, but the parser will pass it regardless.
-	 * @param int $userId Local User ID
+	 * @param mixed $userId Local User ID
 	 *
 	 * @return array|int|string Parser compatible HTML array.
 	 */
-	public static function friendList( ?Parser &$parser = null, int $userId ) {
-		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromId( $userId );
-
-		if ( !$user ) {
-			return 0;
+	public static function friendList( ?Parser &$parser = null, $userId = 0 ) {
+		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+			->getUserIdentityByUserId( (int)$userId );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
+			return [ '', 'isHTML' => true ];
 		}
+		$user = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
 
 		$friendship = new Friendship( $user );
 		$friendTypes = $friendship->getFriends();
 		if ( !count( $friendTypes['friends'] ) ) {
-			return '';
+			return [ '', 'isHTML' => true ];
 		}
 
 		return [

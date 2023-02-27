@@ -28,39 +28,7 @@ class CommentReport {
 	public const ACTION_DISMISS = 1;
 	public const ACTION_DELETE = 2;
 
-	/**
-	 * The structured data.
-	 *
-	 * @var	array
-	 */
-	public $data;
-
-	/**
-	 * ID from the ra_id column of user_board_report_archives.
-	 *
-	 * @var	int
-	 */
-	private $id = 0;
-
-	/**
-	 * Constructor used by static methods to create instances of this class.
-	 *
-	 * @param array $data a mostly filled out data set (see newFromRow)
-	 * @return void
-	 */
-	private function __construct( $data ) {
-		$this->data = $data;
-	}
-
-	/**
-	 * Gets the total count of how many comments are in a given queue
-	 *
-	 * @param string $sortStyle which queue to count
-	 * @param string|null $qualifier [optional] site md5key or curse id when $sortStyle is 'byWiki' or 'byUser'
-	 * @return int
-	 */
-	public static function getCount( $sortStyle, $qualifier = null ) {
-		return 0;
+	private function __construct( private array $data, private int $id = 0 ) {
 	}
 
 	/**
@@ -84,7 +52,7 @@ class CommentReport {
 	public static function newFromKey( $key ) {
 		// report is local
 		[ $md5key, $commentId, $timestamp ] = explode( ':', $key );
-		$db = CP::getDb( DB_REPLICA );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$row = $db->selectRow(
 			'user_board_report_archives',
 			[ '*' ],
@@ -110,7 +78,7 @@ class CommentReport {
 	 * @return array 0 or more CommentReport instances
 	 */
 	private static function getReportsDb( $sortStyle, $limit, $offset ) {
-		$db = CP::getDb( DB_REPLICA );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$reports = [];
 		switch ( $sortStyle ) {
 			case 'byActionDate':
@@ -174,7 +142,7 @@ class CommentReport {
 	 * @return mixed CommentReport instance that is already saved or false on failure.
 	 */
 	public static function newUserReport( Comment $comment, User $actor ) {
-		$db = CP::getDb( DB_REPLICA );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		if ( $comment->getId() < 1 ) {
 			return false;
@@ -240,7 +208,7 @@ class CommentReport {
 		];
 		$report = new self( $data );
 		$report->initialLocalInsert();
-		if ( $report->id == 0 ) {
+		if ( $report->id === 0 ) {
 			return false;
 		}
 
@@ -270,9 +238,7 @@ class CommentReport {
 			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ),
 			'first_reported' => strtotime( $report['ra_first_reported'] ),
 		];
-		$cr = new self( $data );
-		$cr->id = $report['ra_id'];
-		return $cr;
+		return new self( $data, (int)$report['ra_id'] );
 	}
 
 	/**
@@ -283,11 +249,11 @@ class CommentReport {
 	 * @return array With sub arrays for each report having keys reporter => user_id, timestamp
 	 */
 	private static function getReportsForId( $id ) {
-		$db = CP::getDb( DB_REPLICA );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $db->select(
 			[ 'user_board_reports' ],
 			[ 'ubr_reporter_user_id as reporter', 'ubr_reported as timestamp' ],
-			[ 'ubr_report_archive_id = ' . intval( $id ) ],
+			[ 'ubr_report_archive_id = ' . (int)$id ],
 			__METHOD__,
 			[ 'ORDER BY' => 'ubr_reported ASC' ]
 		);
@@ -307,7 +273,7 @@ class CommentReport {
 	 */
 	private function initialLocalInsert() {
 		// insert into local db tables
-		$db = CP::getDb( DB_PRIMARY );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$db->insert(
 			'user_board_report_archives',
 			[
@@ -354,24 +320,19 @@ class CommentReport {
 		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()
 			->newFromId( $this->data['comment']['author'] );
 
-		if ( !isset( $this->id ) || $fromUser->isAnon() ) {
+		if ( $fromUser->isAnon() ) {
 			// Can't add to a comment that hasn't been archived yet.
 			return;
 		}
 
-		$newReport = [
-			'reporter' => $fromUser->getId(),
-			'timestamp' => time(),
-		];
-
 		// Add new report row to the local database.
-		$db = CP::getDb( DB_PRIMARY );
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$db->insert(
 			'user_board_reports',
 			[
 				'ubr_report_archive_id' => $this->id,
 				'ubr_reporter_user_id' => $fromUser->getId(),
-				'ubr_reported' => date( 'Y-m-d H:i:s', $newReport['timestamp'] )
+				'ubr_reported' => date( 'Y-m-d H:i:s', time() )
 			],
 			__METHOD__
 		);
@@ -393,26 +354,11 @@ class CommentReport {
 			[
 				'url' => $canonicalUrl,
 				'message' => [
-					[
-						'user_note',
-						''
-					],
-					[
-						1,
-						$fromUserTitle->getFullURL()
-					],
-					[
-						2,
-						$fromUser->getName()
-					],
-					[
-						3,
-						$canonicalUrl
-					],
-					[
-						4,
-						$commentAuthor->getName()
-					]
+					[ 'user_note', '' ],
+					[ 1, $fromUserTitle->getFullURL() ],
+					[ 2, $fromUser->getName() ],
+					[ 3, $canonicalUrl ],
+					[ 4, $commentAuthor->getName() ]
 				]
 			]
 		);
@@ -452,8 +398,8 @@ class CommentReport {
 	 */
 	private function resolveInDb() {
 		// write 1 or 2 to ra_action_taken column
-		$db = CP::getDb( DB_PRIMARY );
-		$result = $db->update(
+		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		return $db->update(
 			'user_board_report_archives',
 			[
 				'ra_action_taken' => $this->data['action_taken'],
@@ -461,11 +407,10 @@ class CommentReport {
 				'ra_action_taken_at' => date( 'Y-m-d H:i:s', $this->data['action_taken_at'] ),
 			],
 			[
-				'ra_comment_id' => intval( $this->data['comment']['cid'] ),
+				'ra_comment_id' => (int)$this->data['comment']['cid'],
 				'ra_last_edited' => date( 'Y-m-d H:i:s', $this->data['comment']['last_touched'] )
 			],
 			__METHOD__
 		);
-		return $result;
 	}
 }
