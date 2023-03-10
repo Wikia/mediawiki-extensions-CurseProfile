@@ -312,6 +312,9 @@
 				"UserOptionsLookup",
 				"UserOptionsManager"
 			]
+		},
+		"CurseProfileRegistrationHandler": {
+			"class": "CurseProfile\\OnExtensionRegistration"
 		}
 	},
 	"Hooks": {
@@ -325,7 +328,7 @@
 		"EditPage::importFormData": "CurseProfileHookHandler",
 		"SkinTemplateNavigation::Universal": "CurseProfileHookHandler",
 		"SkinSubPageSubtitle": "CurseProfileHookHandler",
-		"LoadExtensionSchemaUpdates": "CurseProfileHookHandler",
+		"LoadExtensionSchemaUpdates": "CurseProfileRegistrationHandler",
 		"GetPreferences": "CurseProfileHookHandler",
 		"PreferencesFormPreSave": "CurseProfileHookHandler",
 		"UserGetDefaultOptions": "CurseProfileHookHandler",
