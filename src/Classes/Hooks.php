@@ -474,7 +474,7 @@ class Hooks implements
 			if ( !isset( $oldUserOptions[$key] ) && ( isset( $formData[$key] ) || isset( $form->mFieldData[$key] ) ) ) {
 				unset( $formData[$key], $form->mFieldData[$key] );
 				$displayWarning = true;
-				$this->userOptionsManager->setOption( $user, $key, $oldUserOptions[$key] );
+				$this->userOptionsManager->setOption( $user, $key, null );
 				continue;
 			}
 
