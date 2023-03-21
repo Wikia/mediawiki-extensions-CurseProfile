@@ -365,6 +365,7 @@ class ProfilePage extends Article {
 	public static function userAvatar($parser, $size, $email, $userName, $attributeString = '') {
 		$size = intval($size);
 		$userName = htmlspecialchars($userName, ENT_QUOTES);
+		$attributeString = htmlspecialchars($attributeString, ENT_QUOTES);
 
 		// Determine if we have a hash or an email address that needs to be hashed
 		if (strlen($email) != 32 && !ctype_xdigit($email)) {
