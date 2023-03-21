@@ -42,7 +42,7 @@ class CommentBoard {
 	 * @return int
 	 */
 	public function countComments( User $asUser, int $inReplyTo = 0 ) {
-		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
+		$db = $this->lb->getConnection( DB_REPLICA );
 		$results = $db->select(
 			[ 'user_board' ],
 			[ 'count(*) as total' ],
@@ -112,21 +112,20 @@ class CommentBoard {
 	public static function visibleClause( User $actor ) {
 		if ( $actor->isAllowed( 'profile-comments-moderate' ) ) {
 			// admins see everything
-			$sql = '1=1';
-		} else {
-			$conditions = [];
-			// Everyone sees public messages.
-			$conditions[] = 'user_board.ub_type = 0';
-			// See private if you are author or recipient.
-			$conditions[] = sprintf(
-				'user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)',
-				$actor->getId()
-			);
-			// See deleted if you are the author.
-			$conditions[] = sprintf( 'user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId() );
-			$sql = '( (' . implode( ') OR (', $conditions ) . ') )';
+			return '1=1';
 		}
-		return $sql;
+
+		$conditions = [];
+		// Everyone sees public messages.
+		$conditions[] = 'user_board.ub_type = 0';
+		// See private if you are author or recipient.
+		$conditions[] = sprintf(
+			'user_board.ub_type = 1 AND (user_board.ub_user_id = %1$s OR user_board.ub_user_id_from = %1$s)',
+			$actor->getId()
+		);
+		// See deleted if you are the author.
+		$conditions[] = sprintf( 'user_board.ub_type = -1 AND user_board.ub_user_id_from = %1$s', $actor->getId() );
+		return '( (' . implode( ') OR (', $conditions ) . ') )';
 	}
 
 	/**
