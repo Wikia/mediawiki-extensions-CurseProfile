@@ -93,8 +93,9 @@ class ProfilePage extends Article {
 		}
 		$this->actionIsView = Action::getActionName( $this->getContext() ) === 'view';
 		$userName = self::resolveUsername( $title );
-		$this->user = $userFactory->newFromName( $userName );
-		if ( $this->user ) {
+		$user = $userFactory->newFromName( $userName );
+		if ( $user ) {
+			$this->user = $user;
 			$this->user->load();
 			$this->getContext()->getSkin()->setRelevantUser( $this->getUser() );
 		} else {
