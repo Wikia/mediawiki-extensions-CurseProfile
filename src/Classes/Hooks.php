@@ -306,7 +306,7 @@ class Hooks implements
 		$skinTitle = $sktemplate->getContext()->getTitle();
 		$skinNamespace = $sktemplate->getContext()->getTitle()->getNamespace();
 		// Only modify the navbar if we are on a user, user talk, or profile page
-		if ( self::$profilePage !== false && in_array( $skinNamespace, [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) ) {
+		if ( self::$profilePage !== null && in_array( $skinNamespace, [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) ) {
 			self::$profilePage->customizeNavBar( $links, $skinTitle );
 		}
 	}
