@@ -22,6 +22,7 @@ class NoProfilePage extends Article {
 	 */
 	public function view() {
 		$output = $this->getContext()->getOutput();
+		$output->setRobotPolicy( 'noindex,nofollow' );
 		$output->setPageTitle( $this->getTitle()->getPrefixedText() );
 		$output->addHTML( $this->getOutputHtml() );
 	}
