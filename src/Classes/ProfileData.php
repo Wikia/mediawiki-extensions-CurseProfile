@@ -69,7 +69,7 @@ class ProfileData {
 			'user'	=> '^(\w{3,12}#\d{3,6})$'
 		],
 		'discord'	=> [
-			'user'	=> '^([^@#:]{2,32}#\d{4,6})$'
+			'user'	=> '^@?([a-z0-9_\.]{2,32}|[^@#:]{2,32}#\d{1,4})$'
 		],
 		'facebook'	=> [
 			'url'	=> '^https?://(?:www\.)?facebook\.com/([\w\.]+)$',
