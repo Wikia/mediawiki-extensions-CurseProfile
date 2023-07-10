@@ -306,6 +306,7 @@
 						// For discord usernames, let's make sure it's always converted to lowercase when it's being edited
 						if (field !== null && field.includes("link-discord")) {
 							const lowercaseDiscordName = value.toLowerCase();
+							// TODO: Remove- Added for logging specific purposes
 							const oldValue = data[field] = value;
 							data[field] = lowercaseDiscordName;
 							console.log(`curseprofile.js - Changed the edit-link-discord value from ${oldValue} to ${lowercaseDiscordName}`)
