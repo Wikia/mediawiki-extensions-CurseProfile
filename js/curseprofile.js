@@ -302,10 +302,17 @@
 					for (var x in fields) {
 						var field = fields[x];
 						var value = $("input[name=\"edit-" + field + "\"]").val();
+						// For discord usernames, let's make sure it's always converted to lowercase when it's being edited
+						if (field !== null && field.includes("link-discord")) {
+							const lowercaseDiscordName = value.toLowerCase();
+							console.log(`curseprofile.js - Changed the edit-link-discord value from ${value} to ${lowercaseDiscordName}`)
+						}
 						data[field] = value;
 					}
 
 					data = JSON.stringify(data);
+					console.log('curseprofile.js - data fields include: ', data);
+
 					// use API to post new comment text
 					api.post({
 						action: 'profile',
