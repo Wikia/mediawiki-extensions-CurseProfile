@@ -305,8 +305,7 @@
 						data[field] = value;
 						// LYLTY-211 :: For discord usernames, let's make sure it's always converted to lowercase when it's being edited
 						if (field && field.includes("link-discord") && typeof value === 'string') {
-							const lowercaseDiscordName = value.toLowerCase();
-							data[field] = lowercaseDiscordName;
+							data[field] = value.toLowerCase();
 						}
 					}
 
