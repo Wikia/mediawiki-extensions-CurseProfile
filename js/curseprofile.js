@@ -303,9 +303,14 @@
 						var field = fields[x];
 						var value = $("input[name=\"edit-" + field + "\"]").val();
 						data[field] = value;
+						// LYLTY-211 :: For discord usernames, let's make sure it's always converted to lowercase when it's being edited
+						if (field && field.includes("link-discord") && typeof value === 'string') {
+							data[field] = value.toLowerCase();
+						}
 					}
 
 					data = JSON.stringify(data);
+
 					// use API to post new comment text
 					api.post({
 						action: 'profile',
