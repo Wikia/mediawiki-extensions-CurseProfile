@@ -304,9 +304,8 @@
 						var value = $("input[name=\"edit-" + field + "\"]").val();
 						data[field] = value;
 						// LYLTY-211 :: For discord usernames, let's make sure it's always converted to lowercase when it's being edited
-						if (field !== null && field.includes("link-discord")) {
+						if (field && field.includes("link-discord") && typeof value === 'string') {
 							const lowercaseDiscordName = value.toLowerCase();
-							const oldValue = data[field] = value;
 							data[field] = lowercaseDiscordName;
 						}
 					}
