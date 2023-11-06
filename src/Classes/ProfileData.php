@@ -261,6 +261,13 @@ class ProfileData {
 	 * @return void
 	 */
 	public function setFields( array $fields, User $performer ): void {
+		$fieldValues = implode( "\n", $fields );
+		// Validate profile content against Phalanx (LYLTY-754).
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+		if ( !$hookContainer->run( 'SpamFilterCheck', [ $performer, $fieldValues ] ) ) {
+			throw new MWException( 'Invalid profile field.' );
+		}
+
 		foreach ( $fields as $field => $text ) {
 			$field = 'profile-' . $field;
 			if ( !in_array( $field, self::getValidEditFields() ) ) {
