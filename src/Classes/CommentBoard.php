@@ -200,6 +200,17 @@ class CommentBoard {
 			$parentCommenter = $parentComment->getActorUser();
 		}
 
+		// Apply rate limiting (MAIN-29037).
+		if ( $fromUser->pingLimiter( 'curseprofile-comment' ) ) {
+			return false;
+		}
+
+		// Validate comment content against Phalanx (LYLTY-754).
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+		if ( !$hookContainer->run( 'SpamFilterCheck', [ $fromUser, $commentText ] ) ) {
+			return false;
+		}
+
 		$comment->setMessage( $commentText );
 		$comment->setActorUser( $fromUser );
 		$comment->markAsPublic();
