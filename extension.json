@@ -83,7 +83,8 @@
 		"CurseProfileMagic": "/CurseProfile.i18n.magic.php"
 	},
 	"JobClasses": {
-		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment::newInstance"
+		"CurseProfile\\ResolveComment": "CurseProfile\\Classes\\Jobs\\ResolveComment::newInstance",
+		"CurseProfile\\PurgeComments": "CurseProfile\\Classes\\Jobs\\PurgeCommentsJob::newInstance"
 	},
 	"namespaces": [
 		{
@@ -314,6 +315,14 @@
 		},
 		"CurseProfileRegistrationHandler": {
 			"class": "CurseProfile\\OnExtensionRegistration"
+		},
+		"QuickToolsHookHandler": {
+			"class": "CurseProfile\\Classes\\QuickToolsHookHandler",
+			"services": [
+				"JobQueueGroup",
+				"DBLoadBalancer",
+				"UserFactory"
+			]
 		}
 	},
 	"Hooks": {
@@ -333,7 +342,8 @@
 		"UserGetDefaultOptions": "CurseProfileHookHandler",
 		"NamespaceIsMovable": "CurseProfileHookHandler",
 		"FandomUserSaveOptions": "CurseProfileHookHandler",
-		"getUserPermissionsErrors": "CurseProfileHookHandler"
+		"getUserPermissionsErrors": "CurseProfileHookHandler",
+		"QuickToolsRevertOrDelete": "QuickToolsHookHandler"
 	},
 	"APIModules": {
 		"profile": {
