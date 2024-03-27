@@ -24,6 +24,7 @@ class NoProfilePage extends Article {
 		$output = $this->getContext()->getOutput();
 		$output->setRobotPolicy( 'noindex,nofollow' );
 		$output->setPageTitle( $this->getTitle()->getPrefixedText() );
+		$output->setStatusCode( 404 );
 		$output->addHTML( $this->getOutputHtml() );
 	}
 
