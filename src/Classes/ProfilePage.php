@@ -37,6 +37,7 @@ use SpecialPage;
 use Subscription\Subscription;
 use Title;
 use User;
+use WANObjectCache;
 
 /**
  * Class ProfilePage
@@ -66,6 +67,7 @@ class ProfilePage extends Article {
 	private UserGroupManager $userGroupManager;
 	private MessageCache $messageCache;
 	private WikiVariablesDataService $wikiVariablesDataService;
+	private WANObjectCache $cache;
 	private Config $config;
 	private Subscription $subscription;
 
@@ -87,6 +89,7 @@ class ProfilePage extends Article {
 		$this->wikiVariablesDataService = $services->getService( WikiVariablesDataService::class );
 		$this->subscription = $services->getService( Subscription::class );
 		$this->config = $services->getMainConfig();
+		$this->cache = $services->getMainWANObjectCache();
 
 		if ( $context ) {
 			$this->setContext( $context );
@@ -133,7 +136,19 @@ class ProfilePage extends Article {
 		$output->setRobotPolicy( "noindex,nofollow" );
 
 		$layout = ( $this->mobile ? $this->mobileProfileLayout() : $this->profileLayout() );
-		$userStats = $this->userStats();
+
+		if ( $this->getContext()->getUser()->isRegistered() ) {
+			$userStats = $this->userStats();
+		} else {
+			// Cache profile statistics for anonymous viewers for up to an hour
+			// to reduce load on the backing service.
+			$profileUserName = $this->getUser()->getName();
+			$userStats = $this->cache->getWithSetCallback(
+				$this->cache->makeKey( 'CurseProfile', 'UserStats', $profileUserName ),
+				WANObjectCache::TTL_HOUR,
+				$this->userStats( ... )
+			);
+		}
 		$layout = str_replace( '<USERSTATS>', $userStats, $layout );
 
 		$outputString = $this->messageCache->parse( $layout, $this->getTitle() );
