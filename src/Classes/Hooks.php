@@ -14,7 +14,8 @@
 namespace CurseProfile\Classes;
 
 use Article;
-use IContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Hook\BeforeInitializeHook;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\EditPage__importFormDataHook;
@@ -32,16 +33,15 @@ use MediaWiki\Page\Hook\ArticleViewRedirectHook;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\Preferences\Hook\PreferencesFormPreSaveHook;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
 use MediaWiki\User\Hook\UserGetDefaultOptionsHook;
+use MediaWiki\User\User;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserOptionsLookup;
 use MediaWiki\User\UserOptionsManager;
-use NamespaceInfo;
-use RequestContext;
-use SpecialPage;
-use Status;
-use Title;
-use User;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class Hooks implements
@@ -66,13 +66,13 @@ class Hooks implements
 	private static ?Title $title = null;
 
 	public function __construct(
-		private UserFactory $userFactory,
-		private ILoadBalancer $lb,
-		private NamespaceInfo $namespaceInfo,
-		private LinkRenderer $linkRenderer,
-		private HookContainer $hookContainer,
-		private UserOptionsLookup $userOptionsLookup,
-		private UserOptionsManager $userOptionsManager
+		private readonly UserFactory $userFactory,
+		private readonly ILoadBalancer $lb,
+		private readonly NamespaceInfo $namespaceInfo,
+		private readonly LinkRenderer $linkRenderer,
+		private readonly HookContainer $hookContainer,
+		private readonly UserOptionsLookup $userOptionsLookup,
+		private readonly UserOptionsManager $userOptionsManager
 	) {
 	}
 
@@ -99,9 +99,13 @@ class Hooks implements
 	}
 
 	/** @inheritDoc */
-	public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ) {
+	public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ): void {
 		self::$title = $title;
-		self::$profilePage = ProfilePage::newFromTitle( $title ) ?: null;
+		if ( in_array( $title->getNamespace(), ProfilePage::USER_NAMESPACES, true ) ) {
+			self::$profilePage = ProfilePage::newFromTitle( $title );
+		} else {
+			self::$profilePage = null;
+		}
 
 		if ( $title->equals( SpecialPage::getTitleFor( "Preferences" ) ) ) {
 			$output->addModuleStyles( [ 'ext.curseprofile.preferences.styles', 'ext.hydraCore.font-awesome.styles' ] );
@@ -122,26 +126,32 @@ class Hooks implements
 
 	/**
 	 * Reset Title and ProfilePage context if a hard internal redirect is done by MediaWiki.
+	 *
 	 * @inheritDoc
 	 */
-	public function onArticleViewRedirect( $article ) {
+	public function onArticleViewRedirect( $article ): void {
 		if ( self::$title !== null && !self::$title->equals( $article->getTitle() ) ) {
 			// Reset profile context.
 			self::$title = $article->getTitle();
-			self::$profilePage = ProfilePage::newFromTitle( self::$title ) ?: null;
+			if ( in_array( self::$title->getNamespace(), ProfilePage::USER_NAMESPACES, true ) ) {
+				self::$profilePage = ProfilePage::newFromTitle( self::$title );
+			} else {
+				self::$profilePage = null;
+			}
 			$this->onArticleFromTitle( self::$title, $article, RequestContext::getMain() );
 		}
 	}
 
 	/**
 	 * Hide NS_USER, NS_USER_TALK, NS_USER_PROFILE from Special:WantedPages.
+	 *
 	 * @inheritDoc
 	 */
-	public function onWantedPages__getQueryInfo( $wantedPages, &$query ) {
+	public function onWantedPages__getQueryInfo( $wantedPages, &$query ): void {
 		if ( isset( $query['conds'] ) ) {
 			$db = $this->lb->getConnection( DB_REPLICA );
 			foreach ( $query['conds'] as $index => $condition ) {
-				if ( strpos( $condition, 'pl_namespace NOT IN' ) === 0 ) {
+				if ( str_starts_with( $condition, 'pl_namespace NOT IN' ) ) {
 					$query['conds'][$index] =
 						'pl_namespace NOT IN(' . $db->makeList( [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) . ')';
 				}
@@ -151,6 +161,7 @@ class Hooks implements
 
 	/**
 	 * Make links to user pages known when that user opts for a profile page
+	 *
 	 * @inheritDoc
 	 */
 	public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
@@ -179,6 +190,7 @@ class Hooks implements
 
 	/**
 	 * Execute actions when ArticleFromTitle is called and add resource loader modules.
+	 *
 	 * @inheritDoc
 	 */
 	public function onArticleFromTitle( $title, &$article, $context ) {
@@ -208,7 +220,7 @@ class Hooks implements
 		}
 
 		// Add profile=no where needed
-		if ( $target->getNamespace() === NS_USER && str_contains( $attribs[ 'class' ], 'mw-changeslist-title' ) ) {
+		if ( $target->getNamespace() === NS_USER && str_contains( $attribs['class'], 'mw-changeslist-title' ) ) {
 			$query['profile'] = 'no';
 		}
 		// Rebuild query string
@@ -228,7 +240,7 @@ class Hooks implements
 			'ext.curseprofile.profilepage.styles',
 			'ext.curseprofile.customskin.styles',
 			'ext.curseprofile.comments.styles',
-			'ext.hydraCore.font-awesome.styles'
+			'ext.hydraCore.font-awesome.styles',
 		] );
 		$output->addModules( [ 'ext.curseprofile.profilepage.scripts' ] );
 
@@ -285,6 +297,7 @@ class Hooks implements
 	/**
 	 * Handle adding profile=no to redirects after articles are created or edited in
 	 * the NS_USER and NS_USER_TALK namespaces.
+	 *
 	 * @inheritDoc
 	 */
 	public function onEditPage__importFormData( $editpage, $request ) {
@@ -313,6 +326,7 @@ class Hooks implements
 
 	/**
 	 * Customize subpage links to use profile=no as needed.
+	 *
 	 * @inheritDoc
 	 */
 	public function onSkinSubPageSubtitle( &$subpages, $skin, $out ) {
@@ -321,7 +335,7 @@ class Hooks implements
 			!(
 				( self::$profilePage->isUserPage() && self::$profilePage->isProfilePreferred() ) ) ||
 				( self::$profilePage->isUserTalkPage() && self::$profilePage->isCommentsPreferred() )
-			) {
+		) {
 			return true;
 		}
 
@@ -357,6 +371,7 @@ class Hooks implements
 
 				$c++;
 
+				// TODO: fixmeeeee!!!
 				$subpages .= $c > 1 ?
 					$lang->getDirMarkEntity() . $skin->msg( 'pipe-separator' )->escaped() :
 					'&lt; ';
@@ -372,7 +387,7 @@ class Hooks implements
 	}
 
 	/** @inheritDoc */
-	public function onGetPreferences( $user, &$preferences ) {
+	public function onGetPreferences( $user, &$preferences ): void {
 		$preferences['profile-pref'] = [
 			'type' => 'select',
 			'label-message' => 'profileprefselect',
@@ -437,7 +452,7 @@ class Hooks implements
 				'maxlength' => 2083,
 				'label-message' => $service . 'link',
 				'section' => 'personal/info/profiles',
-				'placeholder' => wfMessage( $service . 'linkplaceholder' )->plain()
+				'placeholder' => wfMessage( $service . 'linkplaceholder' )->plain(),
 			];
 			if ( count( ProfileData::EXTERNAL_PROFILE_FIELDS ) - 1 === $index ) {
 				$preferences[$field]['help-message'] = 'profilelink-help';
@@ -453,7 +468,7 @@ class Hooks implements
 	}
 
 	/** @inheritDoc */
-	public function onPreferencesFormPreSave( $formData, $form, $user, &$result, $oldUserOptions ) {
+	public function onPreferencesFormPreSave( $formData, $form, $user, &$result, $oldUserOptions ): void {
 		if ( $user->isAnon() ) {
 			return;
 		}
@@ -471,7 +486,7 @@ class Hooks implements
 				continue;
 			}
 
-			if ( !isset( $oldUserOptions[$key] ) && ( isset( $formData[$key] ) || isset( $form->mFieldData[$key] ) ) ) {
+			if ( !isset( $oldUserOptions[$key] ) && ( isset( $value ) || isset( $form->mFieldData[$key] ) ) ) {
 				unset( $formData[$key], $form->mFieldData[$key] );
 				$displayWarning = true;
 				$this->userOptionsManager->setOption( $user, $key, null );
@@ -499,7 +514,7 @@ class Hooks implements
 	}
 
 	/** @inheritDoc */
-	public function onUserGetDefaultOptions( &$defaultOptions ) {
+	public function onUserGetDefaultOptions( &$defaultOptions ): void {
 		$defaultOptions['echo-subscriptions-web-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-email-profile-friendship'] = 1;
 		$defaultOptions['echo-subscriptions-web-profile-comment'] = 1;
@@ -524,7 +539,7 @@ class Hooks implements
 	 * @param array &$options Preferences description object, to be fed to an HTMLForm.
 	 *
 	 */
-	public function onFandomUserSaveOptions( User $user, array &$options ) {
+	public function onFandomUserSaveOptions( User $user, array &$options ): void {
 		if ( !$user->isRegistered() ) {
 			return;
 		}
@@ -564,6 +579,7 @@ class Hooks implements
 
 	/**
 	 * Prevent UserProfile pages from being shown as movable
+	 *
 	 * @inheritDoc
 	 */
 	public function onNamespaceIsMovable( $index, &$result ) {
@@ -572,6 +588,7 @@ class Hooks implements
 
 	/**
 	 * Prevent UserProfile pages from being edited
+	 *
 	 * @inheritDoc
 	 */
 	public function onGetUserPermissionsErrors( $title, $user, $action, &$result ) {

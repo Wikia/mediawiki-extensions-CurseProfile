@@ -16,11 +16,12 @@ namespace CurseProfile\Classes;
 use Exception;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Reverb\Notification\NotificationBroadcastFactory;
-use SpecialPage;
-use Title;
-use User;
 use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Class that manages a 'wall' of comments on a user profile page
@@ -29,7 +30,8 @@ class CommentBoard {
 
 	private ILoadBalancer $lb;
 
-	public function __construct( private User $owner ) {
+	public function __construct( private readonly User $owner ) {
+		// TODO: inject?
 		$this->lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 	}
 
@@ -38,10 +40,8 @@ class CommentBoard {
 	 *
 	 * @param User $asUser User instance of a user viewing.
 	 * @param int $inReplyTo [Optional] ID of a comment (changes from a top-level count to a reply count)
-	 *
-	 * @return int
 	 */
-	public function countComments( User $asUser, int $inReplyTo = 0 ) {
+	public function countComments( User $asUser, int $inReplyTo = 0 ): int {
 		$db = $this->lb->getConnection( DB_REPLICA );
 		$results = $db->select(
 			[ 'user_board' ],
@@ -66,10 +66,13 @@ class CommentBoard {
 	 * @param User $asUser User viewing.
 	 * @param int $startAt [Optional] Number of comments to skip when loading more.
 	 * @param int $limit [Optional] Number of top-level items to return.
-	 *
-	 * @return array comments!
 	 */
-	private function getCommentsWithConditions( array $conditions, User $asUser, $startAt = 0, $limit = 100 ) {
+	private function getCommentsWithConditions(
+		array $conditions,
+		User $asUser,
+		int $startAt = 0,
+		int $limit = 100
+	): array {
 		// Fetch top level comments.
 		$results = $this->lb->getConnection( DB_REPLICA )->select(
 			[ 'user_board' ],
@@ -95,10 +98,6 @@ class CommentBoard {
 			$comments[] = new Comment( $row );
 		}
 
-		if ( empty( $comments ) ) {
-			return $comments;
-		}
-
 		return $comments;
 	}
 
@@ -109,7 +108,7 @@ class CommentBoard {
 	 *
 	 * @return string A single SQL condition entirely enclosed in parenthesis.
 	 */
-	public static function visibleClause( User $actor ) {
+	public static function visibleClause( User $actor ): string {
 		if ( $actor->isAllowed( 'profile-comments-moderate' ) ) {
 			// admins see everything
 			return '1=1';
@@ -136,18 +135,17 @@ class CommentBoard {
 	 * @return array An array of comment data in the same format as getComments.
 	 *   array will be empty if comment is unknown, or not visible.
 	 */
-	public static function getPurgedCommentById( $commentId ) {
-		$commentId = (int)$commentId;
+	public static function getPurgedCommentById( int $commentId ): array {
 		if ( $commentId < 1 ) {
 			return [];
 		}
 
 		$result = MediaWikiServices::getInstance()->getDBLoadBalancer()
 			->getConnection( DB_PRIMARY )->select(
-			[ 'user_board_purge_archive' ],
-			[ '*' ],
-			[ 'ubpa_comment_id' => (int)$commentId ],
-			__METHOD__
+				[ 'user_board_purge_archive' ],
+				[ '*' ],
+				[ 'ubpa_comment_id' => $commentId ],
+				__METHOD__
 		);
 
 		return $result->fetchRow();
@@ -163,7 +161,7 @@ class CommentBoard {
 	 *
 	 * @return array an array of comment data (text and user info)
 	 */
-	public function getComments( User $asUser, $startAt = 0, $limit = 100, $maxAge = 30 ) {
+	public function getComments( User $asUser, int $startAt = 0, int $limit = 100, int $maxAge = 30 ): array {
 		$searchConditions = [
 			'ub_in_reply_to' => 0,
 			'ub_user_id' => $this->owner->getId()
@@ -182,9 +180,10 @@ class CommentBoard {
 	 * @param User $fromUser User of user posting.
 	 * @param int $inReplyTo [Optional] ID of a board post that this will be in reply to.
 	 *
-	 * @return int ID of the newly created comment, or 0 for failure
+	 * @return false|int ID of the newly created comment, or 0 for failure
+	 * @throws TimestampException
 	 */
-	public function addComment( string $commentText, User $fromUser, int $inReplyTo = 0 ) {
+	public function addComment( string $commentText, User $fromUser, int $inReplyTo = 0 ): false|int {
 		if ( empty( $commentText ) ) {
 			return false;
 		}
@@ -342,6 +341,7 @@ class CommentBoard {
 	 * @param string $message New text to use for the comment.
 	 *
 	 * @return bool Success
+	 * @throws TimestampException
 	 */
 	public static function editComment( Comment $comment, User $actor, string $message ): bool {
 		if ( !$comment->canEdit( $actor ) ) {
@@ -375,6 +375,7 @@ class CommentBoard {
 	 * @param User $actor User object of the user doing this action.
 	 *
 	 * @return bool Success
+	 * @throws TimestampException
 	 */
 	public static function removeComment( Comment $comment, User $actor ): bool {
 		if ( !$comment->canRemove( $actor ) ) {
@@ -408,6 +409,7 @@ class CommentBoard {
 	 * @param User $actor User object of the user doing this action.
 	 *
 	 * @return bool Success
+	 * @throws TimestampException
 	 */
 	public static function restoreComment( Comment $comment, User $actor ): bool {
 		if ( !$comment->canRestore( $actor ) ) {
@@ -428,8 +430,9 @@ class CommentBoard {
 	 * @param string $reason
 	 *
 	 * @return bool Success
+	 * @throws Exception
 	 */
-	public static function purgeComment( Comment $comment, User $actor, string $reason ) {
+	public static function purgeComment( Comment $comment, User $actor, string $reason ): bool {
 		if ( !$comment->canPurge( $actor ) ) {
 			return false;
 		}
@@ -451,8 +454,9 @@ class CommentBoard {
 	 * @param string $reason
 	 *
 	 * @return bool Success.
+	 * @throws Exception
 	 */
-	private static function performPurge( User $actor, Comment $comment, string $reason ) {
+	private static function performPurge( User $actor, Comment $comment, string $reason ): bool {
 		$toUser = $comment->getBoardOwnerUser();
 		$title = Title::makeTitle( NS_USER_PROFILE, $toUser->getName() );
 
@@ -501,14 +505,11 @@ class CommentBoard {
 	 *
 	 * @return CommentReport|false Object or false for failure.
 	 */
-	public static function reportComment( Comment $comment, User $actor ) {
+	public static function reportComment( Comment $comment, User $actor ): false|CommentReport {
 		if ( !$comment->canReport( $actor ) ) {
 			return false;
 		}
 
-		if ( $comment ) {
-			return CommentReport::newUserReport( $comment, $actor );
-		}
-		return false;
+		return CommentReport::newUserReport( $comment, $actor );
 	}
 }

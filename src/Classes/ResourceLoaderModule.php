@@ -13,21 +13,21 @@
 
 namespace CurseProfile\Classes;
 
-use ResourceLoaderContext;
-use ResourceLoaderWikiModule;
+use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\WikiModule;
 
 /**
  * Module for site customization
  */
-class ResourceLoaderModule extends ResourceLoaderWikiModule {
+class ResourceLoaderModule extends WikiModule {
 
 	/** @inheritDoc */
-	protected function getPages( ResourceLoaderContext $context ): array {
+	protected function getPages( Context $context ): array {
 		return [ 'MediaWiki:CurseProfile.css' => [ 'type' => 'style' ] ];
 	}
 
 	/** @inheritDoc */
-	public function getGroup() {
+	public function getGroup(): string {
 		return 'site';
 	}
 }

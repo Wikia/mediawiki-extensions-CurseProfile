@@ -13,16 +13,17 @@
 
 namespace CurseProfile\Classes;
 
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * A class to manage displaying a list of recent activity on a user profile
  */
 class RecentActivity {
 
-	public static function parserHook( &$parser, $userId = 0 ) {
+	public static function parserHook( &$parser, $userId = 0 ): array|string {
+		// TODO: Inject???/
 		$userId = (int)$userId;
 		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
 			->getUserIdentityByUserId( $userId );
@@ -67,7 +68,7 @@ class RecentActivity {
 	 *
 	 * @return string
 	 */
-	public static function diffHistLinks( $title, $rev ) {
+	public static function diffHistLinks( Title $title, array $rev ): string {
 		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		$html = $linkRenderer->makeLink( $title, 'diff', [], [ 'diff' => $rev['rev_id'] ] );
 		$html .= ' | ';

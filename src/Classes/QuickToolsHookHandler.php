@@ -8,7 +8,7 @@ use JobQueueGroup;
 use MediaWiki\User\UserFactory;
 use Wikimedia\Rdbms\ILoadBalancer;
 
-class QuickToolsHookHandler implements QuickToolsRevertOrDelete {
+readonly class QuickToolsHookHandler implements QuickToolsRevertOrDelete {
 
 	public function __construct(
 		private JobQueueGroup $jobQueueGroup,

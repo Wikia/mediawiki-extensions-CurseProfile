@@ -13,15 +13,16 @@
 
 namespace CurseProfile\Classes;
 
-use Html;
 use HydraCore;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
 use MediaWiki\Session\CsrfTokenSet;
-use Parser;
-use RequestContext;
-use SpecialPage;
-use Title;
-use User;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * A class to manage displaying a list of friends on a user profile
@@ -32,24 +33,27 @@ class CommentDisplay {
 	 *
 	 * @param mixed &$parser parser instance
 	 * @param mixed $userId id of the user whose recent comments should be displayed
+	 *
 	 * @return array|string
+	 * @throws TimestampException
 	 */
-	public static function comments( &$parser, $userId = 0 ) {
+	public static function comments( mixed &$parser, mixed $userId = 0 ): array|string {
 		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
 			->getUserIdentityByUserId( (int)$userId );
 		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
+			// TODO: Throw???
 			return 'Invalid user ID given';
 		}
 
 		$selectedUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $userIdentity );
 
-		$html = self::newCommentForm( $selectedUser, false );
+		$html = self::newCommentForm( $selectedUser );
 
 		$board = new CommentBoard( $selectedUser );
 		$comments = $board->getComments( RequestContext::getMain()->getUser() );
 
 		foreach ( $comments as $comment ) {
-			$html .= self::singleComment( $comment, false );
+			$html .= self::singleComment( $comment );
 		}
 
 		return [ $html, 'isHTML' => true ];
@@ -62,7 +66,7 @@ class CommentDisplay {
 	 * @param bool $hidden If true, the form will have an added class to be hidden by css/
 	 * @return string html fragment or empty string
 	 */
-	public static function newCommentForm( User $owner, bool $hidden = false ) {
+	public static function newCommentForm( User $owner, bool $hidden = false ): string {
 		$requestUser = RequestContext::getMain()->getUser();
 
 		$comment = Comment::newWithOwner( $owner );
@@ -101,10 +105,12 @@ class CommentDisplay {
 	 * Returns html display for a single profile comment
 	 *
 	 * @param Comment $comment Comment instance to pull data from.
-	 * @param int $highlight [optional] ID of a comment to highlight from among those displayed.
+	 * @param false|int $highlight [optional] ID of a comment to highlight from among those displayed.
+	 *
 	 * @return string html for display
+	 * @throws TimestampException
 	 */
-	public static function singleComment( Comment $comment, $highlight = false ) {
+	public static function singleComment( Comment $comment, false|int $highlight = false ): string {
 		$requestUser = RequestContext::getMain()->getUser();
 		$output = RequestContext::getMain()->getOutput();
 
@@ -217,7 +223,7 @@ class CommentDisplay {
 					)
 				);
 				$html .= "<button type='button' class='reply-count' data-id='{$comment->getId()}' " .
-					" title='{$repliesTooltip}'>{$viewReplies}</button>";
+					" title='$repliesTooltip'>$viewReplies</button>";
 			}
 
 			foreach ( $replies as $reply ) {
@@ -237,8 +243,9 @@ class CommentDisplay {
 	 * @param Comment $comment
 	 *
 	 * @return string HTML fragment
+	 * @throws TimestampException
 	 */
-	private static function adminAction( Comment $comment ) {
+	private static function adminAction( Comment $comment ): string {
 		$admin = $comment->getAdminActedUser();
 		if ( !$admin->getName() ) {
 			return '';
@@ -254,6 +261,7 @@ class CommentDisplay {
 	 * @param Comment $comment
 	 *
 	 * @return string HTML fragment
+	 * @throws TimestampException
 	 */
 	private static function timestamp( Comment $comment ): string {
 		if ( $comment->getEditTimestamp() === null ) {
@@ -269,6 +277,7 @@ class CommentDisplay {
 	 * @param Comment $comment
 	 *
 	 * @return string HTML fragment
+	 * @throws TimestampException
 	 */
 	private static function mobileTimestamp( Comment $comment ): string {
 		if ( $comment->getEditTimestamp() === null ) {
@@ -283,9 +292,11 @@ class CommentDisplay {
 	 *
 	 * @param Comment $comment The comment for which replies need to be loaded
 	 * @param User $actor The user the parent comment belongs to
+	 *
 	 * @return string HTML for display
+	 * @throws TimestampException
 	 */
-	public static function repliesTo( Comment $comment, User $actor ) {
+	public static function repliesTo( Comment $comment, User $actor ): string {
 		if ( $actor->getId() < 1 ) {
 			return 'Invalid user given';
 		}
@@ -308,9 +319,10 @@ class CommentDisplay {
 	 * Sanitizes a comment for display in HTML.
 	 *
 	 * @param string $comment Comment as typed by user.
+	 *
 	 * @return string Comment sanitized for usage in HTML.
 	 */
-	public static function sanitizeComment( $comment ) {
+	public static function sanitizeComment( string $comment ): string {
 		$output = RequestContext::getMain()->getOutput();
 
 		$popts = $output->parserOptions();
@@ -341,6 +353,7 @@ class CommentDisplay {
 		);
 
 		$popts->setMaxIncludeSize( $oldIncludeSize );
+		// TODO: ParserOutput::runOutputPipeline() ??
 		return $parserOutput->getText();
 	}
 }

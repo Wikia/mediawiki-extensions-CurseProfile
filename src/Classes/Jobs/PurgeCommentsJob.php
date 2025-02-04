@@ -4,16 +4,17 @@ namespace CurseProfile\Classes\Jobs;
 
 use CurseProfile\Classes\Comment;
 use CurseProfile\Classes\CommentBoard;
+use Exception;
 use Fandom\Includes\Logging\Loggable;
 use Fandom\Includes\Rabbit\JobConfigurator;
 use Fandom\Includes\Rabbit\JobParams;
-use IDatabase;
 use Job;
 use JobSpecification;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserFactory;
+use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILBFactory;
 use Wikimedia\Rdbms\IResultWrapper;
 
@@ -33,9 +34,9 @@ class PurgeCommentsJob extends Job {
 
 	public function __construct(
 		array $params,
-		private ILBFactory $lbFactory,
-		private UserFactory $userFactory,
-		private ServiceOptions $serviceOptions
+		private readonly ILBFactory $lbFactory,
+		private readonly UserFactory $userFactory,
+		private readonly ServiceOptions $serviceOptions
 	) {
 		$this->serviceOptions->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->targetUserId = $params['targetUserId'];
@@ -88,7 +89,7 @@ class PurgeCommentsJob extends Job {
 					$lastOffset = $commentRow->ub_id;
 					$comment = new Comment( (array)$commentRow );
 					CommentBoard::purgeComment( $comment, $botUser, $this->summary );
-				} catch ( \MWException $e ) {
+				} catch ( Exception $e ) {
 					$this->error( "Failed to purge comment", [ 'exception' => $e ] );
 				}
 			}

@@ -13,9 +13,9 @@
 
 namespace CurseProfile\Classes;
 
-use Html;
 use LogFormatter;
-use SpecialPage;
+use MediaWiki\Html\Html;
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * A class that will handle log formating for Recent Changes
@@ -25,7 +25,7 @@ class CommentLogFormatter extends LogFormatter {
 	 * Handle custom log parameters for comments.
 	 * @inheritDoc
 	 */
-	protected function getMessageParameters() {
+	protected function getMessageParameters(): array {
 		$parameters = parent::getMessageParameters();
 
 		// 4:comment_id

@@ -9,8 +9,9 @@ use CurseProfile\Classes\CommentReport;
 use Job;
 use JobSpecification;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserFactory;
-use Title;
+use Wikimedia\Timestamp\TimestampException;
 
 class ResolveComment extends Job {
 	private const COMMAND = "CurseProfile\\ResolveComment";
@@ -22,7 +23,7 @@ class ResolveComment extends Job {
 	private string $action;
 	private int $byUser;
 
-	public function __construct( array $params, private UserFactory $userFactory ) {
+	public function __construct( array $params, private readonly UserFactory $userFactory ) {
 		parent::__construct( self::COMMAND, $params );
 		$this->reportKey = $params[self::REPORT_KEY_PARAM];
 		$this->action = $params[self::ACTION_PARAM];
@@ -46,8 +47,9 @@ class ResolveComment extends Job {
 	 * Resolve a reported comment by deleting the comment or ignoring it by marking the report dismissed.
 	 *
 	 * @return bool Success
+	 * @throws TimestampException
 	 */
-	public function run() {
+	public function run(): bool {
 		$report = CommentReport::newFromKey( $this->reportKey );
 		if ( !$report ) {
 			return true;

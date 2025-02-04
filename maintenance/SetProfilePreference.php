@@ -28,12 +28,11 @@ class SetProfilePreference extends Maintenance {
 		$this->addDescription( 'Overwrites the preference for profile vs. wiki pages for all users on a wiki' );
 		$this->addArg(
 			'newPref',
-			'What the new user preference should be. One of: ' . implode( ', ', array_keys( self::PREFERENCES ) ),
-			true
+			'What the new user preference should be. One of: ' . implode( ', ', array_keys( self::PREFERENCES ) )
 		);
 	}
 
-	public function execute() {
+	public function execute(): void {
 		$newSetting = $this->getArg();
 		if ( !array_key_exists( $newSetting, self::PREFERENCES ) ) {
 			$this->error(

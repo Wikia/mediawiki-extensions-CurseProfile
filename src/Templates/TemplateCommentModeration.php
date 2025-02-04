@@ -16,9 +16,9 @@ namespace CurseProfile\Templates;
 use CurseProfile\Classes\CommentReport;
 use CurseProfile\Classes\CP;
 use CurseProfile\Classes\ProfilePage;
-use Html;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 
 class TemplateCommentModeration {
 	// Max number of small reporter avatars to display above a comment
@@ -28,9 +28,10 @@ class TemplateCommentModeration {
 	 * Renders the group and sort "tabs" at the top of the CommentModeration page
 	 *
 	 * @param string $currentStyle indicating the current sort style
+	 *
 	 * @return string HTML fragment
 	 */
-	public function sortStyleSelector( $currentStyle ) {
+	public function sortStyleSelector( string $currentStyle ): string {
 		$styles = [
 			'byVolume' => [ 'commentmoderation-byvolume', 'default' ],
 			// 'byWiki' => ['By Origin Wiki'],
@@ -63,10 +64,11 @@ class TemplateCommentModeration {
 	/**
 	 * Renders the main body of the CommentModeration special page
 	 *
-	 * @param array $reports CommentReport instances.
+	 * @param CommentReport[] $reports CommentReport instances.
+	 *
 	 * @return string HTML fragment
 	 */
-	public function renderComments( $reports ) {
+	public function renderComments( array $reports ): string {
 		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '
 				<div id="commentmoderation" class="comments">';
@@ -118,7 +120,7 @@ class TemplateCommentModeration {
 		return $html;
 	}
 
-	private function actionTaken( $rep ) {
+	private function actionTaken( CommentReport $rep ): string {
 		$user = MediaWikiServices::getInstance()->getUserFactory()
 			->newFromId( (int)$rep->data[ 'action_taken_by' ] );
 		switch ( $rep->data[ 'action_taken' ] ) {
@@ -144,7 +146,7 @@ class TemplateCommentModeration {
 	 * @param array $rep CommentReport data
 	 * @return string HTML fragment
 	 */
-	private function itemLine( $rep ) {
+	private function itemLine( array $rep ): string {
 		if ( count( $rep[ 'reports' ] ) <= self::MAX_REPORTER_AVATARS ) {
 			return wfMessage(
 				'commentmoderation-item',
@@ -165,9 +167,10 @@ class TemplateCommentModeration {
 	 * Creates the small user icons indicating who has reported a comment
 	 *
 	 * @param array $reports Array of users reporting: {reporter: CURSE_ID, timestamp: UTC_TIME}
+	 *
 	 * @return string HTML fragment
 	 */
-	private function reporterIcons( $reports ) {
+	private function reporterIcons( array $reports ): string {
 		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		$html = '';
 		$iter = 0;
@@ -190,10 +193,11 @@ class TemplateCommentModeration {
 	/**
 	 * Returns a permalink to a comment on its origin wiki.
 	 *
-	 * @param mixed $rep CommentReport instance
+	 * @param array $rep CommentReport data array
+	 *
 	 * @return string HTML fragment
 	 */
-	private function permalink( $rep ) {
+	private function permalink( array $rep ): string {
 		$commentPermanentLink = SpecialPage::getTitleFor(
 			'CommentPermalink',
 			$rep[ 'comment' ][ 'cid' ],

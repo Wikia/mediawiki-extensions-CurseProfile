@@ -6,7 +6,7 @@ use CurseProfile\Maintenance\ReplaceGlobalIdWithUserId;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 
 class OnExtensionRegistration implements LoadExtensionSchemaUpdatesHook {
-	public static function onRegistration() {
+	public static function onRegistration(): true {
 		global $wgReverbNotifications;
 
 		$reverbNotifications = [
@@ -39,7 +39,7 @@ class OnExtensionRegistration implements LoadExtensionSchemaUpdatesHook {
 	}
 
 	/** @inheritDoc */
-	public function onLoadExtensionSchemaUpdates( $updater ) {
+	public function onLoadExtensionSchemaUpdates( $updater ): void {
 		$extDir = dirname( __DIR__ ) . '/..';
 
 		// Add tables that may exist for previous users of SocialProfile.

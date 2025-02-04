@@ -13,15 +13,15 @@
 
 namespace CurseProfile\Classes;
 
-use Cheevos\Cheevos;
 use Cheevos\CheevosException;
+use Cheevos\FriendService;
+use InvalidArgumentException;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
-use MWException;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Reverb\Notification\NotificationBroadcastFactory;
-use SpecialPage;
-use Title;
-use User;
 
 /**
  * Class that manages friendship relations between users. Create an instance with a User object.
@@ -38,18 +38,22 @@ class Friendship {
 
 	private NotificationBroadcastFactory $notificationBroadcastFactory;
 	private HookContainer $hookContainer;
+	private FriendService $friendService;
 
 	/**
 	 * The user passed to the constructor is used as the main user from which the
 	 * perspective of the SENT/RECEIVED status are determined.
 	 *
 	 * @param User $user
+	 *
+	 * @throws InvalidArgumentException
 	 */
-	public function __construct( private User $user ) {
+	public function __construct( private readonly User $user ) {
 		if ( !$user->isRegistered() ) {
-			throw new MWException( 'Anonymous user object passed.' );
+			throw new InvalidArgumentException( 'Anonymous user object passed.' );
 		}
 		$services = MediaWikiServices::getInstance();
+		$this->friendService = $services->getService( FriendService::class );
 		$this->notificationBroadcastFactory = $services->getService( NotificationBroadcastFactory::class );
 		$this->hookContainer = $services->getHookContainer();
 	}
@@ -61,13 +65,13 @@ class Friendship {
 	 *
 	 * @return int -1 on failure or one of the class constants STRANGERS, FRIENDS, REQUEST_SENT, REQUEST_RECEIVED
 	 */
-	public function getRelationship( User $toUser ) {
+	public function getRelationship( User $toUser ): int {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return -1;
 		}
 
 		try {
-			$status = Cheevos::getFriendStatus( $this->user, $toUser );
+			$status = $this->friendService->getFriendStatus( $this->user, $toUser );
 			if ( $status['status'] ) {
 				return $status['status'];
 			}
@@ -82,7 +86,7 @@ class Friendship {
 	 *
 	 * @return array User IDs of friends
 	 */
-	public function getFriends() {
+	public function getFriends(): array {
 		try {
 			$friendTypes = [
 				'friends' => [],
@@ -91,7 +95,7 @@ class Friendship {
 			];
 			$friendTypes = array_merge(
 				$friendTypes,
-				array_intersect_key( Cheevos::getFriends( $this->user ), $friendTypes )
+				array_intersect_key( $this->friendService->getFriends( $this->user ), $friendTypes )
 			);
 			foreach ( $friendTypes as $type => $data ) {
 				$friendTypes[$type] = (array)$data;
@@ -109,7 +113,7 @@ class Friendship {
 	 *
 	 * @return int Number of friends
 	 */
-	public function getFriendCount() {
+	public function getFriendCount(): int {
 		// my god look how efficient this is
 		$friendTypes = $this->getFriends();
 		return count( $friendTypes['friends'] );
@@ -122,7 +126,7 @@ class Friendship {
 	 *
 	 * @return bool|array True on success, False on failure.
 	 */
-	public function sendRequest( User $toUser ) {
+	public function sendRequest( User $toUser ): array|bool {
 		if ( !$this->checkIfValidUserRelation( $toUser ) ) {
 			return false;
 		}
@@ -146,7 +150,7 @@ class Friendship {
 		}
 
 		try {
-			$makeFriend = Cheevos::createFriendRequest( $this->user, $toUser );
+			$this->friendService->createFriendRequest( $this->user, $toUser );
 		} catch ( CheevosException $e ) {
 			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 			return false;
@@ -201,7 +205,7 @@ class Friendship {
 		}
 
 		try {
-			$res = Cheevos::acceptFriendRequest( $this->user, $toUser );
+			$res = $this->friendService->acceptFriendRequest( $this->user, $toUser );
 			if ( $res['message'] == "success" ) {
 				return true;
 			}
@@ -224,7 +228,7 @@ class Friendship {
 		}
 
 		try {
-			$res = Cheevos::cancelFriendRequest( $this->user, $toUser );
+			$res = $this->friendService->cancelFriendRequest( $this->user, $toUser );
 			if ( $res['message'] == "success" ) {
 				return true;
 			}
@@ -247,7 +251,7 @@ class Friendship {
 		}
 
 		try {
-			Cheevos::cancelFriendRequest( $this->user, $toUser );
+			$this->friendService->cancelFriendRequest( $this->user, $toUser );
 		} catch ( CheevosException $e ) {
 			wfDebug( __METHOD__ . ": Caught CheevosException - " . $e->getMessage() );
 			return false;

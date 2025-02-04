@@ -8,6 +8,9 @@
  * @link      https://gitlab.com/hydrawiki
  */
 
+/**
+ * TODO: nuke this, has been broken since 1.39 and we haven't had the need for it
+ */
 namespace CurseProfile\Maintenance;
 
 use HydraAuthUser;
@@ -144,7 +147,7 @@ class ReplaceGlobalIdWithUserId extends LoggedUpdateMaintenance {
 				}
 			}
 
-			list( $next, $display ) = $this->makeNextCond( $dbw, $orderby, $row );
+			[ $next, $display ] = $this->makeNextCond( $dbw, $orderby, $row );
 			$this->output( "... $display\n" );
 			MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->waitForReplication();
 		}

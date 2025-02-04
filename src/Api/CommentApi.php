@@ -13,13 +13,14 @@
 
 namespace CurseProfile\Api;
 
-use ApiMain;
 use CurseProfile\Classes\Comment;
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\Jobs\ResolveComment;
-use DerivativeRequest;
 use HydraApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Request\DerivativeRequest;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
 use MediaWiki\User\UserOptionsLookup;
@@ -193,6 +194,8 @@ class CommentApi extends HydraApiBase {
 	/**
 	 * Adds a comment to a user's Curse Profile page or adds a new section on their talk page,
 	 * depending on what the user has chosen as their default user page.
+	 *
+	 * @throws ApiUsageException
 	 */
 	public function doAddToDefault(): void {
 		$userIdentity = $this->userIdentityLookup->getUserIdentityByUserId( $this->getMain()->getVal( 'user_id' ) );
@@ -268,6 +271,9 @@ class CommentApi extends HydraApiBase {
 		);
 	}
 
+	/**
+	 * @throws ApiUsageException
+	 */
 	public function doEdit(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		if ( !$comment ) {
@@ -281,6 +287,9 @@ class CommentApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'parsedContent', CommentDisplay::sanitizeComment( $text ) );
 	}
 
+	/**
+	 * @throws ApiUsageException
+	 */
 	public function doRestore(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		if ( !$comment ) {
@@ -292,6 +301,9 @@ class CommentApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'html', $this->msg( 'comment-adminremoved' ) );
 	}
 
+	/**
+	 * @throws ApiUsageException
+	 */
 	public function doRemove(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		if ( !$comment ) {
@@ -303,6 +315,9 @@ class CommentApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'html', $this->msg( 'comment-adminremoved' ) );
 	}
 
+	/**
+	 * @throws ApiUsageException
+	 */
 	public function doPurge(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		if ( !$comment ) {
@@ -314,6 +329,9 @@ class CommentApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'result', $success ? 'success' : 'failure' );
 	}
 
+	/**
+	 * @throws ApiUsageException
+	 */
 	public function doReport(): void {
 		$comment = Comment::newFromId( $this->getInt( 'comment_id' ) );
 		if ( !$comment ) {
@@ -346,7 +364,7 @@ class CommentApi extends HydraApiBase {
 	}
 
 	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): true {
 		return true;
 	}
 }

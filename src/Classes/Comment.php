@@ -11,23 +11,19 @@
 
 namespace CurseProfile\Classes;
 
+use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
-use MWException;
-use MWTimestamp;
-use Sanitizer;
-use User;
+use MediaWiki\Utils\MWTimestamp;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Handles a single comment.
  */
 class Comment {
-	/**
-	 * Comment Data
-	 *
-	 * @var array
-	 */
-	private $data = [
+	private array $data = [
 		'ub_id' => 0,
 		'ub_in_reply_to' => 0,
 		'ub_user_id' => 0,
@@ -56,24 +52,20 @@ class Comment {
 	/**
 	 * Setup and validate data for this class.
 	 *
-	 * @param array [Optional] $comment Database row for a comment.
-	 *
-	 * @throws MWException
+	 * @param array $comment [Optional] $comment Database row for a comment.
 	 */
 	public function __construct( array $comment = [] ) {
 		$comment = array_intersect_key( $comment, $this->data );
-		if ( count( array_diff_key( $comment, $this->data ) ) ) {
-			throw new MWException( __METHOD__ . " Comment data contained invalid keys." );
+		if ( count( $diff = array_diff_key( $comment, $this->data ) ) ) {
+			throw new InvalidArgumentException(
+				__METHOD__ . " Comment data contained invalid keys. Got: " . implode( $diff )
+			);
 		}
 		$this->data = array_merge( $this->data, $comment );
 	}
 
 	/**
 	 * Get a new Comment instance based on a comment ID(ub_id).
-	 *
-	 * @param int $commentId The comment ID.
-	 *
-	 * @return Comment|null
 	 */
 	public static function newFromId( int $commentId ): ?self {
 		if ( $commentId < 1 ) {
@@ -101,12 +93,8 @@ class Comment {
 
 	/**
 	 * Get a raw comment from the database by ID.
-	 *
-	 * @param int $commentId Comment ID
-	 *
-	 * @return mixed Database result or false.
 	 */
-	private static function queryCommentById( int $commentId ) {
+	private static function queryCommentById( int $commentId ): array|false {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$result = $db->select(
 			[ 'user_board' ],
@@ -121,7 +109,7 @@ class Comment {
 	/**
 	 * Save changes to the database.
 	 *
-	 * @return bool Save Success
+	 * @throws TimestampException
 	 */
 	public function save(): bool {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
@@ -173,11 +161,9 @@ class Comment {
 	 * Gets all comment replies to this comment.
 	 *
 	 * @param User $actor The user viewing these comments to limit visibility and give an accurate count.
-	 * @param int $limit [Optional] Maximum number items to return (older replies will be ommitted)
-	 *
-	 * @return array Array of Comment instances.
+	 * @param int $limit [Optional] Maximum number items to return (older replies will be omitted)
 	 */
-	public function getReplies( User $actor, int $limit = 5 ) {
+	public function getReplies( User $actor, int $limit = 5 ): array {
 		// Fetch comments.
 		$options = [ 'ORDER BY' => 'ub_date DESC' ];
 
@@ -235,12 +221,8 @@ class Comment {
 
 	/**
 	 * Checks if a user should be able to view a specific comment
-	 *
-	 * @param User $user User object
-	 *
-	 * @return bool
 	 */
-	public function canView( User $user ) {
+	public function canView( User $user ): bool {
 		// Early check for admin status.
 		if ( $user->isAllowed( 'profile-comments-moderate' ) ) {
 			return true;
@@ -249,7 +231,7 @@ class Comment {
 		// PUBLIC comments visible to all, DELETED comments visible to the author, PRIVATE to author and recipient.
 		return $this->getType() === self::PUBLIC_MESSAGE
 			|| ( $this->getType() === self::PRIVATE_MESSAGE &&
-				$this->getBoardOwnerUser() === $user->getId() &&
+				$this->getBoardOwnerUser()->getId() === $user->getId() &&
 				$this->getActorUserId() === $user->getId() )
 			|| ( $this->getType() === self::DELETED_MESSAGE && $this->getActorUserId() == $user->getId() );
 	}
@@ -258,8 +240,6 @@ class Comment {
 	 * Checks if a user has permissions to leave a comment.
 	 *
 	 * @param User $fromUser User object for comment author, defaults to $wgUser.
-	 *
-	 * @return bool Can Comment
 	 */
 	public function canComment( User $fromUser ): bool {
 		global $wgCPEditsToComment, $wgEmailAuthentication;
@@ -294,10 +274,8 @@ class Comment {
 	 * Checks if a user has permissions to reply to a comment
 	 *
 	 * @param User $actor User that wishes to reply.
-	 *
-	 * @return bool
 	 */
-	public function canReply( User $actor ) {
+	public function canReply( User $actor ): bool {
 		// comment must not be deleted and user must be logged in
 		return $this->getType() > self::DELETED_MESSAGE && $this->canComment( $actor );
 	}
@@ -306,10 +284,8 @@ class Comment {
 	 * Checks if a user has permissions to edit a comment
 	 *
 	 * @param User $actor User performing this action.
-	 *
-	 * @return bool
 	 */
-	public function canEdit( User $actor ) {
+	public function canEdit( User $actor ): bool {
 		// comment must not be deleted and must be written by this user
 		return $this->getType() > self::DELETED_MESSAGE && $this->getActorUserId() === $actor->getId();
 	}
@@ -318,10 +294,8 @@ class Comment {
 	 * Checks if a user has permissions to remove a comment
 	 *
 	 * @param User $actor User performing the action.
-	 *
-	 * @return bool
 	 */
-	public function canRemove( User $actor ) {
+	public function canRemove( User $actor ): bool {
 		// user must not be blocked, comment must either be authored by current user or on user's profile
 		return $this->getType() !== self::DELETED_MESSAGE && !$actor->getBlock() &&
 			( $this->getBoardOwnerUserId() === $actor->getId()
@@ -333,10 +307,8 @@ class Comment {
 	 * Checks if a user has permissions to restore a deleted comment.
 	 *
 	 * @param User $actor User performing the action.
-	 *
-	 * @return bool
 	 */
-	public function canRestore( User $actor ) {
+	public function canRestore( User $actor ): bool {
 		// comment must be deleted, user has mod permissions or was the original author and deleter
 		return $this->getType() === self::DELETED_MESSAGE &&
 			(
@@ -350,10 +322,8 @@ class Comment {
 	 * Checks if a user has permissions to permanently remove a comment.
 	 *
 	 * @param User $actor User performing this action.
-	 *
-	 * @return bool
 	 */
-	public function canPurge( User $actor ) {
+	public function canPurge( User $actor ): bool {
 		return $actor->isAllowed( 'profile-purgecomments' );
 	}
 
@@ -361,10 +331,8 @@ class Comment {
 	 * Checks if a user has permissions to report a comment
 	 *
 	 * @param User $actor User performing this action.
-	 *
-	 * @return bool
 	 */
-	public function canReport( User $actor ) {
+	public function canReport( User $actor ): bool {
 		// user must be logged-in to report and comment must be public (not deleted)
 		return !$actor->isAnon() &&
 			$this->getActorUserId() !== $actor->getId() &&
@@ -373,8 +341,6 @@ class Comment {
 
 	/**
 	 * Return the comment database ID.
-	 *
-	 * @return int
 	 */
 	public function getId(): int {
 		return (int)$this->data['ub_id'];
@@ -382,8 +348,6 @@ class Comment {
 
 	/**
 	 * Return the comment content.
-	 *
-	 * @return string
 	 */
 	public function getMessage(): string {
 		return $this->data['ub_message'];
@@ -394,14 +358,12 @@ class Comment {
 	 *
 	 * @param string $message Comment
 	 */
-	public function setMessage( string $message ) {
+	public function setMessage( string $message ): void {
 		$this->data['ub_message'] = trim( substr( $message, 0, self::MAX_LENGTH ) );
 	}
 
 	/**
 	 * Return the comment type.(Public, Archived, Deleted)
-	 *
-	 * @return int
 	 */
 	public function getType(): int {
 		return (int)$this->data['ub_type'];
@@ -423,8 +385,6 @@ class Comment {
 
 	/**
 	 * Get the User instance of the user that made the comment.
-	 *
-	 * @return User
 	 */
 	public function getActorUser(): User {
 		return MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->getActorUserId() );
@@ -440,8 +400,6 @@ class Comment {
 
 	/**
 	 * Get the user ID of the user that made the comment.
-	 *
-	 * @return int User ID
 	 */
 	public function getActorUserId(): int {
 		return (int)$this->data['ub_user_id_from'];
@@ -449,8 +407,6 @@ class Comment {
 
 	/**
 	 * Get the User instance of the user board that this comment belongs to.
-	 *
-	 * @return User
 	 */
 	public function getBoardOwnerUser(): User {
 		return MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->getBoardOwnerUserId() );
@@ -466,8 +422,6 @@ class Comment {
 
 	/**
 	 * Get the user ID of the user board that this comment belongs to.
-	 *
-	 * @return int Board Owner User ID
 	 */
 	public function getBoardOwnerUserId(): int {
 		return (int)$this->data['ub_user_id'];
@@ -475,18 +429,14 @@ class Comment {
 
 	/**
 	 * Get the User instance of the the administrator that performed an administrative action on this comment.
-	 *
-	 * @return User
 	 */
 	public function getAdminActedUser(): User {
 		return MediaWikiServices::getInstance()->getUserFactory()->newFromId( $this->getAdminActedUserId() );
 	}
 
 	/**
-	 * Set the user ID from an User instance of the the administrator
+	 * Set the user ID from a User instance of the the administrator
 	 * that performed an administrative action on this comment.
-	 *
-	 * @param int $user User ID
 	 */
 	public function setAdminActedUser( User $user ): void {
 		$this->data['ub_admin_acted_user_id'] = $user->getId();
@@ -494,8 +444,6 @@ class Comment {
 
 	/**
 	 * Get the user ID of the the administrator that performed an administrative action on this comment.
-	 *
-	 * @return int Admin Acted User ID
 	 */
 	public function getAdminActedUserId(): int {
 		return (int)$this->data['ub_admin_acted_user_id'];
@@ -504,7 +452,7 @@ class Comment {
 	/**
 	 * Get the post(creation) timestamp.
 	 *
-	 * @return int|null
+	 * @throws TimestampException
 	 */
 	public function getPostTimestamp(): ?int {
 		return $this->convertDBDateToUnix( $this->data['ub_date'] );
@@ -513,7 +461,7 @@ class Comment {
 	/**
 	 * Set the post(creation) timestamp.
 	 *
-	 * @param int|null $timestamp
+	 * @throws TimestampException
 	 */
 	public function setPostTimestamp( ?int $timestamp = null ): void {
 		$this->data['ub_date'] = $this->convertUnixDateToDB( $timestamp );
@@ -522,7 +470,7 @@ class Comment {
 	/**
 	 * Get the edit timestamp.
 	 *
-	 * @return int|null
+	 * @throws TimestampException
 	 */
 	public function getEditTimestamp(): ?int {
 		return $this->convertDBDateToUnix( $this->data['ub_edited'] );
@@ -531,7 +479,7 @@ class Comment {
 	/**
 	 * Set the edit timestamp.
 	 *
-	 * @param int|null $timestamp
+	 * @throws TimestampException
 	 */
 	public function setEditTimestamp( ?int $timestamp = null ): void {
 		$this->data['ub_edited'] = $this->convertUnixDateToDB( $timestamp );
@@ -540,7 +488,7 @@ class Comment {
 	/**
 	 * Get the last reply timestamp.
 	 *
-	 * @return int|null
+	 * @throws TimestampException
 	 */
 	public function getLastReplyTimestamp(): ?int {
 		return $this->convertDBDateToUnix( $this->data['ub_last_reply'] );
@@ -549,7 +497,7 @@ class Comment {
 	/**
 	 * Set the last reply timestamp.
 	 *
-	 * @param int|null $timestamp
+	 * @throws TimestampException
 	 */
 	public function setLastReplyTimestamp( ?int $timestamp = null ): void {
 		$this->data['ub_last_reply'] = $this->convertUnixDateToDB( $timestamp );
@@ -558,7 +506,7 @@ class Comment {
 	/**
 	 * Get the timestamp for an administrator performed an action on this comment.
 	 *
-	 * @return int|null
+	 * @throws TimestampException
 	 */
 	public function getAdminActionTimestamp(): ?int {
 		return $this->convertDBDateToUnix( $this->data['ub_admin_acted_at'] );
@@ -567,7 +515,7 @@ class Comment {
 	/**
 	 * Set the timestamp for an administrator performed an action on this comment.
 	 *
-	 * @param int|null $timestamp
+	 * @throws TimestampException
 	 */
 	public function setAdminActionTimestamp( ?int $timestamp = null ): void {
 		$this->data['ub_admin_acted_at'] = $this->convertUnixDateToDB( $timestamp );
@@ -576,9 +524,9 @@ class Comment {
 	/**
 	 * Process a database date string or null into an Unix date.
 	 *
-	 * @param string $date Database Date String
+	 * @param string|null $date Database Date String
 	 *
-	 * @return int|null
+	 * @throws TimestampException
 	 */
 	private function convertDBDateToUnix( ?string $date ): ?int {
 		if ( empty( $date ) ) {
@@ -592,9 +540,9 @@ class Comment {
 	/**
 	 * Process an Unix date string or null into a database date.
 	 *
-	 * @param string $date Unix Date String
+	 * @param string|null $date Unix Date String
 	 *
-	 * @return string|null
+	 * @throws TimestampException
 	 */
 	private function convertUnixDateToDB( ?string $date ): ?string {
 		if ( empty( $date ) ) {
@@ -607,8 +555,6 @@ class Comment {
 
 	/**
 	 * Get the comment ID of the parent comment to this one.
-	 *
-	 * @return int Parent Comment ID
 	 */
 	public function getParentCommentId(): int {
 		return (int)$this->data['ub_in_reply_to'];
@@ -616,8 +562,6 @@ class Comment {
 
 	/**
 	 * Set the comment ID of the parent comment to this one.
-	 *
-	 * @param int $parentId [Optional] Parent Comment ID
 	 */
 	public function setParentCommentId( int $parentId = 0 ): void {
 		$this->data['ub_in_reply_to'] = $parentId;

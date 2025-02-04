@@ -15,19 +15,20 @@ namespace CurseProfile\Templates;
 
 use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\ProfileData;
-use Html;
-use SpecialPage;
-use User;
+use MediaWiki\Html\Html;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
+use Wikimedia\Timestamp\TimestampException;
 
 class TemplateCommentBoard {
 	/**
 	 * Header for comments archive board
 	 *
-	 * @param mixed $user user reference
-	 * @param string $title text title of the page
+	 * @param User $user user reference
+	 *
 	 * @return string Built HTML
 	 */
-	public function header( $user, $title ) {
+	public function header( User $user ): string {
 		return '<p>' .
 			Html::element(
 				'a',
@@ -39,12 +40,8 @@ class TemplateCommentBoard {
 
 	/**
 	 * Header for single comment permalink page
-	 *
-	 * @param mixed $user
-	 * @param string $title
-	 * @return string
 	 */
-	public function permalinkHeader( $user, $title ) {
+	public function permalinkHeader( User $user ): string {
 		return '<p>' .
 			Html::element(
 				'a',
@@ -68,10 +65,10 @@ class TemplateCommentBoard {
 	 * @param string $pagination [Optional] Built HTML fragment for pagination.
 	 *
 	 * @return string Built HTML
+	 * @throws TimestampException
 	 */
-	public function comments( $comments, User $user, $pagination = '' ) {
-		$html = '';
-		$html .= '<div>' . $pagination . '</div>';
+	public function comments( array $comments, User $user, string $pagination = '' ): string {
+		$html = '<div>' . $pagination . '</div>';
 
 		$html .= '<div class="comments curseprofile" data-user_id="' . $user->getId() . '">';
 
@@ -79,7 +76,7 @@ class TemplateCommentBoard {
 		$html .= CommentDisplay::newCommentForm( $user, true );
 
 		foreach ( $comments as $comment ) {
-			$html .= CommentDisplay::singleComment( $comment, false );
+			$html .= CommentDisplay::singleComment( $comment );
 		}
 
 		$html .= '</div>';

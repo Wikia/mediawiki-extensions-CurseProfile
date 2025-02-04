@@ -18,8 +18,9 @@ use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\CommentDisplay;
 use CurseProfile\Classes\ProfileData;
 use CurseProfile\Templates\TemplateCommentBoard;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\User\UserFactory;
-use UnlistedSpecialPage;
+use Wikimedia\Timestamp\TimestampException;
 
 class SpecialCommentPermalink extends UnlistedSpecialPage {
 	public function __construct( private UserFactory $userFactory ) {
@@ -28,9 +29,12 @@ class SpecialCommentPermalink extends UnlistedSpecialPage {
 
 	/**
 	 * @inheritDoc
+	 *
 	 * @param ?string $subPage commentId
+	 *
+	 * @throws TimestampException
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$output = $this->getOutput();
 		$this->setHeaders();
 

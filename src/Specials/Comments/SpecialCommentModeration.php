@@ -16,7 +16,8 @@ namespace CurseProfile\Specials\Comments;
 use CurseProfile\Classes\CommentReport;
 use CurseProfile\Templates\TemplateCommentModeration;
 use HydraCore;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use PermissionsError;
 
 class SpecialCommentModeration extends SpecialPage {
 	public function __construct() {
@@ -24,7 +25,7 @@ class SpecialCommentModeration extends SpecialPage {
 	}
 
 	/** @inheritDoc */
-	protected function getGroupName() {
+	protected function getGroupName(): string {
 		return 'users';
 	}
 
@@ -32,8 +33,10 @@ class SpecialCommentModeration extends SpecialPage {
 	 * @inheritDoc
 	 *
 	 * @param ?string $subPage sortStyle
+	 *
+	 * @throws PermissionsError
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$this->checkPermissions();
 		$output = $this->getOutput();
 
@@ -78,7 +81,7 @@ class SpecialCommentModeration extends SpecialPage {
 	 * @inheritDoc
 	 * only list when we want it listed, and when user is allowed to use
 	 */
-	public function isListed() {
+	public function isListed(): bool {
 		return parent::isListed() && $this->userCanExecute( $this->getUser() );
 	}
 }

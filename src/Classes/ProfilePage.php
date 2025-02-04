@@ -15,29 +15,30 @@ namespace CurseProfile\Classes;
 
 use Action;
 use Article;
-use Cheevos\Cheevos;
+use Cheevos\AchievementService;
 use Cheevos\CheevosAchievement;
 use Cheevos\CheevosException;
 use Cheevos\CheevosHelper;
 use Cheevos\Points\PointsDisplay;
-use Config;
 use Fandom\WikiConfig\WikiVariablesDataService;
-use Html;
 use HtmlArmor;
 use HydraCore;
-use IContextSource;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserOptionsLookup;
-use Message;
 use MessageCache;
-use Parser;
-use SpecialPage;
 use Subscription\Subscription;
-use Title;
-use User;
-use WANObjectCache;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * Class ProfilePage
@@ -55,9 +56,9 @@ class ProfilePage extends Article {
 		'autoconfirmed',
 		'checkuser',
 		'hydra_admin',
-		'widget_editor'
+		'widget_editor',
 	];
-	private const USER_NAMESPACES = [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ];
+	public const USER_NAMESPACES = [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ];
 	private bool $mobile;
 	private bool $actionIsView;
 	private User $user;
@@ -70,18 +71,22 @@ class ProfilePage extends Article {
 	private WANObjectCache $cache;
 	private Config $config;
 	private Subscription $subscription;
+	private AchievementService $achievementService;
 
 	/**
 	 * Main Constructor
 	 *
 	 * @param Title $title
 	 * @param IContextSource|null $context
+	 *
 	 * @return void
 	 */
-	public function __construct( $title, $context = null ) {
+	public function __construct( Title $title, $context = null ) {
 		parent::__construct( $title );
+		// TODO: Inject????
 		$services = MediaWikiServices::getInstance();
 		$userFactory = $services->getUserFactory();
+		$this->achievementService = $services->getService( AchievementService::class );
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		$this->userGroupManager = $services->getUserGroupManager();
 		$this->messageCache = $services->getMessageCache();
@@ -116,20 +121,18 @@ class ProfilePage extends Article {
 	 *
 	 * @param Title $title
 	 * @param IContextSource|null $context
-	 * @return mixed New self or false for a bad title.
+	 *
+	 * @return ProfilePage New self or false for a bad title.
 	 */
-	public static function newFromTitle( $title, IContextSource $context = null ) {
-		if ( in_array( $title->getNamespace(), self::USER_NAMESPACES, true ) ) {
-			// We do not call the parent newFromTitle since it could return the wrong class.
-			return new self( $title, $context );
-		}
-		return false;
+	public static function newFromTitle( $title, ?IContextSource $context = null ): self {
+		// We do not call the parent newFromTitle since it could return the wrong class.
+		return new self( $title, $context );
 	}
 
 	/**
 	 * Primary rendering function for mediawiki's Article
 	 */
-	public function view() {
+	public function view(): void {
 		$output = $this->getContext()->getOutput();
 		$output->setPageTitle( $this->getTitle()->getPrefixedText() );
 		$output->setArticleFlag( false );
@@ -146,13 +149,14 @@ class ProfilePage extends Article {
 			$userStats = $this->cache->getWithSetCallback(
 				$this->cache->makeKey( 'CurseProfile', 'UserStats', $profileUserName ),
 				WANObjectCache::TTL_HOUR,
-				$this->userStats( ... )
+				$this->userStats()
 			);
 		}
 		$layout = str_replace( '<USERSTATS>', $userStats, $layout );
 
 		$outputString = $this->messageCache->parse( $layout, $this->getTitle() );
-		if ( $outputString instanceof \ParserOutput ) {
+		if ( $outputString instanceof ParserOutput ) {
+			// TODO: outputParserPipeline
 			$outputString = $outputString->getText();
 		}
 		$output->addHTML( $outputString );
@@ -160,25 +164,16 @@ class ProfilePage extends Article {
 
 	/**
 	 * Return the User object for this profile.
-	 *
-	 * @param mixed $audience
-	 * @param User|null $user
-	 *
-	 * @return mixed User
+	 * TODO: what the fuck
 	 */
-	public function getUser( $audience = RevisionRecord::FOR_PUBLIC, User $user = null ) {
+	public function getUser( mixed $audience = RevisionRecord::FOR_PUBLIC, ?User $user = null ): ?User {
 		return $this->user;
 	}
 
 	/**
 	 * Return the User object for who created this profile.(The user, technically.)
-	 *
-	 * @param mixed $audience
-	 * @param User|null $user
-	 *
-	 * @return User
 	 */
-	public function getCreator( $audience = RevisionRecord::FOR_PUBLIC, User $user = null ) {
+	public function getCreator( mixed $audience = RevisionRecord::FOR_PUBLIC, ?User $user = null ): ?User {
 		return $this->user;
 	}
 
@@ -187,7 +182,7 @@ class ProfilePage extends Article {
 	 *
 	 * @return bool True if profile page is preferred, false if wiki is preferred.
 	 */
-	public function isProfilePreferred() {
+	public function isProfilePreferred(): bool {
 		return $this->profile->getProfileTypePreference();
 	}
 
@@ -196,7 +191,7 @@ class ProfilePage extends Article {
 	 *
 	 * @return bool True if profile comment page is preferred, false if wiki is preferred.
 	 */
-	public function isCommentsPreferred() {
+	public function isCommentsPreferred(): bool {
 		return $this->profile->getCommentTypePreference();
 	}
 
@@ -205,9 +200,10 @@ class ProfilePage extends Article {
 	 * or either of the custom UserProfile/UserWiki namespaces.
 	 *
 	 * @param Title|null $title object to check instead of the assumed.
+	 *
 	 * @return bool
 	 */
-	public function isUserPage( $title = null ) {
+	public function isUserPage( ?Title $title = null ): bool {
 		if ( $title === null ) {
 			$title = $this->getTitle();
 		}
@@ -218,9 +214,10 @@ class ProfilePage extends Article {
 	 * True if we are viewing a user_talk namespace page.
 	 *
 	 * @param Title|null $title [Optional] Title object to check instead of the assumed.
+	 *
 	 * @return bool
 	 */
-	public function isUserTalkPage( $title = null ) {
+	public function isUserTalkPage( ?Title $title = null ): bool {
 		if ( $title === null ) {
 			$title = $this->getTitle();
 		}
@@ -231,9 +228,10 @@ class ProfilePage extends Article {
 	 * True if we need to render the user's profile page.
 	 *
 	 * @param Title|null $title [Optional] Title object to check instead of the assumed.
+	 *
 	 * @return bool
 	 */
-	public function isProfilePage( $title = null ) {
+	public function isProfilePage( ?Title $title = null ): bool {
 		if ( $title === null ) {
 			$title = $this->getTitle();
 		}
@@ -242,19 +240,15 @@ class ProfilePage extends Article {
 
 	/**
 	 * Is the action for this page 'view'?
-	 *
-	 * @return bool
 	 */
-	public function isActionView() {
+	public function isActionView(): bool {
 		return $this->actionIsView;
 	}
 
 	/**
 	 * Returns the title object for the user's page in the UserProfile namespace
-	 *
-	 * @return Title instance
 	 */
-	public function getUserProfileTitle() {
+	public function getUserProfileTitle(): Title {
 		return Title::makeTitle( NS_USER_PROFILE, $this->user->getName() );
 	}
 
@@ -263,9 +257,10 @@ class ProfilePage extends Article {
 	 *
 	 * @param array &$links Structured info on what links will appear on the rendered page.
 	 * @param Title $title Title of the page the user is on in the User or User_talk namespace.
+	 *
 	 * @return void
 	 */
-	public function customizeNavBar( &$links, $title ) {
+	public function customizeNavBar( array &$links, Title $title ): void {
 		// Using $this->user will result in a bad User object in the case of MediaWiki #REDIRECT pages
 		// since the context is switched without performing a HTTP redirect.
 		$userName = self::resolveUsername( $title );
@@ -298,7 +293,7 @@ class ProfilePage extends Article {
 			'class' => $this->isProfilePage( $title ) ? 'selected' : '',
 			'href' => $profileTitle->getFullURL(),
 			'text' => wfMessage( 'userprofiletab' )->text(),
-			'primary' => true
+			'primary' => true,
 		];
 
 		// Build Link for User Page
@@ -313,7 +308,7 @@ class ProfilePage extends Article {
 			'class' => implode( ' ', $class ),
 			'text' => wfMessage( 'nstab-' . $userPageTitle->getNamespaceKey( '' ) )->text(),
 			'href' => $this->profile->getUserPageUrl( $userPageTitle ),
-			'primary' => true
+			'primary' => true,
 		];
 
 		// Build Link for User Talk Page
@@ -328,7 +323,7 @@ class ProfilePage extends Article {
 			'class' => implode( ' ', $class ),
 			'text' => wfMessage( 'talk' )->text(),
 			'href' => $this->profile->getTalkPageUrl( $userTalkPageTitle ),
-			'primary' => true
+			'primary' => true,
 		];
 
 		$links['views']['contribs'] = [
@@ -342,9 +337,10 @@ class ProfilePage extends Article {
 	 * Gets an md5 hash for gravatar URLs
 	 *
 	 * @param string $email User's email address
+	 *
 	 * @return string md5 hash of the email address
 	 */
-	private static function emailToMD5Hash( $email ) {
+	private static function emailToMD5Hash( string $email ): string {
 		return md5( strtolower( trim( $email ) ) );
 	}
 
@@ -356,14 +352,19 @@ class ProfilePage extends Article {
 	 * @param string $email email Address OR md5 Hash of user's email address
 	 * @param string $userName the user's username
 	 * @param string $attributeString additional html attributes to include in the IMG tag
+	 *
 	 * @return array the HTML fragment containing a IMG tag
 	 */
-	public static function userAvatar( $parser, $size = 32, $email = '', $userName = '', $attributeString = '' ) {
+	public static function userAvatar(
+		null $parser,
+		int $size = 32,
+		string $email = '',
+		string $userName = '',
+		string $attributeString = ''
+	): array {
 		if ( empty( $email ) ) {
 			return [ '', 'isHTML' => true ];
 		}
-
-		$size = (int)$size;
 		$userName = htmlspecialchars( $userName, ENT_QUOTES );
 		$attributeString = htmlspecialchars( $attributeString, ENT_QUOTES );
 
@@ -380,7 +381,7 @@ class ProfilePage extends Article {
 	}
 
 	/** Get a username from title */
-	public static function resolveUsername( Title $title ): string {
+	public static function resolveUsername( Title $title ): string|false {
 		$username = $title->getText();
 		if ( strpos( $username, '/' ) > 0 ) {
 			$username = explode( '/', $username );
@@ -396,9 +397,10 @@ class ProfilePage extends Article {
 	 * Performs the work for the parser tag that displays the groups to which a user belongs
 	 *
 	 * @param Parser &$parser parser reference
-	 * @return mixed array with HTML string at index 0 or an HTML string
+	 *
+	 * @return array|string array with HTML string at index 0 or an HTML string
 	 */
-	public function groupList( &$parser ) {
+	public function groupList( Parser &$parser ): array|string {
 		$groups = $this->userGroupManager->getUserEffectiveGroups( $this->user );
 		if ( count( $groups ) == 0 ) {
 			return '';
@@ -414,18 +416,18 @@ class ProfilePage extends Article {
 			$groupMessage = new Message( 'group-' . $group );
 			if ( $groupMessage->exists() ) {
 				$html .= '<li>' . $this->linkRenderer->makeKnownLink(
-					$specialListUsersTitle,
-					$groupMessage->text(),
-					[],
-					[ 'group' => $group ]
+						$specialListUsersTitle,
+						$groupMessage->text(),
+						[],
+						[ 'group' => $group ]
 					) . '</li>';
 			} else {
 				// Legacy fall back to make the group name appear pretty.
 				// This handles cases of user groups that are central to one wiki and are not localized.
 				$html .= '<li>' . mb_convert_case(
-					str_replace( "_", " ", htmlspecialchars( $group ) ),
-					MB_CASE_TITLE,
-					"UTF-8"
+						str_replace( "_", " ", htmlspecialchars( $group ) ),
+						MB_CASE_TITLE,
+						"UTF-8"
 					) . '</li>';
 			}
 		}
@@ -446,11 +448,8 @@ class ProfilePage extends Article {
 
 	/**
 	 * Performs the work for the parser tag that displays the user's location.
-	 *
-	 * @param Parser &$parser parser reference
-	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
-	public function location( &$parser ) {
+	public function location( Parser &$parser ): array {
 		$location = $this->profile->getLocation();
 
 		return [
@@ -464,26 +463,24 @@ class ProfilePage extends Article {
 	 *
 	 * @param Parser &$parser Parser reference.
 	 * @param string $field Field name to retrieve.
+	 *
 	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
-	public function fieldBlock( &$parser, $field ) {
+	public function fieldBlock( Parser &$parser, string $field ): array {
 		return [ $this->profile->getFieldHtml( $field ), 'isHTML' => true ];
 	}
 
 	/**
 	 * Generate Profile Links HTML
-	 *
-	 * @param array $profileLinks Profile Links
-	 * @return string HTML
 	 */
-	public static function generateProfileLinks( $profileLinks ) {
+	public static function generateProfileLinks( array $profileLinks ): string {
 		$html = '<ul class="profilelinks">';
 		if ( count( $profileLinks ) ) {
 			foreach ( $profileLinks as $service => $text ) {
 				if ( !empty( $text ) ) {
 					$escapedText = htmlspecialchars( $text, ENT_QUOTES | ENT_HTML5 );
 					$profileLink = ProfileData::getExternalProfileLink( $service, $text );
-					$item = "<li class='{$service}' title='{$service}: {$escapedText}'>";
+					$item = "<li class='$service' title='$service: $escapedText'>";
 					$item .= self::generateProfileTooltipHTML( $service, $escapedText, $profileLink );
 					$item .= '</li>';
 					$html .= $item;
@@ -496,12 +493,14 @@ class ProfilePage extends Article {
 
 	/**
 	 * Creates the HTML for profile links that have a tooltip
-	 *
-	 * @return string HTML string
 	 */
-	private static function generateProfileTooltipHTML( $serviceName, $escapedText, $profileLink ) {
+	private static function generateProfileTooltipHTML(
+		string $serviceName,
+		string $escapedText,
+		string|false $profileLink
+	): string {
 		if ( $profileLink !== false ) {
-			return Html::element( 'a', [ 'alt' => '','href' => $profileLink, 'target' => '_blank' ] );
+			return Html::element( 'a', [ 'alt' => '', 'href' => $profileLink, 'target' => '_blank' ] );
 		}
 
 		$item = "<a class='profile-icon'></a>";
@@ -515,24 +514,18 @@ class ProfilePage extends Article {
 
 	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
-	 *
-	 * @param Parser|null &$parser parser reference
-	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
-	public function profileLinks( &$parser = null ) {
+	public function profileLinks( ?Parser &$parser = null ): array {
 		return [
 			$this->profile->getProfileLinksHtml(),
-			'isHTML' => true
+			'isHTML' => true,
 		];
 	}
 
 	/**
 	 * Performs the work for the parser tag that displays the user's chosen favorite wiki
-	 *
-	 * @param Parser &$parser parser reference
-	 * @return mixed array with HTML string at index 0 or an HTML string
 	 */
-	public function favoriteWiki( &$parser ) {
+	public function favoriteWiki( Parser &$parser ): array|string {
 		$wiki = $this->profile->getFavoriteWiki();
 		if ( empty( $wiki ) ) {
 			return '';
@@ -550,7 +543,7 @@ class ProfilePage extends Article {
 		$title = Title::newFromText( 'UserProfile:' . $this->user->getTitleKey() );
 		$link = $wiki['wiki_url'] . $title->getLocalURL();
 
-		$html = wfMessage( 'favoritewiki' )->plain() . "<br/><a target='_blank' href='{$link}'>$linkContent</a>";
+		$html = wfMessage( 'favoritewiki' )->plain() . "<br/><a target='_blank' href='$link'>$linkContent</a>";
 
 		return [ $html, 'isHTML' => true, ];
 	}
@@ -561,17 +554,17 @@ class ProfilePage extends Article {
 	 *
 	 * @return string generated HTML fragment
 	 */
-	public function userStats() {
+	public function userStats(): string {
 		$stats = [];
 		$wikisEdited = 0;
 		try {
-			$stats = Cheevos::getStatProgress( [ 'global' => true ], $this->user );
+			$stats = $this->achievementService->getStatProgress( [ 'global' => true ], $this->user );
 			$stats = CheevosHelper::makeNiceStatProgressArray( $stats );
 		} catch ( CheevosException $e ) {
 			wfDebug( "Encountered Cheevos API error getting Stat Progress." );
 		}
 		try {
-			$wikisEdited = (int)Cheevos::getUserSitesCountByStat( $this->user, 'article_edit' );
+			$wikisEdited = (int)$this->achievementService->getUserSitesCountByStat( $this->user, 'article_edit' );
 		} catch ( CheevosException $e ) {
 			wfDebug( "Encountered Cheevos API error getting getUserSitesCountByStat." );
 		}
@@ -611,11 +604,11 @@ class ProfilePage extends Article {
 		}
 
 		try {
-			$statsOutput['localrank'] = Cheevos::getUserPointRank(
+			$statsOutput['localrank'] = $this->achievementService->getUserPointRank(
 				$this->user,
 				$this->config->has( 'dsSiteKey' ) ? $this->config->get( 'dsSiteKey' ) : null
 			);
-			$statsOutput['globalrank'] = Cheevos::getUserPointRank( $this->user );
+			$statsOutput['globalrank'] = $this->achievementService->getUserPointRank( $this->user );
 
 			if ( empty( $statsOutput['localrank'] ) ) {
 				unset( $statsOutput['localrank'] );
@@ -636,13 +629,13 @@ class ProfilePage extends Article {
 	 * Recursive function for parsing out and stringifying the stats array above
 	 *
 	 * @param mixed $input arrays will generate a new list, other values will be directly returned
+	 *
 	 * @return string html DL fragment or $input if it is not an array
 	 */
-	public function generateStatsDL( $input ) {
-		$lang = $this->getContext()->getSkin()->getLanguage();
-
+	public function generateStatsDL( mixed $input ): string {
 		// just a simple value
 		if ( is_numeric( $input ) ) {
+			$lang = $this->getContext()->getSkin()->getLanguage();
 			return $lang->formatNum( $input );
 		}
 
@@ -658,9 +651,9 @@ class ProfilePage extends Article {
 		foreach ( $input as $msgKey => $value ) {
 			if ( is_string( $msgKey ) ) {
 				$output .= "<dt>" . wfMessage(
-					$msgKey,
-					$this->user->getId(),
-					$this->getContext()->getUser()->getId()
+						$msgKey,
+						$this->user->getId(),
+						$this->getContext()->getUser()->getId()
 					)->plain() . "</dt>";
 			}
 			// check for sub-list, if there is one
@@ -689,20 +682,20 @@ class ProfilePage extends Article {
 	 * @param Parser &$parser parser reference
 	 * @param string $type type of query. one of: local, master (default)
 	 * @param int $limit maximum number to display
+	 *
 	 * @return array
 	 */
-	public function recentAchievements( &$parser, $type = 'special', $limit = 0 ) {
-		$limit = (int)$limit;
+	public function recentAchievements( Parser &$parser, string $type = 'special', int $limit = 0 ): array {
 		$dsSiteKey = $this->config->has( 'dsSiteKey' ) ? $this->config->get( 'dsSiteKey' ) : null;
 		$achievements = [];
 		try {
-			$achievements = Cheevos::getAchievements( $dsSiteKey );
+			$achievements = $this->achievementService->getAchievements( $dsSiteKey );
 		} catch ( CheevosException $e ) {
 			wfDebug( "Encountered Cheevos API error getting site achievements." );
 		}
 		if ( $type === 'special' ) {
 			try {
-				foreach ( Cheevos::getAchievements() as $achievement ) {
+				foreach ( $this->achievementService->getAchievements() as $achievement ) {
 					$achievements[$achievement->getId()] = $achievement;
 				}
 			} catch ( CheevosException $e ) {
@@ -714,7 +707,7 @@ class ProfilePage extends Article {
 		$progresses = [];
 		if ( $type === 'general' ) {
 			try {
-				$progresses = Cheevos::getAchievementProgress(
+				$progresses = $this->achievementService->getAchievementProgress(
 					[
 						'site_key' => $dsSiteKey,
 						'earned' => true,
@@ -732,7 +725,7 @@ class ProfilePage extends Article {
 		if ( $type === 'special' ) {
 			try {
 				$progresses =
-					Cheevos::getAchievementProgress(
+					$this->achievementService->getAchievementProgress(
 						[
 							'earned' => true,
 							'special' => true,
@@ -746,7 +739,7 @@ class ProfilePage extends Article {
 			}
 		}
 		[ $achievements, $progresses ] =
-			CheevosAchievement::pruneAchievements( [ $achievements, $progresses ], true, true );
+			CheevosAchievement::pruneAchievements( [ $achievements, $progresses ] );
 
 		if ( empty( $progresses ) || !is_array( $progresses ) ) {
 			return [ '', 'isHTML' => true ];
@@ -763,13 +756,13 @@ class ProfilePage extends Article {
 			$output .= Html::rawElement(
 				'div',
 				[
-					'class'	=> [ 'icon', $type ]
+					'class' => [ 'icon', $type ],
 				],
 				Html::element(
 					'img',
 					[
-						'src'	=> $ach->getImageUrl(),
-						'title'	=> $ach->getName() . "\n" . $ach->getDescription()
+						'src' => $ach->getImageUrl(),
+						'title' => $ach->getName() . "\n" . $ach->getDescription(),
 					]
 				) . ( $type === 'special' ? Html::rawElement(
 					'span',
@@ -794,9 +787,10 @@ class ProfilePage extends Article {
 	 * Performs the work for the parser tag that displays the user's level (based on wikipoints)
 	 *
 	 * @param mixed &$parser parser reference
-	 * @return mixed array with HTML string at index 0 or an HTML string
+	 *
+	 * @return array|string array with HTML string at index 0 or an HTML string
 	 */
-	public function userLevel( &$parser ) {
+	public function userLevel( mixed &$parser ): array|string {
 		$userPoints = PointsDisplay::getWikiPointsForRange( $this->user );
 
 		$levelDefinitions = $this->config->get( 'PointsLevels' );
@@ -814,7 +808,7 @@ class ProfilePage extends Article {
 					[
 						'class' => 'level',
 						'title' => $tier['text'],
-						'src' => $tier['image_large']
+						'src' => $tier['image_large'],
 					]
 				);
 			} else {
@@ -829,9 +823,10 @@ class ProfilePage extends Article {
 	 * Parser hook function that inserts either an "edit profile" button or a "add/remove friend" button
 	 *
 	 * @param Parser &$parser
+	 *
 	 * @return array with html as the first element
 	 */
-	public function editOrFriends( &$parser ) {
+	public function editOrFriends( Parser &$parser ): array {
 		$html = FriendDisplay::addFriendButton( $this->getUser(), $this->getContext()->getUser() );
 
 		if ( $this->profile->isViewingSelf() ) {
@@ -840,7 +835,7 @@ class ProfilePage extends Article {
 				[
 					'data-href' =>
 						SpecialPage::getSafeTitleFor( 'Preferences' )->getFullURL() . '#mw-prefsection-personal',
-					'class' => 'linksub wds-button wds-is-secondary'
+					'class' => 'linksub wds-button wds-is-secondary',
 				],
 				wfMessage( 'cp-editprofile' )->plain()
 			);
@@ -851,10 +846,8 @@ class ProfilePage extends Article {
 
 	/**
 	 * Defines the HTML structure of the profile page.
-	 *
-	 * @return string
 	 */
-	protected function profileLayout() {
+	protected function profileLayout(): string {
 		$classes = false;
 		if ( !empty( $this->user ) && $this->user->getId() ) {
 			$classes = $this->subscription->getFlairClasses( $this->user->getId() );
@@ -945,10 +938,8 @@ __NOINDEX__
 
 	/**
 	 * Defines the HTML structure of the profile page for mobile devices.
-	 *
-	 * @return string
 	 */
-	protected function mobileProfileLayout() {
+	protected function mobileProfileLayout(): string {
 		return '
 <div class="curseprofile" id="mf-curseprofile" data-user_id="' . $this->user->getId() . '">
 		<div class="userinfo section">
@@ -999,7 +990,7 @@ __NOINDEX__
 ';
 	}
 
-	protected function getTabsMarkup() {
+	protected function getTabsMarkup(): string {
 		if ( $this->getContext()->getSkin()->getSkinName() !== 'fandomdesktop' ) {
 			return '';
 		}
