@@ -347,7 +347,7 @@ class ProfilePage extends Article {
 	/**
 	 * Prints a gravatar image tag for a user
 	 *
-	 * @param null $parser - Not Used but passed by MW
+	 * @param Parser|null $parser - Not Used but passed by MW
 	 * @param int $size the square size of the avatar to display
 	 * @param string $email email Address OR md5 Hash of user's email address
 	 * @param string $userName the user's username
@@ -356,12 +356,15 @@ class ProfilePage extends Article {
 	 * @return array the HTML fragment containing a IMG tag
 	 */
 	public static function userAvatar(
-		null $parser,
-		int $size = 32,
+		?Parser $parser,
+		int|string $size = 32,
 		string $email = '',
 		string $userName = '',
 		string $attributeString = ''
 	): array {
+		if ( is_string( $size ) ) {
+			$size = (int)$size;
+		}
 		if ( empty( $email ) ) {
 			return [ '', 'isHTML' => true ];
 		}
