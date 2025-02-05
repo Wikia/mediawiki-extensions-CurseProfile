@@ -15,6 +15,7 @@ namespace CurseProfile\Classes;
 
 use LogFormatter;
 use MediaWiki\Html\Html;
+use MediaWiki\Message\Message;
 use MediaWiki\SpecialPage\SpecialPage;
 
 /**
@@ -30,7 +31,7 @@ class CommentLogFormatter extends LogFormatter {
 
 		// 4:comment_id
 		if ( !empty( $parameters[3] ) ) {
-			$parameters[3] = [ 'raw' => Html::rawElement(
+			$parameters[3] = Message::rawParam( Html::rawElement(
 				'a',
 				[ 'href' => SpecialPage::getTitleFor(
 					'CommentPermalink',
@@ -38,7 +39,7 @@ class CommentLogFormatter extends LogFormatter {
 					'comment' . $parameters[3]
 				)->getLinkURL() ],
 				$this->msg( 'logentry-curseprofile-comment' )->text()
-			) ];
+			) );
 		} else {
 			$parameters[3] = $this->msg( 'logentry-curseprofile-comment' )->text();
 		}

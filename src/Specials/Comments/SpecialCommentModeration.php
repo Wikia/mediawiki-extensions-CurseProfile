@@ -57,6 +57,8 @@ class SpecialCommentModeration extends SpecialPage {
 		$start = $this->getRequest()->getInt( 'st' );
 		$itemsPerPage = 25;
 
+		$output->addHTML( $templateCommentModeration->sortStyleSelector( $sortStyle ) );
+
 		$reports = CommentReport::getReports( $sortStyle, $itemsPerPage, $start );
 
 		if ( !count( $reports ) ) {
@@ -71,7 +73,6 @@ class SpecialCommentModeration extends SpecialPage {
 			$start
 		);
 
-		$output->addHTML( $templateCommentModeration->sortStyleSelector( $sortStyle ) );
 		$output->addHTML( $pagination );
 		$output->addHTML( $templateCommentModeration->renderComments( $reports ) );
 		$output->addHTML( $pagination );

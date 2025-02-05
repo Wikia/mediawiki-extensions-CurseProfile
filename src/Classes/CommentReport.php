@@ -18,6 +18,7 @@ use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use Reverb\Notification\NotificationBroadcastFactory;
+use Wikimedia\Rdbms\Subquery;
 use Wikimedia\Timestamp\TimestampException;
 
 /**
@@ -103,13 +104,13 @@ class CommentReport {
 			default:
 				// @TODO alter scheme to have an incrementing count
 				// in the archive table to avoid using a slow count(*) query
-				$subTable = '(select ubr_report_archive_id, count(*) as report_count ' .
+			$subTable = new Subquery( 'select ubr_report_archive_id, count(*) as report_count ' .
 					' from user_board_reports ' .
-					' group by ubr_report_archive_id) AS ubr';
+				' group by ubr_report_archive_id' );
 				$res = $db->select(
 					[
-						'user_board_report_archives AS ra',
-						$subTable,
+						'ra' => 'user_board_report_archives',
+						'ubr' => $subTable,
 					],
 					[ 'ra.*', 'report_count' ],
 					[ 'ra_action_taken' => 0 ],
@@ -120,7 +121,7 @@ class CommentReport {
 						'OFFSET' => $offset,
 					],
 					[
-						$subTable => [
+						'ubr' => [
 							'LEFT JOIN',
 							[ 'ra_id = ubr_report_archive_id' ]
 						]
@@ -235,14 +236,14 @@ class CommentReport {
 			'comment' => [
 				'text' => $report['ra_comment_text'],
 				'cid' => $report['ra_comment_id'],
-				'last_touched' => strtotime( $report['ra_last_edited'] ),
+				'last_touched' => strtotime( $report['ra_last_edited'] ?? '' ),
 				'author' => $report['ra_user_id_from'],
 			],
 			'reports' => self::getReportsForId( $report['ra_id'] ),
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by_user_id'],
-			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ),
-			'first_reported' => strtotime( $report['ra_first_reported'] ),
+			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ?? '' ),
+			'first_reported' => strtotime( $report['ra_first_reported'] ?? '' ),
 		];
 		return new self( $data, (int)$report['ra_id'] );
 	}
