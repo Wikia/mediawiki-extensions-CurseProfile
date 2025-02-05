@@ -186,7 +186,7 @@
 			"dependencies": [
 				"mediawiki.user",
 				"mediawiki.api",
-				"jquery.ui.autocomplete"
+				"jquery.ui"
 			],
 			"position": "top",
 			"targets": [
