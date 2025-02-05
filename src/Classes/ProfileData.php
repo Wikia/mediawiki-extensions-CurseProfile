@@ -123,7 +123,6 @@ class ProfileData {
 	 * @param int|User $user local user ID or User instance
 	 */
 	public function __construct( int|User $user ) {
-		// TODO: Inject?????
 		$services = MediaWikiServices::getInstance();
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		$this->userOptionsManager = $services->getUserOptionsManager();
@@ -131,7 +130,7 @@ class ProfileData {
 			$this->user = $user;
 		} else {
 			$userId = (int)$user;
-			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+			$userFactory = $services->getUserFactory();
 			$this->user = $userId < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId( $userId );
 		}
 	}
@@ -200,12 +199,12 @@ class ProfileData {
 	/**
 	 * Can the given user edit this profile profile?
 	 *
-	 * @param mixed $performer User, the performer that needs to make changes.
+	 * @param User $performer User, the performer that needs to make changes.
 	 *
 	 * @return string|true Boolean true if allowed, otherwise error message string to display.
 	 */
-	public function canEdit( mixed $performer ): string | true {
-		if ( $performer->isBlocked() ) {
+	public function canEdit( User $performer ): string|true {
+		if ( $performer->getBlock() !== null ) {
 			return 'profile-blocked';
 		}
 
@@ -219,7 +218,6 @@ class ProfileData {
 			return 'no-perm-profile-moderate';
 		}
 
-		// TODO: inject???????
 		if ( MediaWikiServices::getInstance()->getMainConfig()->get( 'EmailAuthentication' ) &&
 			(
 				!$performer->getEmailAuthenticationTimestamp() ||
@@ -529,7 +527,6 @@ class ProfileData {
 			$cache->makeGlobalKey( 'CurseProfile', 'wiki-info-v3', $siteKey ?? 'all' ),
 			14400,
 			function ( $oldValue, &$ttl, array &$setOpts ) use ( $siteKey ) {
-				// TODO: inject????
 				/** @var WikiVariablesDataService $wikiVariables */
 				$wikiVariables = MediaWikiServices::getInstance()->getService( WikiVariablesDataService::class );
 				$dsSiteKeyVar = $wikiVariables->getVariableInfo( null, 'dsSiteKey' );

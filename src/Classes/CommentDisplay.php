@@ -41,7 +41,6 @@ class CommentDisplay {
 		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
 			->getUserIdentityByUserId( (int)$userId );
 		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
-			// TODO: Throw???
 			return 'Invalid user ID given';
 		}
 
@@ -353,7 +352,7 @@ class CommentDisplay {
 		);
 
 		$popts->setMaxIncludeSize( $oldIncludeSize );
-		// TODO: ParserOutput::runOutputPipeline() ??
-		return $parserOutput->getText();
+
+		return $parserOutput->runOutputPipeline( $popts )->getContentHolderText();
 	}
 }

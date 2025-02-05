@@ -23,9 +23,9 @@ use MediaWiki\Title\Title;
 class RecentActivity {
 
 	public static function parserHook( &$parser, $userId = 0 ): array|string {
-		// TODO: Inject???/
+		$services = MediaWikiServices::getInstance();
 		$userId = (int)$userId;
-		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
+		$userIdentity = $services->getUserIdentityLookup()
 			->getUserIdentityByUserId( $userId );
 		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			return 'Invalid user ID given';
@@ -39,7 +39,7 @@ class RecentActivity {
 
 		$html = '
 		<ul>';
-		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		$linkRenderer = $services->getLinkRenderer();
 		foreach ( $activity as $rev ) {
 			$title = Title::newFromID( $rev['rev_page'] );
 			if ( $title ) {

@@ -83,7 +83,6 @@ class ProfilePage extends Article {
 	 */
 	public function __construct( Title $title, $context = null ) {
 		parent::__construct( $title );
-		// TODO: Inject????
 		$services = MediaWikiServices::getInstance();
 		$userFactory = $services->getUserFactory();
 		$this->achievementService = $services->getService( AchievementService::class );
@@ -156,17 +155,18 @@ class ProfilePage extends Article {
 
 		$outputString = $this->messageCache->parse( $layout, $this->getTitle() );
 		if ( $outputString instanceof ParserOutput ) {
-			// TODO: outputParserPipeline
-			$outputString = $outputString->getText();
+			// mediawiki's gift to me, a temporary solution which hard deprecates getText, a perfectly working solution
+			$outputString = $outputString->runOutputPipeline(
+				$output->parserOptions()
+			)->getContentHolderText();
 		}
 		$output->addHTML( $outputString );
 	}
 
 	/**
 	 * Return the User object for this profile.
-	 * TODO: what the fuck
 	 */
-	public function getUser( mixed $audience = RevisionRecord::FOR_PUBLIC, ?User $user = null ): ?User {
+	public function getUser(): ?User {
 		return $this->user;
 	}
 

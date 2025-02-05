@@ -31,7 +31,6 @@ class CommentBoard {
 	private ILoadBalancer $lb;
 
 	public function __construct( private readonly User $owner ) {
-		// TODO: inject?
 		$this->lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 	}
 
