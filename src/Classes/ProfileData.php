@@ -203,6 +203,7 @@ class ProfileData {
 	 *
 	 * @return string|true Boolean true if allowed, otherwise error message string to display.
 	 */
+	//phpcs:ignore Squiz.WhiteSpace.OperatorSpacing.NoSpaceBefore, Squiz.WhiteSpace.OperatorSpacing.NoSpaceAfter
 	public function canEdit( User $performer ): string|true {
 		if ( $performer->getBlock() !== null ) {
 			return 'profile-blocked';

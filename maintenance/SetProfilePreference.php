@@ -13,7 +13,7 @@
 
 namespace CurseProfile;
 
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
 
 require_once __DIR__ . '/../../../maintenance/Maintenance.php';
 

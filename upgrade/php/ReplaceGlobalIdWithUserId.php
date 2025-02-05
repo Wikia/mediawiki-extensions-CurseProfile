@@ -10,6 +10,7 @@
 
 /**
  * TODO: nuke this, has been broken since 1.39 and we haven't had the need for it
+ * phpcs:ignoreFile
  */
 namespace CurseProfile\Maintenance;
 
