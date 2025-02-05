@@ -144,19 +144,18 @@ class Hooks implements
 
 	/**
 	 * Hide NS_USER, NS_USER_TALK, NS_USER_PROFILE from Special:WantedPages.
+	 * For sanity sake: Exclude link targets (the wanted pages) which would exist in namespaces:
+	 * NS_USER, NS_USER_TALK, and NS_USER_PROFILE
+	 * In other words: Do not show pages which would be in the above namespaces in Special:WantedPages.
+	 *
+	 * By default, at least as of mw 1.43, lt_namespace already cannot be NS_USER or NS_USER_TALK,
+	 * but we will keep them here as this default might change in the future.
 	 *
 	 * @inheritDoc
 	 */
 	public function onWantedPages__getQueryInfo( $wantedPages, &$query ): void {
-		if ( isset( $query['conds'] ) ) {
-			$db = $this->lb->getConnection( DB_REPLICA );
-			foreach ( $query['conds'] as $index => $condition ) {
-				if ( str_starts_with( $condition, 'pl_namespace NOT IN' ) ) {
-					$query['conds'][$index] =
-						'pl_namespace NOT IN(' . $db->makeList( [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) . ')';
-				}
-			}
-		}
+		$db = $this->lb->getConnection( DB_REPLICA );
+		$query['conds'][] = 'lt_namespace NOT IN(' . $db->makeList( [ NS_USER, NS_USER_TALK, NS_USER_PROFILE ] ) . ')';
 	}
 
 	/**
