@@ -2,7 +2,6 @@
 
 namespace CurseProfile;
 
-use CurseProfile\Maintenance\ReplaceGlobalIdWithUserId;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 
 class OnExtensionRegistration implements LoadExtensionSchemaUpdatesHook {
@@ -40,7 +39,7 @@ class OnExtensionRegistration implements LoadExtensionSchemaUpdatesHook {
 
 	/** @inheritDoc */
 	public function onLoadExtensionSchemaUpdates( $updater ): void {
-		$extDir = dirname( __DIR__ ) . '/..';
+		$extDir = dirname( __DIR__ );
 
 		// Add tables that may exist for previous users of SocialProfile.
 		$updater->addExtensionTable( 'user_board', "$extDir/install/sql/table_user_board.sql" );
@@ -104,7 +103,6 @@ class OnExtensionRegistration implements LoadExtensionSchemaUpdatesHook {
 			'ub_admin_acted',
 			"$extDir/upgrade/sql/user_board/rename_ub_admin_acted.sql"
 		);
-		$updater->addPostDatabaseUpdateMaintenance( ReplaceGlobalIdWithUserId::class );
 
 		// global_id migration - Second part
 		$updater->dropExtensionField(
