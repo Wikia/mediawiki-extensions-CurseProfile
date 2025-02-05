@@ -370,9 +370,8 @@ class Hooks implements
 
 				$c++;
 
-				// TODO: fixmeeeee!!!
 				$subpages .= $c > 1 ?
-					$lang->getDirMarkEntity() . $skin->msg( 'pipe-separator' )->escaped() :
+					"<bdi>{$skin->msg( 'pipe-separator' )->escaped()}</bdi>" :
 					'&lt; ';
 
 				$subpages .= $getlink;
