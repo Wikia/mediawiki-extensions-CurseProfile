@@ -14,10 +14,12 @@
 namespace CurseProfile\Classes;
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Reverb\Notification\NotificationBroadcastFactory;
-use SpecialPage;
-use Title;
-use User;
+use Wikimedia\Rdbms\Subquery;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Class that manages user-reported profile comments
@@ -37,9 +39,10 @@ class CommentReport {
 	 * @param string $sortStyle [optional] default byVolume
 	 * @param int $limit [optional] default 10
 	 * @param int $offset [optional] default 0
+	 *
 	 * @return array
 	 */
-	public static function getReports( $sortStyle = 'byVolume', $limit = 10, $offset = 0 ) {
+	public static function getReports( string $sortStyle = 'byVolume', int $limit = 10, int $offset = 0 ): array {
 		return self::getReportsDb( $sortStyle, $limit, $offset );
 	}
 
@@ -47,11 +50,12 @@ class CommentReport {
 	 * Retrieve a single report by its unique id
 	 *
 	 * @param string $key report key as retrieved from reportKey()
-	 * @return mixed CommentReport instance or null if report does not exist
+	 *
+	 * @return CommentReport|null CommentReport instance or null if report does not exist
 	 */
-	public static function newFromKey( $key ) {
+	public static function newFromKey( string $key ): ?CommentReport {
 		// report is local
-		[ $md5key, $commentId, $timestamp ] = explode( ':', $key );
+		[ , $commentId, $timestamp ] = explode( ':', $key );
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$row = $db->selectRow(
 			'user_board_report_archives',
@@ -75,9 +79,10 @@ class CommentReport {
 	 * @param string $sortStyle sort style
 	 * @param int $limit max number of reports to return
 	 * @param int $offset offset
+	 *
 	 * @return array 0 or more CommentReport instances
 	 */
-	private static function getReportsDb( $sortStyle, $limit, $offset ) {
+	private static function getReportsDb( string $sortStyle, int $limit, int $offset ): array {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$reports = [];
 		switch ( $sortStyle ) {
@@ -99,13 +104,13 @@ class CommentReport {
 			default:
 				// @TODO alter scheme to have an incrementing count
 				// in the archive table to avoid using a slow count(*) query
-				$subTable = '(select ubr_report_archive_id, count(*) as report_count ' .
+			$subTable = new Subquery( 'select ubr_report_archive_id, count(*) as report_count ' .
 					' from user_board_reports ' .
-					' group by ubr_report_archive_id) AS ubr';
+				' group by ubr_report_archive_id' );
 				$res = $db->select(
 					[
-						'user_board_report_archives AS ra',
-						$subTable,
+						'ra' => 'user_board_report_archives',
+						'ubr' => $subTable,
 					],
 					[ 'ra.*', 'report_count' ],
 					[ 'ra_action_taken' => 0 ],
@@ -116,7 +121,7 @@ class CommentReport {
 						'OFFSET' => $offset,
 					],
 					[
-						$subTable => [
+						'ubr' => [
 							'LEFT JOIN',
 							[ 'ra_id = ubr_report_archive_id' ]
 						]
@@ -139,9 +144,10 @@ class CommentReport {
 	 * @param Comment $comment The comment being reported.
 	 * @param User $actor User creating this report.
 	 *
-	 * @return mixed CommentReport instance that is already saved or false on failure.
+	 * @return CommentReport|false CommentReport instance that is already saved or false on failure.
+	 * @throws TimestampException
 	 */
-	public static function newUserReport( Comment $comment, User $actor ) {
+	public static function newUserReport( Comment $comment, User $actor ): false|CommentReport {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		if ( $comment->getId() < 1 ) {
@@ -183,11 +189,12 @@ class CommentReport {
 	 * @param Comment $comment The comment being reported.
 	 * @param User $actor User creating this report.
 	 *
-	 * @return mixed CommentReport instance
+	 * @return CommentReport|false CommentReport instance
+	 * @throws TimestampException
 	 */
-	private static function createWithArchive( Comment $comment, User $actor ) {
+	private static function createWithArchive( Comment $comment, User $actor ): false|CommentReport {
 		$userFrom = $comment->getActorUser();
-		if ( !$userFrom ) {
+		if ( !$userFrom->getId() ) {
 			return false;
 		}
 
@@ -224,19 +231,19 @@ class CommentReport {
 	 *
 	 * @return CommentReport
 	 */
-	private static function newFromRow( $report ) {
+	private static function newFromRow( array $report ): CommentReport {
 		$data = [
 			'comment' => [
 				'text' => $report['ra_comment_text'],
 				'cid' => $report['ra_comment_id'],
-				'last_touched' => strtotime( $report['ra_last_edited'] ),
+				'last_touched' => strtotime( $report['ra_last_edited'] ?? '' ),
 				'author' => $report['ra_user_id_from'],
 			],
 			'reports' => self::getReportsForId( $report['ra_id'] ),
 			'action_taken' => $report['ra_action_taken'],
 			'action_taken_by' => $report['ra_action_taken_by_user_id'],
-			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ),
-			'first_reported' => strtotime( $report['ra_first_reported'] ),
+			'action_taken_at' => strtotime( $report['ra_action_taken_at'] ?? '' ),
+			'first_reported' => strtotime( $report['ra_first_reported'] ?? '' ),
 		];
 		return new self( $data, (int)$report['ra_id'] );
 	}
@@ -248,12 +255,12 @@ class CommentReport {
 	 *
 	 * @return array With sub arrays for each report having keys reporter => user_id, timestamp
 	 */
-	private static function getReportsForId( $id ) {
+	private static function getReportsForId( int $id ): array {
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$res = $db->select(
 			[ 'user_board_reports' ],
 			[ 'ubr_reporter_user_id as reporter', 'ubr_reported as timestamp' ],
-			[ 'ubr_report_archive_id = ' . (int)$id ],
+			[ 'ubr_report_archive_id = ' . $id ],
 			__METHOD__,
 			[ 'ORDER BY' => 'ubr_reported ASC' ]
 		);
@@ -268,10 +275,8 @@ class CommentReport {
 
 	/**
 	 * Insert a new report into the local database.
-	 *
-	 * @return void
 	 */
-	private function initialLocalInsert() {
+	private function initialLocalInsert(): void {
 		// insert into local db tables
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$db->insert(
@@ -296,11 +301,9 @@ class CommentReport {
 
 	/**
 	 * Get the unique key identifying this reported comment.
-	 *
-	 * @return string
 	 */
-	public function reportKey() {
-		// Generating a dumb MD5 for backwards capatibility and not breaking old reports.
+	public function reportKey(): string {
+		// Generating a dumb MD5 for backwards compatibility and not breaking old reports.
 		return sprintf(
 			'%s:%s:%s',
 			md5( $this->data['comment']['cid'] ),
@@ -313,10 +316,8 @@ class CommentReport {
 	 * Add a new report to comment that has already been archived.
 	 *
 	 * @param User $fromUser The User reporting this comment
-	 *
-	 * @return void
 	 */
-	private function addReportFrom( User $fromUser ) {
+	private function addReportFrom( User $fromUser ): void {
 		$commentAuthor = MediaWikiServices::getInstance()->getUserFactory()
 			->newFromId( $this->data['comment']['author'] );
 
@@ -374,8 +375,9 @@ class CommentReport {
 	 * @param User $actor [Optional] User object of the acting user, defaults to|null $wgUser
 	 *
 	 * @return bool True if successful
+	 * @throws TimestampException
 	 */
-	public function resolve( string $action, User $actor ) {
+	public function resolve( string $action, User $actor ): bool {
 		if ( $this->data['action_taken'] ) {
 			return false;
 		}
@@ -396,7 +398,7 @@ class CommentReport {
 	 *
 	 * @return bool Success
 	 */
-	private function resolveInDb() {
+	private function resolveInDb(): bool {
 		// write 1 or 2 to ra_action_taken column
 		$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		return $db->update(

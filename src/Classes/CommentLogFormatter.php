@@ -13,9 +13,10 @@
 
 namespace CurseProfile\Classes;
 
-use Html;
 use LogFormatter;
-use SpecialPage;
+use MediaWiki\Html\Html;
+use MediaWiki\Message\Message;
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * A class that will handle log formating for Recent Changes
@@ -25,12 +26,12 @@ class CommentLogFormatter extends LogFormatter {
 	 * Handle custom log parameters for comments.
 	 * @inheritDoc
 	 */
-	protected function getMessageParameters() {
+	protected function getMessageParameters(): array {
 		$parameters = parent::getMessageParameters();
 
 		// 4:comment_id
 		if ( !empty( $parameters[3] ) ) {
-			$parameters[3] = [ 'raw' => Html::rawElement(
+			$parameters[3] = Message::rawParam( Html::rawElement(
 				'a',
 				[ 'href' => SpecialPage::getTitleFor(
 					'CommentPermalink',
@@ -38,7 +39,7 @@ class CommentLogFormatter extends LogFormatter {
 					'comment' . $parameters[3]
 				)->getLinkURL() ],
 				$this->msg( 'logentry-curseprofile-comment' )->text()
-			) ];
+			) );
 		} else {
 			$parameters[3] = $this->msg( 'logentry-curseprofile-comment' )->text();
 		}

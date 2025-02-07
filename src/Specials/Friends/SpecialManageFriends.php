@@ -15,7 +15,7 @@ namespace CurseProfile\Specials\Friends;
 
 use CurseProfile\Classes\Friendship;
 use CurseProfile\Templates\TemplateManageFriends;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use UserNotLoggedIn;
 
 /**
@@ -29,15 +29,18 @@ class SpecialManageFriends extends SpecialPage {
 	}
 
 	/** @inheritDoc */
-	protected function getGroupName() {
+	protected function getGroupName(): string {
 		return 'users';
 	}
 
 	/**
 	 * @inheritDoc
+	 *
 	 * @param ?string $subPage unused
+	 *
+	 * @throws UserNotLoggedIn
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$this->setHeaders();
 		$this->outputHeader();
 		$request = $this->getRequest();

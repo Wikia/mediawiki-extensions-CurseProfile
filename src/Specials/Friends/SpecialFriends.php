@@ -16,17 +16,20 @@ namespace CurseProfile\Specials\Friends;
 use CurseProfile\Classes\Friendship;
 use CurseProfile\Templates\TemplateManageFriends;
 use HydraCore;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
-use SpecialPage;
-use UnlistedSpecialPage;
 
 /**
  * Special page that lists the friends a user has.
  * Redirects to ManageFriends when viewing one's own friends page.
  */
 class SpecialFriends extends UnlistedSpecialPage {
-	public function __construct( private UserFactory $userFactory, private UserIdentityLookup $userIdentityLookup ) {
+	public function __construct(
+		private readonly UserFactory $userFactory,
+		private readonly UserIdentityLookup $userIdentityLookup
+	) {
 		parent::__construct( 'Friends' );
 	}
 
@@ -34,7 +37,7 @@ class SpecialFriends extends UnlistedSpecialPage {
 	 * @inheritDoc
 	 * @param ?string $subPage userId/userName - missing or mismatching username will be fixed automatically
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();

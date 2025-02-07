@@ -13,10 +13,11 @@
 
 namespace CurseProfile\Classes;
 
-use Html;
+use InvalidArgumentException;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use Parser;
-use User;
+use MediaWiki\Parser\Parser;
+use MediaWiki\User\User;
 
 /**
  * A class to manage displaying a list of friends on a user profile
@@ -25,13 +26,13 @@ class FriendDisplay {
 	/**
 	 * Generates an array to be inserted into the nav links of the page
 	 *
-	 * @param int $toUser User ID of the profile page being viewed
+	 * @param User $toUser User ID of the profile page being viewed
 	 * @param User $actor The User performing friend management actions.
 	 * @param array &$links reference to the links array into which the links will be inserted
 	 *
-	 * @return void
+	 * @throws InvalidArgumentException
 	 */
-	public static function addFriendLink( User $toUser, User $actor, array &$links ) {
+	public static function addFriendLink( User $toUser, User $actor, array &$links ): void {
 		if ( $actor->isAnon() || $toUser->isAnon() ) {
 			return;
 		}
@@ -96,7 +97,7 @@ class FriendDisplay {
 	 *
 	 * @return string HTML button stuff
 	 */
-	public static function friendButtons( User $toUser, User $actor ) {
+	public static function friendButtons( User $toUser, User $actor ): string {
 		// reuse logic from the other function
 		$links = [];
 		self::addFriendLink( $toUser, $actor, $links );
@@ -132,7 +133,7 @@ class FriendDisplay {
 	 *
 	 * @return string
 	 */
-	public static function addFriendButton( User $toUser, User $actor ) {
+	public static function addFriendButton( User $toUser, User $actor ): string {
 		return '<div class="friendship-container">' . self::friendButtons( $toUser, $actor ) . '</div>';
 	}
 
@@ -144,7 +145,7 @@ class FriendDisplay {
 	 *
 	 * @return int Number of friends.
 	 */
-	public static function count( ?Parser $parser = null, $userId = 0 ) {
+	public static function count( ?Parser $parser = null, mixed $userId = 0 ): int {
 		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
 			->getUserIdentityByUserId( (int)$userId );
 		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
@@ -166,7 +167,7 @@ class FriendDisplay {
 	 *
 	 * @return array|int|string Parser compatible HTML array.
 	 */
-	public static function friendList( ?Parser &$parser = null, $userId = 0 ) {
+	public static function friendList( ?Parser &$parser = null, mixed $userId = 0 ): int|array|string {
 		$userIdentity = MediaWikiServices::getInstance()->getUserIdentityLookup()
 			->getUserIdentityByUserId( (int)$userId );
 		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
@@ -189,23 +190,21 @@ class FriendDisplay {
 	/**
 	 * Creates a UL html list from an array of user IDs. The callback function can insert extra html in the LI tags.
 	 *
-	 * @param array $users [Optional] User objects
+	 * @param array|null $users [Optional] User objects
 	 * @param bool $manageButtons [Optional] signature: callback($userObj) returns string
 	 * @param User|null $actor [Optional] The User performing friend management actions.
 	 * @param int $limit [Optional] Number of results to limit.
 	 * @param int $offset [Optional] Offset to start from.
-	 * @param bool $sortByActivity [Optional] Sort by user activity instead of name.
 	 *
 	 * @return string HTML UL List
 	 */
 	public static function listFromArray(
 		?array $users = [],
-		$manageButtons = false,
+		bool $manageButtons = false,
 		?User $actor = null,
-		$limit = 10,
-		$offset = 0,
-		$sortByActivity = false
-	) {
+		int $limit = 10,
+		int $offset = 0
+	): string {
 		if ( $limit > 0 || $offset > 0 ) {
 			$users = array_slice( $users, $offset, $limit, true );
 		}

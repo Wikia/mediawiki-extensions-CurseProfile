@@ -14,10 +14,10 @@
 namespace CurseProfile\Templates;
 
 use CurseProfile\Classes\FriendDisplay;
-use Html;
 use HydraCore;
-use SpecialPage;
-use User;
+use MediaWiki\Html\Html;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
 
 class TemplateManageFriends {
 	/**
@@ -29,7 +29,7 @@ class TemplateManageFriends {
 	 * @param int $start Start Offset
 	 * @return string
 	 */
-	public function display( $friends, $pagination, $itemsPerPage, $start ) {
+	public function display( array $friends, string $pagination, int $itemsPerPage, int $start ): string {
 		$html = '<h2>' . wfMessage( 'friends' ) . '</h2>';
 		if ( count( $friends ) ) {
 			$html .= $pagination;
@@ -52,7 +52,7 @@ class TemplateManageFriends {
 	 *
 	 * @return string Built HTML
 	 */
-	public function manage( User $actor, array $friendTypes, $itemsPerPage, $start ) {
+	public function manage( User $actor, array $friendTypes, int $itemsPerPage, int $start ): string {
 		$friends = $friendTypes[ 'friends' ];
 		$received = $friendTypes[ 'incoming_requests' ];
 		$sent = $friendTypes[ 'outgoing_requests' ];

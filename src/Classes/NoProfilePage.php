@@ -20,7 +20,7 @@ class NoProfilePage extends Article {
 	 * Primary rendering function for mediawiki's Article
 	 * @inheritDoc
 	 */
-	public function view() {
+	public function view(): void {
 		$output = $this->getContext()->getOutput();
 		$output->setRobotPolicy( 'noindex,nofollow' );
 		$output->setPageTitle( $this->getTitle()->getPrefixedText() );

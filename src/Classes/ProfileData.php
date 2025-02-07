@@ -15,16 +15,16 @@ namespace CurseProfile\Classes;
 
 use Fandom\Includes\Util\UrlUtilityService;
 use Fandom\WikiConfig\WikiVariablesDataService;
-use Html;
+use InvalidArgumentException;
 use ManualLogEntry;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserOptionsLookup;
 use MediaWiki\User\UserOptionsManager;
-use MWException;
-use RequestContext;
-use Sanitizer;
-use Title;
-use User;
 
 /**
  * Class for reading and saving custom user-set profile data
@@ -122,7 +122,7 @@ class ProfileData {
 	 *
 	 * @param int|User $user local user ID or User instance
 	 */
-	public function __construct( $user ) {
+	public function __construct( int|User $user ) {
 		$services = MediaWikiServices::getInstance();
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		$this->userOptionsManager = $services->getUserOptionsManager();
@@ -130,7 +130,7 @@ class ProfileData {
 			$this->user = $user;
 		} else {
 			$userId = (int)$user;
-			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+			$userFactory = $services->getUserFactory();
 			$this->user = $userId < 1 ? $userFactory->newAnonymous() : $userFactory->newFromId( $userId );
 		}
 	}
@@ -140,7 +140,7 @@ class ProfileData {
 	 *
 	 * @return array Edit Profile Fields
 	 */
-	public static function getValidEditFields() {
+	public static function getValidEditFields(): array {
 		return array_merge( self::BASIC_PROFILE_FIELDS, self::EXTERNAL_PROFILE_FIELDS );
 	}
 
@@ -149,9 +149,10 @@ class ProfileData {
 	 *
 	 * @param string $service Service Name
 	 * @param string $text Text Replacement/User Name
+	 *
 	 * @return string|bool URL to the external profile or false.
 	 */
-	public static function getExternalProfileLink( $service, $text ) {
+	public static function getExternalProfileLink( string $service, string $text ): bool|string {
 		if ( !isset( self::EXTERNAL_PROFILES[$service]['link'] ) ) {
 			return false;
 		}
@@ -164,9 +165,6 @@ class ProfileData {
 
 	/**
 	 * Get the url for the User page based on preferences
-	 *
-	 * @param Title $title
-	 * @return string
 	 */
 	public function getUserPageUrl( Title $title ): string {
 		return $this->getFullURL(
@@ -177,11 +175,8 @@ class ProfileData {
 
 	/**
 	 * Get the url for the User Talk Page based on preferences
-	 *
-	 * @param Title $title
-	 * @return string
 	 */
-	public function getTalkPageUrl( $title ) {
+	public function getTalkPageUrl( Title $title ): string {
 		$args = [];
 		if ( $this->getCommentTypePreference() ) {
 			$args['profile'] = 'no';
@@ -192,12 +187,8 @@ class ProfileData {
 
 	/**
 	 * Get the full url from Title with the provided arguments
-	 *
-	 * @param Title $title
-	 * @param array $args
-	 * @return string
 	 */
-	private function getFullURL( $title, $args ) {
+	private function getFullURL( Title $title, array $args ): string {
 		if ( !$title->isKnown() ) {
 			$args['redlink'] = 1;
 		}
@@ -208,11 +199,13 @@ class ProfileData {
 	/**
 	 * Can the given user edit this profile profile?
 	 *
-	 * @param mixed $performer User, the performer that needs to make changes.
-	 * @return mixed Boolean true if allowed, otherwise error message string to display.
+	 * @param User $performer User, the performer that needs to make changes.
+	 *
+	 * @return string|true Boolean true if allowed, otherwise error message string to display.
 	 */
-	public function canEdit( $performer ) {
-		if ( $performer->isBlocked() ) {
+	//phpcs:ignore Squiz.WhiteSpace.OperatorSpacing.NoSpaceBefore, Squiz.WhiteSpace.OperatorSpacing.NoSpaceAfter
+	public function canEdit( User $performer ): string|true {
+		if ( $performer->getBlock() !== null ) {
 			return 'profile-blocked';
 		}
 
@@ -248,7 +241,7 @@ class ProfileData {
 	public function getField( string $field ): string {
 		$field = 'profile-' . $field;
 		if ( !in_array( $field, self::getValidEditFields() ) ) {
-			throw new MWException( __METHOD__ . ': Invalid profile field.' );
+			throw new InvalidArgumentException( __METHOD__ . ': Invalid profile field.' );
 		}
 		return (string)$this->userOptionsLookup->getOption( $this->user, $field );
 	}
@@ -265,13 +258,13 @@ class ProfileData {
 		// Validate profile content against Phalanx (LYLTY-754).
 		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 		if ( !$hookContainer->run( 'SpamFilterCheck', [ $performer, $fieldValues ] ) ) {
-			throw new MWException( 'Invalid profile field.' );
+			throw new InvalidArgumentException( 'Invalid profile field.' );
 		}
 
 		foreach ( $fields as $field => $text ) {
 			$field = 'profile-' . $field;
 			if ( !in_array( $field, self::getValidEditFields() ) ) {
-				throw new MWException( __METHOD__ . ': Invalid profile field (' . $field . ').' );
+				throw new InvalidArgumentException( __METHOD__ . ': Invalid profile field (' . $field . ').' );
 			}
 
 			$this->userOptionsManager->setOption( $this->user, $field, $text );
@@ -289,10 +282,15 @@ class ProfileData {
 	 * Extracts the username from a profile link.
 	 *
 	 * @param string $service Name of service to validate.
-	 * @param string $test Raw text to test for an URL or user name to extract.
-	 * @return mixed False or validated string value.
+	 * @param string|null $test Raw text to test for an URL or user name to extract.
+	 *
+	 * @return string|false False or validated string value.
 	 */
-	public static function validateExternalProfile( $service, $test ) {
+	public static function validateExternalProfile( string $service, ?string $test ): string|false {
+		if ( $test === null ) {
+			return false;
+		}
+
 		$service = strtolower( $service );
 
 		if ( !isset( self::EXTERNAL_PROFILES[$service] ) ) {
@@ -303,7 +301,7 @@ class ProfileData {
 
 		foreach ( $patterns as $pattern ) {
 			$result = preg_match( "#" . str_replace( '#', '\#', $pattern ) . "#", $test, $matches );
-			if ( $result > 0 && isset( $matches[1] ) && !empty( $matches[1] ) ) {
+			if ( $result > 0 && !empty( $matches[1] ) ) {
 				return $matches[1];
 			}
 		}
@@ -315,9 +313,10 @@ class ProfileData {
 	 * Performs the work for the parser tag that displays the user's "About Me" text
 	 *
 	 * @param string $field Field name to retrieve.
-	 * @return mixed array with HTML string at index 0 or an HTML string
+	 *
+	 * @return array|string array with HTML string at index 0 or an HTML string
 	 */
-	public function getFieldHtml( $field ) {
+	public function getFieldHtml( string $field ): array|string {
 		if ( !in_array( "profile-$field", self::getValidEditFields() ) ) {
 			return '';
 		}
@@ -355,9 +354,9 @@ class ProfileData {
 	/**
 	 * Performs the work for the parser tag that displays a user's links to other gaming profiles.
 	 *
-	 * @return mixed Array with HTML string at index 0 or an HTML string.
+	 * @return array|string Array with HTML string at index 0 or an HTML string.
 	 */
-	public function getProfileLinksHtml() {
+	public function getProfileLinksHtml(): array|string {
 		$user = RequestContext::getMain()->getUser();
 
 		$profileLinks = $this->getExternalProfiles();
@@ -365,15 +364,15 @@ class ProfileData {
 		$html = "";
 		if ( $this->canEdit( $user ) === true ) {
 			if ( !count( $profileLinks ) ) {
-				$html .= "" . Html::element(
+				$html .= Html::element(
 					'em',
 					[],
 					wfMessage( ( $this->isViewingSelf() ? 'empty-social-text' : 'empty-social-text-mod' ) )
 						->params( $this->user->getName(), $user->getName() )
 						->text()
-					) . "";
+				);
 			}
-			$html .= "" . Html::rawElement(
+			$html .= Html::rawElement(
 				'a',
 				[
 					'class'	=> 'rightfloat socialedit is-icon',
@@ -391,9 +390,7 @@ class ProfileData {
 			$fields[] = 'link-' . $field;
 		}
 		sort( $fields );
-		$html = "<div id='profile-social' data-field='" . implode( " ", $fields ) . "'>" . $html . "</div>";
-
-		return $html;
+		return "<div id='profile-social' data-field='" . implode( " ", $fields ) . "'>" . $html . "</div>";
 	}
 
 	public function isViewingSelf(): bool {
@@ -441,21 +438,24 @@ class ProfileData {
 	 * @return array Possibly including keys: Twitter, Facebook, Reddit, Steam, VK, XBL, PSN
 	 */
 	private function getExternalProfiles(): array {
+		$profile = [];
 		foreach ( self::EXTERNAL_PROFILES as $service => $data ) {
-			$profile[$service] = self::validateExternalProfile(
+			$isValidExternalProfile = self::validateExternalProfile(
 				$service,
 				$this->userOptionsLookup->getOption( $this->user, 'profile-link-' . $service )
 			);
+
+			if ( $isValidExternalProfile !== false ) {
+				$profile[$service] = $isValidExternalProfile;
+			}
 		}
-		return array_filter( $profile );
+		return $profile;
 	}
 
 	/**
 	 * Returns more complete info on the wiki chosen as the user's favorite
-	 *
-	 * @return array
 	 */
-	public function getFavoriteWiki() {
+	public function getFavoriteWiki(): array {
 		$profileFavWiki = $this->userOptionsLookup->getOption( $this->user, 'profile-favwiki' );
 		return $profileFavWiki ? self::getWikiSite( $profileFavWiki ) : [];
 	}
@@ -464,9 +464,10 @@ class ProfileData {
 	 * Get information about wiki sites from WikiVariables for searching.
 	 *
 	 * @param string $search Search Term
+	 *
 	 * @return array Search Results
 	 */
-	public static function getWikiSitesSearch( $search ): array {
+	public static function getWikiSitesSearch( string $search ): array {
 		$wikis = self::getWikisFromCityList();
 		$result = [];
 		foreach ( $wikis as $wiki ) {
@@ -493,7 +494,7 @@ class ProfileData {
 	 * @param string $siteKey md5 key for wanted site, or array of keys.
 	 * @return array Wiki data
 	 */
-	public static function getWikiSite( string $siteKey ) {
+	public static function getWikiSite( string $siteKey ): array {
 		if ( empty( $siteKey ) ) {
 			return [];
 		}
@@ -506,7 +507,7 @@ class ProfileData {
 	 * @param array $info Element of array returned by getListOfWikisWithVar
 	 * @return array Array used by Profile controller
 	 */
-	private static function convertCityInfoToSiteData( $cityId, $info ) {
+	private static function convertCityInfoToSiteData( $cityId, $info ): array {
 		$lang = mb_strtoupper( $info['city_lang'] );
 		$urlUtilityService = MediaWikiServices::getInstance()->getService( UrlUtilityService::class );
 		return [
@@ -520,9 +521,8 @@ class ProfileData {
 
 	/**
 	 * Get wikis from city_list by $dsSiteKey, or all wikis with a $dsSiteKey set.
-	 * @return array
 	 */
-	private static function getWikisFromCityList( $siteKey = null ) {
+	private static function getWikisFromCityList( ?string $siteKey = null ): array {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		return $cache->getWithSetCallback(
 			$cache->makeGlobalKey( 'CurseProfile', 'wiki-info-v3', $siteKey ?? 'all' ),
@@ -556,10 +556,8 @@ class ProfileData {
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
-	 *
-	 * @return bool
 	 */
-	public function getProfileTypePreference() {
+	public function getProfileTypePreference(): bool {
 		// override preference for non existent user
 		if ( $this->user->isAnon() ) {
 			return false;
@@ -569,8 +567,6 @@ class ProfileData {
 
 	/**
 	 * Returns true if the profile page should be used, false if the wiki should be used
-	 *
-	 * @return bool
 	 */
 	public function getCommentTypePreference(): bool {
 		// override preference for non existent user

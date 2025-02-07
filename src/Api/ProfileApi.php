@@ -13,11 +13,11 @@
 
 namespace CurseProfile\Api;
 
-use ApiMain;
 use CurseProfile\Classes\ProfileData;
+use Exception;
 use HydraApiBase;
+use MediaWiki\Api\ApiMain;
 use MediaWiki\User\UserFactory;
-use MWException;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\NumericDef;
 
@@ -25,7 +25,7 @@ use Wikimedia\ParamValidator\TypeDef\NumericDef;
  * Class that allows manipulation of basic profile data
  */
 class ProfileApi extends HydraApiBase {
-	public function __construct( ApiMain $main, $action, private UserFactory $userFactory ) {
+	public function __construct( ApiMain $main, $action, private readonly UserFactory $userFactory ) {
 		parent::__construct( $main, $action );
 	}
 
@@ -116,8 +116,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Return a list of wikis (and data about them) from a search string.
-	 *
-	 * @return void
 	 */
 	public function doGetWikisByString(): void {
 		$search = $this->getMain()->getVal( 'search' );
@@ -138,8 +136,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Return wiki data
-	 *
-	 * @return void
 	 */
 	public function doGetWiki(): void {
 		$hash = $this->getMain()->getVal( 'hash' );
@@ -157,8 +153,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Add the public info from a user profile by username
-	 *
-	 * @return void
 	 */
 	public function doGetPublicProfile(): void {
 		$userName = $this->getRequest()->getText( 'user_name' );
@@ -180,8 +174,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Add the raw about me text into the API response.
-	 *
-	 * @return void
 	 */
 	public function doGetRawField(): void {
 		if ( $this->getUser()->getId() !== $this->getRequest()->getInt( 'user_id' ) &&
@@ -194,7 +186,7 @@ class ProfileApi extends HydraApiBase {
 		try {
 			$fieldText = $profileData->getField( $field );
 			$this->getResult()->addValue( null, $field, $fieldText );
-		} catch ( MWException $e ) {
+		} catch ( Exception $e ) {
 			$this->getResult()->addValue( null, 'result', 'failure' );
 			$this->getResult()->addValue( null, 'errormsg', 'Invalid profile field.' );
 		}
@@ -202,8 +194,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Perform an edit on general profile fields.
-	 *
-	 * @return void
 	 */
 	public function doEditField(): void {
 		$field = strtolower( $this->getRequest()->getText( 'field' ) );
@@ -224,7 +214,7 @@ class ProfileApi extends HydraApiBase {
 			// Add parsed text to result.
 			$this->getResult()->addValue( null, 'parsedContent', $fieldText );
 			return;
-		} catch ( MWException $e ) {
+		} catch ( Exception $e ) {
 			$this->getResult()->addValue( null, 'result', 'failure' );
 			$this->getResult()->addValue( null, 'errormsg', $e->getMessage() );
 			return;
@@ -233,8 +223,6 @@ class ProfileApi extends HydraApiBase {
 
 	/**
 	 * Perform an edit on the about me section with multiple fields.
-	 *
-	 * @return void
 	 */
 	public function doEditSocialFields(): void {
 		$odata = $this->getRequest()->getText( 'data' );
@@ -272,7 +260,7 @@ class ProfileApi extends HydraApiBase {
 			$this->getResult()->addValue( null, 'result', 'success' );
 			$this->getResult()->addValue( null, 'parsedContent', $profileData->getProfileLinksHtml() );
 			return;
-		} catch ( MWException $e ) {
+		} catch ( Exception $e ) {
 			$this->getResult()->addValue( null, 'result', 'failure' );
 			$this->getResult()->addValue( null, 'errormsg', $e->getMessage() );
 			return;

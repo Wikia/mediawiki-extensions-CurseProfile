@@ -15,15 +15,19 @@ namespace CurseProfile\Specials\Comments;
 
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Classes\ProfileData;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\User\UserFactory;
-use UnlistedSpecialPage;
+use Wikimedia\Timestamp\TimestampException;
 
 class SpecialAddComment extends UnlistedSpecialPage {
-	public function __construct( private UserFactory $userFactory ) {
+	public function __construct( private readonly UserFactory $userFactory ) {
 		parent::__construct( 'AddComment' );
 	}
 
-	public function execute( $subPage ) {
+	/**
+	 * @throws TimestampException
+	 */
+	public function execute( $subPage ): void {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$user = $output->getUser();

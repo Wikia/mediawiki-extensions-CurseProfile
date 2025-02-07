@@ -13,10 +13,12 @@
 
 namespace CurseProfile\Api;
 
-use ApiMain;
 use CurseProfile\Classes\FriendDisplay;
 use CurseProfile\Classes\Friendship;
+use Exception;
 use HydraApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
 use MediaWiki\User\UserFactory;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -24,7 +26,7 @@ use Wikimedia\ParamValidator\ParamValidator;
  * Class that allows friendship actions to be performed by AJAX calls.
  */
 class FriendApi extends HydraApiBase {
-	public function __construct( ApiMain $main, $action, private UserFactory $userFactory ) {
+	public function __construct( ApiMain $main, $action, private readonly UserFactory $userFactory ) {
 		parent::__construct( $main, $action );
 	}
 
@@ -36,9 +38,9 @@ class FriendApi extends HydraApiBase {
 			'params' => [
 				'user_id' => [
 					ParamValidator::PARAM_TYPE => 'string',
-					ParamValidator::PARAM_REQUIRED => true
-				]
-			]
+					ParamValidator::PARAM_REQUIRED => true,
+				],
+			],
 		];
 
 		return [
@@ -53,13 +55,17 @@ class FriendApi extends HydraApiBase {
 				'params' => [
 					'name' => [
 						ParamValidator::PARAM_TYPE => 'string',
-						ParamValidator::PARAM_REQUIRED => true
-					]
-				]
-			]
+						ParamValidator::PARAM_REQUIRED => true,
+					],
+				],
+			],
 		];
 	}
 
+	/**
+	 * @throws Exception
+	 * @throws ApiUsageException
+	 */
 	protected function doDirectreq(): void {
 		$user = $this->getUser();
 
@@ -90,6 +96,9 @@ class FriendApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	protected function doSend(): void {
 		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
 		$friendship = new Friendship( $this->getUser() );
@@ -99,6 +108,9 @@ class FriendApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	protected function doConfirm(): void {
 		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
 		$friendship = new Friendship( $this->getUser() );
@@ -108,6 +120,9 @@ class FriendApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'html', $html );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	protected function doIgnore(): void {
 		$friendship = new Friendship( $this->getUser() );
 		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );
@@ -119,6 +134,9 @@ class FriendApi extends HydraApiBase {
 		$this->getResult()->addValue( null, 'result', $result );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	protected function doRemove(): void {
 		$friendship = new Friendship( $this->getUser() );
 		$toUser = $this->userFactory->newFromId( $this->getInt( 'user_id' ) );

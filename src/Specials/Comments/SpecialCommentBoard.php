@@ -16,20 +16,26 @@ namespace CurseProfile\Specials\Comments;
 use CurseProfile\Classes\CommentBoard;
 use CurseProfile\Templates\TemplateCommentBoard;
 use HydraCore;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentityLookup;
-use SpecialPage;
-use UnlistedSpecialPage;
+use Wikimedia\Timestamp\TimestampException;
 
 class SpecialCommentBoard extends UnlistedSpecialPage {
-	public function __construct( private UserFactory $userFactory, private UserIdentityLookup $userIdentityLookup ) {
+	public function __construct(
+		private readonly UserFactory $userFactory,
+		private readonly UserIdentityLookup $userIdentityLookup
+	) {
 		parent::__construct( 'CommentBoard' );
 	}
 
 	/**
 	 * @param ?string $subPage userId/username - missing or mismatching username will be fixed automatically
+	 *
+	 * @throws TimestampException
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
@@ -72,7 +78,7 @@ class SpecialCommentBoard extends UnlistedSpecialPage {
 		$output->addModules( [ 'ext.curseprofile.comments.scripts' ] );
 		$templateCommentBoard = new TemplateCommentBoard();
 
-		$output->addHTML( $templateCommentBoard->header( $user, $output->getPageTitle() ) );
+		$output->addHTML( $templateCommentBoard->header( $user ) );
 
 		$board = new CommentBoard( $user );
 

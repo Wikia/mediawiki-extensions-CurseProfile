@@ -23,7 +23,7 @@ class ProfileLogFormatter extends LogFormatter {
 	 * Handle custom log parameters for profile edits.
 	 * @inheritDoc
 	 */
-	protected function getMessageParameters() {
+	protected function getMessageParameters(): array {
 		$parameters = parent::getMessageParameters();
 
 		// 4:section
