@@ -147,8 +147,8 @@ class ProfilePage extends Article {
 			$profileUserName = $this->getUser()->getName();
 			$userStats = $this->cache->getWithSetCallback(
 				$this->cache->makeKey( 'CurseProfile', 'UserStats', $profileUserName ),
-				WANObjectCache::TTL_HOUR,
-				$this->userStats()
+				$this->cache::TTL_HOUR,
+				fn () => $this->userStats()
 			);
 		}
 		$layout = str_replace( '<USERSTATS>', $userStats, $layout );
@@ -348,7 +348,7 @@ class ProfilePage extends Article {
 	 * Prints a gravatar image tag for a user
 	 *
 	 * @param Parser|null $parser - Not Used but passed by MW
-	 * @param int $size the square size of the avatar to display
+	 * @param int|string $size the square size of the avatar to display
 	 * @param string $email email Address OR md5 Hash of user's email address
 	 * @param string $userName the user's username
 	 * @param string $attributeString additional html attributes to include in the IMG tag
