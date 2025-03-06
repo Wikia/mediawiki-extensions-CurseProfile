@@ -120,9 +120,9 @@ class ProfileData {
 	/**
 	 * Create a new ProfileData instance
 	 *
-	 * @param int|User $user local user ID or User instance
+	 * @param int|User|null $user local user ID or User instance
 	 */
-	public function __construct( int|User $user ) {
+	public function __construct( int|User|null $user ) {
 		$services = MediaWikiServices::getInstance();
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		$this->userOptionsManager = $services->getUserOptionsManager();
